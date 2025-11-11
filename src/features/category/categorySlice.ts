@@ -1,29 +1,23 @@
 import { createSlice } from "@reduxjs/toolkit";
-
-interface subcategories {
-  _id: string;
-  name: string;
-  slug: string;
-  images: string[];
-  parentCategory: string;
-}
-
-interface category {
-  _id: string;
-  name: string;
-  slug: string;
-  images?: string[];
-  subcategories?: subcategories[];
-}
+import {
+  deleteCategory,
+  getAllCategories,
+  getCategoryById,
+  getTreeCategories,
+  updateCategory,
+} from "./categoryAction";
+import { Category, PaginationData } from "@/types/category";
 
 interface CategoryState {
-  categories: category[] | null;
+  categories: Category[];
+  pagination: PaginationData | null;
   isLoading: boolean;
   error: string | null;
 }
 
 const initState: CategoryState = {
-  categories: null,
+  categories: [],
+  pagination: null,
   isLoading: false,
   error: null,
 };
@@ -45,17 +39,82 @@ export const categorySlice = createSlice({
 
   extraReducers: (builder) => {
     // Get Tree Categories
-    builder.addCase("category/tree/pending", (state) => {
+    builder.addCase(getTreeCategories.pending, (state) => {
       state.isLoading = true;
       state.error = null;
     });
-    builder.addCase("category/tree/fulfilled", (state, action: any) => {
+    builder.addCase(getTreeCategories.fulfilled, (state, action: any) => {
       state.isLoading = false;
       state.categories = action.payload?.data;
     });
-    builder.addCase("category/tree/rejected", (state, action: any) => {
+    builder.addCase(getTreeCategories.rejected, (state, action: any) => {
       state.isLoading = false;
       state.error = action.error.message || "Failed to fetch category tree";
+    });
+
+    // Get All Categories
+    builder.addCase(getAllCategories.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(getAllCategories.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.pagination = action.payload.data.pagination;
+      state.categories = action.payload.data.data;
+    });
+    builder.addCase(getAllCategories.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.error.message || "Failed to fetch all categories";
+    });
+
+    // Delete Category
+    builder.addCase(deleteCategory.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(deleteCategory.fulfilled, (state, action) => {
+      state.isLoading = false;
+
+      state.categories = state.categories.filter(
+        (category) => category._id !== action.meta.arg
+      );
+    });
+    builder.addCase(deleteCategory.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.error.message || "Failed to delete category";
+    });
+
+    // Update Category
+    builder.addCase(updateCategory.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(updateCategory.fulfilled, (state, action) => {
+      state.isLoading = false;
+      const updatedCategory = action.payload.data;
+      const index = state.categories.findIndex(
+        (category) => category._id === updatedCategory._id
+      );
+      if (index !== -1) {
+        state.categories[index] = updatedCategory;
+      }
+    });
+    builder.addCase(updateCategory.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.error.message || "Failed to update category";
+    });
+    // Get Category By ID
+    builder.addCase(getCategoryById.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(getCategoryById.fulfilled, (state, action: any) => {
+      state.isLoading = false;
+      state.categories = action.payload?.data;
+    });
+    builder.addCase(getCategoryById.rejected, (state, action: any) => {
+      state.isLoading = false;
+      state.error = action.error.message || "Failed to fetch category";
     });
   },
 });

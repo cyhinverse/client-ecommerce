@@ -57,10 +57,6 @@ export default function LoginPage() {
 
       if (login.fulfilled.match(result)) {
         toast.success("Đăng nhập thành công!");
-
-        if (rememberMe && result.payload?.token) {
-          localStorage.setItem("auth-token", result.payload.token);
-        }
         router.push("/");
       } else {
         const errorMessage =

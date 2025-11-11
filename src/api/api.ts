@@ -4,20 +4,28 @@ const instance = axios.create({
   baseURL: "http://localhost:5000/api",
   timeout: 10000,
   withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
 instance.interceptors.request.use(
   (config) => {
+    const token = localStorage.getItem("accessToken");
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => {
     return Promise.reject(error);
-  },
+  }
 );
 
 instance.interceptors.response.use(
   async (response) => {
     const originalReq = response.config as any;
+    console.log("response interceptor:", response);
 
     if (
       response.status === 401 &&
@@ -39,7 +47,7 @@ instance.interceptors.response.use(
   },
   (error) => {
     return Promise.reject(error);
-  },
+  }
 );
 
 export default instance;

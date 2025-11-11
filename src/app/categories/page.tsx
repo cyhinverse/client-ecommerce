@@ -10,7 +10,7 @@ export default function CategoriesPage() {
   const dispatch = useAppDispatch();
   const [currentIndex, setIndex] = useState(0);
   const { isLoading, categories, error } = useAppSelector(
-    (state) => state.category,
+    (state) => state.category
   );
 
   useEffect(() => {
@@ -22,14 +22,6 @@ export default function CategoriesPage() {
   useEffect(() => {
     handleMove(currentIndex);
   }, [currentIndex]);
-
-  // useEffect(() => {
-  //   if (!categories) return;
-  //   const interval = setInterval(() => {
-  //     setIndex((pre) => (pre + 1) % categories.length);
-  //   }, 1000);
-  //   return () => clearInterval(interval);
-  // }, [categories]);
 
   useEffect(() => {
     if (error) {

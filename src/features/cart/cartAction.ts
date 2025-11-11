@@ -9,7 +9,7 @@ export const addToCart = createAsyncThunk(
     quantity = 1,
   }: {
     productId: string;
-    variantId: string;
+    variantId: any;
     quantity: number;
   }) => {
     const response = await instance.post("/cart", {
@@ -28,7 +28,7 @@ export const addToCart = createAsyncThunk(
 export const removeFromCart = createAsyncThunk(
   "remove/cart",
   async ({ itemId }: { itemId: string }) => {
-    const response = await instance.delete(`/carts/${itemId}`);
+    const response = await instance.delete(`/cart/${itemId}`);
     if (!response) {
       throw new Error("Failed to remove item from cart");
     }
@@ -42,6 +42,7 @@ export const clearCart = createAsyncThunk("clear/cart", async () => {
   if (!response) {
     throw new Error("Failed to clear cart");
   }
+  console.log("Cart cleared successfully", response);
 
   return response.data;
 });

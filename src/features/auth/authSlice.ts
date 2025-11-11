@@ -44,6 +44,10 @@ export const authSlice = createSlice({
       state.loading = false;
       state.isAuthenticated = true;
       state.token = action.payload?.data.accessToken;
+      localStorage.setItem(
+        "accessToken",
+        action.payload?.data.accessToken || ""
+      );
       state.data = action.payload?.data;
       if (state.data) {
         state.data = {

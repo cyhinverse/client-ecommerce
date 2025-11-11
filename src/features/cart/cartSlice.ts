@@ -26,6 +26,21 @@ interface Product {
   isActive: boolean;
 }
 
+interface Variant {
+  _id: string;
+  sku: string;
+  color: string;
+  size: string;
+  stock: number;
+  price: {
+    currentPrice: number;
+    discountPrice: number;
+    currency: string;
+    _id: string;
+  };
+  images: string[];
+}
+
 interface CartItem {
   _id: string;
   productId: Product;
@@ -36,6 +51,7 @@ interface CartItem {
     discountPrice: number;
     currency: string;
   };
+  variant?: Variant; // ✅ THÊM VARIANT DATA
 }
 
 interface Cart {
@@ -75,7 +91,10 @@ export const cartSlice = createSlice({
         };
       } else {
         const existingItemIndex = state.data.items.findIndex(
-          (item) => item._id === action.payload._id,
+          (item) =>
+            item._id === action.payload._id ||
+            (item.productId._id === action.payload.productId._id &&
+              item.variantId === action.payload.variantId),
         );
 
         if (existingItemIndex > -1) {
@@ -89,7 +108,7 @@ export const cartSlice = createSlice({
 
         // Recalculate total
         state.data.totalAmount = state.data.items.reduce(
-          (sum, item) => sum + item.price.currentPrice * item.quantity,
+          (sum, item) => sum + (item.price.currentPrice || 0) * item.quantity,
           0,
         );
       }
@@ -104,7 +123,7 @@ export const cartSlice = createSlice({
             (item) => item._id !== action.payload,
           );
           state.data.totalAmount = state.data.items.reduce(
-            (sum, item) => sum + item.price.currentPrice * item.quantity,
+            (sum, item) => sum + (item.price.currentPrice || 0) * item.quantity,
             0,
           );
         }
@@ -126,7 +145,7 @@ export const cartSlice = createSlice({
         if (itemIndex > -1) {
           state.data.items[itemIndex].quantity = quantity;
           state.data.totalAmount = state.data.items.reduce(
-            (sum, item) => sum + item.price.currentPrice * item.quantity,
+            (sum, item) => sum + (item.price.currentPrice || 0) * item.quantity,
             0,
           );
         }
@@ -139,6 +158,7 @@ export const cartSlice = createSlice({
   extraReducers: (builder) => {
     // Get Cart
     builder.addCase(getCart.pending, (state) => {
+      console.log("🔄 getCart.pending");
       state.isLoading = true;
       state.error = null;
     });
@@ -181,16 +201,16 @@ export const cartSlice = createSlice({
 
     // Remove from Cart
     builder.addCase(removeFromCart.pending, (state) => {
+      console.log("🔄 removeFromCart.pending");
       state.isLoading = true;
       state.error = null;
     });
     builder.addCase(removeFromCart.fulfilled, (state, action) => {
       state.isLoading = false;
       state.error = null;
-
       if (action.payload.data) {
         state.data = action.payload.data;
-      } else {
+      } else if (action.payload) {
         state.data = action.payload;
       }
     });
@@ -210,6 +230,7 @@ export const cartSlice = createSlice({
       state.error = null;
 
       if (action.payload.data) {
+        console.log("📦 Cart data after clearCart:", action.payload.data);
         state.data = action.payload.data;
       } else {
         state.data = action.payload;
@@ -220,45 +241,50 @@ export const cartSlice = createSlice({
       state.error = action.error.message || "Không thể xóa giỏ hàng";
     });
 
-    // Update Cart Item - FIXED VERSION
     builder.addCase(updateCartItem.pending, (state) => {
       state.isLoading = true;
       state.error = null;
-      // DON'T set state.data = null here - we want to keep current data
     });
+
+    // Trong updateCartItem.fulfilled
     builder.addCase(updateCartItem.fulfilled, (state, action) => {
       state.isLoading = false;
       state.error = null;
+      const oldItemsWithVariants = state.data?.items || [];
 
-      // Handle different response structures
       if (action.payload.data) {
-        // Standard API response: { data: cart, status, message }
-        state.data = action.payload.data;
-      } else if (action.payload.cart) {
-        // Alternative structure: { cart: cartData }
-        state.data = action.payload.cart;
-      } else if (action.payload.updatedItem) {
-        // If API returns only the updated item, update it in current cart
-        if (state.data?.items) {
-          const itemIndex = state.data.items.findIndex(
-            (item) => item._id === action.payload.updatedItem._id,
+        const updatedItems = action.payload.data.items.map((newItem: any) => {
+          const oldItem = oldItemsWithVariants.find(
+            (item) => item._id === newItem._id,
           );
-          if (itemIndex > -1) {
-            state.data.items[itemIndex] = action.payload.updatedItem;
-            // Recalculate total
-            state.data.totalAmount = state.data.items.reduce(
-              (sum, item) => sum + item.price.currentPrice * item.quantity,
-              0,
-            );
-          }
-        }
-      } else {
-        // Direct cart data
-        state.data = action.payload;
+          return {
+            ...newItem,
+            variant: oldItem?.variant,
+          };
+        });
+
+        state.data = {
+          ...action.payload.data,
+          items: updatedItems,
+        };
+      } else if (action.payload) {
+        const updatedItems = action.payload.items.map((newItem: any) => {
+          const oldItem = oldItemsWithVariants.find(
+            (item) => item._id === newItem._id,
+          );
+          return {
+            ...newItem,
+            variant: oldItem?.variant,
+          };
+        });
+
+        state.data = {
+          ...action.payload,
+          items: updatedItems,
+        };
       }
     });
     builder.addCase(updateCartItem.rejected, (state, action) => {
-      console.log("❌ updateCartItem.rejected:", action.error);
       state.isLoading = false;
       state.error = action.error.message || "Không thể cập nhật giỏ hàng";
     });
