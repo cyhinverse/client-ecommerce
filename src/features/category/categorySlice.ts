@@ -4,6 +4,7 @@ import {
   getAllCategories,
   getCategoryById,
   getTreeCategories,
+  statisticsCategories,
   updateCategory,
 } from "./categoryAction";
 import { Category, PaginationData } from "@/types/category";
@@ -108,13 +109,28 @@ export const categorySlice = createSlice({
       state.isLoading = true;
       state.error = null;
     });
-    builder.addCase(getCategoryById.fulfilled, (state, action: any) => {
+    builder.addCase(getCategoryById.fulfilled, (state, action) => {
       state.isLoading = false;
       state.categories = action.payload?.data;
     });
-    builder.addCase(getCategoryById.rejected, (state, action: any) => {
+    builder.addCase(getCategoryById.rejected, (state, action) => {
       state.isLoading = false;
       state.error = action.error.message || "Failed to fetch category";
+    });
+
+    // statistics Categories
+    builder.addCase(statisticsCategories.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(statisticsCategories.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.categories = action.payload?.data;
+    });
+    builder.addCase(statisticsCategories.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error =
+        action.error.message || "Failed to fetch category statistics";
     });
   },
 });

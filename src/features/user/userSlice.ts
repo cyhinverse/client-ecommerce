@@ -1,30 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { getProfile, uploadAvatar } from "./userAction";
-
-interface address {
-  fullName: string;
-  phone: string;
-  address: string;
-  city: string;
-  district: string;
-  ward: string;
-}
-
-interface User {
-  _id: string;
-  username: string;
-  email: string;
-  address: address[];
-  avatar: string;
-  isVerifiedEmail: boolean;
-  createdAt: string;
-}
-
-interface UserState {
-  user: User | null;
-  isLoading: boolean;
-  error: string | null;
-}
+import { UserState } from "@/types/user";
 
 const initialState: UserState = {
   user: null,
@@ -41,6 +17,11 @@ export const userSlice = createSlice({
     },
     setIsLoading: (state, action) => {
       state.isLoading = action.payload;
+    },
+    setUploadAvatar: (state, action) => {
+      if (state.user) {
+        state.user.avatar = action.payload;
+      }
     },
     setError: (state, action) => {
       state.error = action.payload;

@@ -80,11 +80,10 @@ export const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    // Local cart actions (optional - for offline support)
     addToCartLocal: (state, action) => {
       if (!state.data) {
         state.data = {
-          userId: "", // Will be set when synced with server
+          userId: "",
           items: [action.payload],
           totalAmount:
             action.payload.price.currentPrice * action.payload.quantity,
@@ -94,7 +93,7 @@ export const cartSlice = createSlice({
           (item) =>
             item._id === action.payload._id ||
             (item.productId._id === action.payload.productId._id &&
-              item.variantId === action.payload.variantId),
+              item.variantId === action.payload.variantId)
         );
 
         if (existingItemIndex > -1) {
@@ -109,22 +108,22 @@ export const cartSlice = createSlice({
         // Recalculate total
         state.data.totalAmount = state.data.items.reduce(
           (sum, item) => sum + (item.price.currentPrice || 0) * item.quantity,
-          0,
+          0
         );
       }
     },
     removeFromCartLocal: (state, action) => {
       if (state.data) {
         const itemToRemove = state.data.items.find(
-          (item) => item._id === action.payload,
+          (item) => item._id === action.payload
         );
         if (itemToRemove) {
           state.data.items = state.data.items.filter(
-            (item) => item._id !== action.payload,
+            (item) => item._id !== action.payload
           );
           state.data.totalAmount = state.data.items.reduce(
             (sum, item) => sum + (item.price.currentPrice || 0) * item.quantity,
-            0,
+            0
           );
         }
       }
@@ -139,14 +138,14 @@ export const cartSlice = createSlice({
       if (state.data) {
         const { itemId, quantity } = action.payload;
         const itemIndex = state.data.items.findIndex(
-          (item) => item._id === itemId,
+          (item) => item._id === itemId
         );
 
         if (itemIndex > -1) {
           state.data.items[itemIndex].quantity = quantity;
           state.data.totalAmount = state.data.items.reduce(
             (sum, item) => sum + (item.price.currentPrice || 0) * item.quantity,
-            0,
+            0
           );
         }
       }
@@ -255,7 +254,7 @@ export const cartSlice = createSlice({
       if (action.payload.data) {
         const updatedItems = action.payload.data.items.map((newItem: any) => {
           const oldItem = oldItemsWithVariants.find(
-            (item) => item._id === newItem._id,
+            (item) => item._id === newItem._id
           );
           return {
             ...newItem,
@@ -270,7 +269,7 @@ export const cartSlice = createSlice({
       } else if (action.payload) {
         const updatedItems = action.payload.items.map((newItem: any) => {
           const oldItem = oldItemsWithVariants.find(
-            (item) => item._id === newItem._id,
+            (item) => item._id === newItem._id
           );
           return {
             ...newItem,

@@ -7,6 +7,7 @@ import {
   getAllCategories,
   getCategoryById,
   updateCategory,
+  creatCategory,
 } from "@/features/category/categoryAction";
 import { Category, PaginationData } from "@/types/category";
 import { CategoriesHeader } from "@/components/admin/CategoriesAdminPage/CategoriesHeader";
@@ -23,6 +24,8 @@ import {
 } from "@/components/ui/card";
 import { EditCategoryModal } from "@/components/admin/CategoriesAdminPage/UpdateModel";
 import { ViewCategoryModal } from "@/components/admin/CategoriesAdminPage/ViewModal";
+import { CreateCategoryModal } from "@/components/admin/CategoriesAdminPage/CreateModel";
+import { toast } from "sonner";
 
 export default function CategoriesAdminPage() {
   const router = useRouter();
@@ -48,6 +51,37 @@ export default function CategoriesAdminPage() {
   );
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+
+  // Hàm mở modal tạo mới
+  const handleOpenCreateModal = () => {
+    setCreateModalOpen(true);
+  };
+
+  // Hàm xử lý tạo danh mục mới
+  const handleCreateCategory = async (categoryData: any) => {
+    setIsCreating(true);
+    try {
+      await dispatch(creatCategory(categoryData)).unwrap();
+
+      // Refresh danh sách
+      dispatch(
+        getAllCategories({
+          page: currentPage,
+          limit: pageSize,
+          search: searchTerm,
+        })
+      );
+
+      setCreateModalOpen(false);
+      toast.success("Tạo danh mục thành công");
+    } catch (error) {
+      toast.error("Lỗi khi tạo danh mục. Vui lòng thử lại.");
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   const handleEditCategory = (category: Category) => {
     setSelectedCategory(category);
@@ -91,11 +125,9 @@ export default function CategoriesAdminPage() {
 
       handleCloseEditModal();
 
-      // Có thể thêm toast notification ở đây
-      console.log("Cập nhật danh mục thành công");
+      toast.success("Cập nhật danh mục thành công");
     } catch (error) {
-      console.error("Lỗi khi cập nhật danh mục:", error);
-      // Có thể thêm error handling ở đây
+      toast.error("Cập nhật danh mục thất bại. Vui lòng thử lại.");
     } finally {
       setIsUpdating(false);
     }
@@ -123,7 +155,6 @@ export default function CategoriesAdminPage() {
     dispatch(getAllCategories(params));
   }, [dispatch, currentPage, pageSize, searchTerm]);
 
-  // Đồng bộ state với URL params khi trang load hoặc URL thay đổi
   useEffect(() => {
     setCurrentPage(urlPage);
     setPageSize(urlLimit);
@@ -165,11 +196,6 @@ export default function CategoriesAdminPage() {
     updateURL(1, pageSize, value);
   };
 
-  const handleAddCategory = () => {
-    console.log("Add category clicked");
-    // TODO: Implement add category modal
-  };
-
   const handleCloseModals = () => {
     setViewModalOpen(false);
     setEditModalOpen(false);
@@ -185,10 +211,6 @@ export default function CategoriesAdminPage() {
     setViewModalOpen(true);
   };
 
-  // Tính toán thống kê
-  const rootCategories = categories.filter(
-    (category) => !category.parentCategory
-  );
   const totalCategories = pagination?.totalItems || categories.length;
   const activeCategories = categories.filter((cat) => cat.isActive).length;
   const childCategories = categories.filter((cat) => cat.parentCategory).length;
@@ -207,7 +229,7 @@ export default function CategoriesAdminPage() {
 
   return (
     <div className="space-y-6">
-      <CategoriesHeader onAddCategory={handleAddCategory} />
+      <CategoriesHeader onAddCategory={handleOpenCreateModal} />
 
       <CategoriesStats
         totalCategories={totalCategories}
@@ -233,6 +255,14 @@ export default function CategoriesAdminPage() {
             onView={handleViewCategory}
             getParentName={getParentName}
             getProductCount={getProductCount}
+          />
+
+          <CreateCategoryModal
+            isOpen={createModalOpen}
+            onClose={() => setCreateModalOpen(false)}
+            onCreate={handleCreateCategory}
+            categories={categories}
+            isLoading={isCreating}
           />
 
           <ViewCategoryModal

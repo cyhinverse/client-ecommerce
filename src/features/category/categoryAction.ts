@@ -63,3 +63,32 @@ export const getCategoryById = createAsyncThunk(
     return response.data;
   }
 );
+
+export const statisticsCategories = createAsyncThunk(
+  "category/statistics",
+  async () => {
+    const response = await instance.get(`/categories/statistics`);
+    if (!response) {
+      throw new Error("Failed to fetch category statistics");
+    }
+    return response.data;
+  }
+);
+
+export const creatCategory = createAsyncThunk(
+  "category/create",
+  async (category: {
+    name: string;
+    slug: string;
+    description?: string;
+    images: string[];
+    isActive?: boolean;
+    parentCategory?: string;
+  }) => {
+    const response = await instance.post(`/categories`, category);
+    if (!response) {
+      throw new Error("Failed to create category");
+    }
+    return response.data;
+  }
+);

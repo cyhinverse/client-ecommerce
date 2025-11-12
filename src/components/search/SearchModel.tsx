@@ -31,29 +31,29 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
       name: "iPhone 15 Pro",
       price: 999,
       image: "/images/iphone.jpg",
-      category: "Điện thoại"
+      category: "Điện thoại",
     },
     {
-      id: "2", 
+      id: "2",
       name: "MacBook Air M2",
       price: 1299,
       image: "/images/macbook.jpg",
-      category: "Laptop"
+      category: "Laptop",
     },
     {
       id: "3",
       name: "Air Jordan 1",
       price: 150,
-      image: "/images/jordan.jpg", 
-      category: "Giày"
+      image: "/images/jordan.jpg",
+      category: "Giày",
     },
     {
       id: "4",
       name: "Samsung Galaxy S24",
       price: 899,
       image: "/images/samsung.jpg",
-      category: "Điện thoại"
-    }
+      category: "Điện thoại",
+    },
   ];
 
   // Tính toán sản phẩm được lọc trực tiếp thay vì dùng useEffect
@@ -61,10 +61,10 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     if (searchQuery.trim() === "") {
       return [];
     }
-    return sampleProducts.filter(product =>
+    return sampleProducts.filter((product) =>
       product.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery,sampleProducts]);
+  }, [searchQuery, sampleProducts]);
 
   // Focus input khi mở modal
   useEffect(() => {
@@ -101,11 +101,11 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20"
       onClick={handleClose}
     >
-      <div 
+      <div
         className="bg-white rounded-lg w-full max-w-2xl mx-4 shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >
@@ -140,10 +140,10 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                   >
                     <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center">
                       {product.image ? (
-                        <Image 
+                        <Image
                           width={100}
                           height={100}
-                          src={product.image} 
+                          src={product.image}
                           alt={product.name}
                           className="w-10 h-10 object-cover rounded"
                         />
@@ -153,9 +153,13 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                     </div>
                     <div className="flex-1">
                       <h4 className="font-medium">{product.name}</h4>
-                      <p className="text-sm text-gray-600">{product.category}</p>
+                      <p className="text-sm text-gray-600">
+                        {product.category}
+                      </p>
                     </div>
-                    <div className="text-lg font-semibold">${product.price}</div>
+                    <div className="text-lg font-semibold">
+                      ${product.price}
+                    </div>
                   </div>
                 ))}
               </div>
