@@ -1,9 +1,16 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getProfile, uploadAvatar } from "./userAction";
+import {
+  getAllUsers,
+  getProfile,
+  updateUser,
+  uploadAvatar,
+} from "./userAction";
 import { UserState } from "@/types/user";
+import { Pagination } from "@/components/ui/pagination";
 
 const initialState: UserState = {
-  user: null,
+  user: [],
+  pagination: null,
   isLoading: false,
   error: null,
 };
@@ -18,11 +25,11 @@ export const userSlice = createSlice({
     setIsLoading: (state, action) => {
       state.isLoading = action.payload;
     },
-    setUploadAvatar: (state, action) => {
-      if (state.user) {
-        state.user.avatar = action.payload;
-      }
-    },
+    // setUploadAvatar: (state, action) => {
+    //   if (state.user) {
+    //     state.user.avatar = action.payload;
+    //   }
+    // },
     setError: (state, action) => {
       state.error = action.payload;
     },
@@ -40,20 +47,38 @@ export const userSlice = createSlice({
       state.isLoading = false;
       state.error = action.error.message || "Failed to fetch user profile";
     });
-
-    builder.addCase(uploadAvatar.pending, (state) => {
+    // Get all users
+    builder.addCase(getAllUsers.pending, (state) => {
       state.isLoading = true;
       state.error = null;
     });
-    builder.addCase(uploadAvatar.fulfilled, (state, action) => {
+    builder.addCase(getAllUsers.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.user = action.payload.users;
+      state.pagination = action.payload.pagination;
+    });
+    builder.addCase(getAllUsers.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.error.message || "Failed to fetch users";
+    });
+
+    // Upload user
+    builder.addCase(updateUser.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(updateUser.fulfilled, (state, action) => {
       state.isLoading = false;
       if (state.user) {
-        state.user.avatar = action.payload?.data.avatar;
+        const index = state.user.findIndex((u) => u._id === action.payload._id);
+        if (index !== -1) {
+          state.user[index] = action.payload;
+        }
       }
     });
-    builder.addCase(uploadAvatar.rejected, (state, action) => {
+    builder.addCase(updateUser.rejected, (state, action) => {
       state.isLoading = false;
-      state.error = action.error.message || "Failed to upload avatar";
+      state.error = action.error.message || "Failed to update user";
     });
   },
 });

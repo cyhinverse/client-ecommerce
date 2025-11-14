@@ -1,0 +1,380 @@
+// components/admin/ProductAdminPage/ProductTable.tsx
+import { useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Search,
+  MoreHorizontal,
+  Edit,
+  Trash2,
+  Eye,
+  Filter,
+  Package,
+} from "lucide-react";
+import { Product } from "@/types/product";
+
+interface ProductsTableProps {
+  products: Product[];
+  searchTerm: string;
+  pageSize: number;
+  onSearch: (value: string) => void;
+  onPageSizeChange: (size: number) => void;
+  onEdit: (product: Product) => void;
+  onDelete: (product: Product) => void;
+  onView: (product: Product) => void;
+  onCategoryFilterChange: (category: string) => void;
+  onBrandFilterChange: (brand: string) => void;
+  onPriceFilterChange: (
+    min: number | undefined,
+    max: number | undefined
+  ) => void;
+  onStatusFilterChange: (isActive: boolean | null) => void;
+  selectedCategory: string;
+  selectedBrand: string;
+  selectedMinPrice?: number;
+  selectedMaxPrice?: number;
+  selectedStatus: boolean | null;
+}
+
+export function ProductsTable({
+  products,
+  searchTerm,
+  pageSize,
+  onSearch,
+  onPageSizeChange,
+  onEdit,
+  onDelete,
+  onView,
+  onCategoryFilterChange,
+  onBrandFilterChange,
+  onPriceFilterChange,
+  onStatusFilterChange,
+  selectedCategory,
+  selectedBrand,
+  selectedMinPrice,
+  selectedMaxPrice,
+  selectedStatus,
+}: ProductsTableProps) {
+  const [localMinPrice, setLocalMinPrice] = useState(
+    selectedMinPrice?.toString() || ""
+  );
+  const [localMaxPrice, setLocalMaxPrice] = useState(
+    selectedMaxPrice?.toString() || ""
+  );
+
+  const handlePriceFilterApply = () => {
+    const min = localMinPrice ? Number(localMinPrice) : undefined;
+    const max = localMaxPrice ? Number(localMaxPrice) : undefined;
+    onPriceFilterChange(min, max);
+  };
+
+  // Lấy danh sách categories không trùng lặp - ĐÃ SỬA
+  const categories = products
+    .map((p) => {
+      if (!p.category) return null;
+      return typeof p.category === "string"
+        ? { id: p.category, name: p.category, slug: p.category }
+        : {
+            id: p.category._id,
+            name: p.category.name,
+            slug: p.category.slug,
+          };
+    })
+    .filter(
+      (category): category is { id: string; name: string; slug: string } =>
+        !!category
+    )
+    .filter(
+      (category, index, self) =>
+        index === self.findIndex((c) => c.id === category.id)
+    );
+
+  const brands = Array.from(
+    new Set(
+      products.map((p) => p.brand).filter((brand): brand is string => !!brand)
+    )
+  );
+
+  const getCategoryName = (category: string | any | null): string => {
+    if (!category) return "Không có";
+    return typeof category === "string"
+      ? category
+      : category.name || "Không có";
+  };
+
+  const getPriceDisplay = (price: any) => {
+    if (!price) return "0₫";
+    const currentPrice = price.currentPrice || 0;
+    const discountPrice = price.discountPrice || 0;
+
+    return (
+      <div className="flex flex-col">
+        <span className="font-medium">{currentPrice.toLocaleString()}₫</span>
+        {discountPrice > 0 && discountPrice !== currentPrice && (
+          <span className="text-sm text-muted-foreground line-through">
+            {discountPrice.toLocaleString()}₫
+          </span>
+        )}
+      </div>
+    );
+  };
+
+  const getStockCount = (product: Product) => {
+    if (product.variants && product.variants.length > 0) {
+      return product.variants.reduce(
+        (total, variant) => total + (variant.stock || 0),
+        0
+      );
+    }
+    return 0;
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Filters */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-1 items-center space-x-2">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Tìm kiếm sản phẩm..."
+              value={searchTerm}
+              onChange={(e) => onSearch(e.target.value)}
+              className="pl-8"
+            />
+          </div>
+
+          {/* Category Filter */}
+          <Select
+            value={selectedCategory}
+            onValueChange={onCategoryFilterChange}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Danh mục" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tất cả danh mục</SelectItem>
+              {categories.map((category) => (
+                <SelectItem key={category.id} value={category.id}>
+                  {category.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Brand Filter */}
+          <Select value={selectedBrand} onValueChange={onBrandFilterChange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Thương hiệu" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tất cả thương hiệu</SelectItem>
+              {brands.map((brand) => (
+                <SelectItem key={brand} value={brand}>
+                  {brand}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                Giá
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-80 p-4">
+              <DropdownMenuLabel>Lọc theo giá</DropdownMenuLabel>
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Giá thấp nhất"
+                    value={localMinPrice}
+                    onChange={(e) => setLocalMinPrice(e.target.value)}
+                    type="number"
+                  />
+                  <Input
+                    placeholder="Giá cao nhất"
+                    value={localMaxPrice}
+                    onChange={(e) => setLocalMaxPrice(e.target.value)}
+                    type="number"
+                  />
+                </div>
+                <Button onClick={handlePriceFilterApply} className="w-full">
+                  Áp dụng
+                </Button>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Status Filter */}
+          <Select
+            value={selectedStatus === null ? "all" : selectedStatus.toString()}
+            onValueChange={(value) => {
+              if (value === "all") {
+                onStatusFilterChange(null);
+              } else {
+                onStatusFilterChange(value === "true");
+              }
+            }}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Trạng thái" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tất cả trạng thái</SelectItem>
+              <SelectItem value="true">Đang hoạt động</SelectItem>
+              <SelectItem value="false">Ngừng kinh doanh</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Page Size Filter */}
+        <Select
+          value={pageSize.toString()}
+          onValueChange={(value) => onPageSizeChange(Number(value))}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Hiển thị" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="10">10 sản phẩm</SelectItem>
+            <SelectItem value="20">20 sản phẩm</SelectItem>
+            <SelectItem value="50">50 sản phẩm</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Table */}
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Hình ảnh</TableHead>
+              <TableHead>Tên sản phẩm</TableHead>
+              <TableHead>Danh mục</TableHead>
+              <TableHead>Thương hiệu</TableHead>
+              <TableHead>Giá</TableHead>
+              <TableHead>Tồn kho</TableHead>
+              <TableHead>Đã bán</TableHead>
+              <TableHead>Trạng thái</TableHead>
+              <TableHead>Ngày tạo</TableHead>
+              <TableHead className="w-[80px]">Thao tác</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {products.map((product) => (
+              <TableRow key={product._id}>
+                <TableCell>
+                  {product.images && product.images.length > 0 ? (
+                    <img
+                      src={product.images[0]}
+                      alt={product.name}
+                      className="h-10 w-10 rounded-md object-cover"
+                    />
+                  ) : (
+                    <div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center">
+                      <Package className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  )}
+                </TableCell>
+                <TableCell className="font-medium">
+                  <div>
+                    <div>{product.name}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {product.slug}
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>{getCategoryName(product.category)}</TableCell>
+                <TableCell>{product.brand || "Không có"}</TableCell>
+                <TableCell>{getPriceDisplay(product.price)}</TableCell>
+                <TableCell>
+                  <Badge variant="outline">{getStockCount(product)}</Badge>
+                </TableCell>
+                <TableCell>
+                  <span className="text-sm">{product.soldCount || 0}</span>
+                </TableCell>
+                <TableCell>
+                  <div className="flex flex-col gap-1">
+                    <Badge variant={product.isActive ? "default" : "secondary"}>
+                      {product.isActive ? "Đang bán" : "Ngừng bán"}
+                    </Badge>
+                    {product.isNewArrival && (
+                      <Badge variant="secondary" className="text-xs">
+                        Mới
+                      </Badge>
+                    )}
+                    {product.isFeatured && (
+                      <Badge variant="secondary" className="text-xs">
+                        Nổi bật
+                      </Badge>
+                    )}
+                    {product.onSale && (
+                      <Badge variant="secondary" className="text-xs">
+                        Giảm giá
+                      </Badge>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  {new Date(product.createdAt).toLocaleDateString("vi-VN")}
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => onView(product)}>
+                        <Eye className="h-4 w-4 mr-2" />
+                        Xem chi tiết
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onEdit(product)}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Chỉnh sửa
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => onDelete(product)}
+                        className="text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Xóa
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+}

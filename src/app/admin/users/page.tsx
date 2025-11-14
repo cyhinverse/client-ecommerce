@@ -1,242 +1,353 @@
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import StatsCard from "@/components/admin/StatsCard";
-import SearchFilterBar from "@/components/admin/SearchFilterBar";
-import DataTable from "@/components/admin/DataTable";
+"use client";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import {
-  UserPlus,
-  Users,
-  UserCheck,
-  UserX,
-  Shield,
-  Eye,
-  Edit,
-  Mail,
-  Trash2,
-} from "lucide-react";
-import StatusBadge from "@/components/admin/StatusBadge";
-import { formatPrice, getInitials } from "@/components/admin/utils";
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { toast } from "sonner";
+import { UsersHeader } from "@/components/admin/UserAdminPage/UsersHeader";
+import { UsersStats } from "@/components/admin/UserAdminPage/UserStats";
+import { UsersTable } from "@/components/admin/UserAdminPage/UserTable";
+import { UserPagination } from "@/components/admin/UserAdminPage/UserPaginationControl";
+import { CreateModelUser } from "@/components/admin/UserAdminPage/CreateModelUser";
+import { UpdateModelUser } from "@/components/admin/UserAdminPage/UpdateModelUser";
+import { ViewModelUser } from "@/components/admin/UserAdminPage/ViewModelUser";
+import {
+  getAllUsers,
+  deleteUser,
+  updateUser,
+  createUser,
+} from "@/features/user/userAction";
+import { User } from "@/types/user";
 
-// Mock data for users
-const mockUsers = [
-  {
-    id: "1",
-    name: "Nguyễn Văn A",
-    email: "nguyenvana@email.com",
-    avatar: "/avatars/01.png",
-    role: "customer",
-    status: "active",
-    orders: 12,
-    totalSpent: 12500000,
-    joinedDate: "2023-12-15",
-    lastLogin: "2024-01-15",
-  },
-  {
-    id: "2",
-    name: "Trần Thị B",
-    email: "tranthib@email.com",
-    avatar: "/avatars/02.png",
-    role: "customer",
-    status: "active",
-    orders: 8,
-    totalSpent: 8500000,
-    joinedDate: "2024-01-05",
-    lastLogin: "2024-01-15",
-  },
-  {
-    id: "3",
-    name: "Lê Văn C",
-    email: "levanc@email.com",
-    avatar: "/avatars/03.png",
-    role: "admin",
-    status: "active",
-    orders: 0,
-    totalSpent: 0,
-    joinedDate: "2023-11-20",
-    lastLogin: "2024-01-15",
-  },
-  {
-    id: "4",
-    name: "Phạm Thị D",
-    email: "phamthid@email.com",
-    avatar: "/avatars/04.png",
-    role: "customer",
-    status: "inactive",
-    orders: 3,
-    totalSpent: 4500000,
-    joinedDate: "2024-01-10",
-    lastLogin: "2024-01-12",
-  },
-  {
-    id: "5",
-    name: "Hoàng Văn E",
-    email: "hoangvane@email.com",
-    avatar: "/avatars/05.png",
-    role: "customer",
-    status: "active",
-    orders: 15,
-    totalSpent: 18900000,
-    joinedDate: "2023-12-28",
-    lastLogin: "2024-01-14",
-  },
-];
+export default function AdminUsersPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const dispatch = useAppDispatch();
+  const userState = useAppSelector((state) => state.user);
 
-export default function UsersAdminPage() {
-  const stats = [
-    {
-      title: "Tổng người dùng",
-      value: "1,248",
-      description: "+24 so với tháng trước",
-      icon: Users,
-    },
-    {
-      title: "Đang hoạt động",
-      value: "1,156",
-      description: "Người dùng tích cực",
-      icon: UserCheck,
-    },
-    {
-      title: "Không hoạt động",
-      value: "92",
-      description: "Người dùng không hoạt động",
-      icon: UserX,
-    },
-    {
-      title: "Quản trị viên",
-      value: "8",
-      description: "Người dùng có quyền admin",
-      icon: Shield,
-    },
-  ];
+  // Lấy params từ URL
+  const urlPage = parseInt(searchParams.get("page") || "1");
+  const urlLimit = parseInt(searchParams.get("limit") || "10");
+  const urlSearch = searchParams.get("search") || "";
+  const urlRole = searchParams.get("role") || "";
+  const urlIsVerifiedEmail = searchParams.get("isVerifiedEmail");
 
-  const roleStats = [
-    { title: "Khách hàng", value: "1,240", description: "99.4% tổng số người dùng", icon: Users },
-    { title: "Quản trị viên", value: "8", description: "0.6% tổng số người dùng", icon: Shield },
-    { title: "Tỷ lệ hoạt động", value: "92.7%", description: "1,156/1,248 người dùng", icon: UserCheck },
-  ];
+  const [currentPage, setCurrentPage] = useState(urlPage);
+  const [pageSize, setPageSize] = useState(urlLimit);
+  const [searchTerm, setSearchTerm] = useState(urlSearch);
+  const [selectedRole, setSelectedRole] = useState(urlRole);
+  const [selectedVerified, setSelectedVerified] = useState<string | null>(
+    urlIsVerifiedEmail
+  );
+
+  const users: User[] = userState.user || [];
+  const pagination = userState.pagination;
+
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Hàm mở modal tạo mới
+  const handleOpenCreateModal = () => {
+    setCreateModalOpen(true);
+  };
+
+  // Hàm xử lý tạo user mới
+  const handleCreateUser = async (userData: any) => {
+    setIsCreating(true);
+    try {
+      const result = await dispatch(createUser(userData)).unwrap();
+
+      // Refresh danh sách
+      fetchUsers();
+
+      setCreateModalOpen(false);
+      toast.success("Tạo người dùng thành công");
+    } catch (error: any) {
+      console.error("Create user error:", error);
+      toast.error(
+        error?.message || "Lỗi khi tạo người dùng. Vui lòng thử lại."
+      );
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleEditUser = (user: User) => {
+    setSelectedUser(user);
+    setUpdateModalOpen(true);
+  };
+
+  const handleEditFromView = (user: User) => {
+    setSelectedUser(user);
+    setViewModalOpen(false);
+    setUpdateModalOpen(true);
+  };
+
+  // Hàm đóng modal
+  const handleCloseEditModal = () => {
+    setUpdateModalOpen(false);
+    setSelectedUser(null);
+    setIsUpdating(false);
+  };
+
+  // Hàm lưu thay đổi
+  const handleUpdateUser = async (userData: any) => {
+    if (!selectedUser) return;
+
+    setIsUpdating(true);
+    try {
+      await dispatch(
+        updateUser({
+          id: selectedUser._id,
+          ...userData,
+        })
+      ).unwrap();
+
+      // Refresh danh sách sau khi update
+      fetchUsers();
+
+      handleCloseEditModal();
+      toast.success("Cập nhật người dùng thành công");
+    } catch (error: any) {
+      toast.error(
+        error?.message || "Cập nhật người dùng thất bại. Vui lòng thử lại."
+      );
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // Hàm fetch users với params hợp lệ
+  const fetchUsers = () => {
+    const params: any = {
+      page: currentPage,
+      limit: pageSize,
+    };
+
+    if (searchTerm && searchTerm.trim() !== "") {
+      params.search = searchTerm.trim();
+    }
+    if (selectedRole && selectedRole.trim() !== "") {
+      params.role = selectedRole.trim();
+    }
+    // Chỉ thêm isVerifiedEmail nếu có giá trị boolean hợp lệ
+    if (selectedVerified === "true" || selectedVerified === "false") {
+      params.isVerifiedEmail = selectedVerified === "true";
+    }
+
+    dispatch(getAllUsers(params));
+  };
+
+  const updateURL = (
+    page: number,
+    limit: number,
+    search: string,
+    role: string,
+    isVerifiedEmail: string | null
+  ) => {
+    const params = new URLSearchParams();
+    params.set("page", page.toString());
+    params.set("limit", limit.toString());
+
+    if (search && search.trim() !== "") {
+      params.set("search", search);
+    }
+    if (role && role.trim() !== "") {
+      params.set("role", role);
+    }
+    // Chỉ thêm isVerifiedEmail nếu có giá trị boolean hợp lệ
+    if (isVerifiedEmail === "true" || isVerifiedEmail === "false") {
+      params.set("isVerifiedEmail", isVerifiedEmail);
+    }
+
+    const url = `/admin/users?${params.toString()}`;
+    console.log("Updating URL to:", url); // Debug log
+    router.push(url, { scroll: false });
+  };
+
+  // Fetch users khi URL params thay đổi
+  useEffect(() => {
+    fetchUsers();
+  }, [
+    dispatch,
+    currentPage,
+    pageSize,
+    searchTerm,
+    selectedRole,
+    selectedVerified,
+  ]);
+
+  // Đồng bộ state với URL params
+  useEffect(() => {
+    setCurrentPage(urlPage);
+    setPageSize(urlLimit);
+    setSearchTerm(urlSearch);
+    setSelectedRole(urlRole);
+    setSelectedVerified(urlIsVerifiedEmail);
+  }, [urlPage, urlLimit, urlSearch, urlRole, urlIsVerifiedEmail]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    updateURL(page, pageSize, searchTerm, selectedRole, selectedVerified);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setCurrentPage(1);
+    updateURL(1, size, searchTerm, selectedRole, selectedVerified);
+  };
+
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+    updateURL(1, pageSize, value, selectedRole, selectedVerified);
+  };
+
+  const handleRoleFilterChange = (role: string) => {
+    setSelectedRole(role);
+    setCurrentPage(1);
+    updateURL(1, pageSize, searchTerm, role, selectedVerified);
+  };
+
+  const handleVerifiedFilterChange = (isVerified: boolean | null) => {
+    // Convert boolean | null thành string | null
+    const verifiedString = isVerified === null ? null : isVerified.toString();
+    setSelectedVerified(verifiedString);
+    setCurrentPage(1);
+    updateURL(1, pageSize, searchTerm, selectedRole, verifiedString);
+  };
+
+  const handleCloseModals = () => {
+    setViewModalOpen(false);
+    setUpdateModalOpen(false);
+    setSelectedUser(null);
+  };
+
+  const handleDeleteUser = async (user: User) => {
+    try {
+      await dispatch(deleteUser(user._id)).unwrap();
+
+      // Refresh danh sách
+      fetchUsers();
+
+      toast.success("Xóa người dùng thành công");
+    } catch (error) {
+      toast.error("Xóa người dùng thất bại. Vui lòng thử lại.");
+    }
+  };
+
+  const handleViewUser = (user: User) => {
+    setSelectedUser(user);
+    setViewModalOpen(true);
+  };
+
+  // Tính toán thống kê
+  const totalUsers = pagination?.totalItems || users.length;
+  const verifiedUsers = users.filter((user) => user.isVerifiedEmail).length;
+  const usersWithAddress = users.filter(
+    (user) => user.addresses && user.addresses.length > 0
+  ).length;
+
+  // Người dùng mới (trong 7 ngày gần đây)
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  const recentUsers = users.filter((user) => {
+    try {
+      return new Date(user.createdAt) > oneWeekAgo;
+    } catch {
+      return false;
+    }
+  }).length;
+
+  if (userState.error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-red-500">Lỗi: {userState.error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <SearchFilterBar
-        title="Quản lý người dùng"
-        description="Quản lý tất cả người dùng và phân quyền trong hệ thống"
-        actionButton={{
-          label: "Thêm người dùng",
-          icon: <UserPlus className="h-4 w-4 mr-2" />,
-          onClick: () => {}
-        }}
+      <UsersHeader onOpenCreate={handleOpenCreateModal} />
+
+      <UsersStats
+        totalUsers={totalUsers}
+        verifiedUsers={verifiedUsers}
+        usersWithAddress={usersWithAddress}
+        recentUsers={recentUsers}
       />
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat, index) => (
-          <StatsCard
-            key={index}
-            title={stat.title}
-            value={stat.value}
-            description={stat.description}
-            icon={stat.icon}
+      <Card>
+        <CardHeader>
+          <CardTitle>Danh sách người dùng</CardTitle>
+          <CardDescription>
+            Quản lý tất cả người dùng trong hệ thống
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <UsersTable
+            users={users}
+            searchTerm={searchTerm}
+            pageSize={pageSize}
+            onSearch={handleSearch}
+            onPageSizeChange={handlePageSizeChange}
+            onEdit={handleEditUser}
+            onDelete={handleDeleteUser}
+            onView={handleViewUser}
+            onRoleFilterChange={handleRoleFilterChange}
+            onVerifiedFilterChange={handleVerifiedFilterChange}
+            selectedRole={selectedRole}
+            selectedVerified={
+              selectedVerified === "true"
+                ? true
+                : selectedVerified === "false"
+                ? false
+                : null
+            }
           />
-        ))}
-      </div>
 
-      {/* Users Table */}
-      <DataTable
-        title="Danh sách người dùng"
-        description="Quản lý thông tin và phân quyền người dùng"
-        columns={[
-          { 
-            key: "name", 
-            title: "Người dùng",
-            render: (item) => (
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-sm font-medium">
-                    {getInitials(item.name)}
-                  </span>
-                </div>
-                <div>
-                  <p className="font-medium">{item.name}</p>
-                  <p className="text-sm text-gray-600">{item.email}</p>
-                </div>
-              </div>
-            )
-          },
-          { 
-            key: "role", 
-            title: "Vai trò",
-            render: (item) => <StatusBadge status={item.role} type="role" />
-          },
-          { 
-            key: "orders", 
-            title: "Đơn hàng",
-            render: (item) => <span className="font-medium">{item.orders}</span>
-          },
-          { 
-            key: "totalSpent", 
-            title: "Tổng chi tiêu",
-            render: (item) => <span className="font-semibold">{formatPrice(item.totalSpent)}</span>
-          },
-          { 
-            key: "status", 
-            title: "Trạng thái",
-            render: (item) => <StatusBadge status={item.status} type="user" />
-          },
-          { key: "joinedDate", title: "Ngày tham gia" },
-          { key: "lastLogin", title: "Lần đăng nhập cuối" }
-        ]}
-        data={mockUsers}
-        actions={[
-          {
-            label: "Xem chi tiết",
-            icon: <Eye className="h-4 w-4 mr-2" />,
-            onClick: () => {}
-          },
-          {
-            label: "Chỉnh sửa",
-            icon: <Edit className="h-4 w-4 mr-2" />,
-            onClick: () => {}
-          },
-          {
-            label: "Gửi email",
-            icon: <Mail className="h-4 w-4 mr-2" />,
-            onClick: () => {}
-          },
-          {
-            label: "Xóa người dùng",
-            icon: <Trash2 className="h-4 w-4 mr-2" />,
-            onClick: () => {},
-            variant: "destructive"
-          }
-        ]}
-        enableExport={true}
-        pagination={{
-          totalItems: 1248,
-          currentPage: 1,
-          totalPages: 25
-        }}
-      />
+          <UserPagination
+            currentPage={currentPage}
+            totalPages={pagination?.totalPages || 1}
+            totalItems={pagination?.totalItems}
+            pageSize={pageSize}
+            onPageChange={handlePageChange}
+          />
 
-      {/* User Roles Overview */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        {roleStats.map((stat, index) => (
-          <Card key={index}>
-            <div className="p-4">
-              <div className="pb-3">
-                <h3 className="text-sm font-medium flex items-center gap-2">
-                  <stat.icon className="h-4 w-4" />
-                  {stat.title}
-                </h3>
-              </div>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {stat.description}
-              </p>
-            </div>
-          </Card>
-        ))}
-      </div>
+          <CreateModelUser
+            open={createModalOpen}
+            onOpenChange={setCreateModalOpen}
+            onCreate={handleCreateUser}
+            isLoading={isCreating}
+          />
+
+          <ViewModelUser
+            open={viewModalOpen}
+            onOpenChange={handleCloseModals}
+            user={selectedUser}
+            onEdit={handleEditFromView}
+          />
+
+          <UpdateModelUser
+            open={updateModalOpen}
+            onOpenChange={handleCloseEditModal}
+            user={selectedUser}
+            onUpdate={handleUpdateUser}
+            isLoading={isUpdating}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

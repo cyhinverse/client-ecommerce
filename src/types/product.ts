@@ -49,9 +49,21 @@ export interface Product {
   updatedAt: string;
 }
 
+export interface PaginationData {
+  currentPage: number;
+  pageSize: number;
+  totalPages: number;
+  totalItems: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+  nextPage: number | null;
+  prevPage: number | null;
+}
+
 export interface ProductState {
   product: Product[] | null;
   currentProduct: Product | null;
+  pagination: PaginationData | null;
   isLoading: boolean;
   error: string | null;
 }

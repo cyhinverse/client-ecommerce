@@ -23,3 +23,159 @@ export const uploadAvatar = createAsyncThunk(
     return response.data;
   }
 );
+
+export const updateProfile = createAsyncThunk(
+  "user/update-profile",
+  async (profileData: {
+    username?: string;
+    email?: string;
+    phone?: string;
+    avatar?: string;
+  }) => {
+    const response = await instance.put("/users/profile", profileData);
+    if (!response) {
+      throw new Error("Failed to update profile");
+    }
+    return response.data;
+  }
+);
+
+export const deleteUser = createAsyncThunk(
+  "user/delete-user",
+  async (userId: string) => {
+    const response = await instance.delete(`/users/${userId}`);
+    if (!response) {
+      throw new Error("Failed to delete user");
+    }
+    return response.data;
+  }
+);
+
+export const createUser = createAsyncThunk(
+  "user/create",
+  async (userData: {
+    name: string;
+    email: string;
+    phone: string;
+    roles: string;
+    isVerifiedEmail: boolean;
+  }) => {
+    const response = await instance.post("/users/create", userData);
+    if (!response) {
+      throw new Error("Failed to create user");
+    }
+    return response.data;
+  }
+);
+
+export const updateUser = createAsyncThunk(
+  "user/update",
+  async (userData: {
+    username: string;
+    email: string;
+    id: string;
+    isVerifiedEmail: boolean;
+    roles: string;
+  }) => {
+    // Sử dụng POST đến /users/update
+    const response = await instance.post("/users/update", userData);
+    if (!response) {
+      throw new Error("Failed to update user");
+    }
+    return response.data;
+  }
+);
+
+export const getAllUsers = createAsyncThunk(
+  "user/all",
+  async (params: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    role?: string;
+    isVerifiedEmail?: boolean;
+  }) => {
+    const {
+      page = 1,
+      limit = 10,
+      search = "",
+      role = "",
+      isVerifiedEmail,
+    } = params;
+    const response = await instance.get("/users", {
+      params: { page, limit, search, role, isVerifiedEmail },
+    });
+
+    if (!response) {
+      throw new Error("Failed to fetch users");
+    }
+    return {
+      users: response.data.data?.data || [], // ← users array
+      pagination: response.data.data?.pagination || null, // ← pagination object
+    };
+  }
+);
+
+export const createAddress = createAsyncThunk(
+  "address/create",
+  async (addressData: {
+    fullName: string;
+    phone: string;
+    address: string;
+    city: string;
+    district: string;
+    ward: string;
+  }) => {
+    const response = await instance.post("/users/address", addressData);
+    if (!response) {
+      throw new Error("Failed to create address");
+    }
+    return response.data;
+  }
+);
+
+export const updateAddress = createAsyncThunk(
+  "address/update",
+  async (payload: {
+    addressId: string;
+    addressData: {
+      fullName?: string;
+      phone?: string;
+      address?: string;
+      city?: string;
+      district?: string;
+      ward?: string;
+    };
+  }) => {
+    const response = await instance.put(
+      `/users/address/${payload.addressId}`,
+      payload.addressData
+    );
+    if (!response) {
+      throw new Error("Failed to update address");
+    }
+    return response.data;
+  }
+);
+
+export const deleteAddress = createAsyncThunk(
+  "address/delete",
+  async (addressId: string) => {
+    const response = await instance.delete(`users/address/${addressId}`);
+    if (!response) {
+      throw new Error("Failed to delete address");
+    }
+    return response.data;
+  }
+);
+
+export const changePassword = createAsyncThunk(
+  "user/change-password",
+  async (password: { oldPassword: string; newPassword: string }) => {
+    const response = await instance.post("/users/change-password", password);
+    if (!response) {
+      throw new Error("Failed to change password");
+    }
+    return response.data;
+  }
+);

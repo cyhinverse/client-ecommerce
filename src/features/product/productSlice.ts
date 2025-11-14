@@ -1,18 +1,25 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
+  createProduct,
+  deleteProduct,
+  deleteVariantByVariantId,
   getAllProducts,
   getFeaturedProducts,
   getNewArrivals,
   getOnSaleProducts,
+  getProductById,
   getProductBySlug,
   getProductsByCategory,
   getProductsBySlugOfCategory,
+  updateProduct,
+  updateVariant,
 } from "./productAction";
 import { ProductState } from "@/types/product";
 
 const initState: ProductState = {
   product: null,
   currentProduct: null,
+  pagination: null,
   isLoading: false,
   error: null,
 };
@@ -53,7 +60,9 @@ export const productSlice = createSlice({
     });
     builder.addCase(getAllProducts.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.product = action.payload;
+      state.product = action.payload.data.data;
+      state.pagination = action.payload.data.pagination;
+      console.log("All Products:", action.payload.data);
     });
     builder.addCase(getAllProducts.rejected, (state, action) => {
       state.isLoading = false;
@@ -68,6 +77,7 @@ export const productSlice = createSlice({
     builder.addCase(getFeaturedProducts.fulfilled, (state, action) => {
       state.isLoading = false;
       state.product = action.payload?.data;
+      console.log("Featured Products:", action.payload);
     });
     builder.addCase(getFeaturedProducts.rejected, (state, action) => {
       state.isLoading = false;
@@ -131,6 +141,103 @@ export const productSlice = createSlice({
       state.isLoading = false;
       state.error =
         action.error.message || "Failed to fetch products by slug of category";
+    });
+
+    // Get products by id
+    builder.addCase(getProductById.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(getProductById.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.currentProduct = action.payload?.data;
+    });
+    builder.addCase(getProductById.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.error.message || "Failed to fetch product by id";
+    });
+
+    // Create new product
+    builder.addCase(createProduct.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(createProduct.fulfilled, (state, action) => {
+      state.isLoading = false;
+      // Optionally, you can add the newly created product to the product list
+      if (state.product) {
+        state.product.push(action.payload?.data);
+      } else {
+        state.product = [action.payload?.data];
+      }
+    });
+    builder.addCase(createProduct.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.error.message || "Failed to create new product";
+    });
+
+    //  update product by id
+    builder.addCase(updateProduct.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(updateProduct.fulfilled, (state) => {
+      state.isLoading = false;
+    });
+    builder.addCase(updateProduct.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.error.message || "Failed to update product by id";
+    });
+    // delete product by id
+    builder.addCase(deleteProduct.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+
+    builder.addCase(deleteProduct.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.error = null;
+
+      console.log("Delete payload:", action.payload);
+
+      // CÁCH 1: Giả sử payload chính là productId (string)
+      if (state.product && Array.isArray(state.product)) {
+        const productId = action.payload;
+        state.product = state.product.filter(
+          (product) => product._id !== productId
+        );
+      }
+    });
+
+    builder.addCase(deleteProduct.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.error.message || "Failed to delete product by id";
+    });
+
+    // delete variant by id
+    builder.addCase(deleteVariantByVariantId.pending, (state, action) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(deleteVariantByVariantId.fulfilled, (state, action) => {
+      state.isLoading = false;
+    });
+    builder.addCase(deleteVariantByVariantId.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.error.message || "Failed to delete variant by id";
+    });
+
+    // update variant by id
+    builder.addCase(updateVariant.pending, (state, action) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(updateVariant.fulfilled, (state, action) => {
+      state.isLoading = false;
+    });
+    builder.addCase(updateVariant.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.error.message || "Failed to update variant by id";
     });
   },
 });

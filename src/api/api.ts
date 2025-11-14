@@ -25,27 +25,30 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   async (response) => {
     const originalReq = response.config as any;
-    console.log("response interceptor:", response);
 
-    if (
-      response.status === 401 &&
-      (!originalReq._retry || originalReq._retry < 3)
-    ) {
-      originalReq._retry = (originalReq._retry || 0) + 1;
-      const res = await instance.post("/auth/refresh-token", {
-        withCredentials: true,
-      });
-      if (!res) {
-        return Promise.reject("Unable to refresh token");
+    if (response.status === 401 && !originalReq._retry) {
+      originalReq._retry = true;
+      try {
+        const res = await instance.post("/auth/refresh-token");
+        const { accessToken } = res.data;
+        originalReq.headers.Authorization = `Bearer ${accessToken}`;
+
+        return instance(originalReq);
+      } catch (error) {
+        return Promise.reject(error);
       }
-      originalReq.headers.Authorization = `Bearer ${res.data.accessToken}`;
-
-      return instance(originalReq);
     }
-
     return response;
   },
   (error) => {
+    if (error.response?.status === 401 && !error.config._retry) {
+      error.config._retry = true;
+      return instance.post("/auth/refresh-token").then((res) => {
+        const { accessToken } = res.data;
+        error.config.headers.Authorization = `Bearer ${accessToken}`;
+        return instance(error.config);
+      });
+    }
     return Promise.reject(error);
   }
 );
