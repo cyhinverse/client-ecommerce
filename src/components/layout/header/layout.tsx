@@ -32,6 +32,7 @@ export default function HeaderLayout() {
     "/admin/categories",
     "/admin/discounts",
     "/admin/settings",
+		"/admin/dashboard"
   ];
 
   return (

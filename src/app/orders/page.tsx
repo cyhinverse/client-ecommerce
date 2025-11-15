@@ -154,7 +154,7 @@ export default function OrdersPage() {
                     {formatPrice(order.total)}
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">S
                       {getStatusIcon(order.status)}
                       {getStatusBadge(order.status)}
                     </div>

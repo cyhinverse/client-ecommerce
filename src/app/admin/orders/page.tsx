@@ -1,226 +1,287 @@
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import StatsCard from "@/components/admin/StatsCard";
-import SearchFilterBar from "@/components/admin/SearchFilterBar";
-import DataTable from "@/components/admin/DataTable";
+"use client";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import {
-  Download,
-  ShoppingCart,
-  Truck,
-  CheckCircle,
-  Clock,
-  XCircle,
-  Eye,
-  Edit,
-} from "lucide-react";
-import StatusBadge from "@/components/admin/StatusBadge";
-import { formatPrice } from "@/components/admin/utils";
+  deleteOrder,
+  getListOrders,
+  getOrderById,
+  changeOrderStatus,
+  getOrderStatistics,
+} from "@/features/order/orderAction";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+// import { EditOrderModal } from "@/components/admin/OrdersAdminPage/UpdateOrderModel";
+// import { ViewOrderModal } from "@/components/admin/OrdersAdminPage/ViewModal";
+import { toast } from "sonner";
+import { PaginationControls } from "@/components/admin/CategoriesAdminPage/PaginationContro";
+import { Order, PaginationData } from "@/types/order";
+import { OrdersHeader } from "@/components/admin/OrderAdminPage/OrdersHeader";
+import { OrdersStats } from "@/components/admin/OrderAdminPage/OrderStats";
+import { OrdersTable } from "@/components/admin/OrderAdminPage/OrderTable";
+import {EditOrderModal} from "@/components/admin/OrderAdminPage/UpdateOrderModel"
+import {ViewOrderModal} from "@/components/admin/OrderAdminPage/ViewOrderModel"
 
-// Mock data for orders
-const mockOrders = [
-  {
-    id: "ORD-001",
-    customer: "Nguyễn Văn A",
-    email: "nguyenvana@email.com",
-    amount: 1250000,
-    status: "delivered",
-    payment: "paid",
-    items: 3,
-    createdAt: "2024-01-15",
-    updatedAt: "2024-01-16",
-  },
-  {
-    id: "ORD-002",
-    customer: "Trần Thị B",
-    email: "tranthib@email.com",
-    amount: 850000,
-    status: "shipped",
-    payment: "paid",
-    items: 2,
-    createdAt: "2024-01-15",
-    updatedAt: "2024-01-15",
-  },
-  {
-    id: "ORD-003",
-    customer: "Lê Văn C",
-    email: "levanc@email.com",
-    amount: 2100000,
-    status: "processing",
-    payment: "pending",
-    items: 4,
-    createdAt: "2024-01-14",
-    updatedAt: "2024-01-14",
-  },
-  {
-    id: "ORD-004",
-    customer: "Phạm Thị D",
-    email: "phamthid@email.com",
-    amount: 450000,
-    status: "cancelled",
-    payment: "failed",
-    items: 1,
-    createdAt: "2024-01-14",
-    updatedAt: "2024-01-14",
-  },
-  {
-    id: "ORD-005",
-    customer: "Hoàng Văn E",
-    email: "hoangvane@email.com",
-    amount: 1890000,
-    status: "pending",
-    payment: "pending",
-    items: 2,
-    createdAt: "2024-01-13",
-    updatedAt: "2024-01-13",
-  },
-];
+interface OrderStatistics {
+  totalOrders: number;
+  pendingOrders: number;
+  confirmedOrders: number;
+  processingOrders: number;
+  shippedOrders: number;
+  deliveredOrders: number;
+  cancelledOrders: number;
+  totalRevenue: number;
+}
 
 export default function OrdersAdminPage() {
-  const stats = [
-    {
-      title: "Tổng đơn hàng",
-      value: "1,248",
-      description: "+24 so với tháng trước",
-      icon: ShoppingCart,
-    },
-    {
-      title: "Đang xử lý",
-      value: "18",
-      description: "Cần xác nhận",
-      icon: Clock,
-    },
-    {
-      title: "Đang giao",
-      value: "42",
-      description: "Đang vận chuyển",
-      icon: Truck,
-    },
-    {
-      title: "Doanh thu",
-      value: "45.2M",
-      description: "+12.5% so với tháng trước",
-      icon: CheckCircle,
-    },
-  ];
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const dispatch = useAppDispatch();
+  const orderState = useAppSelector((state) => state.order);
 
-  const quickStats = [
-    { title: "Chờ xác nhận", value: "18", icon: Clock, color: "text-orange-600" },
-    { title: "Đang xử lý", value: "24", icon: Clock, color: "text-blue-600" },
-    { title: "Đang giao", value: "42", icon: Truck, color: "text-purple-600" },
-    { title: "Thành công", value: "1,164", icon: CheckCircle, color: "text-green-600" },
-  ];
+  // Lấy params từ URL
+  const urlPage = parseInt(searchParams.get("page") || "1");
+  const urlLimit = parseInt(searchParams.get("limit") || "10");
+  const urlSearch = searchParams.get("search") || "";
+  const urlStatus = searchParams.get("status") || "";
+
+  const [currentPage, setCurrentPage] = useState(urlPage);
+  const [pageSize, setPageSize] = useState(urlLimit);
+  const [searchTerm, setSearchTerm] = useState(urlSearch);
+  const [statusFilter, setStatusFilter] = useState(urlStatus);
+  const [statistics, setStatistics] = useState<OrderStatistics | null>(null);
+
+const orders: Order[] = orderState?.orders ?? [];
+  const pagination: PaginationData | null = orderState?.pagination;
+
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Hàm mở modal chỉnh sửa
+  const handleEditOrder = (order: Order) => {
+    setSelectedOrder(order);
+    setEditModalOpen(true);
+  };
+
+  const handleEditFromView = (order: Order) => {
+    setSelectedOrder(order);
+    setViewModalOpen(false);
+    setEditModalOpen(true);
+  };
+
+  // Hàm đóng modal
+  const handleCloseEditModal = () => {
+    setEditModalOpen(false);
+    setSelectedOrder(null);
+    setIsUpdating(false);
+  };
+
+  // Hàm lưu thay đổi trạng thái
+  const handleSaveOrder = async (orderData: { status: string }) => {
+    if (!selectedOrder) return;
+
+    setIsUpdating(true);
+    try {
+      await dispatch(
+        changeOrderStatus({
+          orderId: selectedOrder._id,
+          status: orderData.status,
+        })
+      ).unwrap();
+
+      // Refresh danh sách sau khi update
+      dispatch(
+        getListOrders({
+          page: currentPage,
+          limit: pageSize,
+          search: searchTerm,
+          status: statusFilter,
+        })
+      );
+
+      handleCloseEditModal();
+      toast.success("Cập nhật trạng thái đơn hàng thành công");
+    } catch (error) {
+      toast.error("Cập nhật trạng thái thất bại. Vui lòng thử lại.");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // Hàm cập nhật URL
+  const updateURL = (page: number, limit: number, search: string, status: string) => {
+    const params = new URLSearchParams();
+    params.set("page", page.toString());
+    params.set("limit", limit.toString());
+    if (search) params.set("search", search);
+    if (status) params.set("status", status);
+
+    router.push(`/admin/orders?${params.toString()}`, { scroll: false });
+  };
+
+  // Fetch orders khi URL params thay đổi
+  useEffect(() => {
+    const params: any = { 
+      page: currentPage, 
+      limit: pageSize 
+    };
+    if (searchTerm) params.search = searchTerm;
+    if (statusFilter) params.status = statusFilter;
+
+    dispatch(getListOrders(params));
+  }, [dispatch, currentPage, pageSize, searchTerm, statusFilter]);
+
+  // Fetch statistics
+  useEffect(() => {
+    const fetchStatistics = async () => {
+      try {
+        const result = await dispatch(getOrderStatistics()).unwrap();
+        setStatistics(result);
+      } catch (error) {
+        console.error("Failed to fetch statistics:", error);
+      }
+    };
+    fetchStatistics();
+  }, [dispatch]);
+
+  useEffect(() => {
+    setCurrentPage(urlPage);
+    setPageSize(urlLimit);
+    setSearchTerm(urlSearch);
+    setStatusFilter(urlStatus);
+  }, [urlPage, urlLimit, urlSearch, urlStatus]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    updateURL(page, pageSize, searchTerm, statusFilter);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setCurrentPage(1);
+    updateURL(1, size, searchTerm, statusFilter);
+  };
+
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+    updateURL(1, pageSize, value, statusFilter);
+  };
+
+  const handleStatusFilter = (status: string) => {
+    setStatusFilter(status);
+    setCurrentPage(1);
+    updateURL(1, pageSize, searchTerm, status);
+  };
+
+  const handleCloseModals = () => {
+    setViewModalOpen(false);
+    setEditModalOpen(false);
+    setSelectedOrder(null);
+  };
+
+  const handleDeleteOrder = async (order: Order) => {
+    if (confirm(`Bạn có chắc muốn xóa đơn hàng ${order._id}?`)) {
+      try {
+        await dispatch(deleteOrder(order._id)).unwrap();
+        toast.success("Xóa đơn hàng thành công");
+        // Refresh danh sách
+        dispatch(
+          getListOrders({
+            page: currentPage,
+            limit: pageSize,
+            search: searchTerm,
+            status: statusFilter,
+          })
+        );
+      } catch (error) {
+        toast.error("Xóa đơn hàng thất bại");
+      }
+    }
+  };
+
+  const handleViewOrder = async (order: Order) => {
+    try {
+      const result = await dispatch(getOrderById(order._id)).unwrap();
+      setSelectedOrder(result);
+      setViewModalOpen(true);
+    } catch (error) {
+      toast.error("Không thể tải chi tiết đơn hàng");
+    }
+  };
+
+  if (orderState?.error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-red-500">Lỗi: {orderState.error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <SearchFilterBar
-        title="Quản lý đơn hàng"
-        description="Theo dõi và quản lý tất cả đơn hàng của khách hàng"
-        actionButton={{
-          label: "Export",
-          icon: <Download className="h-4 w-4 mr-2" />,
-          onClick: () => {}
-        }}
-      />
+      <OrdersHeader />
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat, index) => (
-          <StatsCard
-            key={index}
-            title={stat.title}
-            value={stat.value}
-            description={stat.description}
-            icon={stat.icon}
+      {statistics && (
+        <OrdersStats
+          totalOrders={statistics.totalOrders}
+          pendingOrders={statistics.pendingOrders}
+          processingOrders={statistics.processingOrders}
+          confirmedOrders={statistics.confirmedOrders}
+          shippedOrders={statistics.shippedOrders}
+          deliveredOrders={statistics.deliveredOrders}
+          cancelledOrders={statistics.cancelledOrders}
+          totalRevenue={statistics.totalRevenue}
+        />
+      )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Danh sách đơn hàng</CardTitle>
+          <CardDescription>Quản lý tất cả đơn hàng trong hệ thống</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <OrdersTable
+            orders={orders}
+            searchTerm={searchTerm}
+            statusFilter={statusFilter}
+            pageSize={pageSize}
+            onSearch={handleSearch}
+            onStatusFilter={handleStatusFilter}
+            onPageSizeChange={handlePageSizeChange}
+            onEdit={handleEditOrder}
+            onDelete={handleDeleteOrder}
+            onView={handleViewOrder}
           />
-        ))}
-      </div>
 
-      {/* Orders Table */}
-      <DataTable
-        title="Danh sách đơn hàng"
-        description="Quản lý và cập nhật trạng thái đơn hàng"
-        columns={[
-          { key: "id", title: "Mã đơn", className: "font-medium" },
-          { 
-            key: "customer", 
-            title: "Khách hàng",
-            render: (item) => (
-              <div>
-                <p className="font-medium">{item.customer}</p>
-                <p className="text-sm text-gray-600">{item.email}</p>
-              </div>
-            )
-          },
-          { 
-            key: "items", 
-            title: "Số lượng",
-            render: (item) => `${item.items} sản phẩm`
-          },
-          { 
-            key: "amount", 
-            title: "Tổng tiền",
-            render: (item) => <span className="font-semibold">{formatPrice(item.amount)}</span>
-          },
-          { 
-            key: "payment", 
-            title: "Thanh toán",
-            render: (item) => <StatusBadge status={item.payment} type="order" />
-          },
-          { 
-            key: "status", 
-            title: "Trạng thái",
-            render: (item) => <StatusBadge status={item.status} type="order" />
-          },
-          { key: "createdAt", title: "Ngày đặt" }
-        ]}
-        data={mockOrders}
-        actions={[
-          {
-            label: "Xem chi tiết",
-            icon: <Eye className="h-4 w-4 mr-2" />,
-            onClick: () => {}
-          },
-          {
-            label: "Cập nhật vận chuyển",
-            icon: <Truck className="h-4 w-4 mr-2" />,
-            onClick: () => {}
-          },
-          {
-            label: "Xác nhận đơn",
-            icon: <CheckCircle className="h-4 w-4 mr-2" />,
-            onClick: () => {}
-          },
-          {
-            label: "Hủy đơn hàng",
-            icon: <XCircle className="h-4 w-4 mr-2" />,
-            onClick: () => {},
-            variant: "destructive"
-          }
-        ]}
-        pagination={{
-          totalItems: 1248,
-          currentPage: 1,
-          totalPages: 25
-        }}
-      />
+          <ViewOrderModal
+            isOpen={viewModalOpen}
+            onClose={handleCloseModals}
+            onEdit={handleEditFromView}
+            order={selectedOrder}
+          />
 
-      {/* Quick Status Overview */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {quickStats.map((stat, index) => (
-          <Card key={index}>
-            <div className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium">{stat.title}</p>
-                  <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
-                </div>
-                <stat.icon className={`h-8 w-8 ${stat.color.replace('text-', 'text-')}`} />
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
+          <EditOrderModal
+            isOpen={editModalOpen}
+            onClose={handleCloseEditModal}
+            onSave={handleSaveOrder}
+            order={selectedOrder}
+            isLoading={isUpdating}
+          />
+
+          <PaginationControls
+            pagination={pagination}
+            onPageChange={handlePageChange}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

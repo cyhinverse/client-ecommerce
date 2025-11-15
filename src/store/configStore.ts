@@ -1,14 +1,13 @@
-// store/configStore.ts
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import { persistStore, persistReducer } from "redux-persist";
 import createWebStorage from "redux-persist/lib/storage/createWebStorage";
 
-// Import các slice
 import { authSlice } from "@/features/auth/authSlice";
 import { cartSlice } from "@/features/cart/cartSlice";
 import { categorySlice } from "@/features/category/categorySlice";
 import { productSlice } from "@/features/product/productSlice";
 import { userSlice } from "@/features/user/userSlice";
+import { discountSlice } from "@/features/discount/discountSlice";
 
 const createNoopStorage = () => {
   return {
@@ -35,6 +34,7 @@ export const rootReducer = combineReducers({
   cart: cartSlice.reducer,
   user: userSlice.reducer,
   product: productSlice.reducer,
+  discount: discountSlice.reducer
 });
 
 const persistConfig = {

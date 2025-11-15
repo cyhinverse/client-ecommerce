@@ -25,6 +25,7 @@ export default function FooterLayout() {
     "/admin/categories",
     "/admin/discounts",
     "/admin/settings",
+		"/admin/dashboard"
   ];
 
   if (adminPaths.includes(path)) return null;

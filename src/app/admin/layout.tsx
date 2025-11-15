@@ -1,4 +1,5 @@
 "use client";
+import { Avatar } from "@/components/ui/avatar";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -18,11 +19,12 @@ import {
   LayoutDashboardIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { logout } from "@/features/auth/authAction";
-import { useAppDispatch } from "@/hooks/hooks";
+import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { toast } from "sonner";
+import Image from "next/image";
 
 const navigation = [
   {
@@ -81,7 +83,7 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useAppDispatch();
-
+  const { loading, data } = useAppSelector(state => state.auth)
   const handleLogout = () => {
     dispatch(logout());
     toast.success("Đăng xuất thành công");
@@ -93,6 +95,8 @@ export default function AdminLayout({
       {/* Mobile Sidebar */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <SheetContent side="left" className="w-64 p-0">
+          <SheetTitle className="sr-only">Admin Navigation Menu</SheetTitle>
+
           <div className="flex h-full flex-col">
             <div className="flex h-16 items-center justify-between px-4 border-b">
               <h1 className="text-xl font-bold text-gray-900">Admin Panel</h1>
@@ -171,7 +175,7 @@ export default function AdminLayout({
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Header */}
-        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+        <div className="sticky top-0 z-40 flex h-12 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4  sm:gap-x-6 sm:px-6 lg:px-8">
           <Button
             variant="ghost"
             size="icon"
@@ -183,15 +187,13 @@ export default function AdminLayout({
 
           <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
             <div className="flex flex-1"></div>
-            <div className="flex items-center gap-x-4 lg:gap-x-6">
-              <Link
-                href="/"
-                className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
-              >
-                <Home className="h-4 w-4" />
-                Về trang chủ
-              </Link>
-            </div>
+            {
+              data && (
+                <Link href={"/admin"} className="flex flex-col items-center justify-center hover:borer hover:border-gray-200 hover:shadow-sm">
+                  <Image className="rounded-full" src={data.avatar} alt={data.username} height={30} width={30} />
+                </Link>
+              )}
+
           </div>
         </div>
 

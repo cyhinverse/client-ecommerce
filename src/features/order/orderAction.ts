@@ -1,11 +1,34 @@
 import instance from "@/api/api";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { Order } from "../../types/order"
+interface GetListOrdersParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// User routes
+export const createOrder = createAsyncThunk(
+  "order/createOrder",
+  async (orderData: Order) => {
+    const response = await instance.post("/orders", orderData);
+    if (!response.data) {
+      throw new Error("Failed to create order");
+    }
+    return response.data;
+  }
+);
 
 export const getUserOrder = createAsyncThunk(
   "order/getUserOrder",
-  async (userId: string) => {
-    const response = await instance.get(`/api/orders/${userId}`);
-    if (!response) {
+  async (params?: { page?: number; limit?: number }) => {
+    const response = await instance.get("/orders", {
+      params
+    });
+    if (!response.data) {
       throw new Error("Failed to fetch user orders");
     }
     return response.data;
@@ -15,8 +38,8 @@ export const getUserOrder = createAsyncThunk(
 export const getOrderById = createAsyncThunk(
   "order/getOrderById",
   async (orderId: string) => {
-    const response = await instance.get(`/api/order/${orderId}`);
-    if (!response) {
+    const response = await instance.get(`/orders/${orderId}`);
+    if (!response.data) {
       throw new Error("Failed to fetch order by ID");
     }
     return response.data;
@@ -26,31 +49,22 @@ export const getOrderById = createAsyncThunk(
 export const cancelOrder = createAsyncThunk(
   "order/cancelOrder",
   async (orderId: string) => {
-    const response = await instance.delete(`/order/${orderId}`);
-    if (!response) {
+    const response = await instance.delete(`/orders/${orderId}/cancel`);
+    if (!response.data) {
       throw new Error("Failed to cancel order");
     }
     return response.data;
   }
 );
 
+// Admin routes
 export const getListOrders = createAsyncThunk(
   "order/getListOrders",
-  async ({
-    search,
-    status,
-    createAt,
-    updateAt,
-  }: {
-    search: string;
-    status: string;
-    createAt: string;
-    updateAt: string;
-  }) => {
+  async (params: GetListOrdersParams) => {
     const response = await instance.get("/orders/all/list", {
-      params: { search, status, createAt, updateAt },
+      params
     });
-    if (!response) {
+    if (!response.data) {
       throw new Error("Failed to fetch orders");
     }
     return response.data;
@@ -60,22 +74,52 @@ export const getListOrders = createAsyncThunk(
 export const changeOrderStatus = createAsyncThunk(
   "order/changeOrderStatus",
   async ({ orderId, status }: { orderId: string; status: string }) => {
-    const response = await instance.patch(`/orders/${orderId}`, {
+    const response = await instance.put(`/orders/${orderId}/status`, {
       status,
     });
-    if (!response) {
+    if (!response.data) {
       throw new Error("Failed to change order status");
     }
     return response.data;
   }
 );
 
-export const overviewOrders = createAsyncThunk(
-  "order/overviewOrders",
+export const getOrderStatistics = createAsyncThunk(
+  "order/getOrderStatistics",
   async () => {
-    const response = await instance.get("/orders/overview");
-    if (!response) {
-      throw new Error("Failed to fetch order overview");
+    try {
+      const response = await instance.get("/orders/statistics/overview");
+      if (!response.data) {
+        throw new Error("Failed to fetch order statistics");
+      }
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        // Fallback: trả về dữ liệu mẫu hoặc tính toán từ orders
+        throw new Error("Statistics endpoint not available");
+      }
+      throw error;
+    }
+  }
+);
+
+export const deleteOrder = createAsyncThunk(
+  "order/deleteOrder",
+  async (orderId: string) => {
+    const response = await instance.delete(`/orders/${orderId}`);
+    if (response.status === 200 || response.status === 204) {
+      return orderId; // Trả về orderId để xóa khỏi state
+    }
+    throw new Error("Failed to delete order");
+  }
+);
+
+export const updateOrder = createAsyncThunk(
+  "order/updateOrder",
+  async ({ orderId, formData }: { orderId: string; formData: any }) => {
+    const response = await instance.put(`/orders/${orderId}`, formData);
+    if (!response.data) {
+      throw new Error("Failed to update order");
     }
     return response.data;
   }

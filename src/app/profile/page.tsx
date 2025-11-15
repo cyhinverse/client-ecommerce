@@ -33,7 +33,7 @@ import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
   const dispatch = useAppDispatch();
-  const { user, isLoading, error } = useAppSelector((state) => state.user);
+  const {loading,data} = useAppSelector((state) => state.auth)
   const [activeTab, setActiveTab] = useState("profile");
   const [open, setOpen] = useState(false);
   const { isAuthenticated } = useAppSelector((state) => state.auth);
@@ -63,7 +63,7 @@ export default function ProfilePage() {
     file.click();
   };
 
-  if (isLoading) {
+  if (loading) {
     return <SpinnerLoading />;
   }
 
@@ -158,16 +158,17 @@ export default function ProfilePage() {
                 <>
                   {/* Profile Tab */}
                   <TabsContent value="profile" className="space-y-6 m-0">
-                    {user && (
+                    {data && (
                       <>
                         {/* Avatar Section */}
                         <div className="flex flex-col items-center gap-4 text-center">
                           <div className="relative">
                             <Image
-                              src={user.avatar || "/placeholder-avatar.jpg"}
-                              alt={user.username}
+                              src={data.avatar || "/placeholder-avatar.jpg"}
+                              alt={data.avatar}
                               width={120}
                               height={120}
+                          
                               className="rounded-full border-4 border-background shadow-lg"
                             />
                             <Button
@@ -180,7 +181,7 @@ export default function ProfilePage() {
                           </div>
                           <div>
                             <h3 className="text-xl font-semibold">
-                              {user.username}
+                              {data.username}
                             </h3>
                             <p className="text-muted-foreground">
                               Thành viên từ 2024
@@ -204,7 +205,7 @@ export default function ProfilePage() {
                                     </p>
                                   </div>
                                 </div>
-                                <p className="font-medium">{user.username}</p>
+                                <p className="font-medium">{data.username}</p>
                               </div>
                             </CardContent>
                           </Card>
@@ -222,8 +223,8 @@ export default function ProfilePage() {
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <p className="font-medium">{user.email}</p>
-                                  {user.isVerifiedEmail ? (
+                                  <p className="font-medium">{data.email}</p>
+                                  {data.isVerifiedEmail ? (
                                     <Badge className="bg-green-500">
                                       <Check className="h-3 w-3 mr-1" />
                                       Đã xác thực
@@ -251,11 +252,11 @@ export default function ProfilePage() {
                                   </div>
                                 </div>
                                 <div className="text-right">
-                                  {Array.isArray(user.address) &&
-                                  user.address.length > 0 ? (
+                                  {Array.isArray(data.addresses) &&
+                                  data.addresses.length > 0 ? (
                                     <p className="text-sm font-medium">
-                                      {user.address[0]?.district},{" "}
-                                      {user.address[0]?.city}
+                                      {data.addresses[0]?.district},{" "}
+                                      {data.addresses[0]?.city}
                                     </p>
                                   ) : (
                                     <p className="text-sm text-muted-foreground">
