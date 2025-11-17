@@ -4,6 +4,7 @@ import { Card, CardHeader } from "@/components/ui/card";
 import { getTreeCategories } from "@/features/category/categoryAction";
 import { getProductsBySlugOfCategory } from "@/features/product/productAction";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -17,6 +18,7 @@ export default function CategoriesPage() {
     (state) => state.category,
   );
   const { product } = useAppSelector((state) => state.product);
+
 
   useEffect(() => {
     dispatch(getTreeCategories());
@@ -72,11 +74,10 @@ export default function CategoriesPage() {
             {categories.map((category, index) => (
               <div
                 key={category._id}
-                className={`w-fit h-fit p-5 border border-gray-200 rounded-xl ${
-                  currentIndex === index
-                    ? bgColor[randomColorIndex]
-                    : "bg-white"
-                } hover:scale-105 transform transition-transform duration-300 cursor-pointer`}
+                className={`w-fit h-fit p-5 border border-gray-200 rounded-xl ${currentIndex === index
+                  ? bgColor[randomColorIndex]
+                  : "bg-white"
+                  } hover:scale-105 transform transition-transform duration-300 cursor-pointer`}
                 onMouseOver={() => handleMove(index)}
               >
                 <Link

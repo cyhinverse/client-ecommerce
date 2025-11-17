@@ -42,7 +42,6 @@ export default function UpdateUserProfile({
       username: "",
       email: "",
       avatar: "",
-      password: "",
     },
   });
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -84,20 +83,6 @@ export default function UpdateUserProfile({
                   <FormLabel>Email</FormLabel>
                   <FormControl>
                     <Input placeholder="you@example.com" {...field} />
-                  </FormControl>
-
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input placeholder="••••••" type="password" {...field} />
                   </FormControl>
 
                   <FormMessage />

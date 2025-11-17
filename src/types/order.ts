@@ -26,7 +26,7 @@ export interface ShippingAddress {
 
 export interface Order {
   _id: string;
-  userId: string;
+  userId: string | { _id: string; username: string; email: string };
   products: OrderProduct[];
   shippingAddress: ShippingAddress;
   paymentMethod: 'cod' | 'vnpay';
@@ -40,7 +40,11 @@ export interface Order {
   deliveredAt?: Date;
   createdAt: string;
   updatedAt: string;
+  __v?: number;
+  orderCode?: string;
 }
+
+
 
 export interface PaginationData {
   currentPage: number;

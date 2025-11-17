@@ -122,6 +122,7 @@ export const getProductsBySlugOfCategory = createAsyncThunk(
     if (!response) {
       throw new Error("Failed to fetch products by category slug");
     }
+    console.log(`Lay product by slug cua category`, response.data)
     return response.data;
   }
 );
@@ -194,8 +195,8 @@ export const deleteProduct = createAsyncThunk(
       // Sử dụng rejectWithValue để có structured error
       return rejectWithValue(
         error.response?.data?.message ||
-          error.message ||
-          "Xóa sản phẩm thất bại"
+        error.message ||
+        "Xóa sản phẩm thất bại"
       );
     }
   }

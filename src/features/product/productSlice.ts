@@ -135,7 +135,9 @@ export const productSlice = createSlice({
 
     builder.addCase(getProductsBySlugOfCategory.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.product = action.payload?.data.products;
+      state.product = action.payload?.data.data;
+
+      console.log(`Check data from products slice `, action.payload.data)
     });
     builder.addCase(getProductsBySlugOfCategory.rejected, (state, action) => {
       state.isLoading = false;

@@ -4,81 +4,271 @@ import {
   getProfile,
   updateUser,
   uploadAvatar,
+  updateProfile,
+  createAddress,
+  updateAddress,
+  deleteAddress,
+  setDefaultAddress,
+  changePassword,
+  verifyEmail,
+  enableTwoFactor,
+  verifyTwoFactor,
+  disableTwoFactor,
 } from "./userAction";
-import { UserState } from "@/types/user";
-import { Pagination } from "@/components/ui/pagination";
+
+export interface Address {
+  _id: string;
+  fullName: string;
+  phone: string;
+  address: string;
+  city: string;
+  district: string;
+  ward: string;
+  isDefault: boolean;
+}
+
+export interface User {
+  _id: string;
+  username: string;
+  email: string;
+  roles: string;
+  permissions: string[];
+  phone: string;
+  avatar: string | null;
+  isVerifiedEmail: boolean;
+  isTwoFactorEnabled?: boolean;
+  provider: string;
+  addresses: Address[];
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+  codeVerifiEmail?: string;
+  expiresCodeVerifiEmail?: string;
+}
+
+export interface PaginationData {
+  currentPage: number;
+  pageSize: number;
+  totalPages: number;
+  totalItems: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+  nextPage: number | null;
+  prevPage: number | null;
+}
+
+export interface UserState {
+  user: User[];
+  pagination: PaginationData | null;
+  isLoading: boolean;
+  error: string | null;
+  isUploadingAvatar: boolean;
+  isChangingPassword: boolean;
+  isUpdatingProfile: boolean;
+}
 
 const initialState: UserState = {
   user: [],
   pagination: null,
   isLoading: false,
   error: null,
+  isUploadingAvatar: false,
+  isChangingPassword: false,
+  isUpdatingProfile: false,
 };
 
 export const userSlice = createSlice({
   name: "user",
   initialState: initialState,
   reducers: {
+    clearError: (state) => {
+      state.error = null;
+    },
     setUser: (state, action) => {
       state.user = action.payload;
     },
-    setIsLoading: (state, action) => {
-      state.isLoading = action.payload;
+    updateAvatarLocal: (state, action) => {
+      if (state.user.length > 0) {
+        state.user[0].avatar = action.payload;
+      }
     },
-    // setUploadAvatar: (state, action) => {
-    //   if (state.user) {
-    //     state.user.avatar = action.payload;
-    //   }
-    // },
-    setError: (state, action) => {
-      state.error = action.payload;
+    clearUser: (state) => {
+      state.user = [];
+      state.pagination = null;
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(getProfile.pending, (state) => {
-      state.isLoading = true;
-      state.error = null;
-    });
-    builder.addCase(getProfile.fulfilled, (state, action) => {
-      state.isLoading = false;
-      state.user = action.payload?.data;
-    });
-    builder.addCase(getProfile.rejected, (state, action) => {
-      state.isLoading = false;
-      state.error = action.error.message || "Failed to fetch user profile";
-    });
-    // Get all users
-    builder.addCase(getAllUsers.pending, (state) => {
-      state.isLoading = true;
-      state.error = null;
-    });
-    builder.addCase(getAllUsers.fulfilled, (state, action) => {
-      state.isLoading = false;
-      state.user = action.payload.users;
-      state.pagination = action.payload.pagination;
-    });
-    builder.addCase(getAllUsers.rejected, (state, action) => {
-      state.isLoading = false;
-      state.error = action.error.message || "Failed to fetch users";
-    });
+    // Get Profile
+    builder
+      .addCase(getProfile.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(getProfile.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = [action.payload.data];
+      })
+      .addCase(getProfile.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Failed to fetch user profile";
+      });
 
-    // Upload user
-    builder.addCase(updateUser.pending, (state) => {
-      state.isLoading = true;
-      state.error = null;
-    });
-    builder.addCase(updateUser.fulfilled, (state, action) => {
-      state.isLoading = false;
-      if (state.user) {
-        const index = state.user.findIndex((u) => u._id === action.payload._id);
-        if (index !== -1) {
-          state.user[index] = action.payload;
+    // Upload Avatar - FIXED: Cập nhật UI ngay lập tức
+    builder
+      .addCase(uploadAvatar.pending, (state) => {
+        state.isUploadingAvatar = true;
+        state.error = null;
+      })
+      .addCase(uploadAvatar.fulfilled, (state, action) => {
+        state.isUploadingAvatar = false;
+        // Cập nhật avatar ngay lập tức trong state
+        if (state.user.length > 0) {
+          state.user[0].avatar = action.payload.data?.avatar ||
+            action.payload.avatarUrl ||
+            action.payload.data?.user?.avatar;
         }
-      }
-    });
-    builder.addCase(updateUser.rejected, (state, action) => {
-      state.isLoading = false;
-      state.error = action.error.message || "Failed to update user";
-    });
+      })
+      .addCase(uploadAvatar.rejected, (state, action) => {
+        state.isUploadingAvatar = false;
+        state.error = action.error.message || "Failed to upload avatar";
+      });
+
+    // Update Profile
+    builder
+      .addCase(updateProfile.pending, (state) => {
+        state.isUpdatingProfile = true;
+        state.error = null;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.isUpdatingProfile = false;
+        if (state.user.length > 0 && action.payload.data) {
+          state.user[0] = { ...state.user[0], ...action.payload.data };
+        }
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
+        state.isUpdatingProfile = false;
+        state.error = action.error.message || "Failed to update profile";
+      });
+
+    // Get All Users
+    builder
+      .addCase(getAllUsers.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(getAllUsers.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload.users;
+        state.pagination = action.payload.pagination;
+      })
+      .addCase(getAllUsers.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Failed to fetch users";
+      });
+
+    // Update User
+    builder
+      .addCase(updateUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        if (state.user.length > 0) {
+          const index = state.user.findIndex((u) => u._id === action.payload.data?._id);
+          if (index !== -1) {
+            state.user[index] = action.payload.data;
+          }
+        }
+      })
+      .addCase(updateUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Failed to update user";
+      });
+
+    // Change Password
+    builder
+      .addCase(changePassword.pending, (state) => {
+        state.isChangingPassword = true;
+        state.error = null;
+      })
+      .addCase(changePassword.fulfilled, (state) => {
+        state.isChangingPassword = false;
+      })
+      .addCase(changePassword.rejected, (state, action) => {
+        state.isChangingPassword = false;
+        state.error = action.error.message || "Failed to change password";
+      });
+
+    // Verify Email
+    builder
+      .addCase(verifyEmail.fulfilled, (state) => {
+        // Có thể cập nhật state nếu cần
+      })
+      .addCase(verifyEmail.rejected, (state, action) => {
+        state.error = action.error.message || "Failed to verify email";
+      });
+
+    // Two-Factor Authentication
+    builder
+      .addCase(enableTwoFactor.fulfilled, (state, action) => {
+        if (state.user.length > 0) {
+          state.user[0].isTwoFactorEnabled = true;
+        }
+      })
+      .addCase(verifyTwoFactor.fulfilled, (state, action) => {
+        if (state.user.length > 0) {
+          state.user[0].isTwoFactorEnabled = true;
+        }
+      })
+      .addCase(disableTwoFactor.fulfilled, (state, action) => {
+        if (state.user.length > 0) {
+          state.user[0].isTwoFactorEnabled = false;
+        }
+      });
+
+    // Address Management
+    builder
+      .addCase(createAddress.fulfilled, (state, action) => {
+        if (state.user.length > 0 && action.payload.data) {
+          state.user[0].addresses.push(action.payload.data);
+        }
+      })
+      .addCase(updateAddress.fulfilled, (state, action) => {
+        if (state.user.length > 0 && action.payload.data) {
+          const index = state.user[0].addresses.findIndex(
+            (addr) => addr._id === action.payload.data?._id
+          );
+          if (index !== -1) {
+            state.user[0].addresses[index] = action.payload.data;
+          }
+        }
+      })
+      .addCase(deleteAddress.fulfilled, (state, action) => {
+        if (state.user.length > 0) {
+          state.user[0].addresses = state.user[0].addresses.filter(
+            (addr) => addr._id !== action.meta.arg
+          );
+        }
+      })
+      .addCase(setDefaultAddress.fulfilled, (state, action) => {
+        if (state.user.length > 0 && action.payload.data) {
+          // Set all addresses to non-default first
+          state.user[0].addresses.forEach(addr => {
+            addr.isDefault = false;
+          });
+          // Set the specified address as default
+          const index = state.user[0].addresses.findIndex(
+            (addr) => addr._id === action.payload.data?._id
+          );
+          if (index !== -1) {
+            state.user[0].addresses[index].isDefault = true;
+          }
+        }
+      });
   },
 });
+
+export const { clearError, setUser, updateAvatarLocal, clearUser } = userSlice.actions;
+export default userSlice.reducer;

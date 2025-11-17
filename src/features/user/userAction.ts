@@ -77,7 +77,6 @@ export const updateUser = createAsyncThunk(
     isVerifiedEmail: boolean;
     roles: string;
   }) => {
-    // Sử dụng POST đến /users/update
     const response = await instance.post("/users/update", userData);
     if (!response) {
       throw new Error("Failed to update user");
@@ -110,8 +109,8 @@ export const getAllUsers = createAsyncThunk(
       throw new Error("Failed to fetch users");
     }
     return {
-      users: response.data.data?.data || [], // ← users array
-      pagination: response.data.data?.pagination || null, // ← pagination object
+      users: response.data.data?.data || [],
+      pagination: response.data.data?.pagination || null,
     };
   }
 );
@@ -125,6 +124,7 @@ export const createAddress = createAsyncThunk(
     city: string;
     district: string;
     ward: string;
+    isDefault?: boolean;
   }) => {
     const response = await instance.post("/users/address", addressData);
     if (!response) {
@@ -145,6 +145,7 @@ export const updateAddress = createAsyncThunk(
       city?: string;
       district?: string;
       ward?: string;
+      isDefault?: boolean;
     };
   }) => {
     const response = await instance.put(
@@ -161,7 +162,7 @@ export const updateAddress = createAsyncThunk(
 export const deleteAddress = createAsyncThunk(
   "address/delete",
   async (addressId: string) => {
-    const response = await instance.delete(`users/address/${addressId}`);
+    const response = await instance.delete(`/users/address/${addressId}`);
     if (!response) {
       throw new Error("Failed to delete address");
     }
@@ -169,12 +170,71 @@ export const deleteAddress = createAsyncThunk(
   }
 );
 
+export const setDefaultAddress = createAsyncThunk(
+  "address/set-default",
+  async (addressId: string) => {
+    const response = await instance.put(`/users/address/${addressId}/default`);
+    if (!response) {
+      throw new Error("Failed to set default address");
+    }
+    return response.data;
+  }
+);
+
 export const changePassword = createAsyncThunk(
   "user/change-password",
-  async (password: { oldPassword: string; newPassword: string }) => {
-    const response = await instance.post("/users/change-password", password);
+  async (passwordData: {
+    oldPassword: string;
+    newPassword: string;
+    confirmPassword?: string;
+  }) => {
+    const response = await instance.post("/users/change-password", passwordData);
     if (!response) {
       throw new Error("Failed to change password");
+    }
+    return response.data;
+  }
+);
+
+export const verifyEmail = createAsyncThunk(
+  "user/verify-email",
+  async () => {
+    const response = await instance.post("/users/verify-email");
+    if (!response) {
+      throw new Error("Failed to send verification email");
+    }
+    return response.data;
+  }
+);
+
+export const enableTwoFactor = createAsyncThunk(
+  "user/enable-2fa",
+  async () => {
+    const response = await instance.post("/users/enable-2fa");
+    if (!response) {
+      throw new Error("Failed to enable two-factor authentication");
+    }
+    return response.data;
+  }
+);
+
+export const verifyTwoFactor = createAsyncThunk(
+  "user/verify-2fa",
+  async (verificationCode: string) => {
+    const response = await instance.post("/users/verify-2fa", { verificationCode });
+    if (!response) {
+      throw new Error("Failed to verify two-factor authentication");
+    }
+    return response.data;
+  }
+);
+
+export const disableTwoFactor = createAsyncThunk(
+  "user/disable-2fa",
+  async () => {
+    const response = await instance.post("/users/disable-2fa");
+    if (!response) {
+      throw new Error("Failed to disable two-factor authentication");
     }
     return response.data;
   }

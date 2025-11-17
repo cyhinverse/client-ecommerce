@@ -1,29 +1,117 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
-  cancelOrder,
-  changeOrderStatus,
-  getListOrders,
+  createOrder,
+  getUserOrders,
   getOrderById,
-  getUserOrder,
+  cancelOrder,
+  getAllOrders,
+  updateOrderStatus,
   getOrderStatistics,
 } from "./orderAction";
 
-// Import types từ file types/order.ts
-import { Order, PaginationData } from "@/types/order";
+// Interfaces từ schema MongoDB
+export interface OrderProduct {
+  productId: string;
+  variantId?: string;
+  name: string;
+  sku?: string;
+  color?: string;
+  size?: string;
+  image?: string;
+  quantity: number;
+  price: {
+    currentPrice: number;
+    discountPrice?: number;
+    currency: string;
+  };
+}
 
-interface OrderState {
-  orders: Order[]; // Đổi từ 'order' sang 'orders' (mảng orders)
-  currentOrder: Order | null; // Order hiện tại đang xem/chỉnh sửa
-  pagination: PaginationData | null;
+export interface ShippingAddress {
+  fullName: string;
+  phone: string;
+  address: string;
+  city: string;
+  district?: string;
+  ward?: string;
+  note?: string;
+}
+
+export interface Order {
+  _id: string;
+  userId: string;
+  products: OrderProduct[];
+  shippingAddress: ShippingAddress;
+  paymentMethod: "cod" | "vnpay";
+  paymentStatus: "unpaid" | "paid" | "refunded";
+  subtotal: number;
+  shippingFee: number;
+  discountCode?: string;
+  discountAmount: number;
+  totalAmount: number;
+  status: "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
+  deliveredAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PaginationData {
+  currentPage: number;
+  pageSize: number;
+  totalPages: number;
+  totalItems: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+  nextPage: number | null;
+  prevPage: number | null;
+}
+
+export interface OrderStatistics {
+  totalOrders: number;
+  totalRevenue: number;
+  pendingOrders: number;
+  deliveredOrders: number;
+  cancelledOrders: number;
+  revenueByPeriod: Array<{
+    period: string;
+    revenue: number;
+    orders: number;
+  }>;
+}
+
+export interface OrderState {
+  // User orders
+  userOrders: Order[];
+  currentOrder: Order | null;
+
+  // Admin orders
+  allOrders: Order[];
+
+  // Statistics
+  statistics: OrderStatistics | null;
+
+  // Pagination
+  Pagination: PaginationData | null;
+
+  // Loading states
   isLoading: boolean;
+  isCreating: boolean;
+  isUpdating: boolean;
+  isCancelling: boolean;
+
+  // Errors
   error: string | null;
 }
 
 const initialState: OrderState = {
-  orders: [], // Danh sách orders
-  currentOrder: null, // Order đơn lẻ
-  pagination: null,
+  userOrders: [],
+  allOrders: [],
+  currentOrder: null,
+  statistics: null,
+  Pagination: null,
   isLoading: false,
+  isCreating: false,
+  isUpdating: false,
+  isCancelling: false,
   error: null,
 };
 
@@ -31,152 +119,168 @@ export const orderSlice = createSlice({
   name: "order",
   initialState,
   reducers: {
-    setLoading: (state, action: PayloadAction<boolean>) => {
-      state.isLoading = action.payload;
-    },
-    setError: (state, action: PayloadAction<string | null>) => {
-      state.error = action.payload;
+    clearError: (state) => {
+      state.error = null;
     },
     clearCurrentOrder: (state) => {
       state.currentOrder = null;
     },
-    clearError: (state) => {
-      state.error = null;
+    clearStatistics: (state) => {
+      state.statistics = null;
     },
-    // Cập nhật order trong danh sách
-    updateOrderInList: (state, action: PayloadAction<Order>) => {
-      const index = state.orders.findIndex(order => order._id === action.payload._id);
-      if (index !== -1) {
-        state.orders[index] = action.payload;
-      }
+    clearAllOrders: (state) => {
+      state.allOrders = [];
+      state.Pagination = null;
     },
-    // Xóa order khỏi danh sách
-    removeOrderFromList: (state, action: PayloadAction<string>) => {
-      state.orders = state.orders.filter(order => order._id !== action.payload);
-    },
+
   },
   extraReducers: (builder) => {
-    // Get user orders - trả về danh sách orders
-    builder.addCase(getUserOrder.pending, (state) => {
-      state.isLoading = true;
-      state.error = null;
-    });
-    builder.addCase(getUserOrder.fulfilled, (state, action) => {
-      state.isLoading = false;
-      state.orders = action.payload.orders || action.payload;
-      state.pagination = action.payload.pagination || null;
-    });
-    builder.addCase(getUserOrder.rejected, (state, action) => {
-      state.isLoading = false;
-      state.error = action.error.message || "Failed to fetch user orders";
-    });
+    // Create Order
+    builder
+      .addCase(createOrder.pending, (state) => {
+        state.isCreating = true;
+        state.error = null;
+      })
+      .addCase(createOrder.fulfilled, (state, action) => {
+        state.isCreating = false;
+        if (action.payload.data) {
+          state.userOrders.unshift(action.payload.data);
+        }
+      })
+      .addCase(createOrder.rejected, (state, action) => {
+        state.isCreating = false;
+        state.error = action.error.message || "Failed to create order";
+      });
 
-    // Get Order By ID - trả về 1 order
-    builder.addCase(getOrderById.pending, (state) => {
-      state.isLoading = true;
-      state.error = null;
-    });
-    builder.addCase(getOrderById.fulfilled, (state, action) => {
-      state.isLoading = false;
-      state.currentOrder = action.payload;
-      // Cập nhật order trong danh sách nếu có
-      const index = state.orders.findIndex(order => order._id === action.payload._id);
-      if (index !== -1) {
-        state.orders[index] = action.payload;
-      }
-    });
-    builder.addCase(getOrderById.rejected, (state, action) => {
-      state.isLoading = false;
-      state.error = action.error.message || "Failed to fetch order by ID";
-    });
+    // Get User Orders
+    builder
+      .addCase(getUserOrders.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(getUserOrders.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.userOrders = action.payload.orders || [];
+        console.log(`Check data ffrom orderslice `, action.payload)
+        state.Pagination = action.payload.pagination;
+      })
+      .addCase(getUserOrders.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Failed to fetch orders";
+      });
 
-    // Cancel Order - cập nhật order cụ thể
-    builder.addCase(cancelOrder.pending, (state) => {
-      state.isLoading = true;
-      state.error = null;
-    });
-    builder.addCase(cancelOrder.fulfilled, (state, action) => {
-      state.isLoading = false;
-      const updatedOrder = action.payload;
-      // Cập nhật trong danh sách
-      const index = state.orders.findIndex(order => order._id === updatedOrder._id);
-      if (index !== -1) {
-        state.orders[index] = updatedOrder;
-      }
-      // Cập nhật currentOrder nếu đang xem order này
-      if (state.currentOrder && state.currentOrder._id === updatedOrder._id) {
-        state.currentOrder = updatedOrder;
-      }
-    });
-    builder.addCase(cancelOrder.rejected, (state, action) => {
-      state.isLoading = false;
-      state.error = action.error.message || "Failed to cancel order";
-    });
+    // Get Order By ID
+    builder
+      .addCase(getOrderById.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(getOrderById.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.currentOrder = action.payload.data || null;
+      })
+      .addCase(getOrderById.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Failed to fetch order";
+      });
 
-    // Get list Orders (admin) - trả về danh sách orders với pagination
-    builder.addCase(getListOrders.pending, (state) => {
-      state.isLoading = true;
-      state.error = null;
-    });
-    builder.addCase(getListOrders.fulfilled, (state, action) => {
-      state.isLoading = false;
-      state.orders = action.payload.orders || action.payload.data || action.payload;
-      console.log(`Lấy danh sách order`, action.payload)
-      state.pagination = action.payload.pagination || action.payload.meta || null;
-    });
-    builder.addCase(getListOrders.rejected, (state, action) => {
-      state.isLoading = false;
-      state.error = action.error.message || "Failed to fetch orders";
-    });
+    // Cancel Order
+    builder
+      .addCase(cancelOrder.pending, (state) => {
+        state.isCancelling = true;
+        state.error = null;
+      })
+      .addCase(cancelOrder.fulfilled, (state, action) => {
+        state.isCancelling = false;
+        const updatedOrder = action.payload.data;
+        if (updatedOrder) {
+          // Update in userOrders array
+          const index = state.userOrders.findIndex(
+            (order) => order._id === updatedOrder._id
+          );
+          if (index !== -1) {
+            state.userOrders[index] = updatedOrder;
+          }
+          // Update currentOrder if it's the same order
+          if (state.currentOrder && state.currentOrder._id === updatedOrder._id) {
+            state.currentOrder = updatedOrder;
+          }
+        }
+      })
+      .addCase(cancelOrder.rejected, (state, action) => {
+        state.isCancelling = false;
+        state.error = action.error.message || "Failed to cancel order";
+      });
 
-    // Change Order Status - cập nhật order cụ thể
-    builder.addCase(changeOrderStatus.pending, (state) => {
-      state.isLoading = true;
-      state.error = null;
-    });
-    builder.addCase(changeOrderStatus.fulfilled, (state, action) => {
-      state.isLoading = false;
-      const updatedOrder = action.payload;
-      // Cập nhật trong danh sách
-      const index = state.orders.findIndex(order => order._id === updatedOrder._id);
-      if (index !== -1) {
-        state.orders[index] = updatedOrder;
-      }
-      // Cập nhật currentOrder nếu đang xem order này
-      if (state.currentOrder && state.currentOrder._id === updatedOrder._id) {
-        state.currentOrder = updatedOrder;
-      }
-    });
-    builder.addCase(changeOrderStatus.rejected, (state, action) => {
-      state.isLoading = false;
-      state.error = action.error.message || "Failed to change order status";
-    });
+    // Admin: Get All Orders
+    builder
+      .addCase(getAllOrders.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(getAllOrders.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.allOrders = action.payload.data || [];
+        console.log(`Check order from orderSlice`, state.allOrders)
+        state.Pagination = action.payload.pagination;
+        console.log(`Check pagination from orderSlice`, state.Pagination)
+      })
+      .addCase(getAllOrders.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Failed to fetch all orders";
+      });
 
-    // Overview Order - thống kê, có thể trả về dạng khác
-    builder.addCase(getOrderStatistics.pending, (state) => {
-      state.isLoading = true;
-      state.error = null;
-    });
-    builder.addCase(getOrderStatistics.fulfilled, (state, action) => {
-      state.isLoading = false;
-      // Tuỳ thuộc vào API trả về gì cho overview
-      // Nếu là thống kê thì có thể lưu vào state riêng
-      state.orders = action.payload.orders || action.payload;
-    });
-    builder.addCase(getOrderStatistics.rejected, (state, action) => {
-      state.isLoading = false;
-      state.error = action.error.message || "Failed to overview orders";
-    });
+    // Admin: Update Order Status
+    builder
+      .addCase(updateOrderStatus.pending, (state) => {
+        state.isUpdating = true;
+        state.error = null;
+      })
+      .addCase(updateOrderStatus.fulfilled, (state, action) => {
+        state.isUpdating = false;
+        const updatedOrder = action.payload.data;
+        if (updatedOrder) {
+          // Update in allOrders (admin)
+          const adminIndex = state.allOrders.findIndex(
+            (order) => order._id === updatedOrder._id
+          );
+          if (adminIndex !== -1) {
+            state.allOrders[adminIndex] = updatedOrder;
+          }
+
+          // Update in userOrders (if exists)
+          const userIndex = state.userOrders.findIndex(
+            (order) => order._id === updatedOrder._id
+          );
+          if (userIndex !== -1) {
+            state.userOrders[userIndex] = updatedOrder;
+          }
+
+          // Update currentOrder (if matches)
+          if (state.currentOrder && state.currentOrder._id === updatedOrder._id) {
+            state.currentOrder = updatedOrder;
+          }
+        }
+      })
+      .addCase(updateOrderStatus.rejected, (state, action) => {
+        state.isUpdating = false;
+        state.error = action.error.message || "Failed to update order status";
+      });
+
+    // Admin: Get Order Statistics
+    builder
+      .addCase(getOrderStatistics.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(getOrderStatistics.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.statistics = action.payload.data || null;
+      })
+      .addCase(getOrderStatistics.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Failed to fetch statistics";
+      });
   },
 });
 
-export const {
-  setLoading,
-  setError,
-  clearCurrentOrder,
-  clearError,
-  updateOrderInList,
-  removeOrderFromList,
-} = orderSlice.actions;
-
-export default orderSlice.reducer;
