@@ -24,6 +24,7 @@ import { OrdersStats } from "@/components/admin/OrderAdminPage/OrderStats";
 import { OrdersTable } from "@/components/admin/OrderAdminPage/OrderTable";
 import { EditOrderModal } from "@/components/admin/OrderAdminPage/UpdateOrderModel"
 import { ViewOrderModal } from "@/components/admin/OrderAdminPage/ViewOrderModel"
+import { Button } from "@/components/ui/button";
 
 interface OrderStatistics {
   totalOrders: number;
@@ -60,13 +61,54 @@ export default function OrdersAdminPage() {
   const [userIdFilter, setUserIdFilter] = useState(urlUserId);
   const [statistics, setStatistics] = useState<OrderStatistics | null>(null);
 
-  const orders: Order[] = orderState?.orders ?? [];
+  const orders: Order[] = orderState?.allOrders ?? [];
   const pagination: PaginationData | null = orderState?.pagination;
 
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+
+  // Fetch orders khi URL params thay đổi
+ // Trong OrdersAdminPage, sửa phần fetch orders
+useEffect(() => {
+  const params: any = {
+    page: currentPage,
+    limit: pageSize
+  };
+
+  if (searchTerm) params.search = searchTerm;
+  if (statusFilter && statusFilter !== 'all') params.status = statusFilter; // CHỈ gửi khi không phải 'all'
+  if (paymentStatusFilter) params.paymentStatus = paymentStatusFilter;
+  if (paymentMethodFilter) params.paymentMethod = paymentMethodFilter;
+  if (userIdFilter) params.userId = userIdFilter;
+
+  dispatch(getAllOrders(params));
+}, [dispatch, currentPage, pageSize, searchTerm, statusFilter, paymentStatusFilter, paymentMethodFilter, userIdFilter]);
+
+  // Fetch statistics
+  useEffect(() => {
+    const fetchStatistics = async () => {
+      try {
+        const result = await dispatch(getOrderStatistics()).unwrap();
+        setStatistics(result);
+      } catch (error) {
+        toast.error("Không thể tải thống kê đơn hàng");
+      }
+    };
+    fetchStatistics();
+  }, [dispatch]);
+
+  // Đồng bộ state với URL params
+  useEffect(() => {
+    setCurrentPage(urlPage);
+    setPageSize(urlLimit);
+    setSearchTerm(urlSearch);
+    setStatusFilter(urlStatus);
+    setPaymentStatusFilter(urlPaymentStatus);
+    setPaymentMethodFilter(urlPaymentMethod);
+    setUserIdFilter(urlUserId);
+  }, [urlPage, urlLimit, urlSearch, urlStatus, urlPaymentStatus, urlPaymentMethod, urlUserId]);
 
   // Hàm mở modal chỉnh sửa
   const handleEditOrder = (order: Order) => {
@@ -87,40 +129,41 @@ export default function OrdersAdminPage() {
     setIsUpdating(false);
   };
 
-  // Hàm lưu thay đổi trạng thái
-  const handleSaveOrder = async (orderData: { status: string }) => {
-    if (!selectedOrder) return;
+// Trong hàm handleSaveOrder hoặc component EditOrderModal
+const handleSaveOrder = async (orderData: { status: string }) => {
+  if (!selectedOrder) return;
 
-    setIsUpdating(true);
-    try {
-      await dispatch(
-        updateOrderStatus({
-          orderId: selectedOrder._id,
-          status: orderData.status as "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled",
-        })
-      ).unwrap();
+  // Validation: Không cho phép chuyển từ cancelled sang trạng thái khác
+  if (selectedOrder.status === 'cancelled' && orderData.status !== 'cancelled') {
+    toast.error("Không thể thay đổi trạng thái đơn hàng đã hủy");
+    return;
+  }
 
-      // Refresh danh sách sau khi update
-      dispatch(
-        getAllOrders({
-          page: currentPage,
-          limit: pageSize,
-          ...(searchTerm && { search: searchTerm }),
-          ...(statusFilter && { status: statusFilter as "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled" }),
-          ...(paymentStatusFilter && { paymentStatus: paymentStatusFilter as "unpaid" | "paid" | "refunded" }),
-          ...(paymentMethodFilter && { paymentMethod: paymentMethodFilter as "cod" | "vnpay" }),
-          ...(userIdFilter && { userId: userIdFilter }),
-        })
-      );
+  // Validation: Không cho phép hủy đơn hàng đã giao
+  if (selectedOrder.status === 'delivered' && orderData.status === 'cancelled') {
+    toast.error("Không thể hủy đơn hàng đã giao");
+    return;
+  }
 
-      handleCloseEditModal();
-      toast.success("Cập nhật trạng thái đơn hàng thành công");
-    } catch (error) {
-      toast.error("Cập nhật trạng thái thất bại. Vui lòng thử lại.");
-    } finally {
-      setIsUpdating(false);
-    }
-  };
+  setIsUpdating(true);
+  try {
+    await dispatch(
+      updateOrderStatus({
+        orderId: selectedOrder._id,
+        status: orderData.status as "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled",
+      })
+    ).unwrap();
+
+    // Refresh danh sách
+    dispatch(getAllOrders({/* params */}));
+    handleCloseEditModal();
+    toast.success("Cập nhật trạng thái đơn hàng thành công");
+  } catch (error) {
+    toast.error("Cập nhật trạng thái thất bại. Vui lòng thử lại.");
+  } finally {
+    setIsUpdating(false);
+  }
+};
 
   // Hàm cập nhật URL
   const updateURL = (
@@ -143,46 +186,6 @@ export default function OrdersAdminPage() {
 
     router.push(`/admin/orders?${params.toString()}`, { scroll: false });
   };
-
-  // Fetch orders khi URL params thay đổi
-  useEffect(() => {
-    const params: any = {
-      page: currentPage,
-      limit: pageSize
-    };
-
-    if (searchTerm) params.search = searchTerm;
-    if (statusFilter) params.status = statusFilter;
-    if (paymentStatusFilter) params.paymentStatus = paymentStatusFilter;
-    if (paymentMethodFilter) params.paymentMethod = paymentMethodFilter;
-    if (userIdFilter) params.userId = userIdFilter;
-
-    dispatch(getAllOrders(params));
-  }, [dispatch, currentPage, pageSize, searchTerm, statusFilter, paymentStatusFilter, paymentMethodFilter, userIdFilter]);
-
-  // Fetch statistics
-  useEffect(() => {
-    const fetchStatistics = async () => {
-      try {
-        const result = await dispatch(getOrderStatistics()).unwrap();
-        setStatistics(result);
-      } catch (error) {
-        console.error("Failed to fetch statistics:", error);
-      }
-    };
-    fetchStatistics();
-  }, [dispatch]);
-
-  // Đồng bộ state với URL params
-  useEffect(() => {
-    setCurrentPage(urlPage);
-    setPageSize(urlLimit);
-    setSearchTerm(urlSearch);
-    setStatusFilter(urlStatus);
-    setPaymentStatusFilter(urlPaymentStatus);
-    setPaymentMethodFilter(urlPaymentMethod);
-    setUserIdFilter(urlUserId);
-  }, [urlPage, urlLimit, urlSearch, urlStatus, urlPaymentStatus, urlPaymentMethod, urlUserId]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -275,10 +278,41 @@ export default function OrdersAdminPage() {
     updateURL(1, pageSize, "", "", "", "", "");
   };
 
+  // Thêm loading state rõ ràng
+  if (orderState?.isLoading && orders.length === 0) {
+    return (
+      <div className="space-y-6">
+        <OrdersHeader />
+        <Card>
+          <CardContent className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-2"></div>
+              <div className="text-gray-600">Đang tải đơn hàng...</div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (orderState?.error) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-red-500">Lỗi: {orderState.error}</div>
+      <div className="space-y-6">
+        <OrdersHeader />
+        <Card>
+          <CardContent className="flex items-center justify-center h-64">
+            <div className="text-red-500 text-center">
+              <div className="text-lg font-semibold mb-2">Lỗi khi tải đơn hàng</div>
+              <div>{orderState.error}</div>
+              <Button
+                onClick={() => window.location.reload()} 
+                className="mt-4"
+              >
+                Thử lại
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -288,43 +322,37 @@ export default function OrdersAdminPage() {
       <OrdersHeader />
 
       {statistics && (
-        <OrdersStats
-          totalOrders={statistics.totalOrders}
-          pendingOrders={statistics.pendingOrders}
-          processingOrders={statistics.processingOrders}
-          confirmedOrders={statistics.confirmedOrders}
-          shippedOrders={statistics.shippedOrders}
-          deliveredOrders={statistics.deliveredOrders}
-          cancelledOrders={statistics.cancelledOrders}
-          totalRevenue={statistics.totalRevenue}
-        />
+        <OrdersStats {...statistics} />
       )}
 
       <Card>
         <CardHeader>
           <CardTitle>Danh sách đơn hàng</CardTitle>
-          <CardDescription>Quản lý tất cả đơn hàng trong hệ thống</CardDescription>
+          <CardDescription>
+            Quản lý tất cả đơn hàng trong hệ thống
+            {orderState?.isLoading && " - Đang tải..."}
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <OrdersTable
-            orders={orders}
-            searchTerm={searchTerm}
-            statusFilter={statusFilter}
-            paymentStatusFilter={paymentStatusFilter}
-            paymentMethodFilter={paymentMethodFilter}
-            userIdFilter={userIdFilter}
-            pageSize={pageSize}
-            onSearch={handleSearch}
-            onStatusFilter={handleStatusFilter}
-            onPaymentStatusFilter={handlePaymentStatusFilter}
-            onPaymentMethodFilter={handlePaymentMethodFilter}
-            onUserIdFilter={handleUserIdFilter}
-            onResetFilters={handleResetFilters}
-            onPageSizeChange={handlePageSizeChange}
-            onEdit={handleEditOrder}
-            onDelete={handleDeleteOrder}
-            onView={handleViewOrder}
-          />
+        <OrdersTable
+          orders={orders}
+          searchTerm={searchTerm}
+          statusFilter={statusFilter}
+          paymentStatusFilter={paymentStatusFilter} 
+          paymentMethodFilter={paymentMethodFilter}
+          userIdFilter={userIdFilter}
+          pageSize={pageSize}
+          onSearch={handleSearch}
+          onStatusFilter={handleStatusFilter}
+          onPaymentStatusFilter={handlePaymentStatusFilter} 
+          onPaymentMethodFilter={handlePaymentMethodFilter}
+          onUserIdFilter={handleUserIdFilter}
+          onResetFilters={handleResetFilters}
+          onPageSizeChange={handlePageSizeChange}
+          onEdit={handleEditOrder}
+          onDelete={handleDeleteOrder}
+          onView={handleViewOrder}
+        />
 
           <ViewOrderModal
             isOpen={viewModalOpen}

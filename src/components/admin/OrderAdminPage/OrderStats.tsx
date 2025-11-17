@@ -1,3 +1,4 @@
+// components/admin/OrderAdminPage/OrderStats.tsx
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Package,
@@ -10,6 +11,11 @@ import {
   AlertCircle,
 } from "lucide-react";
 
+interface OrderStatusCount {
+  _id: string;
+  count: number;
+}
+
 interface OrdersStatsProps {
   totalOrders?: number;
   pendingOrders?: number;
@@ -19,6 +25,7 @@ interface OrdersStatsProps {
   deliveredOrders?: number;
   cancelledOrders?: number;
   totalRevenue?: number;
+  ordersByStatus?: OrderStatusCount[];
 }
 
 export function OrdersStats({
@@ -30,60 +37,87 @@ export function OrdersStats({
   deliveredOrders = 0,
   cancelledOrders = 0,
   totalRevenue = 0,
+  ordersByStatus = [],
 }: OrdersStatsProps) {
+  
+  // Tính toán stats từ ordersByStatus nếu có
+  let calculatedStats = {
+    total: totalOrders,
+    pending: pendingOrders,
+    confirmed: confirmedOrders,
+    processing: processingOrders,
+    shipped: shippedOrders,
+    delivered: deliveredOrders,
+    cancelled: cancelledOrders,
+    revenue: totalRevenue
+  };
+
+  if (ordersByStatus && ordersByStatus.length > 0) {
+    calculatedStats = {
+      total: ordersByStatus.reduce((sum, item) => sum + item.count, 0),
+      pending: ordersByStatus.find(item => item._id === 'pending')?.count || 0,
+      confirmed: ordersByStatus.find(item => item._id === 'confirmed')?.count || 0,
+      processing: ordersByStatus.find(item => item._id === 'processing')?.count || 0,
+      shipped: ordersByStatus.find(item => item._id === 'shipped')?.count || 0,
+      delivered: ordersByStatus.find(item => item._id === 'delivered')?.count || 0,
+      cancelled: ordersByStatus.find(item => item._id === 'cancelled')?.count || 0,
+      revenue: totalRevenue
+    };
+  }
+
   const stats = [
     {
       title: "Tổng đơn hàng",
-      value: totalOrders.toLocaleString(),
+      value: calculatedStats.total.toLocaleString(),
       icon: ShoppingCart,
       color: "text-blue-600",
       bgColor: "bg-blue-100",
     },
     {
       title: "Chờ xác nhận",
-      value: pendingOrders.toLocaleString(),
+      value: calculatedStats.pending.toLocaleString(),
       icon: Clock,
       color: "text-yellow-600",
       bgColor: "bg-yellow-100",
     },
     {
       title: "Đã xác nhận",
-      value: confirmedOrders.toLocaleString(),
+      value: calculatedStats.confirmed.toLocaleString(),
       icon: AlertCircle,
       color: "text-orange-600",
       bgColor: "bg-orange-100",
     },
     {
       title: "Đang xử lý",
-      value: processingOrders.toLocaleString(),
+      value: calculatedStats.processing.toLocaleString(),
       icon: Package,
       color: "text-indigo-600",
       bgColor: "bg-indigo-100",
     },
     {
       title: "Đang giao",
-      value: shippedOrders.toLocaleString(),
+      value: calculatedStats.shipped.toLocaleString(),
       icon: Truck,
       color: "text-purple-600",
       bgColor: "bg-purple-100",
     },
     {
       title: "Thành công",
-      value: deliveredOrders.toLocaleString(),
+      value: calculatedStats.delivered.toLocaleString(),
       icon: CheckCircle,
       color: "text-green-600",
       bgColor: "bg-green-100",
     },
     {
       title: "Đã hủy",
-      value: cancelledOrders.toLocaleString(),
+      value: calculatedStats.cancelled.toLocaleString(),
       icon: XCircle,
       color: "text-red-600",
       bgColor: "bg-red-100",
     },
     {
       title: "Tổng doanh thu",
-      value: `₫${totalRevenue.toLocaleString()}`,
+      value: `₫${calculatedStats.revenue.toLocaleString()}`,
       icon: DollarSign,
       color: "text-emerald-600",
       bgColor: "bg-emerald-100",

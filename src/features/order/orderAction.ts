@@ -20,7 +20,7 @@ export const createOrder = createAsyncThunk(
     note?: string;
   }) => {
     const response = await instance.post("/orders", orderData);
-    if (!response) {
+    if (!response.data) {
       throw new Error("Failed to create order");
     }
     return response.data;
@@ -55,12 +55,15 @@ export const getUserOrders = createAsyncThunk(
       },
     });
 
-    if (!response) {
+    if (!response.data) {
       throw new Error("Failed to fetch user orders");
     }
+    
+    // Sửa lại theo cấu trúc API thực tế
+    const responseData = response.data.data || response.data;
     return {
-      orders: response.data.data?.data || [],
-      pagination: response.data.data?.pagination || null,
+      orders: responseData.data || responseData.orders || [],
+      pagination: responseData.pagination || null,
     };
   }
 );
@@ -69,16 +72,15 @@ export const getUserOrders = createAsyncThunk(
 export const getOrderById = createAsyncThunk(
   "order/get-by-id",
   async (orderId: string) => {
-    // Validate orderId format before making the request
     if (!/^[0-9a-fA-F]{24}$/.test(orderId)) {
       throw new Error("Invalid order ID format");
     }
 
     const response = await instance.get(`/orders/${orderId}`);
-    if (!response) {
+    if (!response.data) {
       throw new Error("Failed to fetch order");
     }
-    return response.data;
+    return response.data.data || response.data;
   }
 );
 
@@ -86,16 +88,15 @@ export const getOrderById = createAsyncThunk(
 export const cancelOrder = createAsyncThunk(
   "order/cancel",
   async (orderId: string) => {
-    // Validate orderId format before making the request
     if (!/^[0-9a-fA-F]{24}$/.test(orderId)) {
       throw new Error("Invalid order ID format");
     }
 
     const response = await instance.delete(`/orders/${orderId}/cancel`);
-    if (!response) {
+    if (!response.data) {
       throw new Error("Failed to cancel order");
     }
-    return response.data;
+    return response.data.data || response.data;
   }
 );
 
@@ -139,12 +140,12 @@ export const getAllOrders = createAsyncThunk(
       },
     });
 
-    if (!response) {
+    if (!response.data) {
       throw new Error("Failed to fetch all orders");
     }
-
-    console.log(`Check order from order action`, response.data.data)
-    return response.data.data
+    
+    // Sửa lại để phù hợp với API structure
+    return response.data.data || response.data;
   }
 );
 
@@ -155,7 +156,6 @@ export const updateOrderStatus = createAsyncThunk(
     orderId: string;
     status: "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
   }) => {
-    // Validate orderId format before making the request
     if (!/^[0-9a-fA-F]{24}$/.test(payload.orderId)) {
       throw new Error("Invalid order ID format");
     }
@@ -164,10 +164,10 @@ export const updateOrderStatus = createAsyncThunk(
       status: payload.status,
     });
 
-    if (!response) {
+    if (!response.data) {
       throw new Error("Failed to update order status");
     }
-    return response.data;
+    return response.data.data || response.data;
   }
 );
 
@@ -185,10 +185,10 @@ export const getOrderStatistics = createAsyncThunk(
       params: { period, ...(startDate && { startDate }), ...(endDate && { endDate }) },
     });
 
-    if (!response) {
+    if (!response.data) {
       throw new Error("Failed to fetch order statistics");
     }
-    return response.data;
+    return response.data.data || response.data;
   }
 );
 
@@ -201,10 +201,10 @@ export const applyDiscountCode = createAsyncThunk(
     totalAmount: number;
   }) => {
     const response = await instance.post("/orders/apply-discount", payload);
-    if (!response) {
+    if (!response.data) {
       throw new Error("Failed to apply discount code");
     }
-    return response.data;
+    return response.data.data || response.data;
   }
 );
 
@@ -212,15 +212,14 @@ export const applyDiscountCode = createAsyncThunk(
 export const getOrderByIdAdmin = createAsyncThunk(
   "order/admin/get-by-id",
   async (orderId: string) => {
-    // Validate orderId format before making the request
     if (!/^[0-9a-fA-F]{24}$/.test(orderId)) {
       throw new Error("Invalid order ID format");
     }
 
     const response = await instance.get(`/orders/admin/${orderId}`);
-    if (!response) {
+    if (!response.data) {
       throw new Error("Failed to fetch order details");
     }
-    return response.data;
+    return response.data.data || response.data;
   }
 );

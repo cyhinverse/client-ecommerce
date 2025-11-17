@@ -8,6 +8,7 @@ import { productSlice } from "@/features/product/productSlice";
 import { userSlice } from "@/features/user/userSlice";
 import { discountSlice } from "@/features/discount/discountSlice";
 import { orderSlice } from "@/features/order/orderSlice";
+
 const createNoopStorage = () => {
   return {
     getItem(_key: string) {
@@ -40,7 +41,7 @@ export const rootReducer = combineReducers({
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["auth", "cart"],
+  whitelist: ["auth", "cart", "order"],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -60,3 +61,7 @@ export const store = configureStore({
 });
 
 export const persistor = persistStore(store);
+
+// QUAN TRỌNG: Export types đúng cách
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;

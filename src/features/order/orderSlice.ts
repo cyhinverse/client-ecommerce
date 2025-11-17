@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 import {
   createOrder,
   getUserOrders,
@@ -8,106 +8,15 @@ import {
   updateOrderStatus,
   getOrderStatistics,
 } from "./orderAction";
+import type { OrderState } from "@/types/order";
 
-// Interfaces từ schema MongoDB
-export interface OrderProduct {
-  productId: string;
-  variantId?: string;
-  name: string;
-  sku?: string;
-  color?: string;
-  size?: string;
-  image?: string;
-  quantity: number;
-  price: {
-    currentPrice: number;
-    discountPrice?: number;
-    currency: string;
-  };
-}
-
-export interface ShippingAddress {
-  fullName: string;
-  phone: string;
-  address: string;
-  city: string;
-  district?: string;
-  ward?: string;
-  note?: string;
-}
-
-export interface Order {
-  _id: string;
-  userId: string;
-  products: OrderProduct[];
-  shippingAddress: ShippingAddress;
-  paymentMethod: "cod" | "vnpay";
-  paymentStatus: "unpaid" | "paid" | "refunded";
-  subtotal: number;
-  shippingFee: number;
-  discountCode?: string;
-  discountAmount: number;
-  totalAmount: number;
-  status: "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
-  deliveredAt?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface PaginationData {
-  currentPage: number;
-  pageSize: number;
-  totalPages: number;
-  totalItems: number;
-  hasNextPage: boolean;
-  hasPrevPage: boolean;
-  nextPage: number | null;
-  prevPage: number | null;
-}
-
-export interface OrderStatistics {
-  totalOrders: number;
-  totalRevenue: number;
-  pendingOrders: number;
-  deliveredOrders: number;
-  cancelledOrders: number;
-  revenueByPeriod: Array<{
-    period: string;
-    revenue: number;
-    orders: number;
-  }>;
-}
-
-export interface OrderState {
-  // User orders
-  userOrders: Order[];
-  currentOrder: Order | null;
-
-  // Admin orders
-  allOrders: Order[];
-
-  // Statistics
-  statistics: OrderStatistics | null;
-
-  // Pagination
-  Pagination: PaginationData | null;
-
-  // Loading states
-  isLoading: boolean;
-  isCreating: boolean;
-  isUpdating: boolean;
-  isCancelling: boolean;
-
-  // Errors
-  error: string | null;
-}
 
 const initialState: OrderState = {
   userOrders: [],
   allOrders: [],
   currentOrder: null,
   statistics: null,
-  Pagination: null,
+  pagination: null,
   isLoading: false,
   isCreating: false,
   isUpdating: false,
@@ -130,9 +39,8 @@ export const orderSlice = createSlice({
     },
     clearAllOrders: (state) => {
       state.allOrders = [];
-      state.Pagination = null;
+      state.pagination = null;
     },
-
   },
   extraReducers: (builder) => {
     // Create Order
@@ -143,8 +51,8 @@ export const orderSlice = createSlice({
       })
       .addCase(createOrder.fulfilled, (state, action) => {
         state.isCreating = false;
-        if (action.payload.data) {
-          state.userOrders.unshift(action.payload.data);
+        if (action.payload) {
+          state.userOrders.unshift(action.payload);
         }
       })
       .addCase(createOrder.rejected, (state, action) => {
@@ -160,9 +68,8 @@ export const orderSlice = createSlice({
       })
       .addCase(getUserOrders.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.userOrders = action.payload.orders || [];
-        console.log(`Check data ffrom orderslice `, action.payload)
-        state.Pagination = action.payload.pagination;
+        state.userOrders = action.payload.orders;
+        state.pagination = action.payload.pagination;
       })
       .addCase(getUserOrders.rejected, (state, action) => {
         state.isLoading = false;
@@ -177,7 +84,7 @@ export const orderSlice = createSlice({
       })
       .addCase(getOrderById.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.currentOrder = action.payload.data || null;
+        state.currentOrder = action.payload;
       })
       .addCase(getOrderById.rejected, (state, action) => {
         state.isLoading = false;
@@ -192,16 +99,14 @@ export const orderSlice = createSlice({
       })
       .addCase(cancelOrder.fulfilled, (state, action) => {
         state.isCancelling = false;
-        const updatedOrder = action.payload.data;
+        const updatedOrder = action.payload;
         if (updatedOrder) {
-          // Update in userOrders array
           const index = state.userOrders.findIndex(
             (order) => order._id === updatedOrder._id
           );
           if (index !== -1) {
             state.userOrders[index] = updatedOrder;
           }
-          // Update currentOrder if it's the same order
           if (state.currentOrder && state.currentOrder._id === updatedOrder._id) {
             state.currentOrder = updatedOrder;
           }
@@ -220,10 +125,23 @@ export const orderSlice = createSlice({
       })
       .addCase(getAllOrders.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.allOrders = action.payload.data || [];
-        console.log(`Check order from orderSlice`, state.allOrders)
-        state.Pagination = action.payload.pagination;
-        console.log(`Check pagination from orderSlice`, state.Pagination)
+        
+        // Xử lý cả hai trường hợp API response
+        if (action.payload && typeof action.payload === 'object') {
+          if (Array.isArray(action.payload)) {
+            // Nếu payload là mảng orders
+            state.allOrders = action.payload;
+            state.pagination = null;
+          } else {
+            // Nếu payload là object { data, pagination }
+            state.allOrders = action.payload.data || [];
+            state.pagination = action.payload.pagination || null;
+          }
+        } else {
+          state.allOrders = [];
+          state.pagination = null;
+        }
+        
       })
       .addCase(getAllOrders.rejected, (state, action) => {
         state.isLoading = false;
@@ -238,9 +156,8 @@ export const orderSlice = createSlice({
       })
       .addCase(updateOrderStatus.fulfilled, (state, action) => {
         state.isUpdating = false;
-        const updatedOrder = action.payload.data;
+        const updatedOrder = action.payload;
         if (updatedOrder) {
-          // Update in allOrders (admin)
           const adminIndex = state.allOrders.findIndex(
             (order) => order._id === updatedOrder._id
           );
@@ -248,7 +165,6 @@ export const orderSlice = createSlice({
             state.allOrders[adminIndex] = updatedOrder;
           }
 
-          // Update in userOrders (if exists)
           const userIndex = state.userOrders.findIndex(
             (order) => order._id === updatedOrder._id
           );
@@ -256,7 +172,6 @@ export const orderSlice = createSlice({
             state.userOrders[userIndex] = updatedOrder;
           }
 
-          // Update currentOrder (if matches)
           if (state.currentOrder && state.currentOrder._id === updatedOrder._id) {
             state.currentOrder = updatedOrder;
           }
@@ -275,7 +190,7 @@ export const orderSlice = createSlice({
       })
       .addCase(getOrderStatistics.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.statistics = action.payload.data || null;
+        state.statistics = action.payload;
       })
       .addCase(getOrderStatistics.rejected, (state, action) => {
         state.isLoading = false;

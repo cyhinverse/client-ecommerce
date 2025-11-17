@@ -163,7 +163,7 @@ export const deleteAddress = createAsyncThunk(
   "address/delete",
   async (addressId: string) => {
     const response = await instance.delete(`/users/address/${addressId}`);
-    if (!response) {
+    if (!response.data) { 
       throw new Error("Failed to delete address");
     }
     return response.data;

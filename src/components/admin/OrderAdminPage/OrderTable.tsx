@@ -25,13 +25,21 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Search, MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
 
-interface OrdersTableProps {
+
+export interface OrdersTableProps {
   orders: Order[];
   searchTerm: string;
   statusFilter: string;
+  paymentStatusFilter: string; // Đổi từ function thành string
+  paymentMethodFilter: string;
+  userIdFilter: string;
   pageSize: number;
   onSearch: (value: string) => void;
   onStatusFilter: (status: string) => void;
+  onPaymentStatusFilter: (status: string) => void; // Giữ nguyên function cho handler
+  onPaymentMethodFilter: (method: string) => void;
+  onUserIdFilter: (userId: string) => void;
+  onResetFilters: () => void;
   onPageSizeChange: (size: number) => void;
   onEdit: (order: Order) => void;
   onDelete: (order: Order) => void;
@@ -44,6 +52,7 @@ export function OrdersTable({
   statusFilter,
   pageSize,
   onSearch,
+  paymentStatusFilter,
   onStatusFilter,
   onPageSizeChange,
   onEdit,

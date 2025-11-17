@@ -185,16 +185,20 @@ export default function AdminLayout({
             <Menu className="h-6 w-6" />
           </Button>
 
-          <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-            <div className="flex flex-1"></div>
-            {
-              data && (
-                <Link href={"/admin"} className="flex flex-col items-center justify-center hover:borer hover:border-gray-200 hover:shadow-sm">
-                  <Image className="rounded-full" src={data.avatar} alt={data.username} height={30} width={30} />
-                </Link>
-              )}
-
-          </div>
+<div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+  <div className="flex flex-1"></div>
+  {data && (
+    <Link href={"/admin"} className="flex items-center justify-center  rounded-full overflow-hidden">
+      <Image 
+        className="rounded-full object-cover aspect-square" 
+        src={data.avatar} 
+        alt={data.username} 
+        height={30} 
+        width={30} 
+      />
+    </Link>
+  )}
+</div>
         </div>
 
         {/* Page content */}

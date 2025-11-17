@@ -19,8 +19,8 @@ export interface ShippingAddress {
   phone: string;
   address: string;
   city: string;
-  ward?: string;
   district?: string;
+  ward?: string;
   note?: string;
 }
 
@@ -29,22 +29,19 @@ export interface Order {
   userId: string | { _id: string; username: string; email: string };
   products: OrderProduct[];
   shippingAddress: ShippingAddress;
-  paymentMethod: 'cod' | 'vnpay';
-  paymentStatus: 'unpaid' | 'paid' | 'refunded';
+  paymentMethod: "cod" | "vnpay";
+  paymentStatus: "unpaid" | "paid" | "refunded";
   subtotal: number;
   shippingFee: number;
   discountCode?: string;
   discountAmount: number;
   totalAmount: number;
-  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  deliveredAt?: Date;
+  status: "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
+  deliveredAt?: string;
   createdAt: string;
   updatedAt: string;
-  __v?: number;
   orderCode?: string;
 }
-
-
 
 export interface PaginationData {
   currentPage: number;
@@ -57,24 +54,28 @@ export interface PaginationData {
   prevPage: number | null;
 }
 
-
-// Types cho API requests
-export interface CreateOrderRequest {
-  userId: string;
-  products: {
-    productId: string;
-    variantId?: string;
-    quantity: number;
-  }[];
-  shippingAddress: ShippingAddress;
-  paymentMethod: 'cod' | 'vnpay';
-  discountCode?: string;
+export interface OrderStatistics {
+  totalOrders: number;
+  totalRevenue: number;
+  pendingOrders: number;
+  deliveredOrders: number;
+  cancelledOrders: number;
+  revenueByPeriod: Array<{
+    period: string;
+    revenue: number;
+    orders: number;
+  }>;
 }
 
-export interface UpdateOrderRequest {
-  status?: Order['status'];
-  paymentStatus?: Order['paymentStatus'];
-  shippingFee?: number;
-  discountAmount?: number;
-  deliveredAt?: Date;
+export interface OrderState {
+  userOrders: Order[];
+  currentOrder: Order | null;
+  allOrders: Order[];
+  statistics: OrderStatistics | null;
+  pagination: PaginationData | null;
+  isLoading: boolean;
+  isCreating: boolean;
+  isUpdating: boolean;
+  isCancelling: boolean;
+  error: string | null;
 }

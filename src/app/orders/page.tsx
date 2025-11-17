@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { getUserOrders, getOrderById, cancelOrder } from "@/features/order/orderAction";
+import { getAllOrders, getOrderById, cancelOrder } from "@/features/order/orderAction";
 import {
   Card,
   CardContent,
@@ -20,7 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Eye, Package, Truck, CheckCircle, Clock, XCircle, AlertCircle } from "lucide-react";
+import { Eye, Package, Truck, CheckCircle, Clock, XCircle, AlertCircle, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Order } from "@/types/order";
 import { ViewOrderModal } from "@/components/admin/OrderAdminPage/ViewOrderModel";
@@ -99,43 +99,71 @@ const formatDate = (date: string) => {
 export default function OrdersPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const orderState = useAppSelector((state) => state.order);
-  console.log('Order State:', orderState);
-  console.log('All Orders:', orderState.allOrders);
+  const { allOrders, pagination, isLoading } = useAppSelector((state) => state.order);
+
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [hasFetched, setHasFetched] = useState(false);
 
-  const orders: Order[] = orderState?.allOrders ?? [];
-  const pagination = orderState?.Pagination;
+  // Debug dữ liệu
+  useEffect(() => {
+    console.log('Redux Order State:', { 
+      allOrders, 
+      pagination, 
+      isLoading,
+      hasFetched,
+      ordersCount: allOrders.length
+    });
+    
+    if (allOrders.length > 0) {
+      console.log('First order structure:', allOrders[0]);
+      console.log('Products in first order:', allOrders[0]?.products);
+    }
+  }, [allOrders, pagination, isLoading, hasFetched]);
 
-  console.log(`Check order from order page`, orderState.allOrders, orderState.Pagination)
-
-  // Fetch orders khi component mount
+  // Fetch orders khi component mount - chỉ fetch nếu chưa có data
   useEffect(() => {
     const fetchOrders = async () => {
-      setLoading(true);
-      try {
-        await dispatch(getUserOrders({
-          page: 1,
-          limit: 10,
-        })).unwrap();
-      } catch (error) {
-        toast.error("Không thể tải danh sách đơn hàng");
-      } finally {
-        setLoading(false);
+      // Chỉ fetch nếu chưa có data hoặc chưa fetch lần nào
+      if (allOrders.length === 0 && !hasFetched) {
+        console.log('Fetching orders...');
+        try {
+          await dispatch(getAllOrders({
+            page: 1,
+            limit: 10,
+          })).unwrap();
+          setHasFetched(true);
+        } catch (error) {
+          console.error('Fetch orders error:', error);
+          toast.error("Không thể tải danh sách đơn hàng");
+        }
       }
     };
 
     fetchOrders();
-  }, [dispatch]);
+  }, [dispatch, allOrders.length, hasFetched]);
+
+  // Thêm nút refresh manual
+  const handleRefresh = async () => {
+    try {
+      await dispatch(getAllOrders({
+        page: 1,
+        limit: 10,
+      })).unwrap();
+      toast.success("Đã làm mới danh sách đơn hàng");
+    } catch (error) {
+      console.error('Refresh orders error:', error);
+      toast.error("Không thể làm mới danh sách đơn hàng");
+    }
+  };
 
   const handleViewOrder = async (order: Order) => {
     try {
       const result = await dispatch(getOrderById(order._id)).unwrap();
-      setSelectedOrder(result);
+      setSelectedOrder(result.data || result);
       setViewModalOpen(true);
     } catch (error) {
+      console.error('View order error:', error);
       toast.error("Không thể tải chi tiết đơn hàng");
     }
   };
@@ -151,11 +179,9 @@ export default function OrdersPage() {
         await dispatch(cancelOrder(order._id)).unwrap();
         toast.success("Hủy đơn hàng thành công");
         // Refresh danh sách
-        dispatch(getUserOrders({
-          page: pagination?.currentPage || 1,
-          limit: pagination?.limit || 10,
-        }));
+        handleRefresh();
       } catch (error) {
+        console.error('Cancel order error:', error);
         toast.error("Hủy đơn hàng thất bại");
       }
     }
@@ -166,42 +192,38 @@ export default function OrdersPage() {
   };
 
   const getTotalItems = (order: Order) => {
-    return order.items?.reduce((total, item) => total + item.quantity, 0) || 0;
+    return order.products?.reduce((total, product) => total + product.quantity, 0) || 0;
   };
 
   const getOrderStats = () => {
-    const totalOrders = orders.length;
-    const processingOrders = orders.filter(order =>
+    const totalOrders = allOrders.length;
+    const processingOrders = allOrders.filter(order =>
       order.status === "pending" || order.status === "confirmed" || order.status === "processing"
     ).length;
-    const deliveredOrders = orders.filter(order => order.status === "delivered").length;
-    const cancelledOrders = orders.filter(order => order.status === "cancelled").length;
+    const deliveredOrders = allOrders.filter(order => order.status === "delivered").length;
+    const cancelledOrders = allOrders.filter(order => order.status === "cancelled").length;
 
     return { totalOrders, processingOrders, deliveredOrders, cancelledOrders };
   };
 
   const stats = getOrderStats();
 
-  if (loading) {
-    return (
-      <div className="w-full max-w-7xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-lg">Đang tải đơn hàng...</div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-          Đơn hàng của tôi
-        </h1>
-        <p className="text-gray-600 mt-2">
-          Quản lý và theo dõi đơn hàng của bạn
-        </p>
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+            Quản lý đơn hàng
+          </h1>
+          <p className="text-gray-600 mt-2">
+            Quản lý và theo dõi tất cả đơn hàng
+          </p>
+        </div>
+        <Button onClick={handleRefresh} disabled={isLoading}>
+          <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+          Làm mới
+        </Button>
       </div>
 
       {/* Stats Cards */}
@@ -258,91 +280,104 @@ export default function OrdersPage() {
       {/* Orders Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Lịch sử đơn hàng</CardTitle>
+          <CardTitle>Danh sách đơn hàng</CardTitle>
           <CardDescription>
-            Tất cả đơn hàng của bạn sẽ được hiển thị tại đây
+            Tất cả đơn hàng sẽ được hiển thị tại đây
+            {isLoading && " - Đang tải..."}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Mã đơn hàng</TableHead>
-                <TableHead>Ngày đặt</TableHead>
-                <TableHead>Số sản phẩm</TableHead>
-                <TableHead>Tổng tiền</TableHead>
-                <TableHead>Phương thức thanh toán</TableHead>
-                <TableHead>Trạng thái</TableHead>
-                <TableHead className="text-right">Thao tác</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {orders.map((order) => (
-                <TableRow key={order._id}>
-                  <TableCell className="font-medium">
-                    {order.orderCode || order._id}
-                  </TableCell>
-                  <TableCell>{formatDate(order.createdAt)}</TableCell>
-                  <TableCell>{getTotalItems(order)} sản phẩm</TableCell>
-                  <TableCell className="font-semibold">
-                    {formatPrice(order.totalAmount || 0)}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className="capitalize">
-                      {order.paymentMethod === "cod" ? "COD" : "VNPay"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(order.status)}
-                      {getStatusBadge(order.status)}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleViewOrder(order)}
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        Chi tiết
-                      </Button>
-                      {(order.status === "pending" || order.status === "confirmed") && (
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleCancelOrder(order)}
-                        >
-                          Hủy
-                        </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-
-          {/* Empty State */}
-          {orders.length === 0 && (
+          {isLoading && allOrders.length === 0 ? (
             <div className="text-center py-12">
-              <Package className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Chưa có đơn hàng
-              </h3>
-              <p className="text-gray-500 mb-4">Bạn chưa có đơn hàng nào</p>
-              <Button onClick={handleContinueShopping}>
-                Tiếp tục mua sắm
-              </Button>
+              <RefreshCw className="mx-auto h-8 w-8 animate-spin text-gray-400 mb-4" />
+              <div className="text-lg text-gray-600">Đang tải đơn hàng...</div>
             </div>
-          )}
-
-          {/* Loading State */}
-          {loading && (
-            <div className="text-center py-8">
-              <div className="text-gray-500">Đang tải đơn hàng...</div>
-            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Mã đơn hàng</TableHead>
+                  <TableHead>Ngày đặt</TableHead>
+                  <TableHead>Số sản phẩm</TableHead>
+                  <TableHead>Tổng tiền</TableHead>
+                  <TableHead>Phương thức thanh toán</TableHead>
+                  <TableHead>Trạng thái thanh toán</TableHead>
+                  <TableHead>Trạng thái đơn hàng</TableHead>
+                  <TableHead className="text-right">Thao tác</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {allOrders.length > 0 ? (
+                  allOrders.map((order) => (
+                    <TableRow key={order._id}>
+                      <TableCell className="font-medium">
+                        {order.orderCode || `#${order._id.slice(-6)}`}
+                      </TableCell>
+                      <TableCell>{formatDate(order.createdAt)}</TableCell>
+                      <TableCell>{getTotalItems(order)} sản phẩm</TableCell>
+                      <TableCell className="font-semibold">
+                        {formatPrice(order.totalAmount)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="capitalize">
+                          {order.paymentMethod === "cod" ? "COD" : "VNPay"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={
+                          order.paymentStatus === "paid" ? "bg-green-50 text-green-700 border-green-200" :
+                          order.paymentStatus === "unpaid" ? "bg-red-50 text-red-700 border-red-200" :
+                          "bg-yellow-50 text-yellow-700 border-yellow-200"
+                        }>
+                          {order.paymentStatus === "paid" ? "Đã thanh toán" :
+                          order.paymentStatus === "unpaid" ? "Chưa thanh toán" : "Hoàn tiền"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {getStatusIcon(order.status)}
+                          {getStatusBadge(order.status)}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewOrder(order)}
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            Chi tiết
+                          </Button>
+                          {(order.status === "pending" || order.status === "confirmed") && (
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleCancelOrder(order)}
+                            >
+                              Hủy
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-12">
+                      <Package className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">
+                        Chưa có đơn hàng
+                      </h3>
+                      <p className="text-gray-500 mb-4">Không tìm thấy đơn hàng nào trong hệ thống</p>
+                      <Button onClick={handleContinueShopping}>
+                        Quay lại trang sản phẩm
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
           )}
         </CardContent>
       </Card>
@@ -360,4 +395,3 @@ export default function OrdersPage() {
     </div>
   );
 }
-
