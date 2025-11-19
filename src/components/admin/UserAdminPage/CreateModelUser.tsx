@@ -35,7 +35,7 @@ export function CreateModelUser({
     username: "",
     email: "",
     phone: "",
-    roles: "user", // ← Đảm bảo đúng field name
+    roles: "user", 
     isVerifiedEmail: false,
     password: "",
   });
@@ -43,12 +43,10 @@ export function CreateModelUser({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onCreate(formData);
-    // KHÔNG reset form ở đây nữa, để component cha xử lý
   };
 
   const handleClose = () => {
     onOpenChange(false);
-    // Reset form khi đóng modal
     setFormData({
       username: "",
       email: "",

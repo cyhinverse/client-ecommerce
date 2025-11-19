@@ -56,7 +56,7 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="container max-w-6xl mx-auto px-4 py-8">
+    <div className="w-full max-w-7xl mx-auto  h-full m-5">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar Navigation */}

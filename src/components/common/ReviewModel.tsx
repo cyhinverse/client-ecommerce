@@ -136,11 +136,10 @@ export default function ReviewDialog({
                       disabled={isSubmitting}
                     >
                       <Star
-                        className={`h-7 w-7 ${
-                          star <= (hoverRating || rating)
-                            ? "fill-yellow-400 text-yellow-400"
-                            : "text-gray-300"
-                        } transition-colors`}
+                        className={`h-7 w-7 ${star <= (hoverRating || rating)
+                          ? "fill-yellow-400 text-yellow-400"
+                          : "text-gray-300"
+                          } transition-colors`}
                       />
                     </button>
                   ))}

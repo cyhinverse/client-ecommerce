@@ -44,7 +44,7 @@ export default function Banner() {
   };
 
   return (
-    <div className="flex-1 h-[400px] flex border border-gray-200 rounded-xl overflow-hidden relative">
+    <div className="flex-1 h-[400px] flex border border-gray-200 rounded-xl overflow-hidden relative shadow-lg border border-gray-200">
       {/* Chỉ hiển thị banner hiện tại */}
       <div key={banners[currentIndex].id} className="w-full h-full relative">
         <img
@@ -69,9 +69,8 @@ export default function Banner() {
           <button
             key={index}
             onClick={() => setCurrentIndex(index)}
-            className={`w-3 h-3 rounded-full ${
-              index === currentIndex ? "bg-white" : "bg-gray-400"
-            }`}
+            className={`w-3 h-3 rounded-full ${index === currentIndex ? "bg-white" : "bg-gray-400"
+              }`}
           />
         ))}
       </div>

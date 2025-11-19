@@ -37,13 +37,28 @@ export default function SettingsTab({ user }: SettingsTabProps) {
     e.preventDefault();
     setIsChangingPassword(true);
 
+    // Validation
+    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+      toast.error("Vui lòng điền đầy đủ thông tin");
+      setIsChangingPassword(false);
+      return;
+    }
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       toast.error("Mật khẩu mới không khớp");
+      setIsChangingPassword(false);
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
       toast.error("Mật khẩu phải có ít nhất 6 ký tự");
+      setIsChangingPassword(false);
+      return;
+    }
+
+    if (passwordData.currentPassword === passwordData.newPassword) {
+      toast.error("Mật khẩu mới phải khác mật khẩu hiện tại");
+      setIsChangingPassword(false);
       return;
     }
 
@@ -59,8 +74,9 @@ export default function SettingsTab({ user }: SettingsTabProps) {
         newPassword: "",
         confirmPassword: "",
       });
-    } catch (error) {
-      toast.error("Đổi mật khẩu thất bại");
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || "Đổi mật khẩu thất bại";
+      toast.error(errorMessage);
     } finally {
       setIsChangingPassword(false);
     }
@@ -70,8 +86,9 @@ export default function SettingsTab({ user }: SettingsTabProps) {
     try {
       await dispatch(verifyEmail()).unwrap();
       toast.success("Đã gửi email xác minh. Vui lòng kiểm tra hộp thư của bạn.");
-    } catch (error) {
-      toast.error("Gửi email xác minh thất bại");
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || "Gửi email xác minh thất bại";
+      toast.error(errorMessage);
     }
   };
 
@@ -83,8 +100,9 @@ export default function SettingsTab({ user }: SettingsTabProps) {
           setShowVerificationInput(true);
           toast.success("Quét mã QR bằng ứng dụng xác thực của bạn");
         }
-      } catch (error) {
-        toast.error("Kích hoạt xác thực 2 lớp thất bại");
+      } catch (error: any) {
+        const errorMessage = error.response?.data?.message || "Kích hoạt xác thực 2 lớp thất bại";
+        toast.error(errorMessage);
       }
     } else {
       setTwoFactorEnabled(false);
@@ -106,8 +124,9 @@ export default function SettingsTab({ user }: SettingsTabProps) {
         setVerificationCode("");
         toast.success("Kích hoạt xác thực 2 lớp thành công");
       }
-    } catch (error) {
-      toast.error("Mã xác minh không hợp lệ");
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || "Mã xác minh không hợp lệ";
+      toast.error(errorMessage);
     }
   };
 
@@ -147,8 +166,8 @@ export default function SettingsTab({ user }: SettingsTabProps) {
             </div>
 
             <form onSubmit={handlePasswordChange} className="space-y-4">
-              {/* Password form fields */}
               <div className="grid gap-4">
+                {/* Current Password */}
                 <div className="space-y-2">
                   <Label htmlFor="currentPassword">Mật khẩu hiện tại</Label>
                   <div className="relative">
@@ -179,10 +198,75 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                   </div>
                 </div>
 
-                {/* Similar fields for new password and confirm password */}
+                {/* New Password */}
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">Mật khẩu mới</Label>
+                  <div className="relative">
+                    <Input
+                      id="newPassword"
+                      type={showPasswords.new ? "text" : "password"}
+                      value={passwordData.newPassword}
+                      onChange={(e) => setPasswordData({
+                        ...passwordData,
+                        newPassword: e.target.value
+                      })}
+                      placeholder="Nhập mật khẩu mới (ít nhất 6 ký tự)"
+                      required
+                      minLength={6}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => togglePasswordVisibility('new')}
+                    >
+                      {showPasswords.new ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Confirm New Password */}
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Xác nhận mật khẩu mới</Label>
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      type={showPasswords.confirm ? "text" : "password"}
+                      value={passwordData.confirmPassword}
+                      onChange={(e) => setPasswordData({
+                        ...passwordData,
+                        confirmPassword: e.target.value
+                      })}
+                      placeholder="Nhập lại mật khẩu mới"
+                      required
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => togglePasswordVisibility('confirm')}
+                    >
+                      {showPasswords.confirm ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isChangingPassword}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isChangingPassword}
+              >
                 <Lock className="h-4 w-4 mr-2" />
                 {isChangingPassword ? "Đang xử lý..." : "Đổi mật khẩu"}
               </Button>

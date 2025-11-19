@@ -163,7 +163,7 @@ export const deleteAddress = createAsyncThunk(
   "address/delete",
   async (addressId: string) => {
     const response = await instance.delete(`/users/address/${addressId}`);
-    if (!response.data) { 
+    if (!response.data) {
       throw new Error("Failed to delete address");
     }
     return response.data;
@@ -188,7 +188,7 @@ export const changePassword = createAsyncThunk(
     newPassword: string;
     confirmPassword?: string;
   }) => {
-    const response = await instance.post("/users/change-password", passwordData);
+    const response = await instance.put("/users/change-password", passwordData);
     if (!response) {
       throw new Error("Failed to change password");
     }

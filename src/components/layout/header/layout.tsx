@@ -1,10 +1,8 @@
-// components/layout/HeaderLayout.tsx
 "use client";
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAppSelector } from "@/hooks/hooks";
 import { ShoppingCart, Search } from "lucide-react";
@@ -32,7 +30,7 @@ export default function HeaderLayout() {
     "/admin/categories",
     "/admin/discounts",
     "/admin/settings",
-		"/admin/dashboard"
+    "/admin/dashboard"
   ];
 
   return (
@@ -56,27 +54,31 @@ export default function HeaderLayout() {
               <nav className="hidden md:flex items-center space-x-8">
                 <Link
                   href="/men"
-                  className="text-sm font-medium transition-colors hover:text-gray-900 text-gray-600"
+                  className="text-base font-medium transition-colors hover:text-gray-900 text-gray-600 relative group"
                 >
                   Men
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gray-900 transition-all group-hover:w-full"></span>
                 </Link>
                 <Link
                   href="/women"
-                  className="text-sm font-medium transition-colors hover:text-gray-900 text-gray-600"
+                  className="text-base font-medium transition-colors hover:text-gray-900 text-gray-600 relative group"
                 >
                   Women
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gray-900 transition-all group-hover:w-full"></span>
                 </Link>
                 <Link
                   href="/children"
-                  className="text-sm font-medium transition-colors hover:text-gray-900 text-gray-600"
+                  className="text-base font-medium transition-colors hover:text-gray-900 text-gray-600 relative group"
                 >
                   Children
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gray-900 transition-all group-hover:w-full"></span>
                 </Link>
                 <Link
                   href="/deals"
-                  className="text-sm font-medium transition-colors hover:text-gray-900 text-gray-600"
+                  className="text-base font-medium transition-colors hover:text-gray-900 text-gray-600 relative group"
                 >
                   Deals
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gray-900 transition-all group-hover:w-full"></span>
                 </Link>
               </nav>
 
@@ -89,7 +91,7 @@ export default function HeaderLayout() {
                   onClick={() => setIsSearchOpen(true)}
                   className="hidden sm:flex"
                 >
-                  <Search className="h-4 w-4" />
+                  <Search className="h-5 w-5" />
                 </Button>
 
                 {/* Mobile Search */}
@@ -99,7 +101,7 @@ export default function HeaderLayout() {
                   onClick={() => setIsSearchOpen(true)}
                   className="sm:hidden"
                 >
-                  <Search className="h-4 w-4" />
+                  <Search className="h-5 w-5" />
                 </Button>
 
                 {/* Cart */}
@@ -112,17 +114,20 @@ export default function HeaderLayout() {
                 {/* Avatar or Login */}
                 {isAuthenticated && token ? (
                   <Link href="/profile">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={data?.avatar} />
-                      <AvatarFallback className="text-xs">
-                        {data?.username?.charAt(0) || "U"}
-                      </AvatarFallback>
-                    </Avatar>
+                    {/* Sửa lỗi ở đây: chỉ dùng width/height HOẶC fill, không dùng cả hai */}
+                    <div className="relative w-8 h-8 rounded-full overflow-hidden">
+                      <Image
+                        alt={data?.username as string}
+                        src={data?.avatar as string}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
                   </Link>
                 ) : (
                   <Link
                     href="/login"
-                    className="text-sm font-medium transition-colors hover:text-gray-900 text-gray-600"
+                    className="text-base font-medium transition-colors hover:text-gray-900 text-gray-600"
                   >
                     Login
                   </Link>
@@ -141,7 +146,3 @@ export default function HeaderLayout() {
     </>
   );
 }
-
-
-
-

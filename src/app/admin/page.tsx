@@ -6,10 +6,7 @@ import {
   ShoppingCart,
   Users,
   Package,
-  TrendingUp,
   DollarSign,
-  CreditCard,
-  Activity,
 } from "lucide-react";
 
 const stats = [

@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { User } from "@/types/user";
+import Image from "next/image";
 
 interface UsersTableProps {
   users: User[];
@@ -288,13 +289,16 @@ export function UsersTable({
                     <div>
                       <div className="flex items-center gap-3">
                         {user.avatar ? (
-                          <img
-                            src={user.avatar}
-                            alt={user.username}
-                            className="w-10 h-10 rounded-full"
+                        <div className="relative w-8 h-8 rounded-full overflow-hidden">
+                          <Image
+                            alt={user?.username as string}
+                            src={user?.avatar as string}
+                            fill
+                            className="object-cover"
                           />
+                        </div>
                         ) : (
-                          <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                          <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
                             <UserIcon className="h-5 w-5 text-gray-600" />
                           </div>
                         )}
