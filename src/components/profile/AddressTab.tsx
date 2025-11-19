@@ -3,7 +3,7 @@ import { MapPin, Plus, Star, Edit, Phone, Navigation, Trash2 } from "lucide-reac
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import AddressDialog from "./AddressDialog";
+import AddressDialog from "./address/AddressDialog";
 import { useState } from "react";
 import { useAppSelector, useAppDispatch } from "@/hooks/hooks";
 import { deleteAddress, getProfile } from "@/features/user/userAction";

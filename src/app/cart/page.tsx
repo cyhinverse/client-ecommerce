@@ -1,12 +1,12 @@
 "use client";
-
-import { useEffect, useState } from "react";
-import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft } from "lucide-react";
+import { useEffect } from "react";
+import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import {
   getCart,
@@ -14,17 +14,28 @@ import {
   removeFromCart,
   clearCart,
 } from "@/features/cart/cartAction";
+import {
+  toggleSelectItem,
+  selectAllItems,
+  unselectAllItems,
+  prepareForCheckout,
+} from "@/features/cart/cartSlice";
 import SpinnerLoading from "@/components/common/SpinerLoading";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
 
 export default function CartPage() {
   const {
     data: cartData,
     isLoading,
     error,
+    selectedItems,
+    checkoutTotal,
   } = useAppSelector((state) => state.cart);
   const dispatch = useAppDispatch();
+  const router = useRouter();
+
   useEffect(() => {
     dispatch(getCart());
   }, [dispatch]);
@@ -33,12 +44,35 @@ export default function CartPage() {
     if (newQuantity < 1) return;
     dispatch(updateCartItem({ itemId, quantity: newQuantity }));
   };
+
   const handleClearCart = () => {
     dispatch(clearCart());
     toast.success("Giỏ hàng đã được xóa thành công");
   };
+
   const handleRemoveItem = (itemId: string) => {
     dispatch(removeFromCart({ itemId }));
+  };
+
+  const handleToggleSelect = (itemId: string) => {
+    dispatch(toggleSelectItem(itemId));
+  };
+
+  const handleSelectAll = () => {
+    dispatch(selectAllItems());
+  };
+
+  const handleUnselectAll = () => {
+    dispatch(unselectAllItems());
+  };
+
+  const handleCheckout = () => {
+    if (selectedItemsCount === 0) {
+      toast.error("Vui lòng chọn ít nhất một sản phẩm để thanh toán");
+      return;
+    }
+    dispatch(prepareForCheckout());
+    router.push("/checkout");
   };
 
   const formatPrice = (price: number) => {
@@ -48,19 +82,28 @@ export default function CartPage() {
     }).format(price);
   };
 
-  const subtotal =
-    cartData?.items?.reduce(
-      (sum, item) => sum + (item.price?.currentPrice || 0) * item.quantity,
-      0
-    ) ?? 0;
+  const subtotal = cartData?.items?.reduce(
+    (sum, item) => sum + (item.price?.currentPrice || 0) * item.quantity,
+    0
+  ) ?? 0;
 
-  const totalItems =
-    cartData?.items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
+  const totalItems = cartData?.items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
+
+  const selectedItemsCount = selectedItems?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
+
+  const isAllSelected = cartData?.items && cartData.items.length > 0
+    ? cartData.items.every(item => item.selected)
+    : false;
+
+  const hasCartItems = cartData?.items && cartData.items.length > 0;
+
+  const hasSelectedItems = selectedItems && selectedItems.length > 0;
 
   if (error) {
     toast.error("Đã xảy ra lỗi khi tải giỏ hàng");
   }
 
+  // Sửa lỗi: Kiểm tra cartData?.items thay vì cartData.items
   if (!cartData?.items || cartData.items.length === 0) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -85,14 +128,6 @@ export default function CartPage() {
     );
   }
 
-  // const handleGetIndexItems = (index: string) => {
-  //   setSelectedItems((prev) =>
-  //     prev.includes(index)
-  //       ? prev.filter((item) => item !== index)
-  //       : [...prev, index],
-  //   );
-  // };
-
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Header */}
@@ -108,7 +143,22 @@ export default function CartPage() {
           <h1 className="text-xl font-bold text-gray-900">
             Giỏ hàng ({totalItems} sản phẩm)
           </h1>
-          <Button onClick={() => handleClearCart()}>Xóa tất cả</Button>
+          <div className="flex items-center gap-4">
+            {hasCartItems && (
+              isAllSelected ? (
+                <Button variant="outline" onClick={handleUnselectAll}>
+                  Bỏ chọn tất cả
+                </Button>
+              ) : (
+                <Button variant="outline" onClick={handleSelectAll}>
+                  Chọn tất cả
+                </Button>
+              )
+            )}
+            <Button onClick={handleClearCart} variant="outline">
+              Xóa tất cả
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -118,15 +168,21 @@ export default function CartPage() {
           {isLoading ? (
             <SpinnerLoading />
           ) : (
-            cartData.items.map((item) => (
-              <Card key={item._id} className="overflow-hidden ">
+            // Sửa lỗi: Đảm bảo cartData.items tồn tại trước khi map
+            cartData.items?.map((item) => (
+              <Card key={item._id} className="overflow-hidden">
                 <CardContent className="p-0">
                   <div className="p-6">
                     <div className="flex flex-col sm:flex-row gap-4">
-                      {/*<Checkbox
-                      onClick={() => handleGetIndexItems(item._id)}
-                      value={selectedItems}
-                    />*/}
+                      {/* Checkbox for selection */}
+                      <div className="flex items-start">
+                        <Checkbox
+                          checked={item.selected || false}
+                          onCheckedChange={() => handleToggleSelect(item._id)}
+                          className="mt-1"
+                        />
+                      </div>
+
                       {/* Product Image */}
                       <div className="relative w-full sm:w-24 h-24 bg-gray-50 rounded-lg shrink-0">
                         {item.variant?.images?.[0] ? (
@@ -251,23 +307,23 @@ export default function CartPage() {
                               {/* Original Price if different */}
                               {item.price.currentPrice >
                                 item.price.discountPrice && (
-                                <span className="text-sm text-gray-500 line-through">
-                                  {formatPrice(item.price.currentPrice)}
-                                </span>
-                              )}
+                                  <span className="text-sm text-gray-500 line-through">
+                                    {formatPrice(item.price.currentPrice)}
+                                  </span>
+                                )}
                             </div>
 
                             {/* Savings */}
                             {item.price.currentPrice >
                               item.price.discountPrice && (
-                              <span className="text-xs text-green-600 mt-1">
-                                Tiết kiệm{" "}
-                                {formatPrice(
-                                  item.price.currentPrice -
+                                <span className="text-xs text-green-600 mt-1">
+                                  Tiết kiệm{" "}
+                                  {formatPrice(
+                                    item.price.currentPrice -
                                     item.price.discountPrice
-                                )}
-                              </span>
-                            )}
+                                  )}
+                                </span>
+                              )}
                           </div>
 
                           {/* Quantity Controls */}
@@ -315,26 +371,39 @@ export default function CartPage() {
         <div className="lg:col-span-1">
           <Card className="sticky top-4">
             <CardHeader>
-              <CardTitle className="text-lg">Tóm tắt đơn hàng</CardTitle>
+              <CardTitle className="text-lg">
+                Tóm tắt đơn hàng
+                {hasSelectedItems && (
+                  <span className="text-sm font-normal text-gray-600 ml-2">
+                    ({selectedItemsCount} sản phẩm được chọn)
+                  </span>
+                )}
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">
-                    Tạm tính ({totalItems} sản phẩm)
+                    {hasSelectedItems ? "Tạm tính" : "Tổng giỏ hàng"}
+                    {hasSelectedItems && ` (${selectedItemsCount} sản phẩm)`}
                   </span>
                   <span className="font-medium text-gray-900">
-                    {formatPrice(subtotal)}
+                    {formatPrice(hasSelectedItems ? (checkoutTotal || 0) : subtotal)}
                   </span>
                 </div>
 
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Nhập mã giảm giá</span>
-                  <Input
-                    type="text"
-                    placeholder="Mã giảm giá"
-                    className="w-32"
-                  />
+                  <div className="flex gap-2">
+                    <Input
+                      type="text"
+                      placeholder="Mã giảm giá"
+                      className="w-32"
+                    />
+                    <Button variant="outline" size="sm">
+                      Áp dụng
+                    </Button>
+                  </div>
                 </div>
               </div>
 
@@ -342,14 +411,32 @@ export default function CartPage() {
                 <div className="flex justify-between items-center">
                   <span className="font-semibold text-gray-900">Tổng cộng</span>
                   <span className="text-xl font-bold text-gray-900">
-                    {formatPrice(subtotal)}
+                    {formatPrice(hasSelectedItems ? (checkoutTotal || 0) : subtotal)}
                   </span>
                 </div>
               </div>
 
-              <Button className="w-full cursor-pointer" size="lg">
-                Thanh toán
+              <Button
+                className="w-full cursor-pointer"
+                size="lg"
+                onClick={handleCheckout}
+                disabled={!hasSelectedItems}
+              >
+                {hasSelectedItems ? (
+                  <>
+                    <Check className="mr-2 h-4 w-4" />
+                    Thanh toán ({selectedItemsCount})
+                  </>
+                ) : (
+                  "Chọn sản phẩm để thanh toán"
+                )}
               </Button>
+
+              {!hasSelectedItems && (
+                <p className="text-xs text-center text-gray-500">
+                  Vui lòng chọn ít nhất một sản phẩm để tiếp tục thanh toán
+                </p>
+              )}
             </CardContent>
           </Card>
         </div>

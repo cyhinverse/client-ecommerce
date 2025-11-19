@@ -62,7 +62,7 @@ export interface PaginationData {
 
 export interface ProductState {
   product: Product[] | null;
-  currentProduct: Product | null;
+  currentProduct: Product;
   pagination: PaginationData | null;
   isLoading: boolean;
   error: string | null;

@@ -8,22 +8,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { Address, ProfileTabProps } from "@/types/address";
 
-// Định nghĩa interface cho Address
-interface Address {
-  _id: string;
-  fullName: string;
-  phone: string;
-  address: string;
-  city: string;
-  district: string;
-  ward: string;
-  isDefault: boolean;
-}
-
-interface ProfileTabProps {
-  user: any;
-}
 
 export default function ProfileTab({ user }: ProfileTabProps) {
   const dispatch = useAppDispatch();

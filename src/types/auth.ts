@@ -1,3 +1,5 @@
+import { Address } from "./address";
+
 export interface AuthLogin {
   email: string;
   password: string;
@@ -8,6 +10,8 @@ export interface AuthRegister extends AuthLogin {
   confirmPassword: string;
 }
 
+
+
 export interface User {
   username: string;
   email: string;
@@ -16,7 +20,7 @@ export interface User {
   avatar: string;
   isVerifiedEmail: boolean;
   provider: string;
-  addresses: Array<string>;
+  addresses: Array<Address>;
   createdAt: string;
   updatedAt: string;
 }

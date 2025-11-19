@@ -36,12 +36,12 @@ export function ViewModelUser({
 
   const getVerifiedBadge = (isVerified: boolean) => {
     return isVerified ? (
-      <Badge className="bg-green-500">
+      <Badge className="bg-black text-white border-black">
         <CheckCircle className="h-3 w-3 mr-1" />
         Đã xác thực email
       </Badge>
     ) : (
-      <Badge variant="secondary">
+      <Badge variant="outline" className="border-gray-400 text-gray-700">
         <XCircle className="h-3 w-3 mr-1" />
         Chưa xác thực email
       </Badge>
@@ -61,17 +61,17 @@ export function ViewModelUser({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white border-gray-200 text-gray-900 sm:max-w-lg">
+      <DialogContent className="bg-white border-gray-300 text-gray-900 sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Chi tiết người dùng</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-gray-900">Chi tiết người dùng</DialogTitle>
+          <DialogDescription className="text-gray-600">
             Thông tin chi tiết về người dùng trong hệ thống
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* User Info Card */}
-          <Card className="bg-gray-50 border-gray-200">
+          <Card className="bg-gray-50 border-gray-300">
             <CardContent className="p-6">
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
@@ -95,12 +95,12 @@ export function ViewModelUser({
 
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <Mail className="h-4 w-4 text-gray-500" />
+                  <Mail className="h-4 w-4 text-gray-600" />
                   <span className="text-gray-700">{user.email}</span>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <Calendar className="h-4 w-4 text-gray-500" />
+                  <Calendar className="h-4 w-4 text-gray-600" />
                   <span className="text-gray-700">
                     Tham gia: {formatDate(user.createdAt)}
                   </span>
@@ -110,10 +110,10 @@ export function ViewModelUser({
           </Card>
 
           {/* Address Card */}
-          <Card className="bg-gray-50 border-gray-200">
+          <Card className="bg-gray-50 border-gray-300">
             <CardContent className="p-6">
               <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
+                <MapPin className="h-4 w-4 text-gray-600" />
                 Địa chỉ
               </h4>
               {user.addresses && user.addresses.length > 0 ? (
@@ -121,7 +121,7 @@ export function ViewModelUser({
                   {user.addresses.map((addr, index) => (
                     <div
                       key={index}
-                      className="border-l-4 border-gray-300 pl-3"
+                      className="border-l-4 border-gray-400 pl-3"
                     >
                       <p className="font-medium text-gray-900">
                         {addr.fullName}
@@ -145,14 +145,14 @@ export function ViewModelUser({
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="border-gray-300 text-gray-700 hover:bg-gray-100"
+              className="border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
             >
               Đóng
             </Button>
             {onEdit && (
               <Button
                 onClick={handleEdit}
-                className="bg-gray-900 text-white hover:bg-gray-800"
+                className="bg-black text-white hover:bg-gray-800"
               >
                 <Edit className="h-4 w-4 mr-2" />
                 Chỉnh sửa

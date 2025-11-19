@@ -79,3 +79,23 @@ export interface OrderState {
   isCancelling: boolean;
   error: string | null;
 }
+
+
+
+
+export interface OrderStatusCount {
+  _id: string;
+  count: number;
+}
+
+export interface OrdersStatsProps {
+  totalOrders?: number;
+  pendingOrders?: number;
+  confirmedOrders?: number;
+  processingOrders?: number;
+  shippedOrders?: number;
+  deliveredOrders?: number;
+  cancelledOrders?: number;
+  totalRevenue?: number;
+  ordersByStatus?: OrderStatusCount[];
+}

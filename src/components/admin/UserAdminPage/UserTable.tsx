@@ -53,12 +53,12 @@ interface UsersTableProps {
 
 export const getVerifiedBadge = (isVerified: boolean) => {
   return isVerified ? (
-    <Badge className="bg-green-500">
+    <Badge className="bg-black text-white border-black">
       <CheckCircle className="h-3 w-3 mr-1" />
       Đã xác thực
     </Badge>
   ) : (
-    <Badge variant="secondary">
+    <Badge variant="outline" className="border-gray-400 text-gray-700">
       <XCircle className="h-3 w-3 mr-1" />
       Chưa xác thực
     </Badge>
@@ -66,10 +66,9 @@ export const getVerifiedBadge = (isVerified: boolean) => {
 };
 
 export const getRoleBadge = (roles: string) => {
-  // ← Đổi thành roles
   const colors: { [key: string]: string } = {
-    admin: "bg-red-100 text-red-800 border-red-200",
-    user: "bg-blue-100 text-blue-800 border-blue-200",
+    admin: "bg-black text-white border-black",
+    user: "bg-gray-100 text-gray-900 border-gray-300",
   };
 
   const roleNames: { [key: string]: string } = {
@@ -80,7 +79,7 @@ export const getRoleBadge = (roles: string) => {
   return (
     <Badge
       variant="outline"
-      className={colors[roles] || "bg-gray-100 text-gray-800 border-gray-200"}
+      className={colors[roles] || "bg-gray-100 text-gray-900 border-gray-300"}
     >
       {roleNames[roles] || roles}
     </Badge>
@@ -128,10 +127,10 @@ export function UsersTable({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-600" />
             <Input
               placeholder="Tìm kiếm người dùng..."
-              className="pl-9 w-[300px] bg-white border-gray-300 text-gray-900"
+              className="pl-9 w-[300px] bg-white border-gray-300 text-gray-900 focus:border-black focus:ring-black"
               value={searchTerm}
               onChange={handleSearch}
             />
@@ -142,34 +141,34 @@ export function UsersTable({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="border-gray-300 hover:bg-gray-100"
+                className="border-gray-300 hover:bg-gray-100 text-gray-900 hover:text-gray-900"
               >
                 <Shield className="h-4 w-4 mr-2 text-gray-600" />
                 {selectedRole === "admin"
                   ? "Quản trị viên"
                   : selectedRole === "user"
-                  ? "Người dùng"
-                  : "Tất cả vai trò"}
+                    ? "Người dùng"
+                    : "Tất cả vai trò"}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-white border-gray-200 text-gray-900">
-              <DropdownMenuLabel>Lọc theo vai trò</DropdownMenuLabel>
-              <DropdownMenuSeparator />
+            <DropdownMenuContent className="bg-white border-gray-300 text-gray-900 shadow-lg">
+              <DropdownMenuLabel className="text-gray-900 font-semibold">Lọc theo vai trò</DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-gray-200" />
               <DropdownMenuItem
                 onClick={() => handleRoleFilter("")}
-                className={!selectedRole ? "bg-gray-100" : ""}
+                className={`text-gray-700 hover:bg-gray-100 ${!selectedRole ? "bg-gray-100 font-medium" : ""}`}
               >
                 Tất cả vai trò
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleRoleFilter("admin")}
-                className={selectedRole === "admin" ? "bg-gray-100" : ""}
+                className={`text-gray-700 hover:bg-gray-100 ${selectedRole === "admin" ? "bg-gray-100 font-medium" : ""}`}
               >
                 Quản trị viên
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleRoleFilter("user")}
-                className={selectedRole === "user" ? "bg-gray-100" : ""}
+                className={`text-gray-700 hover:bg-gray-100 ${selectedRole === "user" ? "bg-gray-100 font-medium" : ""}`}
               >
                 Người dùng
               </DropdownMenuItem>
@@ -181,35 +180,35 @@ export function UsersTable({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="border-gray-300 hover:bg-gray-100"
+                className="border-gray-300 hover:bg-gray-100 text-gray-900 hover:text-gray-900"
               >
                 <Mail className="h-4 w-4 mr-2 text-gray-600" />
                 {selectedVerified === true
                   ? "Đã xác thực"
                   : selectedVerified === false
-                  ? "Chưa xác thực"
-                  : "Trạng thái email"}
+                    ? "Chưa xác thực"
+                    : "Trạng thái email"}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-white border-gray-200 text-gray-900">
-              <DropdownMenuLabel>Lọc theo xác thực email</DropdownMenuLabel>
-              <DropdownMenuSeparator />
+            <DropdownMenuContent className="bg-white border-gray-300 text-gray-900 shadow-lg">
+              <DropdownMenuLabel className="text-gray-900 font-semibold">Lọc theo xác thực email</DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-gray-200" />
               <DropdownMenuItem
                 onClick={() => handleVerifiedFilter(null)}
-                className={selectedVerified === null ? "bg-gray-100" : ""}
+                className={`text-gray-700 hover:bg-gray-100 ${selectedVerified === null ? "bg-gray-100 font-medium" : ""}`}
               >
                 Tất cả trạng thái
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleVerifiedFilter(true)}
-                className={selectedVerified === true ? "bg-gray-100" : ""}
+                className={`text-gray-700 hover:bg-gray-100 ${selectedVerified === true ? "bg-gray-100 font-medium" : ""}`}
               >
-                <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
+                <CheckCircle className="h-4 w-4 mr-2 text-gray-600" />
                 Đã xác thực
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleVerifiedFilter(false)}
-                className={selectedVerified === false ? "bg-gray-100" : ""}
+                className={`text-gray-700 hover:bg-gray-100 ${selectedVerified === false ? "bg-gray-100 font-medium" : ""}`}
               >
                 <XCircle className="h-4 w-4 mr-2 text-gray-600" />
                 Chưa xác thực
@@ -220,9 +219,9 @@ export function UsersTable({
           <Button
             variant="outline"
             size="icon"
-            className="border-gray-300 hover:bg-gray-100"
+            className="border-gray-300 hover:bg-gray-100 text-gray-600 hover:text-gray-900"
           >
-            <Download className="h-4 w-4 text-gray-600" />
+            <Download className="h-4 w-4" />
           </Button>
         </div>
 
@@ -234,7 +233,7 @@ export function UsersTable({
             id="pageSize"
             value={pageSize}
             onChange={(e) => onPageSizeChange(Number(e.target.value))}
-            className="border border-gray-300 rounded px-2 py-1 text-sm bg-white text-gray-900"
+            className="border border-gray-300 rounded px-2 py-1 text-sm bg-white text-gray-900 focus:border-black focus:ring-black"
           >
             <option value="5">5</option>
             <option value="10">10</option>
@@ -245,26 +244,26 @@ export function UsersTable({
       </div>
 
       {/* Table */}
-      <div className="rounded-md border border-gray-200 bg-white">
+      <div className="rounded-md border border-gray-300 bg-white shadow-sm">
         <Table>
           <TableHeader>
-            <TableRow className="border-gray-200 hover:bg-gray-50">
-              <TableHead className="text-gray-600 font-medium">
+            <TableRow className="border-gray-300 hover:bg-gray-50 bg-gray-50">
+              <TableHead className="text-gray-900 font-semibold">
                 Người dùng
               </TableHead>
-              <TableHead className="text-gray-600 font-medium">
+              <TableHead className="text-gray-900 font-semibold">
                 Vai trò
               </TableHead>
-              <TableHead className="text-gray-600 font-medium">
+              <TableHead className="text-gray-900 font-semibold">
                 Địa chỉ
               </TableHead>
-              <TableHead className="text-gray-600 font-medium">
+              <TableHead className="text-gray-900 font-semibold">
                 Xác thực Email
               </TableHead>
-              <TableHead className="text-gray-600 font-medium">
+              <TableHead className="text-gray-900 font-semibold">
                 Ngày tạo
               </TableHead>
-              <TableHead className="text-gray-600 font-medium text-right">
+              <TableHead className="text-gray-900 font-semibold text-right">
                 Thao tác
               </TableHead>
             </TableRow>
@@ -275,7 +274,7 @@ export function UsersTable({
                 <TableCell colSpan={6} className="text-center py-8">
                   <div className="flex flex-col items-center justify-center text-gray-500">
                     <UserIcon className="h-12 w-12 mb-2 opacity-50" />
-                    <div>Không có người dùng nào</div>
+                    <div className="text-gray-600">Không có người dùng nào</div>
                   </div>
                 </TableCell>
               </TableRow>
@@ -283,20 +282,20 @@ export function UsersTable({
               users.map((user) => (
                 <TableRow
                   key={user._id}
-                  className="border-gray-200 hover:bg-gray-50"
+                  className="border-gray-300 hover:bg-gray-50"
                 >
                   <TableCell>
                     <div>
                       <div className="flex items-center gap-3">
                         {user.avatar ? (
-                        <div className="relative w-8 h-8 rounded-full overflow-hidden">
-                          <Image
-                            alt={user?.username as string}
-                            src={user?.avatar as string}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
+                          <div className="relative w-8 h-8 rounded-full overflow-hidden">
+                            <Image
+                              alt={user?.username as string}
+                              src={user?.avatar as string}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
                         ) : (
                           <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
                             <UserIcon className="h-5 w-5 text-gray-600" />
@@ -316,7 +315,7 @@ export function UsersTable({
                   </TableCell>
                   <TableCell>{getRoleBadge(user.roles || "user")}</TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-1 text-sm text-gray-600">
+                    <div className="flex items-center gap-1 text-sm text-gray-700">
                       <MapPin className="h-3 w-3" />
                       <span className="line-clamp-1">
                         {getPrimaryAddress(user.addresses)}
@@ -338,19 +337,19 @@ export function UsersTable({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="hover:bg-gray-200"
+                          className="hover:bg-gray-200 text-gray-600 hover:text-gray-900"
                         >
-                          <MoreHorizontal className="h-4 w-4 text-gray-600" />
+                          <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent
                         align="end"
-                        className="bg-white border-gray-200 text-gray-900"
+                        className="bg-white border-gray-300 text-gray-900 shadow-lg"
                       >
-                        <DropdownMenuLabel className="text-gray-900">
+                        <DropdownMenuLabel className="text-gray-900 font-semibold">
                           Thao tác
                         </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
+                        <DropdownMenuSeparator className="bg-gray-200" />
                         <DropdownMenuItem
                           onClick={() => onView(user)}
                           className="text-gray-700 hover:bg-gray-100 hover:text-gray-900"
@@ -365,12 +364,12 @@ export function UsersTable({
                           <Edit className="h-4 w-4 mr-2 text-gray-600" />
                           Chỉnh sửa
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator />
+                        <DropdownMenuSeparator className="bg-gray-200" />
                         <DropdownMenuItem
-                          className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                          className="text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                           onClick={() => onDelete(user)}
                         >
-                          <Trash2 className="h-4 w-4 mr-2" />
+                          <Trash2 className="h-4 w-4 mr-2 text-gray-600" />
                           Xóa người dùng
                         </DropdownMenuItem>
                       </DropdownMenuContent>

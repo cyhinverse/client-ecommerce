@@ -133,7 +133,7 @@ export default function OrdersTab() {
         <TabsList className="w-full overflow-x-auto flex justify-start h-auto p-1 bg-muted/50">
           {statusTabs.map((tab) => (
             <TabsTrigger
-              key={tab.value}
+              key={tab.value} // ✅ THÊM KEY Ở ĐÂY
               value={tab.value}
               className="flex items-center gap-2 px-4 py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
             >
@@ -167,9 +167,9 @@ export default function OrdersTab() {
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredOrders.map((order: Order) => (
+              {filteredOrders.map((order: Order, index: number) => (
                 <OrderCard
-                  key={order._id}
+                  key={order._id || `order-${index}`} // ✅ ĐÃ CÓ KEY Ở ĐÂY
                   order={order}
                   onViewOrder={handleViewOrder}
                   onCancelOrder={handleCancelOrder}

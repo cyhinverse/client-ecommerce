@@ -58,7 +58,7 @@ export const getUserOrders = createAsyncThunk(
     if (!response.data) {
       throw new Error("Failed to fetch user orders");
     }
-    
+
     // Sửa lại theo cấu trúc API thực tế
     const responseData = response.data.data || response.data;
     return {
@@ -143,7 +143,7 @@ export const getAllOrders = createAsyncThunk(
     if (!response.data) {
       throw new Error("Failed to fetch all orders");
     }
-    
+
     // Sửa lại để phù hợp với API structure
     return response.data.data || response.data;
   }

@@ -32,3 +32,8 @@ export interface AddressDialogProps {
 export interface AddressTabProps {
     user: any;
 }
+
+
+export interface ProfileTabProps {
+  user: any;
+}

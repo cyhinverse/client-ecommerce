@@ -13,25 +13,29 @@ const stats = [
     title: "Tổng người dùng",
     value: "totalUsers",
     icon: Users,
-    color: "text-blue-600",
+    bgColor: "bg-gray-100",
+    iconColor: "text-gray-700",
   },
   {
     title: "Đã xác thực email",
     value: "verifiedUsers",
     icon: MailCheck,
-    color: "text-green-600",
+    bgColor: "bg-gray-100",
+    iconColor: "text-gray-700",
   },
   {
     title: "Có địa chỉ",
     value: "usersWithAddress",
     icon: MapPin,
-    color: "text-purple-600",
+    bgColor: "bg-gray-100",
+    iconColor: "text-gray-700",
   },
   {
     title: "Người dùng mới",
     value: "recentUsers",
     icon: UserCheck,
-    color: "text-orange-600",
+    bgColor: "bg-gray-100",
+    iconColor: "text-gray-700",
   },
 ];
 
@@ -59,7 +63,7 @@ export function UsersStats({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {stats.map((stat, index) => (
-        <Card key={index} className="bg-white border-gray-200">
+        <Card key={index} className="bg-white border-gray-300 hover:shadow-md transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -70,7 +74,7 @@ export function UsersStats({
                   {getValue(stat.value)?.toLocaleString() || "0"}
                 </p>
               </div>
-              <div className={`p-3 rounded-full bg-gray-100 ${stat.color}`}>
+              <div className={`p-3 rounded-full ${stat.bgColor} ${stat.iconColor}`}>
                 <stat.icon className="h-6 w-6" />
               </div>
             </div>

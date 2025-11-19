@@ -16,10 +16,8 @@ import {
   ChevronRight,
   Home,
 } from "lucide-react";
-
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { getProductBySlug } from "@/features/product/productAction";
-
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -38,12 +36,15 @@ export default function ProductDetailPage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const router = useRouter();
 
+  const hasVariant = currentProduct?.variants[selectedVariant] && currentProduct.variants.length > 0
+  const variant = hasVariant ? currentProduct.variants[selectedVariant] : null
+
   const HandleAddToCart = async () => {
     const result = await dispatch(
       addToCart({
         productId: currentProduct?._id as string,
         quantity,
-        variantId: currentProduct?.variants[selectedVariant]._id as string,
+        variantId: variant?._id,
       }),
     );
     if (result) {
@@ -88,7 +89,7 @@ export default function ProductDetailPage() {
       return Math.round(
         ((product.price.currentPrice - product.price.discountPrice) /
           product.price.currentPrice) *
-          100,
+        100,
       );
     }
     return 0;
@@ -138,11 +139,10 @@ export default function ProductDetailPage() {
                 <button
                   key={index}
                   onClick={() => setSelectedImageIndex(index)}
-                  className={`shrink-0 w-16 h-16 rounded-md border transition-all ${
-                    selectedImageIndex === index
-                      ? "border-foreground"
-                      : "border-border hover:border-foreground/50"
-                  }`}
+                  className={`shrink-0 w-16 h-16 rounded-md border transition-all ${selectedImageIndex === index
+                    ? "border-foreground"
+                    : "border-border hover:border-foreground/50"
+                    }`}
                 >
                   <Image
                     src={image}
@@ -207,8 +207,8 @@ export default function ProductDetailPage() {
             {/* Price */}
             <div>
               {product.price?.discountPrice &&
-              product.price?.currentPrice &&
-              product.price.discountPrice < product.price.currentPrice ? (
+                product.price?.currentPrice &&
+                product.price.discountPrice < product.price.currentPrice ? (
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl font-semibold">
                     {new Intl.NumberFormat("vi-VN", {
@@ -269,11 +269,10 @@ export default function ProductDetailPage() {
                   <button
                     key={index}
                     onClick={() => setSelectedVariant(index)}
-                    className={`p-3 border rounded-lg text-left transition-colors ${
-                      selectedVariant === index
-                        ? "border-foreground bg-muted/50"
-                        : "border-border hover:bg-muted/30"
-                    }`}
+                    className={`p-3 border rounded-lg text-left transition-colors ${selectedVariant === index
+                      ? "border-foreground bg-muted/50"
+                      : "border-border hover:bg-muted/30"
+                      }`}
                   >
                     <div className="flex justify-between items-center">
                       <div>
@@ -286,7 +285,7 @@ export default function ProductDetailPage() {
                       </div>
                       <p className="font-semibold text-sm">
                         {variant.price?.discountPrice &&
-                        variant.price.discountPrice <
+                          variant.price.discountPrice <
                           variant.price.currentPrice ? (
                           <span className="text-red-600">
                             {new Intl.NumberFormat("vi-VN", {
@@ -573,11 +572,10 @@ function ReviewItem({
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`h-3 w-3 ${
-                        i < rating
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-muted"
-                      }`}
+                      className={`h-3 w-3 ${i < rating
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-muted"
+                        }`}
                     />
                   ))}
                 </div>

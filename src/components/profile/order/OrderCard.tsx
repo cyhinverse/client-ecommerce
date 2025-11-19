@@ -94,13 +94,24 @@ export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancell
         return product.price.discountPrice || product.price.currentPrice;
     };
 
+    // ✅ SỬA LỖI: Kiểm tra order._id có tồn tại không
+    const getOrderDisplayId = () => {
+        if (order.orderCode) {
+            return `Đơn hàng #${order.orderCode}`;
+        }
+        if (order._id) {
+            return `Đơn hàng ${order._id.slice(-8)}`;
+        }
+        return "Đơn hàng";
+    };
+
     return (
-        <Card key={order._id} className="hover:shadow-md transition-shadow">
+        <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">
                     <div>
                         <CardTitle className="text-lg flex items-center gap-2">
-                            {order.orderCode ? `Đơn hàng #${order.orderCode}` : `Đơn hàng ${order._id.slice(-8)}`}
+                            {getOrderDisplayId()} {/* ✅ SỬ DỤNG HÀM MỚI */}
                             <Badge variant="outline" className={getStatusColor(order.status)}>
                                 <span className="flex items-center gap-1">
                                     {getStatusIcon(order.status)}
@@ -126,8 +137,8 @@ export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancell
                 <div className="border-t pt-3 mb-4">
                     <h4 className="font-medium mb-2">Sản phẩm:</h4>
                     <div className="space-y-3">
-                        {order.products.slice(0, 3).map((product, index) => (
-                            <div key={product.productId + index} className="flex justify-between items-center text-sm">
+                        {(order.products || []).slice(0, 3).map((product, index) => (
+                            <div key={`${product.productId || index}-${index}`} className="flex justify-between items-center text-sm"> {/* ✅ CẢI THIỆN KEY */}
                                 <div className="flex items-center gap-2">
                                     <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
                                         {product.image ? (
@@ -152,9 +163,9 @@ export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancell
                                 </div>
                             </div>
                         ))}
-                        {order.products.length > 3 && (
+                        {(order.products?.length || 0) > 3 && (
                             <div className="text-sm text-muted-foreground text-center">
-                                +{order.products.length - 3} sản phẩm khác...
+                                +{(order.products?.length || 0) - 3} sản phẩm khác...
                             </div>
                         )}
                     </div>
@@ -186,19 +197,19 @@ export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancell
                 <div className="border-t pt-3 mb-4">
                     <h4 className="font-medium mb-1">Địa chỉ giao hàng:</h4>
                     <p className="text-sm text-muted-foreground">
-                        {order.shippingAddress.fullName} - {order.shippingAddress.phone}
+                        {order.shippingAddress?.fullName} - {order.shippingAddress?.phone}
                     </p>
                     <p className="text-sm text-muted-foreground">
                         {[
-                            order.shippingAddress.address,
-                            order.shippingAddress.ward,
-                            order.shippingAddress.district,
-                            order.shippingAddress.city
+                            order.shippingAddress?.address,
+                            order.shippingAddress?.ward,
+                            order.shippingAddress?.district,
+                            order.shippingAddress?.city
                         ].filter(Boolean).join(", ")}
                     </p>
-                    {order.shippingAddress.note && (
+                    {order.shippingAddress?.note && (
                         <p className="text-sm text-muted-foreground mt-1">
-                            <span className="font-medium">Ghi chú:</span> {order.shippingAddress.note}
+                            <span className="font-medium">Ghi chú:</span> {order.shippingAddress?.note}
                         </p>
                     )}
                 </div>
@@ -213,7 +224,7 @@ export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancell
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => onViewOrder(order._id)}
+                            onClick={() => onViewOrder(order._id!)}
                         >
                             <Eye className="h-4 w-4 mr-1" />
                             Xem chi tiết
@@ -223,7 +234,7 @@ export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancell
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => onCancelOrder(order._id)}
+                                onClick={() => onCancelOrder(order._id!)}
                                 disabled={isCancelling}
                                 className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
                             >

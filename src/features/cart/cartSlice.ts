@@ -51,7 +51,8 @@ interface CartItem {
     discountPrice: number;
     currency: string;
   };
-  variant?: Variant; // ✅ THÊM VARIANT DATA
+  variant?: Variant;
+  selected?: boolean; // ✅ THÊM TRƯỜNG SELECTED
 }
 
 interface Cart {
@@ -68,12 +69,16 @@ interface CartState {
   data: Cart | null;
   isLoading: boolean;
   error: string | null;
+  selectedItems: CartItem[]; // ✅ THÊM SELECTED ITEMS
+  checkoutTotal: number; // ✅ THÊM CHECKOUT TOTAL
 }
 
 const initialState: CartState = {
   data: null,
   isLoading: false,
   error: null,
+  selectedItems: [], // ✅ ITEMS ĐƯỢC CHỌN ĐỂ CHECKOUT
+  checkoutTotal: 0, // ✅ TỔNG TIỀN CỦA SELECTED ITEMS
 };
 
 export const cartSlice = createSlice({
@@ -125,6 +130,15 @@ export const cartSlice = createSlice({
             (sum, item) => sum + (item.price.currentPrice || 0) * item.quantity,
             0
           );
+
+          // ✅ CẬP NHẬT SELECTED ITEMS NẾU XÓA ITEM ĐANG CHỌN
+          state.selectedItems = state.selectedItems.filter(
+            (item) => item._id !== action.payload
+          );
+          state.checkoutTotal = state.selectedItems.reduce(
+            (sum, item) => sum + (item.price.currentPrice || 0) * item.quantity,
+            0
+          );
         }
       }
     },
@@ -133,6 +147,8 @@ export const cartSlice = createSlice({
         state.data.items = [];
         state.data.totalAmount = 0;
       }
+      state.selectedItems = []; // ✅ XÓA SELECTED ITEMS
+      state.checkoutTotal = 0;
     },
     updateCartLocal: (state, action) => {
       if (state.data) {
@@ -147,9 +163,96 @@ export const cartSlice = createSlice({
             (sum, item) => sum + (item.price.currentPrice || 0) * item.quantity,
             0
           );
+
+          // ✅ CẬP NHẬT SELECTED ITEMS NẾU ITEM ĐANG CHỌN
+          const selectedItemIndex = state.selectedItems.findIndex(
+            (item) => item._id === itemId
+          );
+          if (selectedItemIndex > -1) {
+            state.selectedItems[selectedItemIndex].quantity = quantity;
+            state.checkoutTotal = state.selectedItems.reduce(
+              (sum, item) => sum + (item.price.currentPrice || 0) * item.quantity,
+              0
+            );
+          }
         }
       }
     },
+
+    // ✅ THÊM REDUCERS MỚI CHO VIỆC CHỌN SẢN PHẨM
+    toggleSelectItem: (state, action) => {
+      const itemId = action.payload;
+      if (!state.data) return;
+
+      const itemIndex = state.data.items.findIndex(item => item._id === itemId);
+      if (itemIndex > -1) {
+        const item = state.data.items[itemIndex];
+        const isSelected = !item.selected;
+
+        // Cập nhật trạng thái selected trong cart items
+        state.data.items[itemIndex].selected = isSelected;
+
+        // Cập nhật selectedItems
+        if (isSelected) {
+          // Thêm vào selectedItems nếu chưa có
+          if (!state.selectedItems.find(selectedItem => selectedItem._id === itemId)) {
+            state.selectedItems.push(item);
+          }
+        } else {
+          // Xóa khỏi selectedItems
+          state.selectedItems = state.selectedItems.filter(
+            selectedItem => selectedItem._id !== itemId
+          );
+        }
+
+        // Tính lại checkout total
+        state.checkoutTotal = state.selectedItems.reduce(
+          (sum, item) => sum + (item.price.currentPrice || 0) * item.quantity,
+          0
+        );
+      }
+    },
+
+    selectAllItems: (state) => {
+      if (!state.data) return;
+
+      // Chọn tất cả items
+      state.data.items.forEach(item => {
+        item.selected = true;
+      });
+
+      // Cập nhật selectedItems
+      state.selectedItems = [...state.data.items];
+
+      // Tính lại checkout total
+      state.checkoutTotal = state.selectedItems.reduce(
+        (sum, item) => sum + (item.price.currentPrice || 0) * item.quantity,
+        0
+      );
+    },
+
+    unselectAllItems: (state) => {
+      if (!state.data) return;
+
+      // Bỏ chọn tất cả items
+      state.data.items.forEach(item => {
+        item.selected = false;
+      });
+
+      // Xóa selectedItems
+      state.selectedItems = [];
+      state.checkoutTotal = 0;
+    },
+
+    // ✅ CHUẨN BỊ CHO CHECKOUT - CHỈ GIỮ LẠI SELECTED ITEMS
+    prepareForCheckout: (state) => {
+      if (!state.data) return;
+
+      // Chỉ giữ lại selected items trong cart
+      state.data.items = state.selectedItems;
+      state.data.totalAmount = state.checkoutTotal;
+    },
+
     clearError: (state) => {
       state.error = null;
     },
@@ -166,10 +269,30 @@ export const cartSlice = createSlice({
       state.error = null;
 
       // Handle different API response structures
+      let cartData = null;
       if (action.payload.data) {
-        state.data = action.payload.data; // { data: cart, status, message }
+        cartData = action.payload.data;
       } else {
-        state.data = action.payload; // Direct cart data
+        cartData = action.payload;
+      }
+
+      // ✅ THÊM TRƯỜNG SELECTED CHO MỖI ITEM KHI LẤY CART
+      if (cartData && cartData.items) {
+        cartData.items = cartData.items.map((item: CartItem) => ({
+          ...item,
+          selected: item.selected || false
+        }));
+      }
+
+      state.data = cartData;
+
+      // ✅ KHỞI TẠO SELECTED ITEMS TỪ CART DATA
+      if (cartData && cartData.items) {
+        state.selectedItems = cartData.items.filter((item: CartItem) => item.selected);
+        state.checkoutTotal = state.selectedItems.reduce(
+          (sum, item) => sum + (item.price.currentPrice || 0) * item.quantity,
+          0
+        );
       }
     });
     builder.addCase(getCart.rejected, (state, action) => {
@@ -186,11 +309,22 @@ export const cartSlice = createSlice({
       state.isLoading = false;
       state.error = null;
 
+      let cartData = null;
       if (action.payload.data) {
-        state.data = action.payload.data;
+        cartData = action.payload.data;
       } else {
-        state.data = action.payload;
+        cartData = action.payload;
       }
+
+      // ✅ THÊM TRƯỜNG SELECTED CHO MỖI ITEM
+      if (cartData && cartData.items) {
+        cartData.items = cartData.items.map((item: CartItem) => ({
+          ...item,
+          selected: item.selected || false
+        }));
+      }
+
+      state.data = cartData;
     });
     builder.addCase(addToCart.rejected, (state, action) => {
       state.isLoading = false;
@@ -207,10 +341,31 @@ export const cartSlice = createSlice({
     builder.addCase(removeFromCart.fulfilled, (state, action) => {
       state.isLoading = false;
       state.error = null;
+
+      let cartData = null;
       if (action.payload.data) {
-        state.data = action.payload.data;
+        cartData = action.payload.data;
       } else if (action.payload) {
-        state.data = action.payload;
+        cartData = action.payload;
+      }
+
+      // ✅ THÊM TRƯỜNG SELECTED CHO MỖI ITEM
+      if (cartData && cartData.items) {
+        cartData.items = cartData.items.map((item: CartItem) => ({
+          ...item,
+          selected: item.selected || false
+        }));
+      }
+
+      state.data = cartData;
+
+      // ✅ CẬP NHẬT SELECTED ITEMS
+      if (cartData && cartData.items) {
+        state.selectedItems = cartData.items.filter((item: CartItem) => item.selected);
+        state.checkoutTotal = state.selectedItems.reduce(
+          (sum, item) => sum + (item.price.currentPrice || 0) * item.quantity,
+          0
+        );
       }
     });
     builder.addCase(removeFromCart.rejected, (state, action) => {
@@ -228,12 +383,16 @@ export const cartSlice = createSlice({
       state.isLoading = false;
       state.error = null;
 
+      let cartData = null;
       if (action.payload.data) {
-        console.log("📦 Cart data after clearCart:", action.payload.data);
-        state.data = action.payload.data;
+        cartData = action.payload.data;
       } else {
-        state.data = action.payload;
+        cartData = action.payload;
       }
+
+      state.data = cartData;
+      state.selectedItems = []; // ✅ XÓA SELECTED ITEMS
+      state.checkoutTotal = 0;
     });
     builder.addCase(clearCart.rejected, (state, action) => {
       state.isLoading = false;
@@ -245,42 +404,41 @@ export const cartSlice = createSlice({
       state.error = null;
     });
 
-    // Trong updateCartItem.fulfilled
     builder.addCase(updateCartItem.fulfilled, (state, action) => {
       state.isLoading = false;
       state.error = null;
       const oldItemsWithVariants = state.data?.items || [];
 
+      let cartData = null;
       if (action.payload.data) {
-        const updatedItems = action.payload.data.items.map((newItem: any) => {
-          const oldItem = oldItemsWithVariants.find(
-            (item) => item._id === newItem._id
-          );
-          return {
-            ...newItem,
-            variant: oldItem?.variant,
-          };
-        });
-
-        state.data = {
-          ...action.payload.data,
-          items: updatedItems,
-        };
+        cartData = action.payload.data;
       } else if (action.payload) {
-        const updatedItems = action.payload.items.map((newItem: any) => {
+        cartData = action.payload;
+      }
+
+      if (cartData) {
+        const updatedItems = cartData.items.map((newItem: any) => {
           const oldItem = oldItemsWithVariants.find(
             (item) => item._id === newItem._id
           );
           return {
             ...newItem,
             variant: oldItem?.variant,
+            selected: oldItem?.selected || false // ✅ GIỮ LẠI TRẠNG THÁI SELECTED
           };
         });
 
         state.data = {
-          ...action.payload,
+          ...cartData,
           items: updatedItems,
         };
+
+        // ✅ CẬP NHẬT SELECTED ITEMS
+        state.selectedItems = updatedItems.filter((item: CartItem) => item.selected);
+        state.checkoutTotal = state.selectedItems.reduce(
+          (sum, item) => sum + (item.price.currentPrice || 0) * item.quantity,
+          0
+        );
       }
     });
     builder.addCase(updateCartItem.rejected, (state, action) => {
@@ -295,6 +453,10 @@ export const {
   removeFromCartLocal,
   clearCartLocal,
   updateCartLocal,
+  toggleSelectItem,
+  selectAllItems,
+  unselectAllItems,
+  prepareForCheckout,
   clearError,
 } = cartSlice.actions;
 
