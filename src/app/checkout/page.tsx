@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { createOrder } from "@/features/order/orderAction";
 import { clearCart } from "@/features/cart/cartAction";
 import { toast } from "sonner";
+import { createPaymentUrl } from "@/features/payment/paymentAction";
 
 export default function CheckoutPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -118,14 +119,28 @@ export default function CheckoutPage() {
       const result = await dispatch(createOrder(orderData)).unwrap();
 
       if (result) {
-        toast.success("Đặt hàng thành công!");
+        // Clear cart immediately after order creation
+        dispatch(clearCart()).unwrap().catch(console.error);
 
-        router.push(`/`);
+        if (paymentMethod === "vnpay") {
+          try {
+            toast.loading("Đang chuyển hướng đến VNPay...");
+            // Use Redux action instead of direct API call
+            const paymentResult = await dispatch(createPaymentUrl(result._id)).unwrap();
 
-        setTimeout(() => {
-          dispatch(clearCart()).unwrap().catch(error => {
-          });
-        }, 1000);
+            if (paymentResult.paymentUrl) {
+              window.location.href = paymentResult.paymentUrl;
+              return;
+            }
+          } catch (paymentError) {
+            console.error("VNPay error:", paymentError);
+            toast.error("Không thể tạo thanh toán VNPay. Vui lòng thanh toán lại trong lịch sử đơn hàng.");
+            router.push("/"); // Or redirect to order detail if available
+          }
+        } else {
+          toast.success("Đặt hàng thành công!");
+          router.push(`/`);
+        }
       }
 
     } catch (error: any) {

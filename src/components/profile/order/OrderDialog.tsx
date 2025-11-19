@@ -3,6 +3,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { Order, OrderProduct } from "@/types/order";
 import { Package, Clock, Truck, CheckCircle, XCircle, RefreshCw, MapPin, CreditCard } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useAppDispatch } from "@/hooks/hooks";
+import { createPaymentUrl } from "@/features/payment/paymentAction";
+import { toast } from "sonner";
+import { useState } from "react";
 
 interface OrderDialogProps {
     order: Order | null;
@@ -11,7 +16,27 @@ interface OrderDialogProps {
 }
 
 export default function OrderDialog({ order, open, onClose }: OrderDialogProps) {
+    const dispatch = useAppDispatch();
+    const [isPaying, setIsPaying] = useState(false);
+
     if (!order) return null;
+
+    const handlePayment = async () => {
+        if (!order) return;
+        setIsPaying(true);
+        try {
+            toast.loading("Đang chuyển hướng đến VNPay...");
+            const result = await dispatch(createPaymentUrl(order._id)).unwrap();
+            if (result.paymentUrl) {
+                window.location.href = result.paymentUrl;
+            }
+        } catch (error) {
+            console.error("Payment error:", error);
+            toast.error("Không thể tạo thanh toán. Vui lòng thử lại.");
+        } finally {
+            setIsPaying(false);
+        }
+    };
 
     const getStatusIcon = (status: Order["status"]) => {
         switch (status) {
@@ -228,6 +253,17 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
                                         </div>
                                     )}
                                 </div>
+                                {order.paymentMethod === "vnpay" && order.paymentStatus === "unpaid" && (
+                                    <div className="mt-4 pt-4 border-t">
+                                        <Button
+                                            className="w-full"
+                                            onClick={handlePayment}
+                                            disabled={isPaying}
+                                        >
+                                            {isPaying ? "Đang xử lý..." : "Thanh toán ngay"}
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Shipping Address */}

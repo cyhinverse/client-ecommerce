@@ -2,7 +2,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useAppSelector } from "@/hooks/hooks";
 import { ShoppingCart, Search } from "lucide-react";
@@ -12,8 +11,13 @@ import SearchModal from "@/components/search/SearchModel";
 
 export default function HeaderLayout() {
   const { loading, isAuthenticated, token, data } = useAppSelector(
-    (state) => state.auth,
+    (state) => state.auth
   );
+  const { data: cartData } = useAppSelector((state) => state.cart);
+
+  // Calculate total items in cart (sum of quantities)
+  const cartItemsCount = cartData?.items?.reduce((total, item) => total + item.quantity, 0) || 0;
+
   const path = usePathname();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -106,15 +110,19 @@ export default function HeaderLayout() {
 
                 {/* Cart */}
                 {isAuthenticated && token && (
-                  <Link href="/cart" className="p-2">
+                  <Link href="/cart" className="p-2 relative">
                     <ShoppingCart className="h-5 w-5" />
+                    {cartItemsCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                        {cartItemsCount > 99 ? "99+" : cartItemsCount}
+                      </span>
+                    )}
                   </Link>
                 )}
 
                 {/* Avatar or Login */}
                 {isAuthenticated && token ? (
                   <Link href="/profile">
-                    {/* Sửa lỗi ở đây: chỉ dùng width/height HOẶC fill, không dùng cả hai */}
                     <div className="relative w-8 h-8 rounded-full overflow-hidden">
                       <Image
                         alt={data?.username as string}
