@@ -1,19 +1,14 @@
 // components/search/SearchModal.tsx
 "use client";
-import { useState, useEffect, useRef, useMemo } from "react";
-import { Search, X } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Search, X, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Image from "next/image";
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  category: string;
-}
+import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { searchProducts } from "@/features/product/productAction";
+import { useRouter } from "next/navigation";
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -23,50 +18,24 @@ interface SearchModalProps {
 export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { searchResults, isSearching } = useAppSelector((state) => state.product);
 
-  // Danh sách sản phẩm mẫu
-  const sampleProducts: Product[] = [
-    {
-      id: "1",
-      name: "iPhone 15 Pro",
-      price: 999,
-      image: "/images/iphone.jpg",
-      category: "Điện thoại",
-    },
-    {
-      id: "2",
-      name: "MacBook Air M2",
-      price: 1299,
-      image: "/images/macbook.jpg",
-      category: "Laptop",
-    },
-    {
-      id: "3",
-      name: "Air Jordan 1",
-      price: 150,
-      image: "/images/jordan.jpg",
-      category: "Giày",
-    },
-    {
-      id: "4",
-      name: "Samsung Galaxy S24",
-      price: 899,
-      image: "/images/samsung.jpg",
-      category: "Điện thoại",
-    },
-  ];
-
-  // Tính toán sản phẩm được lọc trực tiếp thay vì dùng useEffect
-  const filteredProducts = useMemo(() => {
+  // Debounce search to avoid excessive API calls
+  useEffect(() => {
     if (searchQuery.trim() === "") {
-      return [];
+      return;
     }
-    return sampleProducts.filter((product) =>
-      product.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [searchQuery, sampleProducts]);
 
-  // Focus input khi mở modal
+    const debounceTimer = setTimeout(() => {
+      dispatch(searchProducts({ keyword: searchQuery, limit: 10 }));
+    }, 300); // Wait 300ms after user stops typing
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery, dispatch]);
+
+  // Focus input when modal opens
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => {
@@ -75,7 +44,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     }
   }, [isOpen]);
 
-  // Đóng modal khi nhấn ESC
+  // Close modal on ESC key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -87,15 +56,30 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     }
   }, [isOpen, onClose]);
 
-  // Handle input change with reset logic
+  // Handle input change
   const handleInputChange = (value: string) => {
     setSearchQuery(value);
   };
 
   // Handle close with reset
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setSearchQuery("");
     onClose();
+  }, [onClose]);
+
+  // Handle product click
+  const handleProductClick = (slug: string) => {
+    handleClose();
+    router.push(`/${slug}`);
+  };
+
+  // Format price in VND
+  const formatPrice = (price: any) => {
+    const actualPrice = price?.discountPrice || price?.currentPrice || 0;
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(actualPrice);
   };
 
   if (!isOpen) return null;
@@ -106,11 +90,11 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
       onClick={handleClose}
     >
       <div
-        className="bg-white rounded-lg w-full max-w-2xl mx-4 shadow-lg"
+        className="bg-white rounded-lg w-full max-w-2xl mx-4 shadow-lg max-h-[600px] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Input */}
-        <div className="flex items-center gap-2 p-4 border-b">
+        <div className="flex items-center gap-2 p-4 border-b flex-shrink-0">
           <Search className="w-5 h-5 text-gray-500" />
           <Input
             ref={inputRef}
@@ -119,53 +103,57 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
             onChange={(e) => handleInputChange(e.target.value)}
             className="border-0 focus-visible:ring-0 text-lg"
           />
+          {isSearching && <Loader2 className="w-5 h-5 animate-spin text-gray-500" />}
           <Button variant="ghost" size="icon" onClick={handleClose}>
             <X className="w-5 h-5" />
           </Button>
         </div>
 
         {/* Search Results */}
-        <ScrollArea className="max-h-96">
+        <ScrollArea className="flex-1 overflow-y-auto">
           <div className="p-4">
-            {filteredProducts.length > 0 ? (
+            {isSearching && searchQuery.trim() && (
+              <div className="text-center py-8 text-gray-500">
+                <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
+                Đang tìm kiếm...
+              </div>
+            )}
+            {!isSearching && searchResults.length > 0 ? (
               <div className="space-y-3">
-                {filteredProducts.map((product) => (
+                {searchResults.map((product) => (
                   <div
-                    key={product.id}
-                    className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-lg cursor-pointer"
-                    onClick={() => {
-                      console.log("Chọn sản phẩm:", product);
-                      handleClose();
-                    }}
+                    key={product._id}
+                    className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
+                    onClick={() => handleProductClick(product.slug)}
                   >
-                    <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center">
-                      {product.image ? (
+                    <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center flex-shrink-0 overflow-hidden">
+                      {product.images && product.images.length > 0 ? (
                         <Image
-                          width={100}
-                          height={100}
-                          src={product.image}
+                          width={64}
+                          height={64}
+                          src={product.images[0]}
                           alt={product.name}
-                          className="w-10 h-10 object-cover rounded"
+                          className="w-full h-full object-cover"
                         />
                       ) : (
-                        <span className="text-xs text-gray-500">IMG</span>
+                        <span className="text-xs text-gray-400">No Image</span>
                       )}
                     </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium">{product.name}</h4>
-                      <p className="text-sm text-gray-600">
-                        {product.category}
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-sm truncate">{product.name}</h4>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {product.category?.name || "Chưa phân loại"}
                       </p>
                     </div>
-                    <div className="text-lg font-semibold">
-                      ${product.price}
+                    <div className="text-base font-semibold text-gray-900 flex-shrink-0">
+                      {formatPrice(product.price)}
                     </div>
                   </div>
                 ))}
               </div>
-            ) : searchQuery ? (
+            ) : !isSearching && searchQuery.trim() ? (
               <div className="text-center py-8 text-gray-500">
-                Không tìm thấy sản phẩm {searchQuery}
+                Không tìm thấy sản phẩm "{searchQuery}"
               </div>
             ) : (
               <div className="text-center py-8 text-gray-500">

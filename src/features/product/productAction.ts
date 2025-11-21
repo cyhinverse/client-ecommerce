@@ -226,3 +226,24 @@ export const updateVariant = createAsyncThunk(
     return response.data;
   }
 );
+
+// Search products
+export const searchProducts = createAsyncThunk(
+  "product/search",
+  async ({ keyword, limit = 10 }: { keyword: string; limit?: number }, { rejectWithValue }) => {
+    try {
+      const response = await instance.get(`/products/search`, {
+        params: {
+          q: keyword,
+          limit: limit,
+        },
+      });
+      return response.data.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to search products"
+      );
+    }
+  }
+);
+

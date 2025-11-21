@@ -9,6 +9,7 @@ import { userSlice } from "@/features/user/userSlice";
 import { discountSlice } from "@/features/discount/discountSlice";
 import { orderSlice } from "@/features/order/orderSlice";
 import { paymentSlice } from "@/features/payment/paymentSlice";
+import { chatSlice } from "@/features/chat/chatSlice";
 
 const createNoopStorage = () => {
   return {
@@ -37,7 +38,8 @@ export const rootReducer = combineReducers({
   product: productSlice.reducer,
   discount: discountSlice.reducer,
   order: orderSlice.reducer,
-  payment: paymentSlice.reducer
+  payment: paymentSlice.reducer,
+  chat: chatSlice.reducer,
 });
 
 const persistConfig = {

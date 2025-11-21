@@ -13,6 +13,7 @@ import {
   getProductsBySlugOfCategory,
   updateProduct,
   updateVariant,
+  searchProducts,
 } from "./productAction";
 import { ProductState } from "@/types/product";
 
@@ -22,6 +23,9 @@ const initState: ProductState = {
   pagination: null,
   isLoading: false,
   error: null,
+  searchResults: [],
+  isSearching: false,
+  searchError: null,
 };
 
 export const productSlice = createSlice({
@@ -240,6 +244,20 @@ export const productSlice = createSlice({
     builder.addCase(updateVariant.rejected, (state, action) => {
       state.isLoading = false;
       state.error = action.error.message || "Failed to update variant by id";
+    });
+
+    // Search products
+    builder.addCase(searchProducts.pending, (state) => {
+      state.isSearching = true;
+      state.searchError = null;
+    });
+    builder.addCase(searchProducts.fulfilled, (state, action) => {
+      state.isSearching = false;
+      state.searchResults = action.payload || [];
+    });
+    builder.addCase(searchProducts.rejected, (state, action) => {
+      state.isSearching = false;
+      state.searchError = action.error.message || "Failed to search products";
     });
   },
 });

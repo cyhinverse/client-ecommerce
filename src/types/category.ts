@@ -5,6 +5,13 @@ export interface ParentCategory {
   images: string[];
 }
 
+export interface SubCategory {
+  _id: string;
+  name: string;
+  slug: string;
+  images: string[];
+}
+
 export interface Category {
   _id: string;
   name: string;
@@ -12,6 +19,7 @@ export interface Category {
   description?: string;
   images?: string[];
   parentCategory?: ParentCategory;
+  subcategories?: SubCategory[];
   createdAt: string;
   updatedAt: string;
   isActive: boolean;

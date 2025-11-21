@@ -4,6 +4,7 @@ import "./globals.css";
 import { ReduxProvider } from "./Provider";
 import HeaderLayout from "@/components/layout/header/layout";
 import FooterLayout from "@/components/layout/footer/page";
+import ChatWidget from "@/components/chat/ChatWidget";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -34,6 +35,7 @@ export default function RootLayout({
           <HeaderLayout />
           <main className="flex-1">{children}</main>
           <FooterLayout />
+          <ChatWidget />
         </ReduxProvider>
       </body>
     </html>
