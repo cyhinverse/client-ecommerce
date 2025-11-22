@@ -24,6 +24,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import ReviewDialog from "@/components/common/ReviewModel";
 import { addToCart } from "@/features/cart/cartAction";
+import Link from "next/link";
 
 export default function ProductDetailPage() {
   const dispatch = useAppDispatch();
@@ -99,13 +100,13 @@ export default function ProductDetailPage() {
     <div className="container max-w-6xl mx-auto py-6 px-4 space-y-8">
       {/* Breadcrumb */}
       <nav className="flex items-center text-sm text-muted-foreground">
-        <a
+        <Link
           href="/"
           className="hover:text-foreground transition-colors flex items-center gap-1"
         >
           <Home className="h-3 w-3" />
           Home
-        </a>
+        </Link>
         <ChevronRight className="h-3 w-3 mx-2" />
         <span className="text-foreground">{product.name}</span>
       </nav>

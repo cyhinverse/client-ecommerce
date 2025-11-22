@@ -41,6 +41,8 @@ export interface Product {
   reviews: reviews[] | null;
   tags: string[] | null;
   soldCount: number;
+  averageRating?: number;
+  numberOfReviews?: number;
   isActive?: boolean;
   isFeatured?: boolean;
   isNewArrival?: boolean;
