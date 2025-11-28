@@ -54,7 +54,6 @@ export default function ResetPasswordPage() {
     handleSubmit,
     formState: { errors },
     watch,
-    getValues, // Thêm getValues để debug
   } = useForm<FormData>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
@@ -68,7 +67,7 @@ export default function ResetPasswordPage() {
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
-      console.log("Submitting data:", data); // Debug log
+      console.log("Submitting data:", data); 
 
       const result = await dispatch(
         resetPassword({
@@ -83,7 +82,7 @@ export default function ResetPasswordPage() {
         router.push("/login");
       } else {
         const errorMessage =
-          result.payload?.message || "Đặt lại mật khẩu thất bại";
+         "Đặt lại mật khẩu thất bại";
         toast.error(errorMessage);
       }
     } catch (error: any) {

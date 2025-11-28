@@ -1,4 +1,4 @@
-// ProductFilter.tsx - Main Filter Sidebar Component
+// ProductFilter.tsx - Fixed Color Filter
 "use client";
 
 import { useState } from "react";
@@ -15,9 +15,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { motion, AnimatePresence } from "framer-motion";
 
 export interface ProductFilters {
   search: string;
@@ -37,26 +34,27 @@ interface ProductFilterProps {
   onMobileClose?: () => void;
 }
 
+// Đảm bảo màu sắc được định nghĩa đúng
 const COLORS = [
-  { name: "Đen", value: "đen", hex: "#000000" },
-  { name: "Trắng", value: "trắng", hex: "#FFFFFF" },
-  { name: "Xám", value: "xám", hex: "#808080" },
-  { name: "Đỏ", value: "đỏ", hex: "#EF4444" },
-  { name: "Xanh dương", value: "xanh dương", hex: "#3B82F6" },
-  { name: "Xanh lá", value: "xanh lá", hex: "#10B981" },
-  { name: "Vàng", value: "vàng", hex: "#F59E0B" },
-  { name: "Hồng", value: "hồng", hex: "#EC4899" },
+  { name: "Black", value: "black", hex: "#000000" },
+  { name: "White", value: "white", hex: "#FFFFFF" },
+  { name: "Gray", value: "gray", hex: "#6B7280" },
+  { name: "Navy", value: "navy", hex: "#1E3A8A" },
+  { name: "Beige", value: "beige", hex: "#E5E0D6" },
+  { name: "Brown", value: "brown", hex: "#92400E" },
+  { name: "Green", value: "green", hex: "#065F46" },
+  { name: "Blue", value: "blue", hex: "#1E40AF" },
 ];
 
-const SIZES = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
+const SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
 
 const SORT_OPTIONS = [
-  { label: "Mới nhất", value: "newest" },
-  { label: "Giá: Thấp → Cao", value: "price_asc" },
-  { label: "Giá: Cao → Thấp", value: "price_desc" },
-  { label: "Tên: A → Z", value: "name_asc" },
-  { label: "Tên: Z → A", value: "name_desc" },
-  { label: "Đánh giá cao nhất", value: "rating_desc" },
+  { label: "Newest", value: "newest" },
+  { label: "Price: Low to High", value: "price_asc" },
+  { label: "Price: High to Low", value: "price_desc" },
+  { label: "Name: A to Z", value: "name_asc" },
+  { label: "Name: Z to A", value: "name_desc" },
+  { label: "Highest Rated", value: "rating_desc" },
 ];
 
 export default function ProductFilter({
@@ -86,10 +84,16 @@ export default function ProductFilter({
     onFilterChange({ rating: newRatings });
   };
 
-  const handleColorChange = (color: string) => {
-    const newColors = filters.colors.includes(color)
-      ? filters.colors.filter((c) => c !== color)
-      : [...filters.colors, color];
+  // FIX: Đảm bảo hàm xử lý màu hoạt động đúng
+  const handleColorChange = (colorValue: string) => {
+    console.log("Color clicked:", colorValue); // Debug
+    console.log("Current colors:", filters.colors); // Debug
+    
+    const newColors = filters.colors.includes(colorValue)
+      ? filters.colors.filter((c) => c !== colorValue)
+      : [...filters.colors, colorValue];
+    
+    console.log("New colors:", newColors); // Debug
     onFilterChange({ colors: newColors });
   };
 
@@ -110,14 +114,14 @@ export default function ProductFilter({
   const filterContent = (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b">
+      <div className="flex items-center justify-between pb-4 border-b border-gray-200">
         <div className="flex items-center gap-2">
-          <SlidersHorizontal className="h-5 w-5" />
-          <h2 className="text-lg font-semibold">Bộ lọc</h2>
+          <SlidersHorizontal className="h-4 w-4 text-gray-600" />
+          <h2 className="text-lg font-light tracking-tight">Filters</h2>
           {activeFiltersCount > 0 && (
-            <Badge variant="secondary" className="ml-2">
+            <span className="bg-black text-white text-xs px-1.5 py-0.5 rounded-full min-w-5 h-5 flex items-center justify-center text-[10px]">
               {activeFiltersCount}
-            </Badge>
+            </span>
           )}
         </div>
         {isMobileOpen && (
@@ -125,31 +129,31 @@ export default function ProductFilter({
             variant="ghost"
             size="icon"
             onClick={onMobileClose}
-            className="lg:hidden"
+            className="lg:hidden hover:bg-gray-100 rounded-none h-8 w-8"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </Button>
         )}
       </div>
 
       {/* Search */}
       <div className="space-y-2">
-        <Label className="text-sm font-medium">Tìm kiếm</Label>
+        <Label className="text-xs font-medium text-gray-900 tracking-wide uppercase">SEARCH</Label>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
           <Input
-            placeholder="Tìm sản phẩm..."
+            placeholder="Search products..."
             value={filters.search}
             onChange={(e) => onFilterChange({ search: e.target.value })}
-            className="pl-9"
+            className="pl-8 rounded-none border-gray-300 focus:border-black focus:ring-black h-9 text-sm"
           />
         </div>
       </div>
 
       {/* Price Range */}
       <div className="space-y-3">
-        <Label className="text-sm font-medium">Khoảng giá</Label>
-        <div className="px-2">
+        <Label className="text-xs font-medium text-gray-900 tracking-wide uppercase">PRICE RANGE</Label>
+        <div className="px-1">
           <Slider
             min={0}
             max={10000000}
@@ -157,22 +161,18 @@ export default function ProductFilter({
             value={priceRange}
             onValueChange={handlePriceChange}
             onValueCommit={handlePriceCommit}
-            className="my-4"
+            className="my-3"
           />
         </div>
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">
-            {priceRange[0].toLocaleString("vi-VN")}đ
-          </span>
-          <span className="text-muted-foreground">
-            {priceRange[1].toLocaleString("vi-VN")}đ
-          </span>
+        <div className="flex items-center justify-between text-xs text-gray-600">
+          <span>{priceRange[0].toLocaleString("vi-VN")}đ</span>
+          <span>{priceRange[1].toLocaleString("vi-VN")}đ</span>
         </div>
       </div>
 
       {/* Rating */}
       <div className="space-y-3">
-        <Label className="text-sm font-medium">Đánh giá</Label>
+        <Label className="text-xs font-medium text-gray-900 tracking-wide uppercase">RATING</Label>
         <div className="space-y-2">
           {[5, 4, 3, 2, 1].map((rating) => (
             <div key={rating} className="flex items-center space-x-2">
@@ -180,48 +180,52 @@ export default function ProductFilter({
                 id={`rating-${rating}`}
                 checked={filters.rating.includes(rating)}
                 onCheckedChange={() => handleRatingChange(rating)}
+                className="rounded-none border-gray-300 data-[state=checked]:bg-black data-[state=checked]:border-black h-4 w-4"
               />
               <Label
                 htmlFor={`rating-${rating}`}
-                className="flex items-center gap-1 cursor-pointer text-sm"
+                className="flex items-center gap-1.5 cursor-pointer text-xs text-gray-700 flex-1"
               >
-                {Array.from({ length: rating }).map((_, i) => (
-                  <span key={i} className="text-yellow-500">★</span>
-                ))}
-                {Array.from({ length: 5 - rating }).map((_, i) => (
-                  <span key={i} className="text-gray-300">★</span>
-                ))}
-                <span className="text-muted-foreground ml-1">trở lên</span>
+                <div className="flex">
+                  {Array.from({ length: rating }).map((_, i) => (
+                    <span key={i} className="text-amber-500 text-xs">★</span>
+                  ))}
+                  {Array.from({ length: 5 - rating }).map((_, i) => (
+                    <span key={i} className="text-gray-300 text-xs">★</span>
+                  ))}
+                </div>
+                <span className="text-gray-500 text-xs">& above</span>
               </Label>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Colors */}
+      {/* Colors - FIXED */}
       <div className="space-y-3">
-        <Label className="text-sm font-medium">Màu sắc</Label>
+        <Label className="text-xs font-medium text-gray-900 tracking-wide uppercase">COLORS</Label>
         <div className="grid grid-cols-4 gap-2">
           {COLORS.map((color) => (
             <button
               key={color.value}
+              type="button" // FIX: Thêm type="button" để tránh submit form
               onClick={() => handleColorChange(color.value)}
               className={`
-                relative h-10 w-10 rounded-full border-2 transition-all
+                relative h-8 w-8 rounded-none border transition-all
                 ${
                   filters.colors.includes(color.value)
-                    ? "border-black scale-110 shadow-md"
-                    : "border-gray-200 hover:border-gray-400"
+                    ? "border-black scale-105 shadow-sm"
+                    : "border-gray-300 hover:border-gray-600"
                 }
               `}
               style={{ backgroundColor: color.hex }}
               title={color.name}
             >
               {filters.colors.includes(color.value) && (
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20">
                   <div className={`
-                    font-bold
-                    ${color.value === "trắng" || color.value === "vàng" ? "text-black" : "text-white"}
+                    font-bold text-sm
+                    ${color.value === "white" || color.value === "beige" ? "text-black" : "text-white"}
                   `}>
                     ✓
                   </div>
@@ -230,19 +234,32 @@ export default function ProductFilter({
             </button>
           ))}
         </div>
+        {/* Debug info - có thể xóa sau khi test */}
+        {filters.colors.length > 0 && (
+          <div className="text-xs text-gray-500">
+            Selected: {filters.colors.join(", ")}
+          </div>
+        )}
       </div>
 
       {/* Sizes */}
       <div className="space-y-3">
-        <Label className="text-sm font-medium">Kích thước</Label>
-        <div className="grid grid-cols-4 gap-2">
+        <Label className="text-xs font-medium text-gray-900 tracking-wide uppercase">SIZES</Label>
+        <div className="grid grid-cols-3 gap-1.5">
           {SIZES.map((size) => (
             <Button
               key={size}
+              type="button" // FIX: Thêm type="button"
               variant={filters.sizes.includes(size) ? "default" : "outline"}
               size="sm"
               onClick={() => handleSizeChange(size)}
-              className="font-medium"
+              className={`
+                font-medium rounded-none h-8 text-xs transition-all
+                ${filters.sizes.includes(size) 
+                  ? "bg-black text-white hover:bg-gray-800 border-black" 
+                  : "border-gray-300 text-gray-700 hover:border-black hover:text-black"
+                }
+              `}
             >
               {size}
             </Button>
@@ -252,17 +269,21 @@ export default function ProductFilter({
 
       {/* Sort */}
       <div className="space-y-3">
-        <Label className="text-sm font-medium">Sắp xếp theo</Label>
+        <Label className="text-xs font-medium text-gray-900 tracking-wide uppercase">SORT BY</Label>
         <Select
           value={filters.sortBy}
           onValueChange={(value) => onFilterChange({ sortBy: value })}
         >
-          <SelectTrigger>
-            <SelectValue placeholder="Chọn cách sắp xếp" />
+          <SelectTrigger className="rounded-none border-gray-300 focus:border-black focus:ring-black h-9 text-sm">
+            <SelectValue placeholder="Select sorting" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="rounded-none border-gray-300">
             {SORT_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
+              <SelectItem 
+                key={option.value} 
+                value={option.value}
+                className="rounded-none focus:bg-gray-100 text-sm"
+              >
                 {option.label}
               </SelectItem>
             ))}
@@ -274,53 +295,42 @@ export default function ProductFilter({
       {activeFiltersCount > 0 && (
         <Button
           variant="outline"
-          className="w-full"
+          className="w-full rounded-none border-black text-black hover:bg-black hover:text-white h-9 text-sm transition-all duration-300"
           onClick={onClearFilters}
         >
-          <X className="h-4 w-4 mr-2" />
-          Xóa tất cả bộ lọc
+          <X className="h-3.5 w-3.5 mr-1.5" />
+          Clear All Filters
         </Button>
       )}
     </div>
   );
 
-  // Desktop version - always render, CSS handles visibility
-  // Mobile version - only render when open
+  // Mobile version
   if (isMobileOpen) {
-    // Mobile sidebar overlay
     return (
-      <AnimatePresence>
-        <>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onMobileClose}
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          />
+      <>
+        {/* Backdrop */}
+        <div
+          onClick={onMobileClose}
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+        />
 
-          {/* Sidebar */}
-          <motion.div
-            initial={{ x: "-100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "-100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed left-0 top-0 bottom-0 w-80 bg-white z-50 lg:hidden overflow-y-auto"
-          >
-            <div className="p-6">
-              {filterContent}
-            </div>
-          </motion.div>
-        </>
-      </AnimatePresence>
+        {/* Sidebar */}
+        <div className="fixed left-0 top-0 bottom-0 w-72 bg-white z-50 lg:hidden overflow-y-auto border-r border-gray-200">
+          <div className="p-4">
+            {filterContent}
+          </div>
+        </div>
+      </>
     );
   }
 
   // Desktop version
   return (
-    <Card className="hidden lg:block p-6 sticky top-24 h-fit max-h-[calc(100vh-120px)] overflow-y-auto">
-      {filterContent}
-    </Card>
+    <div className="hidden lg:block w-64 flex-shrink-0">
+      <div className="sticky top-20 h-fit max-h-[calc(100vh-100px)] overflow-y-auto p-4 border-r border-gray-200">
+        {filterContent}
+      </div>
+    </div>
   );
 }

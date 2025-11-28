@@ -1,4 +1,4 @@
-// ProductFeatures.jsx
+"use client";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { Card, CardContent } from "../ui/card";
 import { getFeaturedProducts } from "@/features/product/productAction";
@@ -8,12 +8,11 @@ import { toast } from "sonner";
 import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
 import { motion } from "framer-motion";
 
 export default function ProductFeatures() {
   const dispatch = useAppDispatch();
-  const { isLoading, product, error } = useAppSelector(
+  const { isLoading, featured, error } = useAppSelector(
     (state) => state.product
   );
 
@@ -29,103 +28,83 @@ export default function ProductFeatures() {
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
+        staggerChildren: 0.08
       }
     }
   };
 
   const item = {
-    hidden: { opacity: 0, y: 30 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: { type: "spring" as const, stiffness: 50, damping: 20 }
-    }
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 py-12">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-        className="text-center mb-12"
-      >
-        <h2 className="text-2xl font-semibold text-gray-900 sm:text-3xl">
-          Sản Phẩm Nổi Bật
-        </h2>
-        <p className="mt-3 text-sm text-gray-600 max-w-2xl mx-auto">
-          Khám phá những sản phẩm được ưa chuộng và đánh giá cao nhất
-        </p>
-      </motion.div>
+    <section className="w-full">
+      <div className="flex justify-between items-center mb-8">
+        <h2 className="text-3xl font-bold tracking-tight">Featured Products</h2>
+        <Link href="/products?filter=featured" className="text-sm hover:underline">
+          View All
+        </Link>
+      </div>
+
 
       <motion.div
         variants={container}
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, margin: "-50px" }}
-        className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"
+        className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
       >
-        {product && product.length > 0 ? (
-          product.map((p) => (
+        {featured && featured.length > 0 ? (
+          featured.map((p) => (
             <motion.div key={p._id} variants={item}>
-              <Card
-                className="group overflow-hidden hover:shadow-lg transition-all duration-300 border-0 bg-white rounded-xl shadow-sm"
-              >
-                <Link href={`/${p.slug}`}>
+              <Link href={`/products/${p.slug}`} className="group block">
+                <Card className="overflow-hidden border-0 shadow-none bg-transparent">
                   <CardContent className="p-0">
-                    <div className="relative aspect-square overflow-hidden bg-gray-50 rounded-t-xl">
+                    <div className="relative aspect-[3/4] overflow-hidden bg-gray-100 mb-3">
                       {p.images && p.images.length > 0 ? (
                         <Image
                           src={p.images[0]}
                           alt={p.name}
                           fill
-                          className="object-cover group-hover:scale-110 transition-transform duration-500"
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                          <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                          </div>
+                        <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                          <span className="text-gray-400 text-xs">No Image</span>
                         </div>
                       )}
 
                       {p.price?.discountPrice && p.price.discountPrice < p.price.currentPrice && (
-                        <Badge className="absolute top-3 right-3 bg-black hover:bg-gray-800 text-white border-0 text-xs px-2 py-1 shadow-md">
+                        <Badge className="absolute top-2 right-2 bg-black text-white border-0 text-xs px-2 py-0.5">
                           -{Math.round(((p.price.currentPrice - p.price.discountPrice) / p.price.currentPrice) * 100)}%
                         </Badge>
                       )}
                     </div>
 
-                    <div className="p-4 space-y-3">
-                      <div className="space-y-2">
-                        <h3 className="font-medium text-gray-900 text-sm leading-tight line-clamp-2 min-h-[2.5rem]">
-                          {p.name}
-                        </h3>
-                        <p className="text-xs text-gray-500 font-medium">{p.brand}</p>
-                      </div>
-
-                      <div className="space-y-1">
+                    <div className="space-y-1">
+                      <h3 className="font-medium text-sm line-clamp-1 group-hover:underline">
+                        {p.name}
+                      </h3>
+                      <p className="text-xs text-muted-foreground">{p.brand}</p>
+                      <div className="flex items-baseline gap-2 pt-1">
                         {p.price?.discountPrice && p.price.discountPrice < p.price.currentPrice ? (
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-base font-semibold text-gray-900">
+                          <>
+                            <span className="font-semibold text-sm">
                               {new Intl.NumberFormat("vi-VN", {
                                 style: "currency",
                                 currency: "VND",
                               }).format(p.price.discountPrice)}
                             </span>
-                            <span className="text-xs text-gray-400 line-through">
+                            <span className="text-xs text-muted-foreground line-through">
                               {new Intl.NumberFormat("vi-VN", {
                                 style: "currency",
                                 currency: "VND",
                               }).format(p.price.currentPrice)}
                             </span>
-                          </div>
+                          </>
                         ) : (
-                          <span className="text-base font-semibold text-gray-900">
+                          <span className="font-semibold text-sm">
                             {new Intl.NumberFormat("vi-VN", {
                               style: "currency",
                               currency: "VND",
@@ -133,27 +112,18 @@ export default function ProductFeatures() {
                           </span>
                         )}
                       </div>
-
-                      <Button 
-                        size="sm" 
-                        className="w-full bg-black hover:bg-gray-800 text-white border-0 text-xs transition-all duration-300 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 shadow-md"
-                      >
-                        Xem chi tiết
-                      </Button>
                     </div>
                   </CardContent>
-                </Link>
-              </Card>
+                </Card>
+              </Link>
             </motion.div>
           ))
         ) : (
-          <div className="col-span-full text-center py-12">
-            <div className="text-4xl mb-4">💎</div>
-            <p className="text-lg font-medium text-gray-900 mb-2">Chưa có sản phẩm nổi bật</p>
-            <p className="text-sm text-gray-600">Sản phẩm sẽ được cập nhật sớm nhất</p>
+          <div className="col-span-full text-center py-20">
+            <p className="text-muted-foreground">No featured products at the moment</p>
           </div>
         )}
       </motion.div>
-    </div>
+    </section>
   );
 }

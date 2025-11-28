@@ -3,12 +3,11 @@ import SpinnerLoading from "@/components/common/SpinerLoading";
 import { getTreeCategories } from "@/features/category/categoryAction";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { toast } from "sonner";
 
 export default function CategoriesPage() {
   const dispatch = useAppDispatch();
-  const [currentIndex, setIndex] = useState(0);
   const { isLoading, categories, error } = useAppSelector(
     (state) => state.category
   );
@@ -16,12 +15,12 @@ export default function CategoriesPage() {
   useEffect(() => {
     dispatch(getTreeCategories());
   }, [dispatch]);
-  const handleMove = (index: number) => {
-    setIndex(index);
-  };
-  useEffect(() => {
-    handleMove(currentIndex);
-  }, [currentIndex]);
+  // const handleMove = (index: number) => {
+  //   setIndex(index);
+  // };
+  // useEffect(() => {
+  //   handleMove(currentIndex);
+  // }, [currentIndex]);
 
   useEffect(() => {
     if (error) {
@@ -44,23 +43,18 @@ export default function CategoriesPage() {
     "bg-teal-100",
   ];
 
-  const randomIndex: number = Math.floor(Math.random() * bgColor.length);
-
   return (
-    <main className="w-full h-screen p-4 mt-10 mx-auto max-w-7xl border border-gray-200 rounded-lg">
+    <main className="w-full min-h-screen p-4 mt-10 mx-auto max-w-7xl">
       <section className="m-10">
-        <h1 className="text-5xl font-semibold mb-4 items-center justify-center flex">
+        <h1 className="text-4xl font-bold mb-8 text-center tracking-tight">
           Product Categories
         </h1>
         {categories && categories.length > 0 ? (
           <div className="flex gap-4 flex-wrap items-center justify-center m-5 ">
-            {categories.map((category, index) => (
+            {categories.map((category) => (
               <div
                 key={category._id}
-                className={`w-fit h-fit p-5 border border-gray-200 rounded-xl ${
-                  currentIndex === index ? bgColor[randomIndex] : "bg-none"
-                } hover:scale-105 transform transition-transform duration-300 cursor-pointer`}
-                onMouseOver={() => handleMove(index)}
+                className={`p-4 border border-gray-200 transition-all duration-300 cursor-pointer hover:bg-gray-50`}
               >
                 <Link
                   href={`/categories/${category.slug}`}

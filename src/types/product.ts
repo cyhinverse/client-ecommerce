@@ -43,7 +43,7 @@ export interface Product {
   soldCount: number;
   averageRating?: number;
   numberOfReviews?: number;
-  isActive?: boolean;
+  isActive: boolean;
   isFeatured?: boolean;
   isNewArrival?: boolean;
   onSale?: boolean;
@@ -63,7 +63,11 @@ export interface PaginationData {
 }
 
 export interface ProductState {
-  product: Product[] | null;
+  all: Product[];
+  featured: Product[];
+  newArrivals: Product[];
+  onSale: Product[];
+  byCategory: Product[];
   currentProduct: Product | null;
   pagination: PaginationData | null;
   isLoading: boolean;
@@ -72,3 +76,4 @@ export interface ProductState {
   isSearching: boolean;
   searchError: string | null;
 }
+

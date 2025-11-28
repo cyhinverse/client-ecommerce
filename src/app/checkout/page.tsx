@@ -144,7 +144,6 @@ export default function CheckoutPage() {
       }
 
     } catch (error: any) {
-      console.error("Checkout failed:", error);
 
       let errorMessage = "Đặt hàng thất bại. Vui lòng thử lại.";
 

@@ -7,7 +7,7 @@ import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function CategoriesPage() {
@@ -17,7 +17,7 @@ export default function CategoriesPage() {
   const { isLoading, categories, error } = useAppSelector(
     (state) => state.category,
   );
-  const { product } = useAppSelector((state) => state.product);
+  const { byCategory } = useAppSelector((state) => state.product);
 
 
   useEffect(() => {
@@ -26,7 +26,7 @@ export default function CategoriesPage() {
 
   useEffect(() => {
     dispatch(getProductsBySlugOfCategory(path.split("/")[2]));
-  }, [dispatch]);
+  }, [dispatch, path]);
 
   useEffect(() => {
     if (!categories || categories.length === 0) return;
@@ -44,29 +44,14 @@ export default function CategoriesPage() {
     }
   }, [error]);
 
-  const bgColor = [
-    "bg-red-100",
-    "bg-blue-100",
-    "bg-green-100",
-    "bg-yellow-100",
-    "bg-purple-100",
-    "bg-pink-100",
-    "bg-indigo-100",
-    "bg-teal-100",
-  ];
-
-  const randomColorIndex = useMemo(() => {
-    return Math.floor(Math.random() * bgColor.length);
-  }, [bgColor.length]);
-
   const handleMove = (index: number) => {
     setIndex(index);
   };
 
   return (
-    <main className="w-full min-h-screen p-4 mx-auto max-w-7xl border border-gray-200 rounded-lg mb-20">
+    <main className="w-full min-h-screen p-4 mx-auto max-w-7xl mb-20">
       <section className="m-10">
-        <h1 className="text-5xl font-semibold mb-4 items-center justify-center flex">
+        <h1 className="text-4xl font-bold mb-8 text-center tracking-tight">
           Product Categories
         </h1>
         {categories && categories.length > 0 ? (
@@ -74,10 +59,9 @@ export default function CategoriesPage() {
             {categories.map((category, index) => (
               <div
                 key={category._id}
-                className={`w-fit h-fit p-5 border border-gray-200 rounded-xl ${currentIndex === index
-                  ? bgColor[randomColorIndex]
-                  : "bg-white"
-                  } hover:scale-105 transform transition-transform duration-300 cursor-pointer`}
+                className={`p-4 border border-gray-200 transition-all duration-300 cursor-pointer hover:bg-gray-50 ${
+                  currentIndex === index ? "bg-gray-100" : ""
+                }`}
                 onMouseOver={() => handleMove(index)}
               >
                 <Link
@@ -96,60 +80,56 @@ export default function CategoriesPage() {
 
       {isLoading && <SpinnerLoading />}
       <section className="mb-20">
-        <h1 className="flex items-center justify-center font-semibold text-4xl mb-8">
-          Products for this category
+        <h1 className="text-3xl font-bold mb-8 text-center tracking-tight">
+          Products
         </h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 m-10">
-          {product && product.length > 0 ? (
-            product.map((p) => (
-              <Card
-                key={p._id}
-                className="w-full shadow-sm hover:shadow-md transition-shadow overflow-hidden"
-              >
-                {/* Product Image */}
-                <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
-                  {p.images && p.images.length > 0 ? (
-                    <Image
-                      src={p.images[0].url}
-                      alt={p.name}
-                      width={200}
-                      height={200}
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="text-gray-400 text-center">
-                      <span className="text-sm">No Image</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Product Info */}
-                <CardHeader className="pb-2">
-                  <h3 className="font-semibold text-lg leading-tight line-clamp-2 mb-2">
-                    {p.name}
-                  </h3>
-
-                  {/* Price */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-lg font-bold text-red-600">
-                      {p.price?.discountPrice?.toLocaleString("vi-VN")}đ
-                    </span>
-                    {p.price?.currentPrice !== p.price?.discountPrice && (
-                      <span className="text-sm text-gray-400 line-through">
-                        {p.price?.currentPrice?.toLocaleString("vi-VN")}đ
-                      </span>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 m-10">
+          {byCategory && byCategory.length > 0 ? (
+            byCategory.map((p) => (
+              <Link key={p._id} href={`/products/${p.slug}`} className="group block">
+                <Card className="overflow-hidden border-0 shadow-none bg-transparent">
+                  {/* Product Image - 3:4 Aspect Ratio */}
+                  <div className="relative aspect-[3/4] bg-gray-100 mb-3">
+                    {p.images && p.images.length > 0 ? (
+                      <Image
+                        src={p.images[0]}
+                        alt={p.name}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-gray-400 text-xs">
+                        No Image
+                      </div>
                     )}
                   </div>
 
-                  {/* Action Button */}
-                  <Link
-                    href={`/${p.slug}`}
-                    className="w-full bg-black text-white text-center py-2 rounded hover:bg-gray-800 transition-colors block"
-                  >
-                    Xem chi tiết
-                  </Link>
-                </CardHeader>
-              </Card>
+                  {/* Product Info */}
+                  <CardHeader className="p-0 space-y-1">
+                    <h3 className="font-medium text-sm line-clamp-1 group-hover:underline">
+                      {p.name}
+                    </h3>
+
+                    {/* Price */}
+                    <div className="flex items-baseline gap-2 pt-1">
+                      {p.price?.discountPrice && p.price?.currentPrice !== p.price?.discountPrice ? (
+                        <>
+                          <span className="font-semibold text-sm">
+                            {p.price.discountPrice.toLocaleString("vi-VN")}đ
+                          </span>
+                          <span className="text-xs text-muted-foreground line-through">
+                            {p.price.currentPrice.toLocaleString("vi-VN")}đ
+                          </span>
+                        </>
+                      ) : (
+                        <span className="font-semibold text-sm">
+                          {p.price?.currentPrice?.toLocaleString("vi-VN")}đ
+                        </span>
+                      )}
+                    </div>
+                  </CardHeader>
+                </Card>
+              </Link>
             ))
           ) : (
             <div className="col-span-full">

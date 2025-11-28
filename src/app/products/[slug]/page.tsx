@@ -114,7 +114,7 @@ export default function ProductDetailPage() {
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Image Gallery */}
         <div className="space-y-4">
-          <div className="aspect-square overflow-hidden rounded-lg border">
+          <div className="aspect-square overflow-hidden bg-gray-100">
             {product.images && product.images.length > 0 ? (
               <Image
                 src={product.images[selectedImageIndex]}
@@ -140,9 +140,9 @@ export default function ProductDetailPage() {
                 <button
                   key={index}
                   onClick={() => setSelectedImageIndex(index)}
-                  className={`shrink-0 w-16 h-16 rounded-md border transition-all ${selectedImageIndex === index
-                    ? "border-foreground"
-                    : "border-border hover:border-foreground/50"
+                  className={`shrink-0 w-16 h-16 border-2 transition-all ${selectedImageIndex === index
+                    ? "border-black"
+                    : "border-transparent hover:border-gray-300"
                     }`}
                 >
                   <Image
@@ -150,7 +150,7 @@ export default function ProductDetailPage() {
                     alt={`${product.name} ${index + 1}`}
                     width={64}
                     height={64}
-                    className="h-full w-full object-cover rounded-md"
+                    className="h-full w-full object-cover"
                   />
                 </button>
               ))}
@@ -164,18 +164,18 @@ export default function ProductDetailPage() {
             {/* Badges */}
             <div className="flex flex-wrap gap-2">
               {product.isNewArrival && (
-                <Badge variant="outline" className="text-xs">
-                  New Arrival
+                <Badge className="bg-black text-white border-0 text-xs px-2 py-0.5">
+                  NEW
                 </Badge>
               )}
               {product.onSale && (
-                <Badge className="bg-red-500 text-white hover:bg-red-600 text-xs">
-                  Sale {calculateDiscount()}% Off
+                <Badge className="bg-black text-white border-0 text-xs px-2 py-0.5">
+                  -{calculateDiscount()}%
                 </Badge>
               )}
               {product.isFeatured && (
-                <Badge variant="secondary" className="text-xs">
-                  Featured
+                <Badge className="bg-black text-white border-0 text-xs px-2 py-0.5">
+                  FEATURED
                 </Badge>
               )}
             </div>
@@ -270,9 +270,9 @@ export default function ProductDetailPage() {
                   <button
                     key={index}
                     onClick={() => setSelectedVariant(index)}
-                    className={`p-3 border rounded-lg text-left transition-colors ${selectedVariant === index
-                      ? "border-foreground bg-muted/50"
-                      : "border-border hover:bg-muted/30"
+                    className={`p-3 border text-left transition-colors ${selectedVariant === index
+                      ? "border-black bg-gray-50"
+                      : "border-gray-200 hover:border-gray-400"
                       }`}
                   >
                     <div className="flex justify-between items-center">
@@ -314,7 +314,7 @@ export default function ProductDetailPage() {
           <div>
             <p className="font-medium mb-3">Quantity</p>
             <div className="flex items-center gap-4">
-              <div className="flex items-center border rounded-lg">
+              <div className="flex items-center border">
                 <button
                   onClick={() => handleQuantityChange(-1)}
                   disabled={quantity <= 1}
@@ -358,7 +358,7 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Features */}
-          <div className="border rounded-lg p-4 space-y-3">
+          <div className="border-t pt-4 space-y-3">
             <div className="flex items-center gap-3 text-sm">
               <Truck className="h-4 w-4 text-muted-foreground" />
               <span className="text-muted-foreground">

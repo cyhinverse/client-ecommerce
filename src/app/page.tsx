@@ -10,16 +10,15 @@ import ProductFeatures from "@/components/common/ProductFeatures";
 export default function Home({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <main className="w-full max-w-7xl mx-auto  h-full m-5 ">
-        {children}
-        <div className="flex gap-10">
+      <main className="w-full min-h-screen">
+        <Banner />
+        <div className="container mx-auto px-4 py-12 space-y-20">
           <Category />
-          <Banner />
+          <ListFeatures />
+          <ProductFeatures />
+          <NewArrivals />
+          <OnSaleProduct />
         </div>
-        <ListFeatures />
-        <ProductFeatures />
-        <NewArrivals />
-        <OnSaleProduct />
       </main>
     </>
   );

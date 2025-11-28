@@ -30,7 +30,9 @@ export default function AdminProductsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
-  const productState = useAppSelector((state) => state.product);
+  
+  // SỬA: Lấy đúng state từ slice mới
+  const { all: products, pagination, isLoading, error } = useAppSelector((state) => state.product);
 
   // Lấy params từ URL với giá trị mặc định hợp lệ
   const urlPage = parseInt(searchParams.get("page") || "1");
@@ -61,11 +63,8 @@ export default function AdminProductsPage() {
     urlIsActive === "true" ? true : urlIsActive === "false" ? false : null
   );
 
-  // Đảm bảo products luôn là array
-  const products: Product[] = Array.isArray(productState.product)
-    ? productState.product
-    : [];
-  const pagination = productState.pagination;
+  // SỬA: Đảm bảo products luôn là array (đã có từ selector)
+  const productList: Product[] = Array.isArray(products) ? products : [];
 
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
@@ -201,6 +200,15 @@ export default function AdminProductsPage() {
     urlMaxPrice,
     urlIsActive,
   ]);
+
+  // SỬA: Thêm loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div>Đang tải...</div>
+      </div>
+    );
+  }
 
   // Event handlers
   const handleOpenCreateModal = () => {
@@ -403,15 +411,15 @@ export default function AdminProductsPage() {
     setViewModalOpen(true);
   };
 
-  // Tính toán thống kê
-  const totalProducts = pagination?.totalItems || products.length;
-  const activeProducts = products.filter((product) => product.isActive).length;
-  const productsOnSale = products.filter((product) => product.onSale).length;
+  // Tính toán thống kê - SỬA: sử dụng productList thay vì products
+  const totalProducts = pagination?.totalItems || productList.length;
+  const activeProducts = productList.filter((product) => product.isActive).length;
+  const productsOnSale = productList.filter((product) => product.onSale).length;
 
   // Lấy tổng số danh mục unique
   const categories = Array.from(
     new Set(
-      products
+      productList
         .map((p) =>
           typeof p.category === "string" ? p.category : p.category?.name
         )
@@ -420,10 +428,11 @@ export default function AdminProductsPage() {
   );
   const totalCategories = categories.length;
 
-  if (productState.error) {
+  // SỬA: Kiểm tra error từ state
+  if (error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-red-500">Lỗi: {productState.error}</div>
+        <div className="text-red-500">Lỗi: {error}</div>
       </div>
     );
   }
@@ -448,7 +457,7 @@ export default function AdminProductsPage() {
         </CardHeader>
         <CardContent>
           <ProductsTable
-            products={products}
+            products={productList} // SỬA: sử dụng productList
             searchTerm={searchTerm}
             pageSize={pageSize}
             onSearch={handleSearch}

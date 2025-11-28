@@ -1,5 +1,7 @@
+"use client";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import React, { useEffect } from "react";
+import { Button } from "@/components/ui/button";
 
 export default function Banner() {
   const [currentIndex, setCurrentIndex] = React.useState(0);
@@ -7,22 +9,26 @@ export default function Banner() {
     {
       id: 1,
       imageUrl: "/images/CyBer.jpg",
-      altText: "Summer Sale - Up to 50% Off!",
+      title: "SUMMER COLLECTION",
+      subtitle: "Discover the latest trends.",
     },
     {
       id: 2,
       imageUrl: "/images/lading.jpg",
-      altText: "Winter Clearance - Up to 70% Off!",
+      title: "WINTER ESSENTIALS",
+      subtitle: "Stay warm in style.",
     },
     {
       id: 3,
       imageUrl: "/images/online.jpg",
-      altText: "Spring Collection - New Arrivals!",
+      title: "NEW ARRIVALS",
+      subtitle: "Be the first to wear it.",
     },
     {
       id: 4,
       imageUrl: "/images/shopping.jpg",
-      altText: "Fall Fashion - Trends You Can't Miss!",
+      title: "FALL FASHION",
+      subtitle: "Upgrade your wardrobe.",
     },
   ];
 
@@ -30,47 +36,78 @@ export default function Banner() {
     setCurrentIndex((prev) => (prev === banners.length - 1 ? 0 : prev + 1));
   };
 
-  // Auto-slide effect
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev === banners.length - 1 ? 0 : prev + 1));
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [banners.length]);
-
   const handlePrev = () => {
     setCurrentIndex((prev) => (prev === 0 ? banners.length - 1 : prev - 1));
   };
 
-  return (
-    <div className="flex-1 h-[400px] flex border border-gray-200 rounded-xl overflow-hidden relative shadow-lg border border-gray-200">
-      {/* Chỉ hiển thị banner hiện tại */}
-      <div key={banners[currentIndex].id} className="w-full h-full relative">
-        <img
-          className="object-cover w-full h-full relative"
-          src={banners[currentIndex].imageUrl}
-        />
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev === banners.length - 1 ? 0 : prev + 1));
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [banners.length]);
 
-        {/* Nút điều hướng */}
-        <ArrowLeft
-          onClick={handlePrev}
-          className="absolute h-[30px] w-[30px] top-1/2 left-4 transform -translate-y-1/2 bg-white rounded-full p-1 cursor-pointer hover:bg-gray-200 opacity-80 border border-gray-300"
-        />
-        <ArrowRight
-          onClick={handleNext}
-          className="absolute h-[30px] w-[30px] top-1/2 right-4 transform -translate-y-1/2 bg-white rounded-full p-1 cursor-pointer hover:bg-gray-200 opacity-80 border border-gray-300"
-        />
+  return (
+    <div className="relative w-full h-[80vh] min-h-[600px] overflow-hidden bg-gray-100">
+      {/* Slides */}
+      <div className="relative w-full h-full">
+        {banners.map((banner, index) => (
+          <div
+            key={banner.id}
+            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+              index === currentIndex ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <img
+              src={banner.imageUrl}
+              alt={banner.title}
+              className="w-full h-full object-cover"
+            />
+            {/* Overlay */}
+            <div className="absolute inset-0 bg-black/20" />
+            
+            {/* Content */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white p-4">
+              <h2 className="text-5xl md:text-7xl font-bold tracking-tighter mb-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+                {banner.title}
+              </h2>
+              <p className="text-xl md:text-2xl font-light tracking-wide mb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
+                {banner.subtitle}
+              </p>
+              <Button 
+                size="lg" 
+                className="bg-white text-black hover:bg-white/90 rounded-none px-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300"
+              >
+                SHOP NOW
+              </Button>
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* Indicators/Dots */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+      {/* Controls */}
+      <button
+        onClick={handlePrev}
+        className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm transition-all"
+      >
+        <ArrowLeft className="w-6 h-6" />
+      </button>
+      <button
+        onClick={handleNext}
+        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm transition-all"
+      >
+        <ArrowRight className="w-6 h-6" />
+      </button>
+
+      {/* Indicators */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
         {banners.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentIndex(index)}
-            className={`w-3 h-3 rounded-full ${index === currentIndex ? "bg-white" : "bg-gray-400"
-              }`}
+            className={`w-2 h-2 rounded-full transition-all ${
+              index === currentIndex ? "bg-white w-8" : "bg-white/50"
+            }`}
           />
         ))}
       </div>

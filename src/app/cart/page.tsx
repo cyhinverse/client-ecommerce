@@ -146,7 +146,7 @@ export default function CartPage() {
           <div className="flex items-center gap-4">
             {hasCartItems && (
               isAllSelected ? (
-                <Button variant="outline" onClick={handleUnselectAll}>
+                <Button  variant="outline" onClick={handleUnselectAll}>
                   Bỏ chọn tất cả
                 </Button>
               ) : (
@@ -184,20 +184,20 @@ export default function CartPage() {
                       </div>
 
                       {/* Product Image */}
-                      <div className="relative w-full sm:w-24 h-24 bg-gray-50 rounded-lg shrink-0">
+                      <div className="relative w-full sm:w-24 h-24 bg-gray-100 shrink-0">
                         {item.variant?.images?.[0] ? (
                           <Image
                             src={item.variant.images[0]}
                             alt={item.productId.name}
                             fill
-                            className="object-cover rounded-lg"
+                            className="object-cover"
                           />
                         ) : item.productId.images?.[0] ? (
                           <Image
                             src={item.productId.images[0]}
                             alt={item.productId.name}
                             fill
-                            className="object-cover rounded-lg"
+                            className="object-cover"
                           />
                         ) : (
                           <div className="flex items-center justify-center h-full text-gray-400 text-sm">
@@ -224,7 +224,7 @@ export default function CartPage() {
                                       <span className="font-medium">Màu:</span>
                                       <div className="flex items-center gap-1">
                                         <div
-                                          className="w-4 h-4 rounded-full border border-gray-300"
+                                          className="w-4 h-4 border border-gray-300"
                                           style={{
                                             backgroundColor:
                                               item.variant.color.toLowerCase(),

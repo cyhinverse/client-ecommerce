@@ -9,8 +9,6 @@ import {
   Instagram,
   Youtube,
   Mail,
-  MapPin,
-  Phone,
   ArrowRight,
 } from "lucide-react";
 
@@ -25,139 +23,79 @@ export default function FooterLayout() {
     "/admin/categories",
     "/admin/discounts",
     "/admin/settings",
-		"/admin/dashboard"
+    "/admin/dashboard"
   ];
 
   if (adminPaths.includes(path)) return null;
 
   return (
     <footer className="w-full bg-background border-t">
-      {/* Main Footer Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Company Info */}
-          <div className="space-y-4">
-            <h4 className="text-lg font-semibold">Your Company</h4>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              We are dedicated to providing the best service and quality
-              products to our valued customers worldwide.
+      <div className="container mx-auto px-4 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+          {/* Brand & Newsletter */}
+          <div className="md:col-span-2 space-y-6">
+            <h4 className="text-xl font-bold tracking-tight">STORE</h4>
+            <p className="text-muted-foreground max-w-sm">
+              Subscribe to our newsletter to get updates on our latest collections, campaigns, and special offers.
             </p>
-            <div className="flex space-x-4">
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Facebook className="w-4 h-4" />
+            <div className="flex gap-2 max-w-sm">
+              <Input 
+                placeholder="Enter your email" 
+                className="bg-background border-input focus-visible:ring-1"
+              />
+              <Button size="icon">
+                <ArrowRight className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Twitter className="w-4 h-4" />
+            </div>
+            <div className="flex gap-4 pt-4">
+              <Button variant="ghost" size="icon" className="hover:text-foreground">
+                <Instagram className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Instagram className="w-4 h-4" />
+              <Button variant="ghost" size="icon" className="hover:text-foreground">
+                <Facebook className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Youtube className="w-4 h-4" />
+              <Button variant="ghost" size="icon" className="hover:text-foreground">
+                <Twitter className="h-5 w-5" />
+              </Button>
+              <Button variant="ghost" size="icon" className="hover:text-foreground">
+                <Youtube className="h-5 w-5" />
               </Button>
             </div>
           </div>
 
-          {/* Quick Links */}
-          <div className="space-y-4">
-            <h4 className="text-lg font-semibold">Quick Links</h4>
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="ghost" className="justify-start" asChild>
-                <a href="/about">About Us</a>
-              </Button>
-              <Button variant="ghost" className="justify-start" asChild>
-                <a href="/products">Products</a>
-              </Button>
-              <Button variant="ghost" className="justify-start" asChild>
-                <a href="/blog">Blog</a>
-              </Button>
-              <Button variant="ghost" className="justify-start" asChild>
-                <a href="/careers">Careers</a>
-              </Button>
-              <Button variant="ghost" className="justify-start" asChild>
-                <a href="/support">Support</a>
-              </Button>
-              <Button variant="ghost" className="justify-start" asChild>
-                <a href="/sitemap">Sitemap</a>
-              </Button>
-            </div>
+          {/* Shop */}
+          <div className="space-y-6">
+            <h4 className="font-semibold tracking-wider text-sm uppercase">Shop</h4>
+            <ul className="space-y-3 text-sm text-muted-foreground">
+              <li><a href="/men" className="hover:text-foreground transition-colors">Men</a></li>
+              <li><a href="/women" className="hover:text-foreground transition-colors">Women</a></li>
+              <li><a href="/children" className="hover:text-foreground transition-colors">Children</a></li>
+              <li><a href="/new-arrivals" className="hover:text-foreground transition-colors">New Arrivals</a></li>
+              <li><a href="/accessories" className="hover:text-foreground transition-colors">Accessories</a></li>
+            </ul>
           </div>
 
-          {/* Customer Service */}
-          <div className="space-y-4">
-            <h4 className="text-lg font-semibold">Customer Service</h4>
-            <div className="space-y-2">
-              <Button variant="ghost" className="justify-start" asChild>
-                <a href="/contact">Contact Us</a>
-              </Button>
-              <Button variant="ghost" className="justify-start" asChild>
-                <a href="/shipping">Shipping Info</a>
-              </Button>
-              <Button variant="ghost" className="justify-start" asChild>
-                <a href="/returns">Returns</a>
-              </Button>
-              <Button variant="ghost" className="justify-start" asChild>
-                <a href="/privacy">Privacy Policy</a>
-              </Button>
-              <Button variant="ghost" className="justify-start" asChild>
-                <a href="/terms">Terms of Service</a>
-              </Button>
-            </div>
-          </div>
-
-          {/* Contact Info */}
-          <div className="space-y-4">
-            <h4 className="text-lg font-semibold">Contact Info</h4>
-            <div className="space-y-3">
-              <div className="flex items-start space-x-3">
-                <MapPin className="w-4 h-4 mt-0.5 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">
-                  123 Business Street
-                  <br />
-                  City, State 10001
-                </span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Phone className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">
-                  +1 (555) 123-4567
-                </span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Mail className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">
-                  info@yourcompany.com
-                </span>
-              </div>
-            </div>
+          {/* Help */}
+          <div className="space-y-6">
+            <h4 className="font-semibold tracking-wider text-sm uppercase">Help</h4>
+            <ul className="space-y-3 text-sm text-muted-foreground">
+              <li><a href="/support" className="hover:text-foreground transition-colors">Customer Service</a></li>
+              <li><a href="/shipping" className="hover:text-foreground transition-colors">Shipping & Returns</a></li>
+              <li><a href="/terms" className="hover:text-foreground transition-colors">Terms & Conditions</a></li>
+              <li><a href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</a></li>
+              <li><a href="/contact" className="hover:text-foreground transition-colors">Contact Us</a></li>
+            </ul>
           </div>
         </div>
 
-        <Separator className="my-8" />
+        <Separator className="my-12" />
 
-        {/* Bottom Bar */}
-        <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
-          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-            <span>
-              &copy; {new Date().getFullYear()} Your Company. All rights
-              reserved.
-            </span>
-          </div>
-
-          <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-            <span>We accept:</span>
-            <div className="flex space-x-2">
-              {/* Payment Icons - You can replace with actual payment icons */}
-              <div className="w-8 h-5 bg-muted rounded-sm flex items-center justify-center text-xs font-medium">
-                VISA
-              </div>
-              <div className="w-8 h-5 bg-muted rounded-sm flex items-center justify-center text-xs font-medium">
-                MC
-              </div>
-              <div className="w-8 h-5 bg-muted rounded-sm flex items-center justify-center text-xs font-medium">
-                PP
-              </div>
-            </div>
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
+          <p>&copy; {new Date().getFullYear()} STORE. All rights reserved.</p>
+          <div className="flex gap-6">
+            <span>Privacy</span>
+            <span>Terms</span>
+            <span>Cookies</span>
           </div>
         </div>
       </div>

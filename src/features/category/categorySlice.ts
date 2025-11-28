@@ -47,6 +47,10 @@ export const categorySlice = createSlice({
     builder.addCase(getTreeCategories.fulfilled, (state, action: any) => {
       state.isLoading = false;
       state.categories = action.payload?.data;
+      const newData = action.payload?.data;
+      if(JSON.stringify(newData) !== JSON.stringify(state.categories) ){
+        state.categories = newData;
+      }
     });
     builder.addCase(getTreeCategories.rejected, (state, action: any) => {
       state.isLoading = false;
