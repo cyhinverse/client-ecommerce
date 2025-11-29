@@ -1,4 +1,3 @@
-// components/admin/ProductAdminPage/UpdateModelProduct.tsx
 import { useState, useEffect, useRef } from "react";
 import {
   Dialog,

@@ -29,7 +29,7 @@ export function ProductPagination({
 
   return (
     <div className="flex items-center justify-between px-2">
-      <div className="flex-1 text-sm text-muted-foreground">
+      <div className="flex-1 text-sm text-gray-500">
         Hiển thị {startItem} đến {endItem} trong tổng số {totalItems} sản phẩm
       </div>
       <div className="flex items-center space-x-6 lg:space-x-8">
@@ -39,10 +39,11 @@ export function ProductPagination({
             size="sm"
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage <= 1}
+            className="rounded-none border-gray-200 hover:bg-gray-50"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-sm font-medium">
+          <span className="text-sm font-medium text-gray-900">
             Trang {currentPage} / {totalPages}
           </span>
           <Button
@@ -50,6 +51,7 @@ export function ProductPagination({
             size="sm"
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage >= totalPages}
+            className="rounded-none border-gray-200 hover:bg-gray-50"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>

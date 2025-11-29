@@ -123,160 +123,174 @@ export function CreateModelProduct({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white border-gray-200 text-gray-900 max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Tạo sản phẩm mới</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="bg-white border-gray-200 text-gray-900 max-w-4xl max-h-[90vh] overflow-y-auto rounded-none p-0 gap-0">
+        <DialogHeader className="p-6 border-b border-gray-100">
+          <DialogTitle className="text-xl font-bold uppercase tracking-tight">Tạo sản phẩm mới</DialogTitle>
+          <DialogDescription className="text-gray-500">
             Thêm sản phẩm mới vào cửa hàng của bạn
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-8">
+          <div className="grid grid-cols-2 gap-8">
             {/* Thông tin cơ bản */}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Tên sản phẩm *</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  required
-                  disabled={isLoading}
-                />
-              </div>
+            <div className="space-y-6">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-900 border-b border-gray-100 pb-2">Thông tin cơ bản</h3>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-xs font-bold uppercase text-gray-500">Tên sản phẩm *</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    required
+                    disabled={isLoading}
+                    className="rounded-none border-gray-200 focus-visible:ring-0 focus-visible:border-black"
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="slug">Slug *</Label>
-                <Input
-                  id="slug"
-                  value={formData.slug}
-                  onChange={(e) =>
-                    setFormData({ ...formData, slug: e.target.value })
-                  }
-                  required
-                  disabled={isLoading}
-                />
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="slug" className="text-xs font-bold uppercase text-gray-500">Slug *</Label>
+                  <Input
+                    id="slug"
+                    value={formData.slug}
+                    onChange={(e) =>
+                      setFormData({ ...formData, slug: e.target.value })
+                    }
+                    required
+                    disabled={isLoading}
+                    className="rounded-none border-gray-200 focus-visible:ring-0 focus-visible:border-black"
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="category">Danh mục *</Label>
-                <Input
-                  id="category"
-                  value={formData.category}
-                  onChange={(e) =>
-                    setFormData({ ...formData, category: e.target.value })
-                  }
-                  required
-                  disabled={isLoading}
-                />
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="category" className="text-xs font-bold uppercase text-gray-500">Danh mục *</Label>
+                  <Input
+                    id="category"
+                    value={formData.category}
+                    onChange={(e) =>
+                      setFormData({ ...formData, category: e.target.value })
+                    }
+                    required
+                    disabled={isLoading}
+                    className="rounded-none border-gray-200 focus-visible:ring-0 focus-visible:border-black"
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="brand">Thương hiệu *</Label>
-                <Input
-                  id="brand"
-                  value={formData.brand}
-                  onChange={(e) =>
-                    setFormData({ ...formData, brand: e.target.value })
-                  }
-                  required
-                  disabled={isLoading}
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="brand" className="text-xs font-bold uppercase text-gray-500">Thương hiệu *</Label>
+                  <Input
+                    id="brand"
+                    value={formData.brand}
+                    onChange={(e) =>
+                      setFormData({ ...formData, brand: e.target.value })
+                    }
+                    required
+                    disabled={isLoading}
+                    className="rounded-none border-gray-200 focus-visible:ring-0 focus-visible:border-black"
+                  />
+                </div>
               </div>
             </div>
 
             {/* Giá và trạng thái */}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="currentPrice">Giá hiện tại *</Label>
-                <Input
-                  id="currentPrice"
-                  type="number"
-                  value={formData.price.currentPrice}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      price: {
-                        ...formData.price,
-                        currentPrice: Number(e.target.value),
-                      },
-                    })
-                  }
-                  required
-                  disabled={isLoading}
-                />
-              </div>
+            <div className="space-y-6">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-900 border-b border-gray-100 pb-2">Giá & Trạng thái</h3>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="currentPrice" className="text-xs font-bold uppercase text-gray-500">Giá hiện tại *</Label>
+                  <Input
+                    id="currentPrice"
+                    type="number"
+                    value={formData.price.currentPrice}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        price: {
+                          ...formData.price,
+                          currentPrice: Number(e.target.value),
+                        },
+                      })
+                    }
+                    required
+                    disabled={isLoading}
+                    className="rounded-none border-gray-200 focus-visible:ring-0 focus-visible:border-black"
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="discountPrice">Giá khuyến mãi</Label>
-                <Input
-                  id="discountPrice"
-                  type="number"
-                  value={formData.price.discountPrice}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      price: {
-                        ...formData.price,
-                        discountPrice: Number(e.target.value),
-                      },
-                    })
-                  }
-                  disabled={isLoading}
-                />
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="discountPrice" className="text-xs font-bold uppercase text-gray-500">Giá khuyến mãi</Label>
+                  <Input
+                    id="discountPrice"
+                    type="number"
+                    value={formData.price.discountPrice}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        price: {
+                          ...formData.price,
+                          discountPrice: Number(e.target.value),
+                        },
+                      })
+                    }
+                    disabled={isLoading}
+                    className="rounded-none border-gray-200 focus-visible:ring-0 focus-visible:border-black"
+                  />
+                </div>
 
-              <div className="flex items-center justify-between">
-                <Label htmlFor="isActive">Đang hoạt động</Label>
-                <Switch
-                  checked={formData.isActive}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, isActive: checked })
-                  }
-                  disabled={isLoading}
-                />
-              </div>
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-center justify-between border p-3 border-gray-100">
+                    <Label htmlFor="isActive" className="text-sm font-medium">Đang hoạt động</Label>
+                    <Switch
+                      checked={formData.isActive}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, isActive: checked })
+                      }
+                      disabled={isLoading}
+                    />
+                  </div>
 
-              <div className="flex items-center justify-between">
-                <Label htmlFor="isNewArrival">Sản phẩm mới</Label>
-                <Switch
-                  checked={formData.isNewArrival}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, isNewArrival: checked })
-                  }
-                  disabled={isLoading}
-                />
-              </div>
+                  <div className="flex items-center justify-between border p-3 border-gray-100">
+                    <Label htmlFor="isNewArrival" className="text-sm font-medium">Sản phẩm mới</Label>
+                    <Switch
+                      checked={formData.isNewArrival}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, isNewArrival: checked })
+                      }
+                      disabled={isLoading}
+                    />
+                  </div>
 
-              <div className="flex items-center justify-between">
-                <Label htmlFor="isFeatured">Nổi bật</Label>
-                <Switch
-                  checked={formData.isFeatured}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, isFeatured: checked })
-                  }
-                  disabled={isLoading}
-                />
-              </div>
+                  <div className="flex items-center justify-between border p-3 border-gray-100">
+                    <Label htmlFor="isFeatured" className="text-sm font-medium">Nổi bật</Label>
+                    <Switch
+                      checked={formData.isFeatured}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, isFeatured: checked })
+                      }
+                      disabled={isLoading}
+                    />
+                  </div>
 
-              <div className="flex items-center justify-between">
-                <Label htmlFor="onSale">Đang giảm giá</Label>
-                <Switch
-                  checked={formData.onSale}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, onSale: checked })
-                  }
-                  disabled={isLoading}
-                />
+                  <div className="flex items-center justify-between border p-3 border-gray-100">
+                    <Label htmlFor="onSale" className="text-sm font-medium">Đang giảm giá</Label>
+                    <Switch
+                      checked={formData.onSale}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, onSale: checked })
+                      }
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Mô tả */}
           <div className="space-y-2">
-            <Label htmlFor="description">Mô tả sản phẩm</Label>
+            <Label htmlFor="description" className="text-xs font-bold uppercase text-gray-500">Mô tả sản phẩm</Label>
             <Textarea
               id="description"
               value={formData.description}
@@ -285,12 +299,13 @@ export function CreateModelProduct({
               }
               rows={4}
               disabled={isLoading}
+              className="rounded-none border-gray-200 focus-visible:ring-0 focus-visible:border-black resize-none"
             />
           </div>
 
           {/* Tags */}
           <div className="space-y-2">
-            <Label htmlFor="tags">Tags</Label>
+            <Label htmlFor="tags" className="text-xs font-bold uppercase text-gray-500">Tags</Label>
             <div className="flex gap-2">
               <Input
                 value={newTag}
@@ -303,8 +318,9 @@ export function CreateModelProduct({
                     addTag();
                   }
                 }}
+                className="rounded-none border-gray-200 focus-visible:ring-0 focus-visible:border-black"
               />
-              <Button type="button" onClick={addTag} disabled={isLoading}>
+              <Button type="button" onClick={addTag} disabled={isLoading} className="rounded-none bg-black text-white hover:bg-gray-800">
                 Thêm
               </Button>
             </div>
@@ -312,13 +328,13 @@ export function CreateModelProduct({
               {formData.tags.map((tag, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded"
+                  className="flex items-center gap-1 bg-gray-100 px-2 py-1 text-xs font-medium uppercase tracking-wide"
                 >
-                  <span className="text-sm">{tag}</span>
+                  <span>{tag}</span>
                   <button
                     type="button"
                     onClick={() => removeTag(tag)}
-                    className="text-gray-500 hover:text-gray-700"
+                    className="text-gray-500 hover:text-gray-900 ml-1"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -329,7 +345,7 @@ export function CreateModelProduct({
 
           {/* Hình ảnh */}
           <div className="space-y-2">
-            <Label>Hình ảnh sản phẩm</Label>
+            <Label className="text-xs font-bold uppercase text-gray-500">Hình ảnh sản phẩm</Label>
             <input
               type="file"
               multiple
@@ -343,23 +359,23 @@ export function CreateModelProduct({
               variant="outline"
               onClick={() => fileInputRef.current?.click()}
               disabled={isLoading}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 rounded-none border-gray-200 hover:bg-gray-50 w-full h-24 border-dashed"
             >
               <Upload className="h-4 w-4" />
               Chọn hình ảnh
             </Button>
-            <div className="grid grid-cols-4 gap-4 mt-2">
+            <div className="grid grid-cols-4 gap-4 mt-4">
               {images.map((file, index) => (
-                <div key={index} className="relative">
+                <div key={index} className="relative group">
                   <img
                     src={URL.createObjectURL(file)}
                     alt={`Preview ${index}`}
-                    className="h-20 w-20 object-cover rounded"
+                    className="h-24 w-full object-cover border border-gray-200"
                   />
                   <button
                     type="button"
                     onClick={() => removeImage(index)}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                    className="absolute -top-2 -right-2 bg-black text-white p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -368,18 +384,19 @@ export function CreateModelProduct({
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex justify-end gap-3 pt-6 border-t border-gray-100">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
+              className="rounded-none border-gray-200 hover:bg-gray-50"
             >
               Hủy
             </Button>
             <Button
               type="submit"
-              className="bg-gray-900 text-white hover:bg-gray-800"
+              className="bg-black text-white hover:bg-gray-800 rounded-none min-w-[120px]"
               disabled={isLoading}
             >
               {isLoading ? "Đang tạo..." : "Tạo sản phẩm"}

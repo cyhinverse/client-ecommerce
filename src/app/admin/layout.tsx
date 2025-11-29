@@ -1,78 +1,16 @@
 "use client";
-import { Avatar } from "@/components/ui/avatar";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  BarChart3,
-  ShoppingCart,
-  Users,
-  Package,
-  Settings,
-  LogOut,
-  Menu,
-  X,
-  Home,
-  Bell,
-  Album,
-  TicketPercent,
-  LayoutDashboardIcon,
-} from "lucide-react";
+import { LogOut, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { logout } from "@/features/auth/authAction";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { toast } from "sonner";
 import Image from "next/image";
-
-const navigation = [
-  {
-    name: "Tổng quan",
-    href: "/admin",
-    icon: BarChart3,
-  },
-  {
-    name: "Dashboard",
-    href: "/admin/dashboard",
-    icon: LayoutDashboardIcon,
-  },
-  {
-    name: "Sản phẩm",
-    href: "/admin/products",
-    icon: Package,
-  },
-  {
-    name: "Đơn hàng",
-    href: "/admin/orders",
-    icon: ShoppingCart,
-  },
-  {
-    name: "Khách hàng",
-    href: "/admin/users",
-    icon: Users,
-  },
-  {
-    name: "Thông báo",
-    href: "/admin/notifications",
-    icon: Bell,
-  },
-  {
-    name: "Danh mục",
-    href: "/admin/categories",
-    icon: Album,
-  },
-  {
-    name: "Mã giảm giá",
-    href: "/admin/discounts",
-    icon: TicketPercent,
-  },
-  {
-    name: "Cài đặt",
-    href: "/admin/settings",
-    icon: Settings,
-  },
-];
+import { ADMIN_NAVIGATION } from "@/constants";
 
 export default function AdminLayout({
   children,
@@ -83,7 +21,8 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { loading, data } = useAppSelector(state => state.auth)
+  const { data } = useAppSelector(state => state.auth)
+  
   const handleLogout = () => {
     dispatch(logout());
     toast.success("Đăng xuất thành công");
@@ -102,7 +41,7 @@ export default function AdminLayout({
               <h1 className="text-xl font-bold text-gray-900">Admin Panel</h1>
             </div>
             <nav className="flex-1 space-y-2 px-4 py-4">
-              {navigation.map((item) => {
+              {ADMIN_NAVIGATION.map((item) => {
                 const isActive = pathname === item.href;
                 return (
                   <Link
@@ -136,7 +75,7 @@ export default function AdminLayout({
             <ul role="list" className="flex flex-1 flex-col gap-y-7">
               <li>
                 <ul role="list" className="-mx-2 space-y-1">
-                  {navigation.map((item) => {
+                  {ADMIN_NAVIGATION.map((item) => {
                     const isActive = pathname === item.href;
                     return (
                       <li key={item.name}>
@@ -185,20 +124,20 @@ export default function AdminLayout({
             <Menu className="h-6 w-6" />
           </Button>
 
-<div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-  <div className="flex flex-1"></div>
-  {data && (
-    <Link href={"/admin"} className="flex items-center justify-center  rounded-full overflow-hidden">
-      <Image 
-        className="rounded-full object-cover aspect-square" 
-        src={data.avatar} 
-        alt={data.username} 
-        height={30} 
-        width={30} 
-      />
-    </Link>
-  )}
-</div>
+          <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+            <div className="flex flex-1"></div>
+            {data && (
+              <Link href={"/admin"} className="flex items-center justify-center  rounded-full overflow-hidden">
+                <Image 
+                  className="rounded-full object-cover aspect-square" 
+                  src={data.avatar} 
+                  alt={data.username} 
+                  height={30} 
+                  width={30} 
+                />
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Page content */}

@@ -1,11 +1,9 @@
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { LucideIcon } from "lucide-react";
 import React from "react";
 
@@ -29,24 +27,31 @@ const StatsCard: React.FC<StatsCardProps> = ({
   className,
 }) => {
   return (
-    <Card className={className}>
+    <Card className={`border border-gray-200 shadow-none rounded-none ${className}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <Icon className="h-4 w-4 text-muted-foreground" />
+        <CardTitle className="text-sm font-medium text-gray-600 uppercase tracking-wider">{title}</CardTitle>
+        <Icon className="h-4 w-4 text-gray-400" />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
+        <div className="text-3xl font-bold tracking-tight">{value}</div>
         {change && (
-          <p
-            className={`text-xs ${
-              changeType === "positive" ? "text-green-600" : "text-red-600"
-            }`}
-          >
-            {change} so với tháng trước
-          </p>
+          <div className="flex items-center mt-1">
+            <span
+              className={`text-xs font-medium px-1.5 py-0.5 ${
+                changeType === "positive"
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700"
+              }`}
+            >
+              {change}
+            </span>
+            <span className="text-xs text-muted-foreground ml-2">
+              so với tháng trước
+            </span>
+          </div>
         )}
         {description && !change && (
-          <p className="text-xs text-muted-foreground">{description}</p>
+          <p className="text-xs text-muted-foreground mt-1">{description}</p>
         )}
       </CardContent>
     </Card>

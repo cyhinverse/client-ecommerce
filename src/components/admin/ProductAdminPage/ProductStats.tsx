@@ -45,14 +45,14 @@ export function ProductsStats({
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {stats.map((stat, index) => (
-        <Card key={index}>
+        <Card key={index} className="rounded-none border border-gray-200 shadow-none">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-            <stat.icon className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-gray-600 uppercase tracking-wider">{stat.title}</CardTitle>
+            <stat.icon className="h-4 w-4 text-gray-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stat.value}</div>
-            <p className="text-xs text-muted-foreground">{stat.description}</p>
+            <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
+            <p className="text-xs text-gray-500 mt-1">{stat.description}</p>
           </CardContent>
         </Card>
       ))}

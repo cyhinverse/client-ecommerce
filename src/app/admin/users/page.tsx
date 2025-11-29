@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { useUrlFilters } from "@/hooks/useUrlFilters";
 import {
   Card,
   CardContent,
@@ -26,29 +26,39 @@ import {
 import { User } from "@/types/user";
 
 export default function AdminUsersPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const userState = useAppSelector((state) => state.user);
 
-  // Lấy params từ URL
-  const urlPage = parseInt(searchParams.get("page") || "1");
-  const urlLimit = parseInt(searchParams.get("limit") || "10");
-  const urlSearch = searchParams.get("search") || "";
-  const urlRole = searchParams.get("role") || "";
-  const urlIsVerifiedEmail = searchParams.get("isVerifiedEmail");
+  // Define filter interface
+  interface UserFilters {
+    page: number;
+    limit: number;
+    search: string;
+    role: string;
+    isVerifiedEmail: boolean | null;
+    [key: string]: string | number | boolean | null;
+  }
 
-  const [currentPage, setCurrentPage] = useState(urlPage);
-  const [pageSize, setPageSize] = useState(urlLimit);
-  const [searchTerm, setSearchTerm] = useState(urlSearch);
-  const [selectedRole, setSelectedRole] = useState(urlRole);
-  const [selectedVerified, setSelectedVerified] = useState<string | null>(
-    urlIsVerifiedEmail
-  );
+  // Use URL filters hook
+  const { filters, updateFilter, updateFilters } = useUrlFilters<UserFilters>({
+    defaultFilters: {
+      page: 1,
+      limit: 10,
+      search: '',
+      role: '',
+      isVerifiedEmail: null,
+    },
+    basePath: '/admin/users',
+  });
 
+  // Extract filter values
+  const currentPage = Number(filters.page);
+  const pageSize = Number(filters.limit);
+  const searchTerm = filters.search as string;
+  const selectedRole = filters.role as string;
+  const selectedVerified = filters.isVerifiedEmail as boolean | null;
   const users: User[] = userState.user || [];
   const pagination = userState.pagination;
-
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
@@ -56,20 +66,43 @@ export default function AdminUsersPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Hàm mở modal tạo mới
+  // Fetch users with current filters
+  const fetchUsers = () => {
+    const params: Record<string, string | number | boolean> = {
+      page: currentPage,
+      limit: pageSize,
+    };
+
+    if (searchTerm && searchTerm.trim() !== "") {
+      params.search = searchTerm.trim();
+    }
+    if (selectedRole && selectedRole.trim() !== "") {
+      params.role = selectedRole.trim();
+    }
+    if (selectedVerified !== null) {
+      params.isVerifiedEmail = selectedVerified;
+    }
+
+    dispatch(getAllUsers(params));
+  };
+
+  // Fetch users when filters change
+  useEffect(() => {
+    fetchUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, pageSize, searchTerm, selectedRole, selectedVerified]);
+
+  // ============= Event Handlers =============
+
   const handleOpenCreateModal = () => {
     setCreateModalOpen(true);
   };
 
-  // Hàm xử lý tạo user mới
-  const handleCreateUser = async (userData: any) => {
+  const handleCreateUser = async (userData: Partial<User>) => {
     setIsCreating(true);
     try {
-      const result = await dispatch(createUser(userData)).unwrap();
-
-      // Refresh danh sách
+      await dispatch(createUser(userData as any)).unwrap();
       fetchUsers();
-
       setCreateModalOpen(false);
       toast.success("Tạo người dùng thành công");
     } catch (error: any) {
@@ -93,15 +126,13 @@ export default function AdminUsersPage() {
     setUpdateModalOpen(true);
   };
 
-  // Hàm đóng modal
   const handleCloseEditModal = () => {
     setUpdateModalOpen(false);
     setSelectedUser(null);
     setIsUpdating(false);
   };
 
-  // Hàm lưu thay đổi
-  const handleUpdateUser = async (userData: any) => {
+  const handleUpdateUser = async (userData: Partial<User>) => {
     if (!selectedUser) return;
 
     setIsUpdating(true);
@@ -110,12 +141,9 @@ export default function AdminUsersPage() {
         updateUser({
           id: selectedUser._id,
           ...userData,
-        })
+        } as any)
       ).unwrap();
-
-      // Refresh danh sách sau khi update
       fetchUsers();
-
       handleCloseEditModal();
       toast.success("Cập nhật người dùng thành công");
     } catch (error: any) {
@@ -127,104 +155,25 @@ export default function AdminUsersPage() {
     }
   };
 
-  // Hàm fetch users với params hợp lệ
-  const fetchUsers = () => {
-    const params: any = {
-      page: currentPage,
-      limit: pageSize,
-    };
-
-    if (searchTerm && searchTerm.trim() !== "") {
-      params.search = searchTerm.trim();
-    }
-    if (selectedRole && selectedRole.trim() !== "") {
-      params.role = selectedRole.trim();
-    }
-    // Chỉ thêm isVerifiedEmail nếu có giá trị boolean hợp lệ
-    if (selectedVerified === "true" || selectedVerified === "false") {
-      params.isVerifiedEmail = selectedVerified === "true";
-    }
-
-    dispatch(getAllUsers(params));
-  };
-
-  const updateURL = (
-    page: number,
-    limit: number,
-    search: string,
-    role: string,
-    isVerifiedEmail: string | null
-  ) => {
-    const params = new URLSearchParams();
-    params.set("page", page.toString());
-    params.set("limit", limit.toString());
-
-    if (search && search.trim() !== "") {
-      params.set("search", search);
-    }
-    if (role && role.trim() !== "") {
-      params.set("role", role);
-    }
-    // Chỉ thêm isVerifiedEmail nếu có giá trị boolean hợp lệ
-    if (isVerifiedEmail === "true" || isVerifiedEmail === "false") {
-      params.set("isVerifiedEmail", isVerifiedEmail);
-    }
-
-    const url = `/admin/users?${params.toString()}`;
-    console.log("Updating URL to:", url); // Debug log
-    router.push(url, { scroll: false });
-  };
-
-  // Fetch users khi URL params thay đổi
-  useEffect(() => {
-    fetchUsers();
-  }, [
-    dispatch,
-    currentPage,
-    pageSize,
-    searchTerm,
-    selectedRole,
-    selectedVerified,
-  ]);
-
-  // Đồng bộ state với URL params
-  useEffect(() => {
-    setCurrentPage(urlPage);
-    setPageSize(urlLimit);
-    setSearchTerm(urlSearch);
-    setSelectedRole(urlRole);
-    setSelectedVerified(urlIsVerifiedEmail);
-  }, [urlPage, urlLimit, urlSearch, urlRole, urlIsVerifiedEmail]);
-
+  // Filter handlers
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    updateURL(page, pageSize, searchTerm, selectedRole, selectedVerified);
+    updateFilter('page', page);
   };
 
   const handlePageSizeChange = (size: number) => {
-    setPageSize(size);
-    setCurrentPage(1);
-    updateURL(1, size, searchTerm, selectedRole, selectedVerified);
+    updateFilters({ limit: size, page: 1 });
   };
 
   const handleSearch = (value: string) => {
-    setSearchTerm(value);
-    setCurrentPage(1);
-    updateURL(1, pageSize, value, selectedRole, selectedVerified);
+    updateFilters({ search: value, page: 1 });
   };
 
   const handleRoleFilterChange = (role: string) => {
-    setSelectedRole(role);
-    setCurrentPage(1);
-    updateURL(1, pageSize, searchTerm, role, selectedVerified);
+    updateFilters({ role: role, page: 1 });
   };
 
   const handleVerifiedFilterChange = (isVerified: boolean | null) => {
-    // Convert boolean | null thành string | null
-    const verifiedString = isVerified === null ? null : isVerified.toString();
-    setSelectedVerified(verifiedString);
-    setCurrentPage(1);
-    updateURL(1, pageSize, searchTerm, selectedRole, verifiedString);
+    updateFilters({ isVerifiedEmail: isVerified, page: 1 });
   };
 
   const handleCloseModals = () => {
@@ -236,10 +185,7 @@ export default function AdminUsersPage() {
   const handleDeleteUser = async (user: User) => {
     try {
       await dispatch(deleteUser(user._id)).unwrap();
-
-      // Refresh danh sách
       fetchUsers();
-
       toast.success("Xóa người dùng thành công");
     } catch (error) {
       toast.error("Xóa người dùng thất bại. Vui lòng thử lại.");
@@ -251,14 +197,13 @@ export default function AdminUsersPage() {
     setViewModalOpen(true);
   };
 
-  // Tính toán thống kê
+  // Calculate stats
   const totalUsers = pagination?.totalItems || users.length;
   const verifiedUsers = users.filter((user) => user.isVerifiedEmail).length;
   const usersWithAddress = users.filter(
     (user) => user.addresses && user.addresses.length > 0
   ).length;
 
-  // Người dùng mới (trong 7 ngày gần đây)
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
   const recentUsers = users.filter((user) => {
@@ -308,13 +253,7 @@ export default function AdminUsersPage() {
             onRoleFilterChange={handleRoleFilterChange}
             onVerifiedFilterChange={handleVerifiedFilterChange}
             selectedRole={selectedRole}
-            selectedVerified={
-              selectedVerified === "true"
-                ? true
-                : selectedVerified === "false"
-                ? false
-                : null
-            }
+            selectedVerified={selectedVerified}
           />
 
           <UserPagination

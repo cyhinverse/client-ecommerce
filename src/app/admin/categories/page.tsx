@@ -1,11 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { useUrlFilters } from "@/hooks/useUrlFilters";
 import {
   deleteCategory,
   getAllCategories,
-  getCategoryById,
   updateCategory,
   creatCategory,
 } from "@/features/category/categoryAction";
@@ -28,19 +27,31 @@ import { CreateCategoryModal } from "@/components/admin/CategoriesAdminPage/Crea
 import { toast } from "sonner";
 
 export default function CategoriesAdminPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const categoryState = useAppSelector((state) => state.category);
 
-  // Lấy params từ URL
-  const urlPage = parseInt(searchParams.get("page") || "1");
-  const urlLimit = parseInt(searchParams.get("limit") || "10");
-  const urlSearch = searchParams.get("search") || "";
+  // Define filter interface
+  interface CategoryFilters {
+    page: number;
+    limit: number;
+    search: string;
+    [key: string]: string | number;
+  }
 
-  const [currentPage, setCurrentPage] = useState(urlPage);
-  const [pageSize, setPageSize] = useState(urlLimit);
-  const [searchTerm, setSearchTerm] = useState(urlSearch);
+  // Use URL filters hook
+  const { filters, updateFilter, updateFilters } = useUrlFilters<CategoryFilters>({
+    defaultFilters: {
+      page: 1,
+      limit: 10,
+      search: '',
+    },
+    basePath: '/admin/categories',
+  });
+
+  // Extract filter values
+  const currentPage = Number(filters.page);
+  const pageSize = Number(filters.limit);
+  const searchTerm = filters.search as string;
 
   const categories: Category[] = categoryState.categories || [];
   const pagination: PaginationData | null = categoryState.pagination;
@@ -54,29 +65,37 @@ export default function CategoriesAdminPage() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
-  // Hàm mở modal tạo mới
+  // Fetch categories when filters change
+  useEffect(() => {
+    const params: Record<string, string | number> = { page: currentPage, limit: pageSize };
+    if (searchTerm && searchTerm.trim() !== "") {
+      params.search = searchTerm.trim();
+    }
+
+    dispatch(getAllCategories(params));
+  }, [dispatch, currentPage, pageSize, searchTerm]);
+
+  // ============= Event Handlers =============
+
   const handleOpenCreateModal = () => {
     setCreateModalOpen(true);
   };
 
-  // Hàm xử lý tạo danh mục mới
-  const handleCreateCategory = async (categoryData: any) => {
+  const handleCreateCategory = async (categoryData: Partial<Category>) => {
     setIsCreating(true);
     try {
-      await dispatch(creatCategory(categoryData)).unwrap();
+      await dispatch(creatCategory(categoryData as any)).unwrap();
 
-      // Refresh danh sách
-      dispatch(
-        getAllCategories({
-          page: currentPage,
-          limit: pageSize,
-          search: searchTerm,
-        })
-      );
+      // Refresh list
+      const params: any = { page: currentPage, limit: pageSize };
+      if (searchTerm && searchTerm.trim() !== "") {
+        params.search = searchTerm.trim();
+      }
+      dispatch(getAllCategories(params));
 
       setCreateModalOpen(false);
       toast.success("Tạo danh mục thành công");
-    } catch (error) {
+    } catch {
       toast.error("Lỗi khi tạo danh mục. Vui lòng thử lại.");
     } finally {
       setIsCreating(false);
@@ -94,15 +113,13 @@ export default function CategoriesAdminPage() {
     setEditModalOpen(true);
   };
 
-  // Hàm đóng modal
   const handleCloseEditModal = () => {
     setEditModalOpen(false);
     setSelectedCategory(null);
     setIsUpdating(false);
   };
 
-  // Hàm lưu thay đổi
-  const handleSaveCategory = async (categoryData: any) => {
+  const handleSaveCategory = async (categoryData: Partial<Category>) => {
     if (!selectedCategory) return;
 
     setIsUpdating(true);
@@ -111,55 +128,38 @@ export default function CategoriesAdminPage() {
         updateCategory({
           id: selectedCategory._id,
           ...categoryData,
-        })
+        } as any)
       ).unwrap();
 
-      // Refresh danh sách sau khi update
-      dispatch(
-        getAllCategories({
-          page: currentPage,
-          limit: pageSize,
-          search: searchTerm,
-        })
-      );
+      // Refresh list
+      const params: any = { page: currentPage, limit: pageSize };
+      if (searchTerm && searchTerm.trim() !== "") {
+        params.search = searchTerm.trim();
+      }
+      dispatch(getAllCategories(params));
 
       handleCloseEditModal();
 
       toast.success("Cập nhật danh mục thành công");
-    } catch (error) {
+    } catch {
       toast.error("Cập nhật danh mục thất bại. Vui lòng thử lại.");
     } finally {
       setIsUpdating(false);
     }
   };
 
-  // Hàm cập nhật URL
-  const updateURL = (page: number, limit: number, search: string) => {
-    const params = new URLSearchParams();
-    params.set("page", page.toString());
-    params.set("limit", limit.toString());
-    if (search && search.trim() !== "") {
-      params.set("search", search);
-    }
-
-    router.push(`/admin/categories?${params.toString()}`, { scroll: false });
+  // Filter handlers
+  const handlePageChange = (page: number) => {
+    updateFilter('page', page);
   };
 
-  // Fetch categories khi URL params thay đổi
-  useEffect(() => {
-    const params: any = { page: currentPage, limit: pageSize };
-    if (searchTerm && searchTerm.trim() !== "") {
-      params.search = searchTerm.trim();
-    }
+  const handlePageSizeChange = (size: number) => {
+    updateFilters({ limit: size, page: 1 });
+  };
 
-    dispatch(getAllCategories(params));
-  }, [dispatch, currentPage, pageSize, searchTerm]);
-
-  useEffect(() => {
-    setCurrentPage(urlPage);
-    setPageSize(urlLimit);
-    setSearchTerm(urlSearch);
-  }, [urlPage, urlLimit, urlSearch]);
+  const handleSearch = (value: string) => {
+    updateFilters({ search: value, page: 1 });
+  };
 
   const getParentName = (category: Category) => {
     if (category.parentCategory && category.parentCategory.name) {
@@ -177,23 +177,6 @@ export default function CategoriesAdminPage() {
 
   const getProductCount = (category: Category) => {
     return category.productCount || 0;
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    updateURL(page, pageSize, searchTerm);
-  };
-
-  const handlePageSizeChange = (size: number) => {
-    setPageSize(size);
-    setCurrentPage(1);
-    updateURL(1, size, searchTerm);
-  };
-
-  const handleSearch = (value: string) => {
-    setSearchTerm(value);
-    setCurrentPage(1);
-    updateURL(1, pageSize, value);
   };
 
   const handleCloseModals = () => {
@@ -260,7 +243,7 @@ export default function CategoriesAdminPage() {
           <CreateCategoryModal
             isOpen={createModalOpen}
             onClose={() => setCreateModalOpen(false)}
-            onCreate={handleCreateCategory}
+            onCreate={handleCreateCategory as any}
             categories={categories}
             isLoading={isCreating}
           />

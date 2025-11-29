@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { useUrlFilters } from "@/hooks/useUrlFilters";
 import {
   Card,
   CardContent,
@@ -27,31 +27,40 @@ import { ViewModelDiscount } from "@/components/admin/DiscountAdminPage/ViewMode
 import { UpdateModelDiscount } from "@/components/admin/DiscountAdminPage/UpdateModelDiscount";
 
 export default function AdminDiscountsPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const discountState = useAppSelector((state) => state.discount);
-  // Lấy params từ URL
-  const urlPage = parseInt(searchParams.get("page") || "1");
-  const urlLimit = parseInt(searchParams.get("limit") || "10");
-  const urlSearch = searchParams.get("search") || "";
-  const urlDiscountType = searchParams.get("discountType") || "";
-  const urlIsActive = searchParams.get("isActive");
 
-  const [currentPage, setCurrentPage] = useState(urlPage);
-  const [pageSize, setPageSize] = useState(urlLimit);
-  const [searchTerm, setSearchTerm] = useState(urlSearch);
-  const [selectedDiscountType, setSelectedDiscountType] = useState(urlDiscountType);
-  const [selectedIsActive, setSelectedIsActive] = useState<string | null>(
-    urlIsActive
-  );
+  // Define filter interface
+  interface DiscountFilters {
+    page: number;
+    limit: number;
+    search: string;
+    discountType: string;
+    isActive: boolean | null;
+    [key: string]: string | number | boolean | null;
+  }
 
+  // Use URL filters hook
+  const { filters, updateFilter, updateFilters } = useUrlFilters<DiscountFilters>({
+    defaultFilters: {
+      page: 1,
+      limit: 10,
+      search: '',
+      discountType: '',
+      isActive: null,
+    },
+    basePath: '/admin/discounts',
+  });
 
+  // Extract filter values
+  const currentPage = Number(filters.page);
+  const pageSize = Number(filters.limit);
+  const searchTerm = filters.search as string;
+  const selectedDiscountType = filters.discountType as string;
+  const selectedIsActive = filters.isActive as boolean | null;
 
-  const discounts: Discount[] = discountState?.discounts;
+  const discounts: Discount[] = discountState?.discounts || [];
   const pagination = discountState?.pagination;
-  console.log(discounts)
-  console.log(pagination)
 
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
@@ -60,20 +69,49 @@ export default function AdminDiscountsPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Hàm mở modal tạo mới
+  // Fetch discounts when filters change
+  useEffect(() => {
+    const params: Record<string, string | number | boolean> = {
+      page: currentPage,
+      limit: pageSize,
+    };
+
+    if (searchTerm && searchTerm.trim() !== "") {
+      params.search = searchTerm.trim();
+    }
+    if (selectedDiscountType && selectedDiscountType.trim() !== "") {
+      params.discountType = selectedDiscountType.trim();
+    }
+    if (selectedIsActive !== null) {
+      params.isActive = selectedIsActive;
+    }
+
+    dispatch(getAllDiscounts(params));
+    dispatch(getDiscountStatistics());
+  }, [dispatch, currentPage, pageSize, searchTerm, selectedDiscountType, selectedIsActive]);
+
+  // ============= Event Handlers =============
+
   const handleOpenCreateModal = () => {
     setCreateModalOpen(true);
   };
 
-  // Hàm xử lý tạo discount mới
-  const handleCreateDiscount = async (discountData: any) => {
+  const handleCreateDiscount = async (discountData: Partial<Discount>) => {
     setIsCreating(true);
     try {
-      const result = await dispatch(createDiscount(discountData)).unwrap();
+      await dispatch(createDiscount(discountData as any)).unwrap();
 
-      // Refresh danh sách
-      fetchDiscounts();
-      fetchStatistics();
+      // Refresh list
+      const params: any = {
+        page: currentPage,
+        limit: pageSize,
+      };
+      if (searchTerm) params.search = searchTerm;
+      if (selectedDiscountType) params.discountType = selectedDiscountType;
+      if (selectedIsActive !== null) params.isActive = selectedIsActive;
+      
+      dispatch(getAllDiscounts(params));
+      dispatch(getDiscountStatistics());
 
       setCreateModalOpen(false);
       toast.success("Tạo mã giảm giá thành công");
@@ -98,15 +136,13 @@ export default function AdminDiscountsPage() {
     setUpdateModalOpen(true);
   };
 
-  // Hàm đóng modal
   const handleCloseEditModal = () => {
     setUpdateModalOpen(false);
     setSelectedDiscount(null);
     setIsUpdating(false);
   };
 
-  // Hàm lưu thay đổi
-  const handleUpdateDiscount = async (discountData: any) => {
+  const handleUpdateDiscount = async (discountData: Partial<Discount>) => {
     if (!selectedDiscount) return;
 
     setIsUpdating(true);
@@ -118,9 +154,17 @@ export default function AdminDiscountsPage() {
         })
       ).unwrap();
 
-      // Refresh danh sách sau khi update
-      fetchDiscounts();
-      fetchStatistics();
+      // Refresh list
+      const params: any = {
+        page: currentPage,
+        limit: pageSize,
+      };
+      if (searchTerm) params.search = searchTerm;
+      if (selectedDiscountType) params.discountType = selectedDiscountType;
+      if (selectedIsActive !== null) params.isActive = selectedIsActive;
+
+      dispatch(getAllDiscounts(params));
+      dispatch(getDiscountStatistics());
 
       handleCloseEditModal();
       toast.success("Cập nhật mã giảm giá thành công");
@@ -133,110 +177,25 @@ export default function AdminDiscountsPage() {
     }
   };
 
-  // Hàm fetch discounts với params hợp lệ
-  const fetchDiscounts = () => {
-    const params: any = {
-      page: currentPage,
-      limit: pageSize,
-    };
-
-    if (searchTerm && searchTerm.trim() !== "") {
-      params.search = searchTerm.trim();
-    }
-    if (selectedDiscountType && selectedDiscountType.trim() !== "") {
-      params.discountType = selectedDiscountType.trim();
-    }
-    // Chỉ thêm isActive nếu có giá trị boolean hợp lệ
-    if (selectedIsActive === "true" || selectedIsActive === "false") {
-      params.isActive = selectedIsActive === "true";
-    }
-
-    dispatch(getAllDiscounts(params));
-  };
-
-  // Hàm fetch statistics
-  const fetchStatistics = () => {
-    dispatch(getDiscountStatistics());
-  };
-
-  const updateURL = (
-    page: number,
-    limit: number,
-    search: string,
-    discountType: string,
-    isActive: string | null
-  ) => {
-    const params = new URLSearchParams();
-    params.set("page", page.toString());
-    params.set("limit", limit.toString());
-
-    if (search && search.trim() !== "") {
-      params.set("search", search);
-    }
-    if (discountType && discountType.trim() !== "") {
-      params.set("discountType", discountType);
-    }
-    // Chỉ thêm isActive nếu có giá trị boolean hợp lệ
-    if (isActive === "true" || isActive === "false") {
-      params.set("isActive", isActive);
-    }
-
-    const url = `/admin/discounts?${params.toString()}`;
-    console.log("Updating URL to:", url);
-    router.push(url, { scroll: false });
-  };
-
-  // Fetch discounts khi URL params thay đổi
-  useEffect(() => {
-    fetchDiscounts();
-    fetchStatistics();
-  }, [
-    dispatch,
-    currentPage,
-    pageSize,
-    searchTerm,
-    selectedDiscountType,
-    selectedIsActive,
-  ]);
-
-  // Đồng bộ state với URL params
-  useEffect(() => {
-    setCurrentPage(urlPage);
-    setPageSize(urlLimit);
-    setSearchTerm(urlSearch);
-    setSelectedDiscountType(urlDiscountType);
-    setSelectedIsActive(urlIsActive);
-  }, [urlPage, urlLimit, urlSearch, urlDiscountType, urlIsActive]);
-
+  // Filter handlers
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    updateURL(page, pageSize, searchTerm, selectedDiscountType, selectedIsActive);
+    updateFilter('page', page);
   };
 
   const handlePageSizeChange = (size: number) => {
-    setPageSize(size);
-    setCurrentPage(1);
-    updateURL(1, size, searchTerm, selectedDiscountType, selectedIsActive);
+    updateFilters({ limit: size, page: 1 });
   };
 
   const handleSearch = (value: string) => {
-    setSearchTerm(value);
-    setCurrentPage(1);
-    updateURL(1, pageSize, value, selectedDiscountType, selectedIsActive);
+    updateFilters({ search: value, page: 1 });
   };
 
   const handleDiscountTypeFilterChange = (discountType: string) => {
-    setSelectedDiscountType(discountType);
-    setCurrentPage(1);
-    updateURL(1, pageSize, searchTerm, discountType, selectedIsActive);
+    updateFilters({ discountType: discountType, page: 1 });
   };
 
   const handleActiveFilterChange = (isActive: boolean | null) => {
-    // Convert boolean | null thành string | null
-    const activeString = isActive === null ? null : isActive.toString();
-    setSelectedIsActive(activeString);
-    setCurrentPage(1);
-    updateURL(1, pageSize, searchTerm, selectedDiscountType, activeString);
+    updateFilters({ isActive: isActive, page: 1 });
   };
 
   const handleCloseModals = () => {
@@ -249,9 +208,17 @@ export default function AdminDiscountsPage() {
     try {
       await dispatch(deleteDiscount(discount._id)).unwrap();
 
-      // Refresh danh sách
-      fetchDiscounts();
-      fetchStatistics();
+      // Refresh list
+      const params: any = {
+        page: currentPage,
+        limit: pageSize,
+      };
+      if (searchTerm) params.search = searchTerm;
+      if (selectedDiscountType) params.discountType = selectedDiscountType;
+      if (selectedIsActive !== null) params.isActive = selectedIsActive;
+
+      dispatch(getAllDiscounts(params));
+      dispatch(getDiscountStatistics());
 
       toast.success("Xóa mã giảm giá thành công");
     } catch (error) {
@@ -264,7 +231,7 @@ export default function AdminDiscountsPage() {
     setViewModalOpen(true);
   };
 
-  // Tính toán thống kê
+  // Calculate stats
   const totalDiscounts = pagination?.totalItems || discounts.length
   const activeDiscounts = discounts.filter((discount) => discount.isActive).length;
   const expiredDiscounts = discounts.filter(
@@ -313,13 +280,7 @@ export default function AdminDiscountsPage() {
             onDiscountTypeFilterChange={handleDiscountTypeFilterChange}
             onActiveFilterChange={handleActiveFilterChange}
             selectedDiscountType={selectedDiscountType}
-            selectedIsActive={
-              selectedIsActive === "true"
-                ? true
-                : selectedIsActive === "false"
-                  ? false
-                  : null
-            }
+            selectedIsActive={selectedIsActive}
           />
 
           <DiscountPagination

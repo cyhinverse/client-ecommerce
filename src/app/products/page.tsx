@@ -93,9 +93,6 @@ export default function ProductsPage() {
   const filteredAndSortedProducts = useMemo(() => {
     if (!products || !Array.isArray(products)) return [];
 
-    console.log("Filtering products with colors:", filters.colors); // Debug
-    console.log("Total products:", products.length); // Debug
-
     const filtered = products.filter((product) => {
       // Search filter
       if (filters.search && !product.name?.toLowerCase().includes(filters.search.toLowerCase())) {
@@ -118,12 +115,10 @@ export default function ProductsPage() {
 
       // Color filter - FIXED: Improved logic
       if (filters.colors.length > 0) {
-        console.log("Checking color for product:", product.name); // Debug
-        console.log("Product variants:", product.variants); // Debug
+
         
         // Kiểm tra nếu product có variants
         if (!product.variants || product.variants.length === 0) {
-          console.log("Product has no variants, skipping"); // Debug
           return false;
         }
 
@@ -134,15 +129,12 @@ export default function ProductsPage() {
           const variantColor = variant.color.toLowerCase().trim();
           const match = filters.colors.some(filterColor => {
             const normalizedFilterColor = filterColor.toLowerCase().trim();
-            console.log(`Comparing: "${variantColor}" with "${normalizedFilterColor}"`); // Debug
             return variantColor === normalizedFilterColor;
           });
           
-          console.log(`Color match for ${variantColor}:`, match); // Debug
           return match;
         });
 
-        console.log("Has matching color:", hasMatchingColor); // Debug
         if (!hasMatchingColor) return false;
       }
 
@@ -161,8 +153,6 @@ export default function ProductsPage() {
 
       return true;
     });
-
-    console.log("Filtered products count:", filtered.length); // Debug
 
     // Sort products
     const sorted = [...filtered].sort((a, b) => {
