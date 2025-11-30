@@ -96,13 +96,15 @@ export default function AdminDiscountsPage() {
     setCreateModalOpen(true);
   };
 
+
+
   const handleCreateDiscount = async (discountData: Partial<Discount>) => {
     setIsCreating(true);
     try {
       await dispatch(createDiscount(discountData as any)).unwrap();
 
       // Refresh list
-      const params: any = {
+      const params: Record<string, string | number | boolean> = {
         page: currentPage,
         limit: pageSize,
       };
@@ -115,11 +117,8 @@ export default function AdminDiscountsPage() {
 
       setCreateModalOpen(false);
       toast.success("Tạo mã giảm giá thành công");
-    } catch (error: any) {
-      console.error("Create discount error:", error);
-      toast.error(
-        error?.message || "Lỗi khi tạo mã giảm giá. Vui lòng thử lại."
-      );
+    } catch (error) {
+      toast.error("Lỗi khi tạo mã giảm giá. Vui lòng thử lại." + error);
     } finally {
       setIsCreating(false);
     }
@@ -154,8 +153,10 @@ export default function AdminDiscountsPage() {
         })
       ).unwrap();
 
+
+
       // Refresh list
-      const params: any = {
+      const params: Record<string, string | number | boolean> = {
         page: currentPage,
         limit: pageSize,
       };
@@ -168,10 +169,8 @@ export default function AdminDiscountsPage() {
 
       handleCloseEditModal();
       toast.success("Cập nhật mã giảm giá thành công");
-    } catch (error: any) {
-      toast.error(
-        error?.message || "Cập nhật mã giảm giá thất bại. Vui lòng thử lại."
-      );
+    } catch (error) {
+      toast.error("Cập nhật mã giảm giá thất bại. Vui lòng thử lại." + error);
     } finally {
       setIsUpdating(false);
     }
@@ -209,7 +208,7 @@ export default function AdminDiscountsPage() {
       await dispatch(deleteDiscount(discount._id)).unwrap();
 
       // Refresh list
-      const params: any = {
+      const params: Record<string, string | number | boolean> = {
         page: currentPage,
         limit: pageSize,
       };
@@ -222,7 +221,7 @@ export default function AdminDiscountsPage() {
 
       toast.success("Xóa mã giảm giá thành công");
     } catch (error) {
-      toast.error("Xóa mã giảm giá thất bại. Vui lòng thử lại.");
+      toast.error("Xóa mã giảm giá thất bại. Vui lòng thử lại." + error);
     }
   };
 

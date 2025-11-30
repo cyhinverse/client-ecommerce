@@ -178,9 +178,6 @@ export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancell
                         <div className="text-muted-foreground">Tạm tính:</div>
                         <div className="text-right">{formatCurrency(order.subtotal)}</div>
 
-                        <div className="text-muted-foreground">Phí vận chuyển:</div>
-                        <div className="text-right">{formatCurrency(order.shippingFee)}</div>
-
                         {order.discountAmount > 0 && (
                             <>
                                 <div className="text-muted-foreground">Giảm giá:</div>

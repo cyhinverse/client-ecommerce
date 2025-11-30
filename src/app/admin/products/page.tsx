@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import {
@@ -10,7 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { toast } from "sonner";
-
 import { ProductsHeader } from "@/components/admin/ProductAdminPage/ProductHeader";
 import { ProductsStats } from "@/components/admin/ProductAdminPage/ProductStats";
 import { ProductsTable } from "@/components/admin/ProductAdminPage/ProductTable";
@@ -74,8 +73,8 @@ export default function AdminProductsPage() {
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Hàm lọc bỏ các param không hợp lệ
-  const filterValidParams = (params: any) => {
-    const filtered: any = {};
+  const filterValidParams = (params: Record<string, any>) => {
+    const filtered: Record<string, any> = {};
     Object.keys(params).forEach((key) => {
       const value = params[key];
       // Chỉ giữ lại các giá trị hợp lệ
@@ -91,9 +90,19 @@ export default function AdminProductsPage() {
     return filtered;
   };
 
+  type Params = {
+    page: number,
+    limit: number,
+    search?: string,
+    category?: string,
+    brand?: string,
+    minPrice?: number,
+    maxPrice?: number,
+    isActive?: boolean
+  }
   // Hàm fetch products với params hợp lệ
-  const fetchProducts = () => {
-    const params: any = {
+  const fetchProducts = useCallback(() => {
+    const params: Params = {
       page: currentPage,
       limit: pageSize,
     };
@@ -122,8 +131,18 @@ export default function AdminProductsPage() {
     const filteredParams = filterValidParams(params);
     console.log("Fetching products with params:", filteredParams);
 
-    dispatch(getAllProducts(filteredParams));
-  };
+    dispatch(getAllProducts(filteredParams as Params ));
+  }, [
+    currentPage,
+    pageSize,
+    searchTerm,
+    selectedCategory,
+    selectedBrand,
+    selectedMinPrice,
+    selectedMaxPrice,
+    selectedStatus,
+    dispatch
+  ]);
 
   const updateURL = (
     page: number,
@@ -166,17 +185,7 @@ export default function AdminProductsPage() {
   // Fetch products khi component mount và khi filter thay đổi
   useEffect(() => {
     fetchProducts();
-  }, [
-    dispatch,
-    currentPage,
-    pageSize,
-    searchTerm,
-    selectedCategory,
-    selectedBrand,
-    selectedMinPrice,
-    selectedMaxPrice,
-    selectedStatus,
-  ]);
+  }, [fetchProducts]);
 
   // Đồng bộ state với URL params
   useEffect(() => {
@@ -222,8 +231,8 @@ export default function AdminProductsPage() {
       fetchProducts();
       setCreateModalOpen(false);
       toast.success("Tạo sản phẩm thành công");
-    } catch (error: any) {
-      toast.error(error?.message || "Lỗi khi tạo sản phẩm. Vui lòng thử lại.");
+    } catch (error) {
+      toast.error("Lỗi khi tạo sản phẩm. Vui lòng thử lại." + error);
     } finally {
       setIsCreating(false);
     }
@@ -260,10 +269,8 @@ export default function AdminProductsPage() {
       fetchProducts();
       handleCloseEditModal();
       toast.success("Cập nhật sản phẩm thành công");
-    } catch (error: any) {
-      toast.error(
-        error?.message || "Cập nhật sản phẩm thất bại. Vui lòng thử lại."
-      );
+    } catch (error) {
+      toast.error("Cập nhật sản phẩm thất bại. Vui lòng thử lại." + error);
     } finally {
       setIsUpdating(false);
     }
@@ -394,7 +401,7 @@ export default function AdminProductsPage() {
 
       // Refresh data sau khi xóa thành công
       fetchProducts();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Delete product error:", error);
 
       // Kiểm tra nếu error thực sự là string message

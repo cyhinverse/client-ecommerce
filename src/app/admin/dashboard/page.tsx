@@ -13,8 +13,6 @@ import {
   Users,
   Package,
   DollarSign,
-  TrendingUp,
-  TrendingDown,
   Calendar,
   ArrowUpRight,
   ArrowDownRight,
@@ -161,9 +159,6 @@ const formatPrice = (price: number) => {
   }).format(price);
 };
 
-const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString("vi-VN");
-};
 
 export default function AdminDashboard() {
   return (

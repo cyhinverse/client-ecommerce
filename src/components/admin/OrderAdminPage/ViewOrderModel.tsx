@@ -156,29 +156,13 @@ export  function ViewOrderModal({
 
           {/* Tổng quan */}
           <div className="space-y-4">
-            <h3 className="font-semibold">Tổng quan</h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Tổng tiền hàng:</span>
-                <span>{formatCurrency(order.subtotal)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Phí vận chuyển:</span>
-                <span>{formatCurrency(order.shippingFee)}</span>
-              </div>
-              {order.discountAmount > 0 && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Giảm giá:</span>
-                  <span className="text-green-600">-{formatCurrency(order.discountAmount)}</span>
-                </div>
-              )}
               <div className="flex justify-between font-semibold text-base border-t pt-2">
                 <span>Tổng cộng:</span>
                 <span>{formatCurrency(order.totalAmount)}</span>
               </div>
             </div>
           </div>
-        </div>
+
 
         {/* Chi tiết sản phẩm */}
         <div className="space-y-4">

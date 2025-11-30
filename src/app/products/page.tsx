@@ -4,14 +4,12 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { getAllProducts } from "@/features/product/productAction";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { SlidersHorizontal } from "lucide-react";
-import Link from "next/link";
-import Image from "next/image";
-import ProductFilter, { ProductFilters } from "@/components/common/ProductFilter";
-import SpinnerLoading from "@/components/common/SpinerLoading"; 
+import ProductFilter from "@/components/common/ProductFilter";
+import SpinnerLoading from "@/components/common/SpinerLoading";
+import { Params , ProductFilters } from "@/types/product";
+import { ProductCard } from "@/components/common/ProductCard";
 
 export default function ProductsPage() {
   const router = useRouter();
@@ -20,7 +18,6 @@ export default function ProductsPage() {
   const { all: products, isLoading } = useAppSelector(
     (state) => state.product
   );
-
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   
   const [filters, setFilters] = useState<ProductFilters>(() => ({
@@ -33,10 +30,12 @@ export default function ProductsPage() {
     sortBy: searchParams.get("sortBy") || "newest",
   }));
 
+
+
   // Debounce API calls
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      const params: any = {
+      const params: Params= {
         page: 1,
         limit: 50,
       };
@@ -52,7 +51,6 @@ export default function ProductsPage() {
     return () => clearTimeout(timeoutId);
   }, [dispatch, filters.search, filters.minPrice, filters.maxPrice, filters.sortBy]);
 
-  // Debounce URL updates
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       const params = new URLSearchParams();
@@ -250,65 +248,3 @@ export default function ProductsPage() {
   );
 }
 
-// ProductCard Component - Giống với ProductFeatures
-const ProductCard = ({ product }: { product: any }) => (
-  <Link href={`/products/${product.slug || product._id}`} className="group block">
-    <Card className="overflow-hidden border-0 shadow-none bg-transparent">
-      <CardContent className="p-0">
-        <div className="relative aspect-[3/4] overflow-hidden bg-gray-100 mb-3">
-          {product.images && product.images.length > 0 ? (
-            <Image
-              src={product.images[0]}
-              alt={product.name || "Product image"}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
-              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gray-100">
-              <span className="text-gray-400 text-xs">No Image</span>
-            </div>
-          )}
-
-          {product.price?.discountPrice && product.price.discountPrice < product.price.currentPrice && (
-            <Badge className="absolute top-2 right-2 bg-black text-white border-0 text-xs px-2 py-0.5">
-              -{Math.round(((product.price.currentPrice - product.price.discountPrice) / product.price.currentPrice) * 100)}%
-            </Badge>
-          )}
-        </div>
-
-        <div className="space-y-1">
-          <h3 className="font-medium text-sm line-clamp-1 group-hover:underline">
-            {product.name || "Product Name"}
-          </h3>
-          <p className="text-xs text-muted-foreground">{product.brand || "Brand"}</p>
-          <div className="flex items-baseline gap-2 pt-1">
-            {product.price?.discountPrice && product.price.discountPrice < product.price.currentPrice ? (
-              <>
-                <span className="font-semibold text-sm">
-                  {new Intl.NumberFormat("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                  }).format(product.price.discountPrice)}
-                </span>
-                <span className="text-xs text-muted-foreground line-through">
-                  {new Intl.NumberFormat("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                  }).format(product.price.currentPrice)}
-                </span>
-              </>
-            ) : (
-              <span className="font-semibold text-sm">
-                {new Intl.NumberFormat("vi-VN", {
-                  style: "currency",
-                  currency: "VND",
-                }).format(product.price?.currentPrice || 0)}
-              </span>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  </Link>
-);

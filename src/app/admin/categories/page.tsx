@@ -25,6 +25,7 @@ import { EditCategoryModal } from "@/components/admin/CategoriesAdminPage/Update
 import { ViewCategoryModal } from "@/components/admin/CategoriesAdminPage/ViewModal";
 import { CreateCategoryModal } from "@/components/admin/CategoriesAdminPage/CreateModel";
 import { toast } from "sonner";
+import { Params } from "@/types/product";
 
 export default function CategoriesAdminPage() {
   const dispatch = useAppDispatch();
@@ -84,10 +85,10 @@ export default function CategoriesAdminPage() {
   const handleCreateCategory = async (categoryData: Partial<Category>) => {
     setIsCreating(true);
     try {
-      await dispatch(creatCategory(categoryData as any)).unwrap();
+      await dispatch(creatCategory(categoryData)).unwrap();
 
       // Refresh list
-      const params: any = { page: currentPage, limit: pageSize };
+      const params: Params = { page: currentPage, limit: pageSize };
       if (searchTerm && searchTerm.trim() !== "") {
         params.search = searchTerm.trim();
       }
@@ -132,7 +133,7 @@ export default function CategoriesAdminPage() {
       ).unwrap();
 
       // Refresh list
-      const params: any = { page: currentPage, limit: pageSize };
+      const params: Params = { page: currentPage, limit: pageSize };
       if (searchTerm && searchTerm.trim() !== "") {
         params.search = searchTerm.trim();
       }
@@ -186,7 +187,7 @@ export default function CategoriesAdminPage() {
   };
 
   const handleDeleteCategory = (category: Category) => {
-    dispatch(deleteCategory(category._id));
+    dispatch(deleteCategory(category._id as string));
   };
 
   const handleViewCategory = (category: Category) => {

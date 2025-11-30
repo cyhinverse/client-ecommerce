@@ -15,16 +15,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ProductFilters } from "@/types/product";
 
-export interface ProductFilters {
-  search: string;
-  minPrice: number;
-  maxPrice: number;
-  rating: number[];
-  colors: string[];
-  sizes: string[];
-  sortBy: string;
-}
 
 interface ProductFilterProps {
   filters: ProductFilters;

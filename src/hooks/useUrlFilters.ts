@@ -194,3 +194,4 @@ export function useUrlFilters<T extends Filters>({
     createSearchParams,
   };
 }
+

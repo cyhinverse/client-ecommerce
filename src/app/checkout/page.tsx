@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,16 +37,18 @@ export default function CheckoutPage() {
     note: ""
   });
 
+
   const { data: userData } = useAppSelector((state) => state.auth);
   const { data: cartData, checkoutTotal } = useAppSelector((state) => state.cart);
   const dispatch = useAppDispatch();
   const router = useRouter();
 
-  const cartItems = cartData?.items || [];
-  const shippingFee = 30000;
-  const discount = 0;
-  const finalTotal = (checkoutTotal || 0) + shippingFee - discount;
+  const cartItems = useMemo(() => {
+    return cartData?.items || [];
+  }, [cartData]);
 
+  const discount = 0;
+  const finalTotal = (checkoutTotal || 0) - discount;
   const cartItemIds = cartItems.map(item => item._id);
 
   useEffect(() => {
@@ -69,7 +71,7 @@ export default function CheckoutPage() {
         ward: defaultAddress.ward || ""
       }));
     }
-  }, [userData, cartItems, router]);
+  }, [userData,cartItems, router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -119,13 +121,11 @@ export default function CheckoutPage() {
       const result = await dispatch(createOrder(orderData)).unwrap();
 
       if (result) {
-        // Clear cart immediately after order creation
         dispatch(clearCart()).unwrap().catch(console.error);
 
         if (paymentMethod === "vnpay") {
           try {
             toast.loading("Đang chuyển hướng đến VNPay...");
-            // Use Redux action instead of direct API call
             const paymentResult = await dispatch(createPaymentUrl(result._id)).unwrap();
 
             if (paymentResult.paymentUrl) {
@@ -133,9 +133,8 @@ export default function CheckoutPage() {
               return;
             }
           } catch (paymentError) {
-            console.error("VNPay error:", paymentError);
-            toast.error("Không thể tạo thanh toán VNPay. Vui lòng thanh toán lại trong lịch sử đơn hàng.");
-            router.push("/"); // Or redirect to order detail if available
+            toast.error("Không thể tạo thanh toán VNPay. Vui lòng thanh toán lại trong lịch sử đơn hàng." + paymentError);
+            router.push("/");
           }
         } else {
           toast.success("Đặt hàng thành công!");
@@ -143,16 +142,8 @@ export default function CheckoutPage() {
         }
       }
 
-    } catch (error: any) {
-
-      let errorMessage = "Đặt hàng thất bại. Vui lòng thử lại.";
-
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      toast.error(errorMessage);
+    } catch (error) {
+      toast.error(error as string);
     } finally {
       setIsLoading(false);
     }
@@ -389,13 +380,6 @@ export default function CheckoutPage() {
                     </span>
                     <span className="font-medium text-gray-900">
                       {formatPrice(checkoutTotal || 0)}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Phí vận chuyển</span>
-                    <span className="font-medium text-gray-900">
-                      {formatPrice(shippingFee)}
                     </span>
                   </div>
 

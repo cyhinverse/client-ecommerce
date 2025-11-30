@@ -30,7 +30,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
     const debounceTimer = setTimeout(() => {
       dispatch(searchProducts({ keyword: searchQuery, limit: 10 }));
-    }, 300); // Wait 300ms after user stops typing
+    }, 300); 
 
     return () => clearTimeout(debounceTimer);
   }, [searchQuery, dispatch]);

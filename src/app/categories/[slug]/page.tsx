@@ -1,6 +1,7 @@
 "use client";
 import SpinnerLoading from "@/components/common/SpinerLoading";
 import { Card, CardHeader } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getTreeCategories } from "@/features/category/categoryAction";
 import { getProductsBySlugOfCategory } from "@/features/product/productAction";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
@@ -78,7 +79,7 @@ export default function CategoriesPage() {
         )}
       </section>
 
-      {isLoading && <SpinnerLoading />}
+      {isLoading && <SpinnerLoading/>}
       <section className="mb-20">
         <h1 className="text-3xl font-bold mb-8 text-center tracking-tight">
           Products

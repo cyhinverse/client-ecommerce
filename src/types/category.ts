@@ -13,14 +13,14 @@ export interface SubCategory {
 }
 
 export interface Category {
-  _id: string;
-  name: string;
-  slug: string;
+  _id?: string;
+  name?: string;
+  slug?: string;
   description?: string;
   images?: string[];
   parentCategory?: ParentCategory;
   subcategories?: SubCategory[];
-  createdAt: string;
+  createdAt?: string;
   updatedAt: string;
   isActive: boolean;
   productCount?: number;

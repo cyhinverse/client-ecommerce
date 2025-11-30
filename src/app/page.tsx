@@ -1,5 +1,4 @@
 "use client";
-
 import Banner from "@/components/common/Banner";
 import Category from "@/components/common/Category";
 import ListFeatures from "@/components/common/ListFeatures";

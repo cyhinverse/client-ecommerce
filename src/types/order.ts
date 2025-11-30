@@ -32,7 +32,6 @@ export interface Order {
   paymentMethod: "cod" | "vnpay";
   paymentStatus: "unpaid" | "paid" | "refunded";
   subtotal: number;
-  shippingFee: number;
   discountCode?: string;
   discountAmount: number;
   totalAmount: number;
@@ -79,9 +78,6 @@ export interface OrderState {
   isCancelling: boolean;
   error: string | null;
 }
-
-
-
 
 export interface OrderStatusCount {
   _id: string;

@@ -37,6 +37,8 @@ import {
   Trash2,
 } from "lucide-react";
 import { Category } from "@/types/category";
+import Image from "next/image";
+
 
 // Zod validation schema
 const createFormSchema = z.object({
@@ -415,7 +417,7 @@ export function CreateCategoryModal({
               <FormField
                 control={form.control}
                 name="images"
-                render={({ field }) => (
+                render={({  }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium">
                       Hình ảnh
@@ -451,7 +453,7 @@ export function CreateCategoryModal({
                           <div className="grid grid-cols-3 gap-2">
                             {currentImages.map((image, index) => (
                               <div key={index} className="relative group">
-                                <img
+                                <Image
                                   src={image}
                                   alt={`Preview ${index + 1}`}
                                   className="w-full h-16 object-cover rounded border"

@@ -77,3 +77,23 @@ export interface ProductState {
   searchError: string | null;
 }
 
+
+ export type Params = {
+    page: number;
+    limit: number;
+    search?: string;
+    minPrice?: number;
+    maxPrice?: number
+    sortBy?: string;
+  };
+
+
+  export interface ProductFilters {
+  search: string;
+  minPrice: number;
+  maxPrice: number;
+  rating: number[];
+  colors: string[];
+  sizes: string[];
+  sortBy: string;
+}

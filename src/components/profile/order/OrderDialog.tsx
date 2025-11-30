@@ -1,5 +1,6 @@
 "use client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Order, OrderProduct } from "@/types/order";
 import { Package, Clock, Truck, CheckCircle, XCircle, RefreshCw, MapPin, CreditCard } from "lucide-react";
@@ -173,10 +174,12 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
                                         <div key={product.productId + index} className="flex items-start gap-3 p-3 border rounded-lg">
                                             <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center flex-shrink-0">
                                                 {product.image ? (
-                                                    <img
+                                                    <Image
                                                         src={product.image}
                                                         alt={product.name}
-                                                        className="w-14 h-14 object-cover rounded"
+                                                        width={56}
+                                                        height={56}
+                                                        className="object-cover rounded"
                                                     />
                                                 ) : (
                                                     <Package className="h-6 w-6 text-gray-400" />
@@ -207,27 +210,11 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
                             {/* Order Summary */}
                             <div className="bg-gray-50 p-4 rounded-lg">
                                 <h3 className="font-semibold text-base mb-3">Tổng quan đơn hàng</h3>
-                                <div className="space-y-2 text-sm">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-muted-foreground text-xs">Tạm tính:</span>
-                                        <span className="font-medium text-sm">{formatCurrency(order.subtotal)}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-muted-foreground text-xs">Phí vận chuyển:</span>
-                                        <span className="font-medium text-sm">{formatCurrency(order.shippingFee)}</span>
-                                    </div>
-                                    {order.discountAmount > 0 && (
-                                        <div className="flex justify-between items-center text-green-600">
-                                            <span className="text-xs">Giảm giá:</span>
-                                            <span className="font-medium text-sm">-{formatCurrency(order.discountAmount)}</span>
-                                        </div>
-                                    )}
                                     <div className="flex justify-between items-center font-semibold text-base border-t pt-2">
                                         <span>Tổng cộng:</span>
                                         <span>{formatCurrency(order.totalAmount)}</span>
                                     </div>
                                 </div>
-                            </div>
 
                             {/* Payment Information */}
                             <div className="bg-gray-50 p-4 rounded-lg">
