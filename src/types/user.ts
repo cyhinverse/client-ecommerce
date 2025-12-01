@@ -42,3 +42,12 @@ export interface UserState {
   isLoading: boolean;
   error: string | null;
 }
+
+export interface UserFilters {
+  page: number;
+  limit: number;
+  search: string;
+  role: string;
+  isVerifiedEmail: boolean | null;
+  [key: string]: string | number | boolean | null;
+}

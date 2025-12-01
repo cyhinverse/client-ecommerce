@@ -15,12 +15,12 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import SpinnerLoading from "@/components/common/SpinerLoading";
-import UpdateUserProfile from "@/components/profile/UpdateUserModel";
-import ProfileTab from "@/components/profile/ProfileTab";
-import OrdersTab from "@/components/profile/OrdersTab";
-import AddressTab from "@/components/profile/AddressTab";
-import SettingsTab from "@/components/profile/SettingsTab";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
+import UpdateUserProfile from "@/components/profile/modals/UpdateUserModal";
+import ProfileTab from "@/components/profile/tabs/ProfileTab";
+import OrdersTab from "@/components/profile/tabs/OrdersTab";
+import AddressTab from "@/components/profile/tabs/AddressTab";
+import SettingsTab from "@/components/profile/tabs/SettingsTab";
 import { User, Package, MapPin, Settings, LogOut, SquarePen } from "lucide-react";
 
 export default function ProfilePage() {
@@ -86,7 +86,7 @@ export default function ProfilePage() {
                 <Button
                   onClick={handleLogout}
                   variant="ghost"
-                  className="w-full justify-start px-4 py-3 text-red-600 hover:text-red-700 hover:bg-red-50"
+                  className="w-full justify-start px-4 py-3 text-destructive hover:text-destructive hover:bg-destructive/10"
                 >
                   <LogOut className="h-4 w-4 mr-3" />
                   Đăng xuất

@@ -5,9 +5,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAppSelector } from "@/hooks/hooks";
 import { ShoppingCart, Search } from "lucide-react";
-import SpinnerLoading from "@/components/common/SpinerLoading";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { usePathname } from "next/navigation";
-import SearchModal from "@/components/search/SearchModel";
+import SearchModal from "@/components/search/SearchModal";
 
 export default function HeaderLayout() {
   const { loading, isAuthenticated, token, data } = useAppSelector(

@@ -53,13 +53,13 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
 
     const getStatusColor = (status: Order["status"]) => {
         switch (status) {
-            case "pending": return "bg-yellow-100 text-yellow-800";
+            case "pending": return "bg-warning/10 text-warning";
             case "confirmed":
-            case "processing": return "bg-blue-100 text-blue-800";
-            case "shipped": return "bg-purple-100 text-purple-800";
-            case "delivered": return "bg-green-100 text-green-800";
-            case "cancelled": return "bg-red-100 text-red-800";
-            default: return "bg-gray-100 text-gray-800";
+            case "processing": return "bg-info/10 text-info";
+            case "shipped": return "bg-primary/10 text-primary";
+            case "delivered": return "bg-success/10 text-success";
+            case "cancelled": return "bg-destructive/10 text-destructive";
+            default: return "bg-muted text-muted-foreground";
         }
     };
 
@@ -136,7 +136,7 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
                         {/* Main Content - 2/3 width */}
                         <div className="lg:col-span-2 space-y-4">
                             {/* Order Information */}
-                            <div className="bg-gray-50 p-4 rounded-lg">
+                            <div className="bg-muted/30 p-4 rounded-lg">
                                 <h3 className="font-semibold text-base mb-3 flex items-center gap-2">
                                     <Package className="h-4 w-4" />
                                     Thông tin đơn hàng
@@ -172,7 +172,7 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
                                 <div className="space-y-3">
                                     {order.products.map((product, index) => (
                                         <div key={product.productId + index} className="flex items-start gap-3 p-3 border rounded-lg">
-                                            <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center flex-shrink-0">
+                                            <div className="w-16 h-16 bg-muted rounded flex items-center justify-center flex-shrink-0">
                                                 {product.image ? (
                                                     <Image
                                                         src={product.image}
@@ -182,7 +182,7 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
                                                         className="object-cover rounded"
                                                     />
                                                 ) : (
-                                                    <Package className="h-6 w-6 text-gray-400" />
+                                                    <Package className="h-6 w-6 text-muted-foreground" />
                                                 )}
                                             </div>
                                             <div className="flex-1 min-w-0">
@@ -208,7 +208,7 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
                         {/* Sidebar - 1/3 width */}
                         <div className="space-y-4">
                             {/* Order Summary */}
-                            <div className="bg-gray-50 p-4 rounded-lg">
+                            <div className="bg-muted/30 p-4 rounded-lg">
                                 <h3 className="font-semibold text-base mb-3">Tổng quan đơn hàng</h3>
                                     <div className="flex justify-between items-center font-semibold text-base border-t pt-2">
                                         <span>Tổng cộng:</span>
@@ -217,7 +217,7 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
                                 </div>
 
                             {/* Payment Information */}
-                            <div className="bg-gray-50 p-4 rounded-lg">
+                            <div className="bg-muted/30 p-4 rounded-lg">
                                 <h3 className="font-semibold text-base mb-3 flex items-center gap-2">
                                     <CreditCard className="h-4 w-4" />
                                     Thanh toán
@@ -236,7 +236,7 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
                                     {order.discountCode && (
                                         <div className="flex justify-between items-center">
                                             <span className="text-muted-foreground text-xs">Mã giảm giá:</span>
-                                            <span className="font-medium text-sm text-blue-600">{order.discountCode}</span>
+                                            <span className="font-medium text-sm text-primary">{order.discountCode}</span>
                                         </div>
                                     )}
                                 </div>
@@ -254,7 +254,7 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
                             </div>
 
                             {/* Shipping Address */}
-                            <div className="bg-gray-50 p-4 rounded-lg">
+                            <div className="bg-muted/30 p-4 rounded-lg">
                                 <h3 className="font-semibold text-base mb-3 flex items-center gap-2">
                                     <MapPin className="h-4 w-4" />
                                     Giao hàng

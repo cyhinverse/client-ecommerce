@@ -97,3 +97,26 @@ export interface ProductState {
   sizes: string[];
   sortBy: string;
 }
+
+export interface AdminProductFilters {
+  page: number;
+  limit: number;
+  search: string;
+  category: string;
+  brand: string;
+  minPrice: number | null;
+  maxPrice: number | null;
+  isActive: boolean | null;
+  [key: string]: string | number | boolean | null;
+}
+
+export interface ProductUrlFilters {
+  search: string;
+  minPrice: number;
+  maxPrice: number;
+  rating: string; // Comma separated
+  colors: string; // Comma separated
+  sizes: string; // Comma separated
+  sortBy: string;
+  [key: string]: string | number | boolean | null;
+}

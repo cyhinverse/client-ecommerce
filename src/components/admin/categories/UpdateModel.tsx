@@ -1,0 +1,274 @@
+// components/EditCategoryModal.tsx
+"use client";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, Save, X } from "lucide-react";
+import { Category } from "@/types/category";
+
+// Define Zod validation schema với giá trị mặc định rõ ràng
+const formSchema = z.object({
+  name: z.string().min(1, { message: "Tên danh mục là bắt buộc" }),
+  slug: z
+    .string()
+    .min(1, { message: "Slug là bắt buộc" })
+    .regex(/^[a-z0-9-]+$/, {
+      message: "Slug chỉ được chứa chữ thường, số và dấu gạch ngang",
+    }),
+  description: z.string().default(""),
+  isActive: z.boolean().default(true),
+});
+
+// Type inference với giá trị mặc định
+type FormData = z.infer<typeof formSchema>;
+
+interface EditCategoryModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (categoryData: FormData & { id: string }) => void;
+  category: Category | null;
+  isLoading?: boolean;
+}
+
+export function EditCategoryModal({
+  isOpen,
+  onClose,
+  onSave,
+  category,
+  isLoading = false,
+}: EditCategoryModalProps) {
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema) as any, // ← Sử dụng type assertion nếu cần
+    defaultValues: {
+      name: "",
+      slug: "",
+      description: "",
+      isActive: true,
+    },
+  });
+
+  // Reset form khi category thay đổi
+  useEffect(() => {
+    if (category) {
+      form.reset({
+        name: category.name || "",
+        slug: category.slug || "",
+        description: category.description || "",
+        isActive: category.isActive ?? true,
+      });
+    }
+  }, [category, form]);
+
+  // Auto-generate slug từ name
+  const generateSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9 ]/g, "")
+      .replace(/\s+/g, "-");
+  };
+
+  // Xử lý khi name thay đổi
+  const handleNameChange = (name: string) => {
+    const currentSlug = form.getValues("slug");
+    const originalSlug = category ? generateSlug(category.name as any) : "";
+
+    // Auto-generate slug nếu slug chưa được chỉnh sửa thủ công
+    if (!currentSlug || currentSlug === originalSlug) {
+      form.setValue("slug", generateSlug(name), { shouldValidate: true });
+    }
+  };
+
+  const onSubmit = (data: FormData) => {
+    if (!category) return;
+
+    onSave({
+      ...data,
+      id: category._id as string,
+    });
+  };
+
+  const handleClose = () => {
+    form.reset();
+    onClose();
+  };
+
+  if (!category) return null;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-[500px]">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                Chỉnh sửa danh mục
+                <Badge variant="outline" className="text-sm">
+                  {/* {category._id.slice(-8)} */}
+                </Badge>
+              </DialogTitle>
+              <DialogDescription>
+                Cập nhật thông tin danh mục sản phẩm
+              </DialogDescription>
+            </DialogHeader>
+
+            {/* Name Field */}
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium">
+                    Tên danh mục <span className="text-destructive">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Nhập tên danh mục"
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleNameChange(e.target.value);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Slug Field */}
+            <FormField
+              control={form.control}
+              name="slug"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium">
+                    Slug <span className="text-destructive">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="ten-danh-muc" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Đường dẫn SEO: /danh-muc/{field.value}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Description Field */}
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium">Mô tả</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Nhập mô tả cho danh mục"
+                      rows={3}
+                      {...field}
+                      value={field.value || ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Status Field */}
+            <FormField
+              control={form.control}
+              name="isActive"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">Trạng thái</FormLabel>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={field.value ? "default" : "secondary"}>
+                        {field.value ? "Đang hoạt động" : "Không hoạt động"}
+                      </Badge>
+                    </div>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            {/* Read-only Information */}
+            <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+              <div>
+                <FormLabel className="text-xs text-muted-foreground">
+                  Ngày tạo
+                </FormLabel>
+                <p className="text-sm font-medium">
+                  {new Date(category.createdAt as any).toLocaleDateString("vi-VN")}
+                </p>
+              </div>
+              <div>
+                <FormLabel className="text-xs text-muted-foreground">
+                  Số sản phẩm
+                </FormLabel>
+                <p className="text-sm font-medium">
+                  {category.productCount || 0} sản phẩm
+                </p>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
+                disabled={isLoading}
+              >
+                <X className="h-4 w-4 mr-2" />
+                Hủy
+              </Button>
+              <Button
+                type="submit"
+                disabled={isLoading || !form.formState.isValid}
+              >
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4 mr-2" />
+                )}
+                {isLoading ? "Đang lưu..." : "Lưu thay đổi"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}

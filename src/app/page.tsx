@@ -1,10 +1,10 @@
 "use client";
-import Banner from "@/components/common/Banner";
-import Category from "@/components/common/Category";
-import ListFeatures from "@/components/common/ListFeatures";
-import NewArrivals from "@/components/common/NewArrivals";
-import OnSaleProduct from "@/components/common/OnSaleProduct";
-import ProductFeatures from "@/components/common/ProductFeatures";
+import Banner from "@/components/home/Banner";
+import Category from "@/components/category/Category";
+import ListFeatures from "@/components/home/ListFeatures";
+import NewArrivals from "@/components/product/NewArrivals";
+import OnSaleProduct from "@/components/product/OnSaleProduct";
+import ProductFeatures from "@/components/product/ProductFeatures";
 
 export default function Home({ children }: { children: React.ReactNode }) {
   return (

@@ -55,6 +55,28 @@ export interface PaginationData {
 
 export interface OrderStatistics {
   totalOrders: number;
+  pendingOrders: number;
+  confirmedOrders: number;
+  processingOrders: number;
+  shippedOrders: number;
+  deliveredOrders: number;
+  cancelledOrders: number;
+  totalRevenue: number;
+}
+
+export interface OrderFilters {
+  page: number;
+  limit: number;
+  search: string;
+  status: string;
+  paymentStatus: string;
+  paymentMethod: string;
+  userId: string;
+  [key: string]: string | number | boolean | null;
+}
+
+export interface OrderStatistics {
+  totalOrders: number;
   totalRevenue: number;
   pendingOrders: number;
   deliveredOrders: number;

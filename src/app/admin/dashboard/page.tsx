@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardContent,
@@ -17,8 +19,47 @@ import {
   ArrowUpRight,
   ArrowDownRight,
 } from "lucide-react";
+import { Bar, BarChart, CartesianGrid, XAxis, Line, LineChart, Tooltip } from "recharts";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 
 // Mock data for dashboard
+const chartData = [
+  { month: "Tháng 1", revenue: 18600000 },
+  { month: "Tháng 2", revenue: 30500000 },
+  { month: "Tháng 3", revenue: 23700000 },
+  { month: "Tháng 4", revenue: 73000000 },
+  { month: "Tháng 5", revenue: 20900000 },
+  { month: "Tháng 6", revenue: 21400000 },
+];
+
+const visitorData = [
+  { month: "Tháng 1", visitors: 450 },
+  { month: "Tháng 2", visitors: 520 },
+  { month: "Tháng 3", visitors: 480 },
+  { month: "Tháng 4", visitors: 650 },
+  { month: "Tháng 5", visitors: 780 },
+  { month: "Tháng 6", visitors: 900 },
+];
+
+const chartConfig = {
+  revenue: {
+    label: "Doanh thu",
+    color: "#2563eb",
+  },
+} satisfies ChartConfig;
+
+const visitorConfig = {
+  visitors: {
+    label: "Khách truy cập",
+    color: "#16a34a",
+  },
+} satisfies ChartConfig;
+
 const stats = [
   {
     name: "Tổng doanh thu",
@@ -381,33 +422,48 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Progress Bars */}
-            <div className="mt-6 space-y-4">
+            {/* Charts */}
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium">
-                    Tỷ lệ hoàn thành đơn hàng
-                  </span>
-                  <span className="text-sm text-muted-foreground">94.2%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-green-500 h-2 rounded-full"
-                    style={{ width: "94.2%" }}
-                  ></div>
-                </div>
+                <h4 className="text-sm font-medium mb-2">Biểu đồ doanh thu</h4>
+                <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+                  <BarChart accessibilityLayer data={chartData}>
+                    <CartesianGrid vertical={false} />
+                    <XAxis
+                      dataKey="month"
+                      tickLine={false}
+                      tickMargin={10}
+                      axisLine={false}
+                      tickFormatter={(value) => value.slice(0, 3)}
+                    />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="revenue" fill="var(--color-revenue)" radius={4} />
+                  </BarChart>
+                </ChartContainer>
               </div>
+              
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium">Tỷ lệ phản hồi</span>
-                  <span className="text-sm text-muted-foreground">78.5%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-blue-500 h-2 rounded-full"
-                    style={{ width: "78.5%" }}
-                  ></div>
-                </div>
+                <h4 className="text-sm font-medium mb-2">Khách truy cập mới</h4>
+                <ChartContainer config={visitorConfig} className="min-h-[200px] w-full">
+                  <LineChart accessibilityLayer data={visitorData}>
+                    <CartesianGrid vertical={false} />
+                    <XAxis
+                      dataKey="month"
+                      tickLine={false}
+                      tickMargin={10}
+                      axisLine={false}
+                      tickFormatter={(value) => value.slice(0, 3)}
+                    />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Line 
+                      type="monotone" 
+                      dataKey="visitors" 
+                      stroke="var(--color-visitors)" 
+                      strokeWidth={2} 
+                      dot={false} 
+                    />
+                  </LineChart>
+                </ChartContainer>
               </div>
             </div>
           </CardContent>

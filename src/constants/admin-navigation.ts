@@ -19,13 +19,8 @@ export interface NavigationItem {
 
 export const ADMIN_NAVIGATION: NavigationItem[] = [
   {
-    name: "Tổng quan",
-    href: "/admin",
-    icon: BarChart3,
-  },
-  {
     name: "Dashboard",
-    href: "/admin/dashboard",
+    href: "/admin",
     icon: LayoutDashboardIcon,
   },
   {

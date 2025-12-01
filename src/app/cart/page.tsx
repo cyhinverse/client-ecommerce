@@ -20,7 +20,7 @@ import {
   unselectAllItems,
   prepareForCheckout,
 } from "@/features/cart/cartSlice";
-import SpinnerLoading from "@/components/common/SpinerLoading";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
@@ -109,11 +109,11 @@ export default function CartPage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <Card className="text-center py-16">
           <CardContent>
-            <ShoppingBag className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+            <ShoppingBag className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
+            <h2 className="text-2xl font-semibold text-foreground mb-2">
               Giỏ hàng trống
             </h2>
-            <p className="text-gray-600 mb-6">
+            <p className="text-muted-foreground mb-6">
               Hãy thêm sản phẩm vào giỏ hàng để tiếp tục mua sắm
             </p>
             <Link href="/products">
@@ -134,13 +134,13 @@ export default function CartPage() {
       <div className="mb-8">
         <Link
           href="/products"
-          className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-4 transition-colors"
+          className="inline-flex items-center text-muted-foreground hover:text-foreground mb-4 transition-colors"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Tiếp tục mua sắm
         </Link>
         <div className="w-full max-w-[820px] flex justify-between items-center">
-          <h1 className="text-xl font-bold text-gray-900">
+          <h1 className="text-xl font-bold text-foreground">
             Giỏ hàng ({totalItems} sản phẩm)
           </h1>
           <div className="flex items-center gap-4">
@@ -184,7 +184,7 @@ export default function CartPage() {
                       </div>
 
                       {/* Product Image */}
-                      <div className="relative w-full sm:w-24 h-24 bg-gray-100 shrink-0">
+                      <div className="relative w-full sm:w-24 h-24 bg-muted shrink-0">
                         {item.variant?.images?.[0] ? (
                           <Image
                             src={item.variant.images[0]}
@@ -200,7 +200,7 @@ export default function CartPage() {
                             className="object-cover"
                           />
                         ) : (
-                          <div className="flex items-center justify-center h-full text-gray-400 text-sm">
+                          <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
                             No Image
                           </div>
                         )}
@@ -210,21 +210,21 @@ export default function CartPage() {
                       <div className="flex-1">
                         <div className="flex justify-between items-start mb-3">
                           <div className="flex-1 pr-2">
-                            <h3 className="font-semibold text-gray-900 text-base leading-tight">
+                            <h3 className="font-semibold text-foreground text-base leading-tight">
                               {item.productId.name}
                             </h3>
 
                             {/* Variant Information */}
                             {item.variant && (
                               <div className="mt-2 space-y-2">
-                                <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                                   {/* Color */}
                                   {item.variant.color && (
                                     <div className="flex items-center gap-2">
                                       <span className="font-medium">Màu:</span>
                                       <div className="flex items-center gap-1">
                                         <div
-                                          className="w-4 h-4 border border-gray-300"
+                                          className="w-4 h-4 border border-border"
                                           style={{
                                             backgroundColor:
                                               item.variant.color.toLowerCase(),
@@ -252,7 +252,7 @@ export default function CartPage() {
                                   {item.variant.sku && (
                                     <div className="flex items-center gap-2">
                                       <span className="font-medium">SKU:</span>
-                                      <code className="text-xs bg-gray-100 px-2 py-1 rounded">
+                                      <code className="text-xs bg-muted px-2 py-1 rounded">
                                         {item.variant.sku}
                                       </code>
                                     </div>
@@ -261,7 +261,7 @@ export default function CartPage() {
 
                                 {/* Stock Information */}
                                 <div className="flex items-center gap-2 text-xs">
-                                  <span className="text-gray-500">
+                                  <span className="text-muted-foreground">
                                     Tồn kho: {item.variant.stock}
                                   </span>
                                   {item.quantity > item.variant.stock && (
@@ -289,7 +289,7 @@ export default function CartPage() {
                             variant="ghost"
                             size="icon"
                             onClick={() => handleRemoveItem(item._id)}
-                            className="text-gray-400 hover:text-red-600 hover:bg-red-50 shrink-0"
+                            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -300,14 +300,14 @@ export default function CartPage() {
                           <div className="flex flex-col">
                             <div className="flex items-center gap-3">
                               {/* Discount Price */}
-                              <span className="text-lg font-semibold text-gray-900">
+                              <span className="text-lg font-semibold text-foreground">
                                 {formatPrice(item.price.discountPrice)}
                               </span>
 
                               {/* Original Price if different */}
                               {item.price.currentPrice >
                                 item.price.discountPrice && (
-                                  <span className="text-sm text-gray-500 line-through">
+                                  <span className="text-sm text-muted-foreground line-through">
                                     {formatPrice(item.price.currentPrice)}
                                   </span>
                                 )}
@@ -316,7 +316,7 @@ export default function CartPage() {
                             {/* Savings */}
                             {item.price.currentPrice >
                               item.price.discountPrice && (
-                                <span className="text-xs text-green-600 mt-1">
+                                <span className="text-xs text-success mt-1">
                                   Tiết kiệm{" "}
                                   {formatPrice(
                                     item.price.currentPrice -
@@ -327,7 +327,7 @@ export default function CartPage() {
                           </div>
 
                           {/* Quantity Controls */}
-                          <div className="flex items-center border border-gray-300 rounded-md">
+                          <div className="flex items-center border border-border rounded-md">
                             <Button
                               variant="ghost"
                               size="icon"
@@ -335,11 +335,11 @@ export default function CartPage() {
                                 updateQuantity(item._id, item.quantity - 1)
                               }
                               disabled={item.quantity <= 1}
-                              className="h-8 w-8 hover:bg-gray-100"
+                              className="h-8 w-8 hover:bg-muted"
                             >
                               <Minus className="h-3 w-3" />
                             </Button>
-                            <span className="w-12 text-center font-medium text-sm border-x border-gray-300 py-2">
+                            <span className="w-12 text-center font-medium text-sm border-x border-border py-2">
                               {item.quantity}
                             </span>
                             <Button
@@ -352,7 +352,7 @@ export default function CartPage() {
                                 item.variant &&
                                 item.quantity >= item.variant.stock
                               }
-                              className="h-8 w-8 hover:bg-gray-100"
+                              className="h-8 w-8 hover:bg-muted"
                             >
                               <Plus className="h-3 w-3" />
                             </Button>
@@ -374,7 +374,7 @@ export default function CartPage() {
               <CardTitle className="text-lg">
                 Tóm tắt đơn hàng
                 {hasSelectedItems && (
-                  <span className="text-sm font-normal text-gray-600 ml-2">
+                  <span className="text-sm font-normal text-muted-foreground ml-2">
                     ({selectedItemsCount} sản phẩm được chọn)
                   </span>
                 )}
@@ -383,17 +383,17 @@ export default function CartPage() {
             <CardContent className="space-y-4">
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">
+                  <span className="text-muted-foreground">
                     {hasSelectedItems ? "Tạm tính" : "Tổng giỏ hàng"}
                     {hasSelectedItems && ` (${selectedItemsCount} sản phẩm)`}
                   </span>
-                  <span className="font-medium text-gray-900">
+                  <span className="font-medium text-foreground">
                     {formatPrice(hasSelectedItems ? (checkoutTotal || 0) : subtotal)}
                   </span>
                 </div>
 
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Nhập mã giảm giá</span>
+                  <span className="text-muted-foreground">Nhập mã giảm giá</span>
                   <div className="flex gap-2">
                     <Input
                       type="text"
@@ -407,10 +407,10 @@ export default function CartPage() {
                 </div>
               </div>
 
-              <div className="border-t border-gray-200 pt-4">
+              <div className="border-t border-border pt-4">
                 <div className="flex justify-between items-center">
-                  <span className="font-semibold text-gray-900">Tổng cộng</span>
-                  <span className="text-xl font-bold text-gray-900">
+                  <span className="font-semibold text-foreground">Tổng cộng</span>
+                  <span className="text-xl font-bold text-foreground">
                     {formatPrice(hasSelectedItems ? (checkoutTotal || 0) : subtotal)}
                   </span>
                 </div>
@@ -433,7 +433,7 @@ export default function CartPage() {
               </Button>
 
               {!hasSelectedItems && (
-                <p className="text-xs text-center text-gray-500">
+                <p className="text-xs text-center text-muted-foreground">
                   Vui lòng chọn ít nhất một sản phẩm để tiếp tục thanh toán
                 </p>
               )}

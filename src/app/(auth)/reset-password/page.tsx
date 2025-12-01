@@ -97,11 +97,11 @@ export default function ResetPasswordPage() {
   const newPassword = watch("newPassword");
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="w-full min-h-screen flex items-center justify-center bg-muted/30 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-2">
-          <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-            <Lock className="h-8 w-8 text-green-600" />
+          <div className="mx-auto w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mb-4">
+            <Lock className="h-8 w-8 text-success" />
           </div>
 
           <CardTitle className="text-2xl font-bold">Đặt lại mật khẩu</CardTitle>
@@ -116,7 +116,7 @@ export default function ResetPasswordPage() {
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   {...register("email")}
                   id="email"
@@ -127,7 +127,7 @@ export default function ResetPasswordPage() {
                 />
               </div>
               {errors.email && (
-                <p className="text-sm text-red-600">{errors.email.message}</p>
+                <p className="text-sm text-destructive">{errors.email.message}</p>
               )}
             </div>
 
@@ -135,7 +135,7 @@ export default function ResetPasswordPage() {
             <div className="space-y-2">
               <Label htmlFor="code">Mã xác thực</Label>
               <div className="relative">
-                <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   {...register("code")}
                   id="code"
@@ -147,7 +147,7 @@ export default function ResetPasswordPage() {
                 />
               </div>
               {errors.code && (
-                <p className="text-sm text-red-600">{errors.code.message}</p>
+                <p className="text-sm text-destructive">{errors.code.message}</p>
               )}
             </div>
 
@@ -155,7 +155,7 @@ export default function ResetPasswordPage() {
             <div className="space-y-2">
               <Label htmlFor="newPassword">Mật khẩu mới</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   {...register("newPassword")}
                   id="newPassword"

@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { useUrlFilters } from "@/hooks/useUrlFilters";
 import {
   Card,
   CardContent,
@@ -10,20 +11,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ProductsHeader } from "@/components/admin/ProductAdminPage/ProductHeader";
-import { ProductsStats } from "@/components/admin/ProductAdminPage/ProductStats";
-import { ProductsTable } from "@/components/admin/ProductAdminPage/ProductTable";
-import { ProductPagination } from "@/components/admin/ProductAdminPage/ProductPagination";
-import { CreateModelProduct } from "@/components/admin/ProductAdminPage/CreateModelProduct";
-import { UpdateModelProduct } from "@/components/admin/ProductAdminPage/UpdateModelProduct";
-import { ViewModelProduct } from "@/components/admin/ProductAdminPage/ViewModelProduct";
+import { ProductsHeader } from "@/components/admin/products/ProductHeader";
+import { ProductsStats } from "@/components/admin/products/ProductStats";
+import { ProductsTable } from "@/components/admin/products/ProductTable";
+import { ProductPagination } from "@/components/admin/products/ProductPagination";
+import { CreateModelProduct } from "@/components/admin/products/CreateModelProduct";
+import { UpdateModelProduct } from "@/components/admin/products/UpdateModelProduct";
+import { ViewModelProduct } from "@/components/admin/products/ViewModelProduct";
 import {
   getAllProducts,
   deleteProduct,
   updateProduct,
   createProduct,
 } from "@/features/product/productAction";
-import { Product } from "@/types/product";
+import { Product, AdminProductFilters } from "@/types/product";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 export default function AdminProductsPage() {
   const router = useRouter();
@@ -33,34 +35,30 @@ export default function AdminProductsPage() {
   // SỬA: Lấy đúng state từ slice mới
   const { all: products, pagination, isLoading, error } = useAppSelector((state) => state.product);
 
-  // Lấy params từ URL với giá trị mặc định hợp lệ
-  const urlPage = parseInt(searchParams.get("page") || "1");
-  const urlLimit = parseInt(searchParams.get("limit") || "10");
-  const urlSearch = searchParams.get("search") || "";
-  const urlCategory = searchParams.get("category") || "";
-  const urlBrand = searchParams.get("brand") || "";
-  const urlMinPrice = searchParams.get("minPrice")
-    ? Number(searchParams.get("minPrice"))
-    : undefined;
-  const urlMaxPrice = searchParams.get("maxPrice")
-    ? Number(searchParams.get("maxPrice"))
-    : undefined;
-  const urlIsActive = searchParams.get("isActive");
+  // Use URL filters hook
+  const { filters, updateFilter, updateFilters } = useUrlFilters<AdminProductFilters>({
+    defaultFilters: {
+      page: 1,
+      limit: 10,
+      search: '',
+      category: '',
+      brand: '',
+      minPrice: null,
+      maxPrice: null,
+      isActive: null,
+    },
+    basePath: '/admin/products',
+  });
 
-  const [currentPage, setCurrentPage] = useState(urlPage);
-  const [pageSize, setPageSize] = useState(urlLimit);
-  const [searchTerm, setSearchTerm] = useState(urlSearch);
-  const [selectedCategory, setSelectedCategory] = useState(urlCategory);
-  const [selectedBrand, setSelectedBrand] = useState(urlBrand);
-  const [selectedMinPrice, setSelectedMinPrice] = useState<number | undefined>(
-    urlMinPrice
-  );
-  const [selectedMaxPrice, setSelectedMaxPrice] = useState<number | undefined>(
-    urlMaxPrice
-  );
-  const [selectedStatus, setSelectedStatus] = useState<boolean | null>(
-    urlIsActive === "true" ? true : urlIsActive === "false" ? false : null
-  );
+  // Extract filter values
+  const currentPage = Number(filters.page);
+  const pageSize = Number(filters.limit);
+  const searchTerm = filters.search as string;
+  const selectedCategory = filters.category as string;
+  const selectedBrand = filters.brand as string;
+  const selectedMinPrice = filters.minPrice as number | undefined;
+  const selectedMaxPrice = filters.maxPrice as number | undefined;
+  const selectedStatus = filters.isActive as boolean | null;
 
   // SỬA: Đảm bảo products luôn là array (đã có từ selector)
   const productList: Product[] = Array.isArray(products) ? products : [];
@@ -100,124 +98,59 @@ export default function AdminProductsPage() {
     maxPrice?: number,
     isActive?: boolean
   }
-  // Hàm fetch products với params hợp lệ
-  const fetchProducts = useCallback(() => {
+
+
+  // Fetch products when filters change
+  useEffect(() => {
     const params: Params = {
       page: currentPage,
       limit: pageSize,
     };
 
-    // Chỉ thêm các param filter nếu có giá trị hợp lệ
-    if (searchTerm && searchTerm.trim() !== "") {
-      params.search = searchTerm.trim();
-    }
-    if (selectedCategory && selectedCategory.trim() !== "") {
-      params.category = selectedCategory.trim();
-    }
-    if (selectedBrand && selectedBrand.trim() !== "") {
-      params.brand = selectedBrand.trim();
-    }
-    if (selectedMinPrice !== undefined) {
-      params.minPrice = selectedMinPrice;
-    }
-    if (selectedMaxPrice !== undefined) {
-      params.maxPrice = selectedMaxPrice;
-    }
-    if (selectedStatus !== null) {
-      params.isActive = selectedStatus;
-    }
+    if (searchTerm) params.search = searchTerm;
+    if (selectedCategory) params.category = selectedCategory;
+    if (selectedBrand) params.brand = selectedBrand;
+    if (selectedMinPrice !== undefined && selectedMinPrice !== null) params.minPrice = selectedMinPrice;
+    if (selectedMaxPrice !== undefined && selectedMaxPrice !== null) params.maxPrice = selectedMaxPrice;
+    if (selectedStatus !== null) params.isActive = selectedStatus;
 
-    // Lọc bỏ các param không hợp lệ trước khi gửi API
-    const filteredParams = filterValidParams(params);
-    console.log("Fetching products with params:", filteredParams);
-
-    dispatch(getAllProducts(filteredParams as Params ));
+    dispatch(getAllProducts(params));
   }, [
-    currentPage,
-    pageSize,
-    searchTerm,
-    selectedCategory,
-    selectedBrand,
-    selectedMinPrice,
-    selectedMaxPrice,
-    selectedStatus,
-    dispatch
+    dispatch, 
+    currentPage, 
+    pageSize, 
+    searchTerm, 
+    selectedCategory, 
+    selectedBrand, 
+    selectedMinPrice, 
+    selectedMaxPrice, 
+    selectedStatus
   ]);
 
-  const updateURL = (
-    page: number,
-    limit: number,
-    search: string,
-    category: string,
-    brand: string,
-    minPrice: number | undefined,
-    maxPrice: number | undefined,
-    isActive: boolean | null
-  ) => {
-    const params = new URLSearchParams();
-    params.set("page", page.toString());
-    params.set("limit", limit.toString());
+  const refreshData = () => {
+    const params: Params = {
+      page: currentPage,
+      limit: pageSize,
+    };
 
-    // Chỉ thêm các param có giá trị hợp lệ
-    if (search && search.trim() !== "") {
-      params.set("search", search);
-    }
-    if (category && category.trim() !== "") {
-      params.set("category", category);
-    }
-    if (brand && brand.trim() !== "") {
-      params.set("brand", brand);
-    }
-    if (minPrice !== undefined) {
-      params.set("minPrice", minPrice.toString());
-    }
-    if (maxPrice !== undefined) {
-      params.set("maxPrice", maxPrice.toString());
-    }
-    if (isActive !== null) {
-      params.set("isActive", isActive.toString());
-    }
+    if (searchTerm) params.search = searchTerm;
+    if (selectedCategory) params.category = selectedCategory;
+    if (selectedBrand) params.brand = selectedBrand;
+    if (selectedMinPrice !== undefined && selectedMinPrice !== null) params.minPrice = selectedMinPrice;
+    if (selectedMaxPrice !== undefined && selectedMaxPrice !== null) params.maxPrice = selectedMaxPrice;
+    if (selectedStatus !== null) params.isActive = selectedStatus;
 
-    const url = `/admin/products?${params.toString()}`;
-    router.push(url, { scroll: false });
+    dispatch(getAllProducts(params));
   };
 
-  // Fetch products khi component mount và khi filter thay đổi
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
-
-  // Đồng bộ state với URL params
-  useEffect(() => {
-    setCurrentPage(urlPage);
-    setPageSize(urlLimit);
-    setSearchTerm(urlSearch);
-    setSelectedCategory(urlCategory);
-    setSelectedBrand(urlBrand);
-    setSelectedMinPrice(urlMinPrice);
-    setSelectedMaxPrice(urlMaxPrice);
-    setSelectedStatus(
-      urlIsActive === "true" ? true : urlIsActive === "false" ? false : null
-    );
-  }, [
-    urlPage,
-    urlLimit,
-    urlSearch,
-    urlCategory,
-    urlBrand,
-    urlMinPrice,
-    urlMaxPrice,
-    urlIsActive,
-  ]);
-
   // SỬA: Thêm loading state
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div>Đang tải...</div>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="flex items-center justify-center h-64">
+  //       <div>Đang tải...</div>
+  //     </div>
+  //   );
+  // }
 
   // Event handlers
   const handleOpenCreateModal = () => {
@@ -228,7 +161,7 @@ export default function AdminProductsPage() {
     setIsCreating(true);
     try {
       await dispatch(createProduct(formData)).unwrap();
-      fetchProducts();
+      refreshData();
       setCreateModalOpen(false);
       toast.success("Tạo sản phẩm thành công");
     } catch (error) {
@@ -266,7 +199,7 @@ export default function AdminProductsPage() {
           updateData: formData,
         })
       ).unwrap();
-      fetchProducts();
+      refreshData();
       handleCloseEditModal();
       toast.success("Cập nhật sản phẩm thành công");
     } catch (error) {
@@ -277,113 +210,36 @@ export default function AdminProductsPage() {
   };
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    updateURL(
-      page,
-      pageSize,
-      searchTerm,
-      selectedCategory,
-      selectedBrand,
-      selectedMinPrice,
-      selectedMaxPrice,
-      selectedStatus
-    );
+    updateFilter('page', page);
   };
 
   const handlePageSizeChange = (size: number) => {
-    setPageSize(size);
-    setCurrentPage(1);
-    updateURL(
-      1,
-      size,
-      searchTerm,
-      selectedCategory,
-      selectedBrand,
-      selectedMinPrice,
-      selectedMaxPrice,
-      selectedStatus
-    );
+    updateFilters({ limit: size, page: 1 });
   };
 
   const handleSearch = (value: string) => {
-    setSearchTerm(value);
-    setCurrentPage(1);
-    updateURL(
-      1,
-      pageSize,
-      value,
-      selectedCategory,
-      selectedBrand,
-      selectedMinPrice,
-      selectedMaxPrice,
-      selectedStatus
-    );
+    updateFilters({ search: value, page: 1 });
   };
 
   const handleCategoryFilterChange = (category: string) => {
     const newCategory = category === "all" ? "" : category;
-    setSelectedCategory(newCategory);
-    setCurrentPage(1);
-    updateURL(
-      1,
-      pageSize,
-      searchTerm,
-      newCategory,
-      selectedBrand,
-      selectedMinPrice,
-      selectedMaxPrice,
-      selectedStatus
-    );
+    updateFilters({ category: newCategory, page: 1 });
   };
 
   const handleBrandFilterChange = (brand: string) => {
     const newBrand = brand === "all" ? "" : brand;
-    setSelectedBrand(newBrand);
-    setCurrentPage(1);
-    updateURL(
-      1,
-      pageSize,
-      searchTerm,
-      selectedCategory,
-      newBrand,
-      selectedMinPrice,
-      selectedMaxPrice,
-      selectedStatus
-    );
+    updateFilters({ brand: newBrand, page: 1 });
   };
 
   const handlePriceFilterChange = (
     min: number | undefined,
     max: number | undefined
   ) => {
-    setSelectedMinPrice(min);
-    setSelectedMaxPrice(max);
-    setCurrentPage(1);
-    updateURL(
-      1,
-      pageSize,
-      searchTerm,
-      selectedCategory,
-      selectedBrand,
-      min,
-      max,
-      selectedStatus
-    );
+    updateFilters({ minPrice: min, maxPrice: max, page: 1 });
   };
 
   const handleStatusFilterChange = (isActive: boolean | null) => {
-    setSelectedStatus(isActive);
-    setCurrentPage(1);
-    updateURL(
-      1,
-      pageSize,
-      searchTerm,
-      selectedCategory,
-      selectedBrand,
-      selectedMinPrice,
-      selectedMaxPrice,
-      isActive
-    );
+    updateFilters({ isActive: isActive, page: 1 });
   };
 
   const handleCloseModals = () => {
@@ -400,7 +256,7 @@ export default function AdminProductsPage() {
       toast.success("Xóa sản phẩm thành công");
 
       // Refresh data sau khi xóa thành công
-      fetchProducts();
+      refreshData();
     } catch (error) {
       console.error("Delete product error:", error);
 
@@ -439,7 +295,7 @@ export default function AdminProductsPage() {
   if (error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-red-500">Lỗi: {error}</div>
+        <div className="text-destructive">Lỗi: {error}</div>
       </div>
     );
   }
@@ -448,72 +304,78 @@ export default function AdminProductsPage() {
     <div className="space-y-6">
       <ProductsHeader onOpenCreate={handleOpenCreateModal} />
 
-      <ProductsStats
-        totalProducts={totalProducts}
-        activeProducts={activeProducts}
-        productsOnSale={productsOnSale}
-        totalCategories={totalCategories}
-      />
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Danh sách sản phẩm</CardTitle>
-          <CardDescription>
-            Quản lý tất cả sản phẩm trong cửa hàng
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ProductsTable
-            products={productList} // SỬA: sử dụng productList
-            searchTerm={searchTerm}
-            pageSize={pageSize}
-            onSearch={handleSearch}
-            onPageSizeChange={handlePageSizeChange}
-            onEdit={handleEditProduct}
-            onDelete={handleDeleteProduct}
-            onView={handleViewProduct}
-            onCategoryFilterChange={handleCategoryFilterChange}
-            onBrandFilterChange={handleBrandFilterChange}
-            onPriceFilterChange={handlePriceFilterChange}
-            onStatusFilterChange={handleStatusFilterChange}
-            selectedCategory={selectedCategory}
-            selectedBrand={selectedBrand}
-            selectedMinPrice={selectedMinPrice}
-            selectedMaxPrice={selectedMaxPrice}
-            selectedStatus={selectedStatus}
+      {isLoading ? (
+        <SpinnerLoading />
+      ) : (
+        <>
+          <ProductsStats
+            totalProducts={totalProducts}
+            activeProducts={activeProducts}
+            productsOnSale={productsOnSale}
+            totalCategories={totalCategories}
           />
 
-          <ProductPagination
-            currentPage={currentPage}
-            totalPages={pagination?.totalPages || 1}
-            totalItems={pagination?.totalItems}
-            pageSize={pageSize}
-            onPageChange={handlePageChange}
-          />
+          <Card>
+            <CardHeader>
+              <CardTitle>Danh sách sản phẩm</CardTitle>
+              <CardDescription>
+                Quản lý tất cả sản phẩm trong cửa hàng
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ProductsTable
+                products={productList} // SỬA: sử dụng productList
+                searchTerm={searchTerm}
+                pageSize={pageSize}
+                onSearch={handleSearch}
+                onPageSizeChange={handlePageSizeChange}
+                onEdit={handleEditProduct}
+                onDelete={handleDeleteProduct}
+                onView={handleViewProduct}
+                onCategoryFilterChange={handleCategoryFilterChange}
+                onBrandFilterChange={handleBrandFilterChange}
+                onPriceFilterChange={handlePriceFilterChange}
+                onStatusFilterChange={handleStatusFilterChange}
+                selectedCategory={selectedCategory}
+                selectedBrand={selectedBrand}
+                selectedMinPrice={selectedMinPrice}
+                selectedMaxPrice={selectedMaxPrice}
+                selectedStatus={selectedStatus}
+              />
 
-          <CreateModelProduct
-            open={createModalOpen}
-            onOpenChange={setCreateModalOpen}
-            onCreate={handleCreateProduct}
-            isLoading={isCreating}
-          />
+              <ProductPagination
+                currentPage={currentPage}
+                totalPages={pagination?.totalPages || 1}
+                totalItems={pagination?.totalItems}
+                pageSize={pageSize}
+                onPageChange={handlePageChange}
+              />
 
-          <ViewModelProduct
-            open={viewModalOpen}
-            onOpenChange={handleCloseModals}
-            product={selectedProduct}
-            onEdit={handleEditFromView}
-          />
+              <CreateModelProduct
+                open={createModalOpen}
+                onOpenChange={setCreateModalOpen}
+                onCreate={handleCreateProduct}
+                isLoading={isCreating}
+              />
 
-          <UpdateModelProduct
-            open={updateModalOpen}
-            onOpenChange={handleCloseEditModal}
-            product={selectedProduct}
-            onUpdate={handleUpdateProduct}
-            isLoading={isUpdating}
-          />
-        </CardContent>
-      </Card>
+              <ViewModelProduct
+                open={viewModalOpen}
+                onOpenChange={handleCloseModals}
+                product={selectedProduct}
+                onEdit={handleEditFromView}
+              />
+
+              <UpdateModelProduct
+                open={updateModalOpen}
+                onOpenChange={handleCloseEditModal}
+                product={selectedProduct}
+                onUpdate={handleUpdateProduct}
+                isLoading={isUpdating}
+              />
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 }

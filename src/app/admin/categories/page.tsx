@@ -8,12 +8,12 @@ import {
   updateCategory,
   creatCategory,
 } from "@/features/category/categoryAction";
-import { Category, PaginationData } from "@/types/category";
-import { CategoriesHeader } from "@/components/admin/CategoriesAdminPage/CategoriesHeader";
-import { CategoriesStats } from "@/components/admin/CategoriesAdminPage/CategoriesStats";
-import { CategoriesTable } from "@/components/admin/CategoriesAdminPage/CategoriesTable";
-import { PaginationControls } from "@/components/admin/CategoriesAdminPage/PaginationContro";
-import { CategoryTreeView } from "@/components/admin/CategoriesAdminPage/CategoryTreeView";
+import { Category, PaginationData, CategoryFilters } from "@/types/category";
+import { CategoriesHeader } from "@/components/admin/categories/CategoriesHeader";
+import { CategoriesStats } from "@/components/admin/categories/CategoriesStats";
+import { CategoriesTable } from "@/components/admin/categories/CategoriesTable";
+import { PaginationControls } from "@/components/admin/categories/PaginationContro";
+import { CategoryTreeView } from "@/components/admin/categories/CategoryTreeView";
 import {
   Card,
   CardContent,
@@ -21,23 +21,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { EditCategoryModal } from "@/components/admin/CategoriesAdminPage/UpdateModel";
-import { ViewCategoryModal } from "@/components/admin/CategoriesAdminPage/ViewModal";
-import { CreateCategoryModal } from "@/components/admin/CategoriesAdminPage/CreateModel";
+import { EditCategoryModal } from "@/components/admin/categories/UpdateModel";
+import { ViewCategoryModal } from "@/components/admin/categories/ViewModal";
+import { CreateCategoryModal } from "@/components/admin/categories/CreateModel";
 import { toast } from "sonner";
 import { Params } from "@/types/product";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 export default function CategoriesAdminPage() {
   const dispatch = useAppDispatch();
   const categoryState = useAppSelector((state) => state.category);
-
-  // Define filter interface
-  interface CategoryFilters {
-    page: number;
-    limit: number;
-    search: string;
-    [key: string]: string | number;
-  }
 
   // Use URL filters hook
   const { filters, updateFilter, updateFilters } = useUrlFilters<CategoryFilters>({
@@ -71,12 +64,13 @@ export default function CategoriesAdminPage() {
     const params: Record<string, string | number> = { page: currentPage, limit: pageSize };
     if (searchTerm && searchTerm.trim() !== "") {
       params.search = searchTerm.trim();
+    } else {
+      params.parentCategory = "null";
     }
 
     dispatch(getAllCategories(params));
   }, [dispatch, currentPage, pageSize, searchTerm]);
 
-  // ============= Event Handlers =============
 
   const handleOpenCreateModal = () => {
     setCreateModalOpen(true);
@@ -85,7 +79,7 @@ export default function CategoriesAdminPage() {
   const handleCreateCategory = async (categoryData: Partial<Category>) => {
     setIsCreating(true);
     try {
-      await dispatch(creatCategory(categoryData)).unwrap();
+      await dispatch(creatCategory(categoryData as any)).unwrap();
 
       // Refresh list
       const params: Params = { page: currentPage, limit: pageSize };
@@ -215,67 +209,75 @@ export default function CategoriesAdminPage() {
     <div className="space-y-6">
       <CategoriesHeader onAddCategory={handleOpenCreateModal} />
 
-      <CategoriesStats
-        totalCategories={totalCategories}
-        activeCategories={activeCategories}
-        childCategories={childCategories}
-        totalProducts={totalProducts}
-      />
+      {categoryState.isLoading ? (
+        <SpinnerLoading />
+      ) : (
+        <>
+          <CategoriesStats
+            totalCategories={totalCategories}
+            activeCategories={activeCategories}
+            childCategories={childCategories}
+            totalProducts={totalProducts}
+          />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Danh sách danh mục</CardTitle>
-          <CardDescription>Quản lý tất cả danh mục sản phẩm</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <CategoriesTable
+          <Card>
+            <CardHeader>
+              <CardTitle>Danh sách danh mục</CardTitle>
+              <CardDescription>
+                Quản lý tất cả danh mục sản phẩm
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CategoriesTable
+                categories={categories}
+                searchTerm={searchTerm}
+                pageSize={pageSize}
+                onSearch={handleSearch}
+                onPageSizeChange={handlePageSizeChange}
+                onEdit={handleEditCategory}
+                onDelete={handleDeleteCategory}
+                onView={handleViewCategory}
+                getParentName={getParentName}
+                getProductCount={getProductCount}
+              />
+
+              <CreateCategoryModal
+                isOpen={createModalOpen}
+                onClose={() => setCreateModalOpen(false)}
+                onCreate={handleCreateCategory as any}
+                categories={categories}
+                isLoading={isCreating}
+              />
+
+              <ViewCategoryModal
+                isOpen={viewModalOpen}
+                onClose={handleCloseModals}
+                onEdit={handleEditFromView}
+                category={selectedCategory}
+              />
+
+              <EditCategoryModal
+                isOpen={editModalOpen}
+                onClose={handleCloseEditModal}
+                onSave={handleSaveCategory}
+                category={selectedCategory}
+                isLoading={isUpdating}
+              />
+
+              <PaginationControls
+                pagination={pagination}
+                onPageChange={handlePageChange}
+              />
+            </CardContent>
+          </Card>
+
+          <CategoryTreeView
             categories={categories}
-            searchTerm={searchTerm}
-            pageSize={pageSize}
-            onSearch={handleSearch}
-            onPageSizeChange={handlePageSizeChange}
-            onEdit={handleEditCategory}
-            onDelete={handleDeleteCategory}
-            onView={handleViewCategory}
-            getParentName={getParentName}
+            getChildCategories={getChildCategories}
             getProductCount={getProductCount}
           />
-
-          <CreateCategoryModal
-            isOpen={createModalOpen}
-            onClose={() => setCreateModalOpen(false)}
-            onCreate={handleCreateCategory as any}
-            categories={categories}
-            isLoading={isCreating}
-          />
-
-          <ViewCategoryModal
-            isOpen={viewModalOpen}
-            onClose={handleCloseModals}
-            onEdit={handleEditFromView}
-            category={selectedCategory}
-          />
-
-          <EditCategoryModal
-            isOpen={editModalOpen}
-            onClose={handleCloseEditModal}
-            onSave={handleSaveCategory}
-            category={selectedCategory}
-            isLoading={isUpdating}
-          />
-
-          <PaginationControls
-            pagination={pagination}
-            onPageChange={handlePageChange}
-          />
-        </CardContent>
-      </Card>
-
-      <CategoryTreeView
-        categories={categories}
-        getChildCategories={getChildCategories}
-        getProductCount={getProductCount}
-      />
+        </>
+      )}
     </div>
   );
 }

@@ -3,34 +3,47 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { useUrlFilters } from "@/hooks/useUrlFilters";
 import { getAllProducts } from "@/features/product/productAction";
 import { Button } from "@/components/ui/button";
 import { SlidersHorizontal } from "lucide-react";
-import ProductFilter from "@/components/common/ProductFilter";
-import SpinnerLoading from "@/components/common/SpinerLoading";
-import { Params , ProductFilters } from "@/types/product";
-import { ProductCard } from "@/components/common/ProductCard";
+import ProductFilter from "@/components/product/ProductFilter";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
+import { Params , ProductFilters, ProductUrlFilters } from "@/types/product";
+import { ProductCard } from "@/components/product/ProductCard";
+import { isColorMatch } from "@/lib/color-mapping";
 
 export default function ProductsPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const { all: products, isLoading } = useAppSelector(
     (state) => state.product
   );
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   
-  const [filters, setFilters] = useState<ProductFilters>(() => ({
-    search: searchParams.get("search") || "",
-    minPrice: Number(searchParams.get("minPrice")) || 0,
-    maxPrice: Number(searchParams.get("maxPrice")) || 10000000,
-    rating: searchParams.get("rating")?.split(",").map(Number).filter(Boolean) || [],
-    colors: searchParams.get("colors")?.split(",").filter(Boolean) || [],
-    sizes: searchParams.get("sizes")?.split(",").filter(Boolean) || [],
-    sortBy: searchParams.get("sortBy") || "newest",
-  }));
+  const { filters: urlFilters, updateFilter, updateFilters, resetFilters } = useUrlFilters<ProductUrlFilters>({
+    defaultFilters: {
+      search: "",
+      minPrice: 0,
+      maxPrice: 10000000,
+      rating: "",
+      colors: "",
+      sizes: "",
+      sortBy: "newest",
+    },
+    basePath: '/products',
+  });
 
-
+  // Convert URL filters to component filters
+  const filters: ProductFilters = useMemo(() => ({
+    search: urlFilters.search as string,
+    minPrice: Number(urlFilters.minPrice),
+    maxPrice: Number(urlFilters.maxPrice),
+    rating: (urlFilters.rating as string)?.split(",").map(Number).filter(n => n > 0) || [],
+    colors: (urlFilters.colors as string)?.split(",").filter(Boolean) || [],
+    sizes: (urlFilters.sizes as string)?.split(",").filter(Boolean) || [],
+    sortBy: urlFilters.sortBy as string,
+  }), [urlFilters]);
 
   // Debounce API calls
   useEffect(() => {
@@ -51,42 +64,23 @@ export default function ProductsPage() {
     return () => clearTimeout(timeoutId);
   }, [dispatch, filters.search, filters.minPrice, filters.maxPrice, filters.sortBy]);
 
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      const params = new URLSearchParams();
-      
-      if (filters.search) params.set("search", filters.search);
-      if (filters.minPrice > 0) params.set("minPrice", filters.minPrice.toString());
-      if (filters.maxPrice < 10000000) params.set("maxPrice", filters.maxPrice.toString());
-      if (filters.rating.length > 0) params.set("rating", filters.rating.join(","));
-      if (filters.colors.length > 0) params.set("colors", filters.colors.join(","));
-      if (filters.sizes.length > 0) params.set("sizes", filters.sizes.join(","));
-      if (filters.sortBy !== "newest") params.set("sortBy", filters.sortBy);
-
-      const queryString = params.toString();
-      const newUrl = queryString ? `/products?${queryString}` : "/products";
-      
-      router.replace(newUrl, { scroll: false });
-    }, 150);
-
-    return () => clearTimeout(timeoutId);
-  }, [filters, router]);
-
   const handleFilterChange = useCallback((newFilters: Partial<ProductFilters>) => {
-    setFilters((prev) => ({ ...prev, ...newFilters }));
-  }, []);
+    const updates: Partial<ProductUrlFilters> = {};
+    
+    if (newFilters.search !== undefined) updates.search = newFilters.search;
+    if (newFilters.minPrice !== undefined) updates.minPrice = newFilters.minPrice;
+    if (newFilters.maxPrice !== undefined) updates.maxPrice = newFilters.maxPrice;
+    if (newFilters.rating !== undefined) updates.rating = newFilters.rating.join(",");
+    if (newFilters.colors !== undefined) updates.colors = newFilters.colors.join(",");
+    if (newFilters.sizes !== undefined) updates.sizes = newFilters.sizes.join(",");
+    if (newFilters.sortBy !== undefined) updates.sortBy = newFilters.sortBy;
+
+    updateFilters(updates);
+  }, [updateFilters]);
 
   const handleClearFilters = useCallback(() => {
-    setFilters({
-      search: "",
-      minPrice: 0,
-      maxPrice: 10000000,
-      rating: [],
-      colors: [],
-      sizes: [],
-      sortBy: "newest",
-    });
-  }, []);
+    resetFilters();
+  }, [resetFilters]);
 
   const filteredAndSortedProducts = useMemo(() => {
     if (!products || !Array.isArray(products)) return [];
@@ -124,13 +118,9 @@ export default function ProductsPage() {
         const hasMatchingColor = product.variants.some(variant => {
           if (!variant.color) return false;
           
-          const variantColor = variant.color.toLowerCase().trim();
-          const match = filters.colors.some(filterColor => {
-            const normalizedFilterColor = filterColor.toLowerCase().trim();
-            return variantColor === normalizedFilterColor;
-          });
-          
-          return match;
+          return filters.colors.some(filterColor => 
+            isColorMatch(filterColor, variant.color)
+          );
         });
 
         if (!hasMatchingColor) return false;
@@ -173,8 +163,6 @@ export default function ProductsPage() {
 
     return sorted;
   }, [products, filters]);
-
-  if (isLoading) return <SpinnerLoading />;
 
   return (
     <div className="container max-w-7xl mx-auto px-4 py-8">
@@ -221,7 +209,9 @@ export default function ProductsPage() {
 
         {/* Products Grid */}
         <div className="flex-1">
-          {filteredAndSortedProducts.length > 0 ? (
+          {isLoading ? (
+            <SpinnerLoading />
+          ) : filteredAndSortedProducts.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {filteredAndSortedProducts.map((product, index) => (
                 <ProductCard 

@@ -28,6 +28,15 @@ export interface CreateDiscountData {
   isActive?: boolean;
 }
 
+export interface DiscountFilters {
+  page: number;
+  limit: number;
+  search: string;
+  discountType: string;
+  isActive: boolean | null;
+  [key: string]: string | number | boolean | null;
+}
+
 export interface UpdateDiscountData {
   code?: string;
   description?: string;

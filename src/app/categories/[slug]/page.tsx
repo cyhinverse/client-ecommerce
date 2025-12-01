@@ -1,5 +1,5 @@
 "use client";
-import SpinnerLoading from "@/components/common/SpinerLoading";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getTreeCategories } from "@/features/category/categoryAction";
@@ -60,14 +60,14 @@ export default function CategoriesPage() {
             {categories.map((category, index) => (
               <div
                 key={category._id}
-                className={`p-4 border border-gray-200 transition-all duration-300 cursor-pointer hover:bg-gray-50 ${
-                  currentIndex === index ? "bg-gray-100" : ""
+                className={`p-4 border border-border transition-all duration-300 cursor-pointer hover:bg-muted/50 ${
+                  currentIndex === index ? "bg-muted" : ""
                 }`}
                 onMouseOver={() => handleMove(index)}
               >
                 <Link
                   href={`/categories/${category.slug}`}
-                  className="text-lg font-medium text-gray-700 hover:text-gray-900  transition-colors duration-300"
+                  className="text-lg font-medium text-muted-foreground hover:text-foreground  transition-colors duration-300"
                 >
                   {category.name}
                 </Link>
@@ -90,7 +90,7 @@ export default function CategoriesPage() {
               <Link key={p._id} href={`/products/${p.slug}`} className="group block">
                 <Card className="overflow-hidden border-0 shadow-none bg-transparent">
                   {/* Product Image - 3:4 Aspect Ratio */}
-                  <div className="relative aspect-[3/4] bg-gray-100 mb-3">
+                  <div className="relative aspect-[3/4] bg-muted mb-3">
                     {p.images && p.images.length > 0 ? (
                       <Image
                         src={p.images[0]}
@@ -99,7 +99,7 @@ export default function CategoriesPage() {
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     ) : (
-                      <div className="flex items-center justify-center h-full text-gray-400 text-xs">
+                      <div className="flex items-center justify-center h-full text-muted-foreground text-xs">
                         No Image
                       </div>
                     )}
@@ -134,7 +134,7 @@ export default function CategoriesPage() {
             ))
           ) : (
             <div className="col-span-full">
-              <p className="text-gray-500 text-center py-10">
+              <p className="text-muted-foreground text-center py-10">
                 No products found for this category
               </p>
             </div>

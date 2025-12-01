@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import ReviewDialog from "@/components/common/ReviewModel";
+import ReviewDialog from "@/components/review/ReviewModal";
 import { addToCart } from "@/features/cart/cartAction";
 import Link from "next/link";
 
@@ -114,7 +114,7 @@ export default function ProductDetailPage() {
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Image Gallery */}
         <div className="space-y-4">
-          <div className="aspect-square overflow-hidden bg-gray-100">
+          <div className="aspect-square overflow-hidden bg-muted">
             {product.images && product.images.length > 0 ? (
               <Image
                 src={product.images[selectedImageIndex]}
@@ -141,8 +141,8 @@ export default function ProductDetailPage() {
                   key={index}
                   onClick={() => setSelectedImageIndex(index)}
                   className={`shrink-0 w-16 h-16 border-2 transition-all ${selectedImageIndex === index
-                    ? "border-black"
-                    : "border-transparent hover:border-gray-300"
+                    ? "border-primary"
+                    : "border-transparent hover:border-border"
                     }`}
                 >
                   <Image
@@ -164,17 +164,17 @@ export default function ProductDetailPage() {
             {/* Badges */}
             <div className="flex flex-wrap gap-2">
               {product.isNewArrival && (
-                <Badge className="bg-black text-white border-0 text-xs px-2 py-0.5">
+                <Badge className="bg-primary text-primary-foreground border-0 text-xs px-2 py-0.5">
                   NEW
                 </Badge>
               )}
               {product.onSale && (
-                <Badge className="bg-black text-white border-0 text-xs px-2 py-0.5">
+                <Badge className="bg-primary text-primary-foreground border-0 text-xs px-2 py-0.5">
                   -{calculateDiscount()}%
                 </Badge>
               )}
               {product.isFeatured && (
-                <Badge className="bg-black text-white border-0 text-xs px-2 py-0.5">
+                <Badge className="bg-primary text-primary-foreground border-0 text-xs px-2 py-0.5">
                   FEATURED
                 </Badge>
               )}
@@ -196,7 +196,7 @@ export default function ProductDetailPage() {
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className="h-4 w-4 fill-yellow-400 text-yellow-400"
+                    className="h-4 w-4 fill-warning text-warning"
                   />
                 ))}
               </div>
@@ -271,8 +271,8 @@ export default function ProductDetailPage() {
                     key={index}
                     onClick={() => setSelectedVariant(index)}
                     className={`p-3 border text-left transition-colors ${selectedVariant === index
-                      ? "border-black bg-gray-50"
-                      : "border-gray-200 hover:border-gray-400"
+                      ? "border-primary bg-muted/50"
+                      : "border-border hover:border-muted-foreground"
                       }`}
                   >
                     <div className="flex justify-between items-center">
@@ -288,7 +288,7 @@ export default function ProductDetailPage() {
                         {variant.price?.discountPrice &&
                           variant.price.discountPrice <
                           variant.price.currentPrice ? (
-                          <span className="text-red-600">
+                          <span className="text-destructive">
                             {new Intl.NumberFormat("vi-VN", {
                               style: "currency",
                               currency: "VND",
@@ -397,7 +397,7 @@ export default function ProductDetailPage() {
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className="h-4 w-4 fill-yellow-400 text-yellow-400"
+                    className="h-4 w-4 fill-warning text-warning"
                   />
                 ))}
               </div>
@@ -414,7 +414,7 @@ export default function ProductDetailPage() {
                   </span>
                   <div className="flex-1 bg-muted rounded-full h-1.5">
                     <div
-                      className="bg-yellow-400 h-1.5 rounded-full"
+                      className="bg-warning h-1.5 rounded-full"
                       style={{
                         width:
                           review.rating === 5
@@ -574,7 +574,7 @@ function ReviewItem({
                     <Star
                       key={i}
                       className={`h-3 w-3 ${i < rating
-                        ? "fill-yellow-400 text-yellow-400"
+                        ? "fill-warning text-warning"
                         : "text-muted"
                         }`}
                     />
@@ -584,7 +584,7 @@ function ReviewItem({
               </div>
             </div>
             {verified && (
-              <Badge variant="outline" className="text-xs bg-green-50">
+              <Badge variant="outline" className="text-xs bg-success/10">
                 Verified
               </Badge>
             )}

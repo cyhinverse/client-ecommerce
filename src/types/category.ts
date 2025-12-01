@@ -19,7 +19,7 @@ export interface Category {
   description?: string;
   images?: string[];
   parentCategory?: ParentCategory;
-  subcategories?: SubCategory[];
+  subcategories?: Category[];
   createdAt?: string;
   updatedAt: string;
   isActive: boolean;
@@ -40,4 +40,11 @@ export interface PaginationData {
 export interface CategoriesResponse {
   categories: Category[];
   pagination: PaginationData;
+}
+
+export interface CategoryFilters {
+  page: number;
+  limit: number;
+  search: string;
+  [key: string]: string | number;
 }

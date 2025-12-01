@@ -1,5 +1,5 @@
 "use client";
-import SpinnerLoading from "@/components/common/SpinerLoading";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { getTreeCategories } from "@/features/category/categoryAction";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import Link from "next/link";
@@ -32,17 +32,6 @@ export default function CategoriesPage() {
     return <SpinnerLoading />;
   }
 
-  const bgColor = [
-    "bg-red-100",
-    "bg-blue-100",
-    "bg-green-100",
-    "bg-yellow-100",
-    "bg-purple-100",
-    "bg-pink-100",
-    "bg-indigo-100",
-    "bg-teal-100",
-  ];
-
   return (
     <main className="w-full min-h-screen p-4 mt-10 mx-auto max-w-7xl">
       <section className="m-10">
@@ -54,11 +43,11 @@ export default function CategoriesPage() {
             {categories.map((category) => (
               <div
                 key={category._id}
-                className={`p-4 border border-gray-200 transition-all duration-300 cursor-pointer hover:bg-gray-50`}
+                className={`p-4 border border-border transition-all duration-300 cursor-pointer hover:bg-muted/50`}
               >
                 <Link
                   href={`/categories/${category.slug}`}
-                  className="text-lg font-medium text-gray-700 hover:text-gray-900  transition-colors duration-300"
+                  className="text-lg font-medium text-muted-foreground hover:text-foreground  transition-colors duration-300"
                 >
                   {category.name}
                 </Link>

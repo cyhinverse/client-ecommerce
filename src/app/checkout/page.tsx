@@ -158,10 +158,10 @@ export default function CheckoutPage() {
 
   if (!cartItems || cartItems.length === 0) {
     return (
-      <div className="w-full min-h-screen bg-gray-50 py-8">
+      <div className="w-full min-h-screen bg-muted/30 py-8">
         <div className="container max-w-6xl mx-auto px-4">
           <div className="text-center py-16">
-            <p className="text-lg text-gray-600">Đang tải thông tin đơn hàng...</p>
+            <p className="text-lg text-muted-foreground">Đang tải thông tin đơn hàng...</p>
           </div>
         </div>
       </div>
@@ -169,7 +169,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-gray-50 py-8">
+    <div className="w-full min-h-screen bg-muted/30 py-8">
       <div className="container max-w-6xl mx-auto px-4">
         <h1 className="text-2xl font-bold mb-8">Thanh toán</h1>
 
@@ -321,7 +321,7 @@ export default function CheckoutPage() {
                 <div className="space-y-3 max-h-96 overflow-y-auto">
                   {cartItems.map((item) => (
                     <div key={item._id} className="flex items-center gap-3 pb-3 border-b">
-                      <div className="relative w-16 h-16 bg-gray-50 rounded-lg shrink-0">
+                      <div className="relative w-16 h-16 bg-muted/50 rounded-lg shrink-0">
                         {item.variant?.images?.[0] ? (
                           <Image
                             src={item.variant.images[0]}
@@ -337,13 +337,13 @@ export default function CheckoutPage() {
                             className="object-cover rounded-lg"
                           />
                         ) : (
-                          <div className="flex items-center justify-center h-full text-gray-400 text-xs">
+                          <div className="flex items-center justify-center h-full text-muted-foreground text-xs">
                             No Image
                           </div>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm text-gray-900 truncate">
+                        <h4 className="font-medium text-sm text-foreground truncate">
                           {item.productId.name}
                         </h4>
                         {item.variant && (
@@ -361,7 +361,7 @@ export default function CheckoutPage() {
                           </div>
                         )}
                         <div className="flex justify-between items-center mt-1">
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-muted-foreground">
                             Số lượng: {item.quantity}
                           </span>
                           <span className="font-medium text-sm">
@@ -375,18 +375,18 @@ export default function CheckoutPage() {
 
                 <div className="space-y-2 pt-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">
+                    <span className="text-muted-foreground">
                       Tạm tính ({cartItems.length} sản phẩm)
                     </span>
-                    <span className="font-medium text-gray-900">
+                    <span className="font-medium text-foreground">
                       {formatPrice(checkoutTotal || 0)}
                     </span>
                   </div>
 
                   {discount > 0 && (
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Giảm giá</span>
-                      <span className="text-green-600 font-medium">
+                      <span className="text-muted-foreground">Giảm giá</span>
+                      <span className="text-success font-medium">
                         -{formatPrice(discount)}
                       </span>
                     </div>

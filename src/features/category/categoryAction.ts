@@ -11,11 +11,13 @@ export const getTreeCategories = createAsyncThunk("category/tree", async () => {
 
 export const getAllCategories = createAsyncThunk(
   "category/all",
-  async (params: { page?: number; limit?: number; search?: string } = {}) => {
-    const { page = 1, limit = 10, search = "" } = params;
-    const response = await instance.get(
-      `/categories?page=${page}&limit=${limit}&search=${search}`
-    );
+  async (params: { page?: number; limit?: number; search?: string; parentCategory?: string | null } = {}) => {
+    const { page = 1, limit = 10, search = "", parentCategory } = params;
+    let url = `/categories?page=${page}&limit=${limit}&search=${search}`;
+    if (parentCategory !== undefined) {
+      url += `&parentCategory=${parentCategory}`;
+    }
+    const response = await instance.get(url);
     if (!response) {
       throw new Error("Failed to fetch all categories");
     }

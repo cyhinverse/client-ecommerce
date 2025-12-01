@@ -316,7 +316,7 @@ export default function AddressDialog({
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <Label className="text-sm font-medium">
-                  Địa chỉ cụ thể <span className="text-red-500">*</span>
+                  Địa chỉ cụ thể <span className="text-destructive">*</span>
                 </Label>
                 <Button
                   type="button"
@@ -336,14 +336,14 @@ export default function AddressDialog({
                 placeholder="Số nhà, tên đường, địa chỉ chi tiết"
                 className="h-10"
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Địa chỉ là thông tin bắt buộc để có thể giao hàng
               </p>
             </div>
 
             {/* Họ tên và Số điện thoại - KHÔNG BẮT BUỘC */}
             <div className="space-y-3">
-              <div className="flex items-center justify-between text-sm font-medium text-gray-600">
+              <div className="flex items-center justify-between text-sm font-medium text-muted-foreground">
                 <span>Họ và tên (tùy chọn)</span>
                 <span>Số điện thoại (tùy chọn)</span>
               </div>
@@ -367,7 +367,7 @@ export default function AddressDialog({
 
             {/* Tỉnh/Thành phố, Quận/Huyện, Phường/Xã - TỰ ĐỘNG ĐIỀN KHI LẤY VỊ TRÍ */}
             <div className="space-y-3">
-              <Label className="text-sm font-medium text-gray-600">
+              <Label className="text-sm font-medium text-muted-foreground">
                 Thông tin khu vực (tự động điền khi lấy vị trí)
               </Label>
               <div className="grid grid-cols-3 gap-3">

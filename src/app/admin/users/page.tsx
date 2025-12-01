@@ -10,34 +10,25 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { toast } from "sonner";
-import { UsersHeader } from "@/components/admin/UserAdminPage/UsersHeader";
-import { UsersStats } from "@/components/admin/UserAdminPage/UserStats";
-import { UsersTable } from "@/components/admin/UserAdminPage/UserTable";
-import { UserPagination } from "@/components/admin/UserAdminPage/UserPaginationControl";
-import { CreateModelUser } from "@/components/admin/UserAdminPage/CreateModelUser";
-import { UpdateModelUser } from "@/components/admin/UserAdminPage/UpdateModelUser";
-import { ViewModelUser } from "@/components/admin/UserAdminPage/ViewModelUser";
+import { UsersHeader } from "@/components/admin/users/UsersHeader";
+import { UsersStats } from "@/components/admin/users/UserStats";
+import { UsersTable } from "@/components/admin/users/UserTable";
+import { UserPagination } from "@/components/admin/users/UserPaginationControl";
+import { CreateModelUser } from "@/components/admin/users/CreateModelUser";
+import { UpdateModelUser } from "@/components/admin/users/UpdateModelUser";
+import { ViewModelUser } from "@/components/admin/users/ViewModelUser";
 import {
   getAllUsers,
   deleteUser,
   updateUser,
   createUser,
 } from "@/features/user/userAction";
-import { User } from "@/types/user";
+import { User, UserFilters } from "@/types/user";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 export default function AdminUsersPage() {
   const dispatch = useAppDispatch();
   const userState = useAppSelector((state) => state.user);
-
-  // Define filter interface
-  interface UserFilters {
-    page: number;
-    limit: number;
-    search: string;
-    role: string;
-    isVerifiedEmail: boolean | null;
-    [key: string]: string | number | boolean | null;
-  }
 
   // Use URL filters hook
   const { filters, updateFilter, updateFilters } = useUrlFilters<UserFilters>({
@@ -217,7 +208,7 @@ export default function AdminUsersPage() {
   if (userState.error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-red-500">Lỗi: {userState.error}</div>
+        <div className="text-destructive">Lỗi: {userState.error}</div>
       </div>
     );
   }
@@ -226,67 +217,73 @@ export default function AdminUsersPage() {
     <div className="space-y-6">
       <UsersHeader onOpenCreate={handleOpenCreateModal} />
 
-      <UsersStats
-        totalUsers={totalUsers}
-        verifiedUsers={verifiedUsers}
-        usersWithAddress={usersWithAddress}
-        recentUsers={recentUsers}
-      />
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Danh sách người dùng</CardTitle>
-          <CardDescription>
-            Quản lý tất cả người dùng trong hệ thống
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <UsersTable
-            users={users}
-            searchTerm={searchTerm}
-            pageSize={pageSize}
-            onSearch={handleSearch}
-            onPageSizeChange={handlePageSizeChange}
-            onEdit={handleEditUser}
-            onDelete={handleDeleteUser}
-            onView={handleViewUser}
-            onRoleFilterChange={handleRoleFilterChange}
-            onVerifiedFilterChange={handleVerifiedFilterChange}
-            selectedRole={selectedRole}
-            selectedVerified={selectedVerified}
+      {userState.isLoading ? (
+        <SpinnerLoading />
+      ) : (
+        <>
+          <UsersStats
+            totalUsers={totalUsers}
+            verifiedUsers={verifiedUsers}
+            usersWithAddress={usersWithAddress}
+            recentUsers={recentUsers}
           />
 
-          <UserPagination
-            currentPage={currentPage}
-            totalPages={pagination?.totalPages || 1}
-            totalItems={pagination?.totalItems}
-            pageSize={pageSize}
-            onPageChange={handlePageChange}
-          />
+          <Card>
+            <CardHeader>
+              <CardTitle>Danh sách người dùng</CardTitle>
+              <CardDescription>
+                Quản lý tất cả người dùng trong hệ thống
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <UsersTable
+                users={users}
+                searchTerm={searchTerm}
+                pageSize={pageSize}
+                onSearch={handleSearch}
+                onPageSizeChange={handlePageSizeChange}
+                onEdit={handleEditUser}
+                onDelete={handleDeleteUser}
+                onView={handleViewUser}
+                onRoleFilterChange={handleRoleFilterChange}
+                onVerifiedFilterChange={handleVerifiedFilterChange}
+                selectedRole={selectedRole}
+                selectedVerified={selectedVerified}
+              />
 
-          <CreateModelUser
-            open={createModalOpen}
-            onOpenChange={setCreateModalOpen}
-            onCreate={handleCreateUser}
-            isLoading={isCreating}
-          />
+              <UserPagination
+                currentPage={currentPage}
+                totalPages={pagination?.totalPages || 1}
+                totalItems={pagination?.totalItems}
+                pageSize={pageSize}
+                onPageChange={handlePageChange}
+              />
 
-          <ViewModelUser
-            open={viewModalOpen}
-            onOpenChange={handleCloseModals}
-            user={selectedUser}
-            onEdit={handleEditFromView}
-          />
+              <CreateModelUser
+                open={createModalOpen}
+                onOpenChange={setCreateModalOpen}
+                onCreate={handleCreateUser}
+                isLoading={isCreating}
+              />
 
-          <UpdateModelUser
-            open={updateModalOpen}
-            onOpenChange={handleCloseEditModal}
-            user={selectedUser}
-            onUpdate={handleUpdateUser}
-            isLoading={isUpdating}
-          />
-        </CardContent>
-      </Card>
+              <ViewModelUser
+                open={viewModalOpen}
+                onOpenChange={handleCloseModals}
+                user={selectedUser}
+                onEdit={handleEditFromView}
+              />
+
+              <UpdateModelUser
+                open={updateModalOpen}
+                onOpenChange={handleCloseEditModal}
+                user={selectedUser}
+                onUpdate={handleUpdateUser}
+                isLoading={isUpdating}
+              />
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 }

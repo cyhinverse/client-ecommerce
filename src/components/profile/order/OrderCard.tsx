@@ -27,13 +27,13 @@ export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancell
 
     const getStatusColor = (status: Order["status"]) => {
         switch (status) {
-            case "pending": return "bg-yellow-100 text-yellow-800 border-yellow-200";
+            case "pending": return "bg-warning/10 text-warning border-warning/20";
             case "confirmed":
-            case "processing": return "bg-blue-100 text-blue-800 border-blue-200";
-            case "shipped": return "bg-purple-100 text-purple-800 border-purple-200";
-            case "delivered": return "bg-green-100 text-green-800 border-green-200";
-            case "cancelled": return "bg-red-100 text-red-800 border-red-200";
-            default: return "bg-gray-100 text-gray-800 border-gray-200";
+            case "processing": return "bg-info/10 text-info border-info/20";
+            case "shipped": return "bg-primary/10 text-primary border-primary/20";
+            case "delivered": return "bg-success/10 text-success border-success/20";
+            case "cancelled": return "bg-destructive/10 text-destructive border-destructive/20";
+            default: return "bg-muted text-muted-foreground border-border";
         }
     };
 
@@ -140,7 +140,7 @@ export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancell
                         {(order.products || []).slice(0, 3).map((product, index) => (
                             <div key={`${product.productId || index}-${index}`} className="flex justify-between items-center text-sm"> {/* ✅ CẢI THIỆN KEY */}
                                 <div className="flex items-center gap-2">
-                                    <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
+                                    <div className="w-8 h-8 bg-muted rounded flex items-center justify-center">
                                         {product.image ? (
                                             <img
                                                 src={getProductImage(product)}
@@ -148,7 +148,7 @@ export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancell
                                                 className="w-6 h-6 object-cover rounded"
                                             />
                                         ) : (
-                                            <Package className="h-4 w-4 text-gray-400" />
+                                            <Package className="h-4 w-4 text-muted-foreground" />
                                         )}
                                     </div>
                                     <span className="flex-1">
@@ -181,7 +181,7 @@ export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancell
                         {order.discountAmount > 0 && (
                             <>
                                 <div className="text-muted-foreground">Giảm giá:</div>
-                                <div className="text-right text-green-600">-{formatCurrency(order.discountAmount)}</div>
+                                <div className="text-right text-success">-{formatCurrency(order.discountAmount)}</div>
                             </>
                         )}
 
@@ -233,7 +233,7 @@ export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancell
                                 size="sm"
                                 onClick={() => onCancelOrder(order._id!)}
                                 disabled={isCancelling}
-                                className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
+                                className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground"
                             >
                                 {isCancelling ? (
                                     <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
