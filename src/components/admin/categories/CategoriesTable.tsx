@@ -34,11 +34,13 @@ import {
 } from "lucide-react";
 import { Category } from "@/types/category";
 import { Badge } from "@/components/ui/badge";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 interface CategoriesTableProps {
   categories: Category[];
   searchTerm: string;
   pageSize: number;
+  isLoading?: boolean;
   onSearch: (value: string) => void;
   onPageSizeChange: (size: number) => void;
   onEdit: (category: Category) => void;
@@ -191,6 +193,7 @@ export function CategoriesTable({
   onView,
   getParentName,
   getProductCount,
+  isLoading = false,
 }: CategoriesTableProps) {
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     onSearch(e.target.value);
@@ -265,7 +268,15 @@ export function CategoriesTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {categories.length === 0 ? (
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={7} className="h-24 text-center">
+                  <div className="flex justify-center items-center">
+                    <SpinnerLoading />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : categories.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-8">
                   <div className="flex flex-col items-center justify-center text-muted-foreground">

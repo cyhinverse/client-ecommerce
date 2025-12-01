@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut, Menu } from "lucide-react";
+import { LogOut, Menu, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -18,6 +18,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -66,10 +67,26 @@ export default function AdminLayout({
       </Sheet>
 
       {/* Desktop Sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 lg:flex-col">
-        <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6">
-          <div className="flex h-16 shrink-0 items-center">
-            <h1 className="text-xl font-bold text-gray-900">Admin Panel</h1>
+      <div
+        className={cn(
+          "hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col transition-all duration-300",
+          isCollapsed ? "lg:w-20" : "lg:w-64"
+        )}
+      >
+        <div className={cn(
+          "flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white transition-all duration-300",
+          isCollapsed ? "px-2" : "px-6"
+        )}>
+          <div className={cn("flex h-16 shrink-0 items-center", isCollapsed ? "justify-center" : "justify-between")}>
+            {!isCollapsed && <h1 className="text-xl font-bold text-gray-900 truncate">Admin Panel</h1>}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className={cn("ml-auto", isCollapsed && "mx-auto")}
+            >
+              {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            </Button>
           </div>
           <nav className="flex flex-1 flex-col">
             <ul role="list" className="flex flex-1 flex-col gap-y-7">
@@ -85,11 +102,13 @@ export default function AdminLayout({
                             "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all",
                             isActive
                               ? "bg-gray-100 text-gray-900 font-medium"
-                              : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                              : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+                            isCollapsed && "justify-center px-2"
                           )}
+                          title={isCollapsed ? item.name : undefined}
                         >
-                          <item.icon className="h-4 w-4" />
-                          {item.name}
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          {!isCollapsed && <span>{item.name}</span>}
                         </Link>
                       </li>
                     );
@@ -99,11 +118,15 @@ export default function AdminLayout({
               <li className="mt-auto">
                 <Button
                   variant="ghost"
-                  className="w-full justify-start text-gray-600 hover:text-gray-900"
+                  className={cn(
+                    "w-full justify-start text-gray-600 hover:text-gray-900",
+                    isCollapsed && "justify-center px-2"
+                  )}
                   onClick={handleLogout}
+                  title={isCollapsed ? "Đăng xuất" : undefined}
                 >
-                  <LogOut className="h-4 w-4 mr-3" />
-                  Đăng xuất
+                  <LogOut className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
+                  {!isCollapsed && "Đăng xuất"}
                 </Button>
               </li>
             </ul>
@@ -112,7 +135,7 @@ export default function AdminLayout({
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-64">
+      <div className={cn("transition-all duration-300", isCollapsed ? "lg:pl-20" : "lg:pl-64")}>
         {/* Header */}
         <div className="sticky top-0 z-40 flex h-12 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4  sm:gap-x-6 sm:px-6 lg:px-8">
           <Button

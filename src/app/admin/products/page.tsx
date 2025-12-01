@@ -304,78 +304,73 @@ export default function AdminProductsPage() {
     <div className="space-y-6">
       <ProductsHeader onOpenCreate={handleOpenCreateModal} />
 
-      {isLoading ? (
-        <SpinnerLoading />
-      ) : (
-        <>
-          <ProductsStats
-            totalProducts={totalProducts}
-            activeProducts={activeProducts}
-            productsOnSale={productsOnSale}
-            totalCategories={totalCategories}
+      <ProductsStats
+        totalProducts={totalProducts}
+        activeProducts={activeProducts}
+        productsOnSale={productsOnSale}
+        totalCategories={totalCategories}
+      />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Danh sách sản phẩm</CardTitle>
+          <CardDescription>
+            Quản lý tất cả sản phẩm trong cửa hàng
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ProductsTable
+            products={productList} // SỬA: sử dụng productList
+            searchTerm={searchTerm}
+            pageSize={pageSize}
+            isLoading={isLoading}
+            onSearch={handleSearch}
+            onPageSizeChange={handlePageSizeChange}
+            onEdit={handleEditProduct}
+            onDelete={handleDeleteProduct}
+            onView={handleViewProduct}
+            onCategoryFilterChange={handleCategoryFilterChange}
+            onBrandFilterChange={handleBrandFilterChange}
+            onPriceFilterChange={handlePriceFilterChange}
+            onStatusFilterChange={handleStatusFilterChange}
+            selectedCategory={selectedCategory}
+            selectedBrand={selectedBrand}
+            selectedMinPrice={selectedMinPrice}
+            selectedMaxPrice={selectedMaxPrice}
+            selectedStatus={selectedStatus}
           />
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Danh sách sản phẩm</CardTitle>
-              <CardDescription>
-                Quản lý tất cả sản phẩm trong cửa hàng
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ProductsTable
-                products={productList} // SỬA: sử dụng productList
-                searchTerm={searchTerm}
-                pageSize={pageSize}
-                onSearch={handleSearch}
-                onPageSizeChange={handlePageSizeChange}
-                onEdit={handleEditProduct}
-                onDelete={handleDeleteProduct}
-                onView={handleViewProduct}
-                onCategoryFilterChange={handleCategoryFilterChange}
-                onBrandFilterChange={handleBrandFilterChange}
-                onPriceFilterChange={handlePriceFilterChange}
-                onStatusFilterChange={handleStatusFilterChange}
-                selectedCategory={selectedCategory}
-                selectedBrand={selectedBrand}
-                selectedMinPrice={selectedMinPrice}
-                selectedMaxPrice={selectedMaxPrice}
-                selectedStatus={selectedStatus}
-              />
+          <ProductPagination
+            currentPage={currentPage}
+            totalPages={pagination?.totalPages || 1}
+            totalItems={pagination?.totalItems}
+            pageSize={pageSize}
+            onPageChange={handlePageChange}
+          />
 
-              <ProductPagination
-                currentPage={currentPage}
-                totalPages={pagination?.totalPages || 1}
-                totalItems={pagination?.totalItems}
-                pageSize={pageSize}
-                onPageChange={handlePageChange}
-              />
+          <CreateModelProduct
+            open={createModalOpen}
+            onOpenChange={setCreateModalOpen}
+            onCreate={handleCreateProduct}
+            isLoading={isCreating}
+          />
 
-              <CreateModelProduct
-                open={createModalOpen}
-                onOpenChange={setCreateModalOpen}
-                onCreate={handleCreateProduct}
-                isLoading={isCreating}
-              />
+          <ViewModelProduct
+            open={viewModalOpen}
+            onOpenChange={handleCloseModals}
+            product={selectedProduct}
+            onEdit={handleEditFromView}
+          />
 
-              <ViewModelProduct
-                open={viewModalOpen}
-                onOpenChange={handleCloseModals}
-                product={selectedProduct}
-                onEdit={handleEditFromView}
-              />
-
-              <UpdateModelProduct
-                open={updateModalOpen}
-                onOpenChange={handleCloseEditModal}
-                product={selectedProduct}
-                onUpdate={handleUpdateProduct}
-                isLoading={isUpdating}
-              />
-            </CardContent>
-          </Card>
-        </>
-      )}
+          <UpdateModelProduct
+            open={updateModalOpen}
+            onOpenChange={handleCloseEditModal}
+            product={selectedProduct}
+            onUpdate={handleUpdateProduct}
+            isLoading={isUpdating}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -35,11 +35,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { User } from "@/types/user";
 import Image from "next/image";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 interface UsersTableProps {
   users: User[];
   searchTerm: string;
   pageSize: number;
+  isLoading?: boolean;
   onSearch: (value: string) => void;
   onPageSizeChange: (size: number) => void;
   onEdit: (user: User) => void;
@@ -94,6 +96,7 @@ export function UsersTable({
   users,
   searchTerm,
   pageSize,
+  isLoading = false,
   onSearch,
   onPageSizeChange,
   onEdit,
@@ -265,7 +268,15 @@ export function UsersTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users.length === 0 ? (
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={6} className="h-24 text-center">
+                  <div className="flex justify-center items-center">
+                    <SpinnerLoading />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : users.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-8">
                   <div className="flex flex-col items-center justify-center text-muted-foreground">

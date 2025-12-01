@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Search, MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 
 export interface OrdersTableProps {
@@ -34,6 +35,7 @@ export interface OrdersTableProps {
   paymentMethodFilter: string;
   userIdFilter: string;
   pageSize: number;
+  isLoading?: boolean;
   onSearch: (value: string) => void;
   onStatusFilter: (status: string) => void;
   onPaymentStatusFilter: (status: string) => void; // Giữ nguyên function cho handler
@@ -58,6 +60,7 @@ export function OrdersTable({
   onEdit,
   onDelete,
   onView,
+  isLoading = false,
 }: OrdersTableProps) {
   const getStatusBadge = (status: string) => {
     const statusConfig: { [key: string]: { label: string; variant: "default" | "secondary" | "destructive" | "outline" } } = {
@@ -161,7 +164,15 @@ export function OrdersTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {orders.length === 0 ? (
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={7} className="h-24 text-center">
+                  <div className="flex justify-center items-center">
+                    <SpinnerLoading />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : orders.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                   Không có đơn hàng nào

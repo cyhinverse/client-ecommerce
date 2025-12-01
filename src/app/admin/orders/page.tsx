@@ -277,63 +277,58 @@ const handleSaveOrder = async (orderData: { status: string }) => {
     <div className="space-y-6">
       <OrdersHeader />
 
-      {orderState.isLoading ? (
-        <SpinnerLoading />
-      ) : (
-        <>
-          {statistics && <OrdersStats {...statistics} />}
+      {statistics && <OrdersStats {...statistics} />}
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Danh sách đơn hàng</CardTitle>
-              <CardDescription>
-                Quản lý tất cả đơn hàng trong hệ thống
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <OrdersTable
-                orders={orders}
-                searchTerm={searchTerm}
-                statusFilter={statusFilter}
-                paymentStatusFilter={paymentStatusFilter}
-                paymentMethodFilter={paymentMethodFilter}
-                userIdFilter={userIdFilter}
-                pageSize={pageSize}
-                onSearch={handleSearch}
-                onStatusFilter={handleStatusFilter}
-                onPaymentStatusFilter={handlePaymentStatusFilter}
-                onPaymentMethodFilter={handlePaymentMethodFilter}
-                onUserIdFilter={handleUserIdFilter}
-                onResetFilters={handleResetFilters}
-                onPageSizeChange={handlePageSizeChange}
-                onEdit={handleEditOrder}
-                onDelete={handleDeleteOrder}
-                onView={handleViewOrder}
-              />
+      <Card>
+        <CardHeader>
+          <CardTitle>Danh sách đơn hàng</CardTitle>
+          <CardDescription>
+            Quản lý tất cả đơn hàng trong hệ thống
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <OrdersTable
+            orders={orders}
+            searchTerm={searchTerm}
+            statusFilter={statusFilter}
+            paymentStatusFilter={paymentStatusFilter}
+            paymentMethodFilter={paymentMethodFilter}
+            userIdFilter={userIdFilter}
+            pageSize={pageSize}
+            isLoading={orderState.isLoading}
+            onSearch={handleSearch}
+            onStatusFilter={handleStatusFilter}
+            onPaymentStatusFilter={handlePaymentStatusFilter}
+            onPaymentMethodFilter={handlePaymentMethodFilter}
+            onUserIdFilter={handleUserIdFilter}
+            onResetFilters={handleResetFilters}
+            onPageSizeChange={handlePageSizeChange}
+            onEdit={handleEditOrder}
+            onDelete={handleDeleteOrder}
+            onView={handleViewOrder}
+          />
 
-              <ViewOrderModal
-                isOpen={viewModalOpen}
-                onClose={handleCloseModals}
-                onEdit={handleEditFromView}
-                order={selectedOrder}
-              />
+          <ViewOrderModal
+            isOpen={viewModalOpen}
+            onClose={handleCloseModals}
+            onEdit={handleEditFromView}
+            order={selectedOrder}
+          />
 
-              <EditOrderModal
-                isOpen={editModalOpen}
-                onClose={handleCloseEditModal}
-                onSave={handleSaveOrder}
-                order={selectedOrder}
-                isLoading={isUpdating}
-              />
+          <EditOrderModal
+            isOpen={editModalOpen}
+            onClose={handleCloseEditModal}
+            onSave={handleSaveOrder}
+            order={selectedOrder}
+            isLoading={isUpdating}
+          />
 
-              <PaginationControls
-                pagination={pagination}
-                onPageChange={handlePageChange}
-              />
-            </CardContent>
-          </Card>
-        </>
-      )}
+          <PaginationControls
+            pagination={pagination}
+            onPageChange={handlePageChange}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -27,11 +27,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Search, MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
 import { Discount } from "@/types/discount";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 interface DiscountsTableProps {
   discounts: Discount[];
   searchTerm: string;
   pageSize: number;
+  isLoading?: boolean;
   onSearch: (value: string) => void;
   onPageSizeChange: (size: number) => void;
   onEdit: (discount: Discount) => void;
@@ -56,6 +58,7 @@ export function DiscountsTable({
   onActiveFilterChange,
   selectedDiscountType,
   selectedIsActive,
+  isLoading = false,
 }: DiscountsTableProps) {
   const [localSearch, setLocalSearch] = useState(searchTerm);
 
@@ -176,7 +179,15 @@ export function DiscountsTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {discounts.length === 0 ? (
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={8} className="h-24 text-center">
+                  <div className="flex justify-center items-center">
+                    <SpinnerLoading />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : discounts.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} className="text-center h-24">
                   Không tìm thấy mã giảm giá nào.

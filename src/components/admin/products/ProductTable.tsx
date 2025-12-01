@@ -33,13 +33,18 @@ import {
   Eye,
   Filter,
   Package,
+  Star,
+  Sparkles,
+  Percent,
 } from "lucide-react";
 import { Product } from "@/types/product";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 interface ProductsTableProps {
   products: Product[];
   searchTerm: string;
   pageSize: number;
+  isLoading?: boolean;
   onSearch: (value: string) => void;
   onPageSizeChange: (size: number) => void;
   onEdit: (product: Product) => void;
@@ -77,6 +82,7 @@ export function ProductsTable({
   selectedMinPrice,
   selectedMaxPrice,
   selectedStatus,
+  isLoading = false,
 }: ProductsTableProps) {
   const [localMinPrice, setLocalMinPrice] = useState(
     selectedMinPrice?.toString() || ""
@@ -276,21 +282,36 @@ export function ProductsTable({
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50 hover:bg-muted/50 border-border">
-              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Hình ảnh</TableHead>
-              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Tên sản phẩm</TableHead>
-              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Danh mục</TableHead>
-              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Thương hiệu</TableHead>
-              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Giá</TableHead>
-              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Tồn kho</TableHead>
-              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Đã bán</TableHead>
-              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Trạng thái</TableHead>
-              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Ngày tạo</TableHead>
-              <TableHead className="w-[80px] uppercase text-xs font-bold tracking-wider text-muted-foreground">Thao tác</TableHead>
+              <TableHead className="w-[50px] uppercase text-xs font-bold tracking-wider text-muted-foreground">Hình ảnh</TableHead>
+              <TableHead className="w-[250px] uppercase text-xs font-bold tracking-wider text-muted-foreground">Tên sản phẩm</TableHead>
+              <TableHead className="w-[120px] uppercase text-xs font-bold tracking-wider text-muted-foreground">Danh mục</TableHead>
+              <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">Thương hiệu</TableHead>
+              <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">Giá</TableHead>
+              <TableHead className="w-[80px] uppercase text-xs font-bold tracking-wider text-muted-foreground">Tồn kho</TableHead>
+              <TableHead className="w-[80px] uppercase text-xs font-bold tracking-wider text-muted-foreground">Đã bán</TableHead>
+              <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">Trạng thái</TableHead>
+              <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">Ngày tạo</TableHead>
+              <TableHead className="w-[50px] uppercase text-xs font-bold tracking-wider text-muted-foreground text-right">Thao tác</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {products.map((product) => (
-              <TableRow key={product._id} className="border-border hover:bg-muted/50">
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={10} className="h-24 text-center">
+                  <div className="flex justify-center items-center">
+                    <SpinnerLoading />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : products.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={10} className="h-24 text-center">
+                  Không tìm thấy sản phẩm nào.
+                </TableCell>
+              </TableRow>
+            ) : (
+              products.map((product) => (
+                <TableRow key={product._id} className="border-border hover:bg-muted/50">
                 <TableCell>
                   {product.images && product.images.length > 0 ? (
                     <img
@@ -305,15 +326,38 @@ export function ProductsTable({
                   )}
                 </TableCell>
                 <TableCell className="font-medium">
-                  <div>
-                    <div className="text-foreground">{product.name}</div>
-                    <div className="text-xs text-muted-foreground font-normal">
+                  <div className="max-w-[250px]">
+                    <div className="flex items-center gap-2">
+                      <div className="text-foreground truncate font-medium" title={product.name}>
+                        {product.name}
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        {product.isNewArrival && (
+                          <Badge variant="secondary" className="h-4 px-1 text-[9px] rounded-sm bg-info/10 text-info border-info/20">Mới</Badge>
+                        )}
+                        {product.isFeatured && (
+                          <Badge variant="secondary" className="h-4 px-1 text-[9px] rounded-sm bg-primary/10 text-primary border-primary/20">Hot</Badge>
+                        )}
+                        {product.onSale && (
+                          <Badge variant="secondary" className="h-4 px-1 text-[9px] rounded-sm bg-destructive/10 text-destructive border-destructive/20">Sale</Badge>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-xs text-muted-foreground font-normal truncate" title={product.slug}>
                       {product.slug}
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="text-muted-foreground">{getCategoryName(product.category)}</TableCell>
-                <TableCell className="text-muted-foreground">{product.brand || "Không có"}</TableCell>
+                <TableCell className="text-muted-foreground">
+                  <div className="max-w-[120px] truncate" title={getCategoryName(product.category)}>
+                    {getCategoryName(product.category)}
+                  </div>
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  <div className="max-w-[100px] truncate" title={product.brand || "Không có"}>
+                    {product.brand || "Không có"}
+                  </div>
+                </TableCell>
                 <TableCell>{getPriceDisplay(product.price)}</TableCell>
                 <TableCell>
                   <Badge variant="outline" className="rounded-none border-border font-normal">{getStockCount(product)}</Badge>
@@ -322,31 +366,14 @@ export function ProductsTable({
                   <span className="text-sm text-muted-foreground">{product.soldCount || 0}</span>
                 </TableCell>
                 <TableCell>
-                  <div className="flex flex-col gap-1">
-                    <Badge variant={product.isActive ? "default" : "secondary"} className={`rounded-none font-normal ${product.isActive ? "bg-success/10 text-success hover:bg-success/20" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}>
-                      {product.isActive ? "Đang bán" : "Ngừng bán"}
-                    </Badge>
-                    {product.isNewArrival && (
-                      <Badge variant="secondary" className="text-[10px] rounded-none bg-info/10 text-info hover:bg-info/20 border-info/20">
-                        Mới
-                      </Badge>
-                    )}
-                    {product.isFeatured && (
-                      <Badge variant="secondary" className="text-[10px] rounded-none bg-primary/10 text-primary hover:bg-primary/20 border-primary/20">
-                        Nổi bật
-                      </Badge>
-                    )}
-                    {product.onSale && (
-                      <Badge variant="secondary" className="text-[10px] rounded-none bg-destructive/10 text-destructive hover:bg-destructive/20 border-destructive/20">
-                        Giảm giá
-                      </Badge>
-                    )}
-                  </div>
+                  <Badge variant={product.isActive ? "default" : "secondary"} className={`rounded-none font-normal whitespace-nowrap ${product.isActive ? "bg-success/10 text-success hover:bg-success/20" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}>
+                    {product.isActive ? "Đang bán" : "Ngừng bán"}
+                  </Badge>
                 </TableCell>
-                <TableCell className="text-muted-foreground text-sm">
+                <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
                   {new Date(product.createdAt).toLocaleDateString("vi-VN")}
                 </TableCell>
-                <TableCell>
+                <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="h-8 w-8 p-0 rounded-none hover:bg-muted">
@@ -373,7 +400,8 @@ export function ProductsTable({
                   </DropdownMenu>
                 </TableCell>
               </TableRow>
-            ))}
+            ))
+            )}
           </TableBody>
         </Table>
       </div>

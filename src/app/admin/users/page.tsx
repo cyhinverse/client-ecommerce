@@ -217,73 +217,68 @@ export default function AdminUsersPage() {
     <div className="space-y-6">
       <UsersHeader onOpenCreate={handleOpenCreateModal} />
 
-      {userState.isLoading ? (
-        <SpinnerLoading />
-      ) : (
-        <>
-          <UsersStats
-            totalUsers={totalUsers}
-            verifiedUsers={verifiedUsers}
-            usersWithAddress={usersWithAddress}
-            recentUsers={recentUsers}
+      <UsersStats
+        totalUsers={totalUsers}
+        verifiedUsers={verifiedUsers}
+        usersWithAddress={usersWithAddress}
+        recentUsers={recentUsers}
+      />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Danh sách người dùng</CardTitle>
+          <CardDescription>
+            Quản lý tất cả người dùng trong hệ thống
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <UsersTable
+            users={users}
+            searchTerm={searchTerm}
+            pageSize={pageSize}
+            isLoading={userState.isLoading}
+            onSearch={handleSearch}
+            onPageSizeChange={handlePageSizeChange}
+            onEdit={handleEditUser}
+            onDelete={handleDeleteUser}
+            onView={handleViewUser}
+            onRoleFilterChange={handleRoleFilterChange}
+            onVerifiedFilterChange={handleVerifiedFilterChange}
+            selectedRole={selectedRole}
+            selectedVerified={selectedVerified}
           />
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Danh sách người dùng</CardTitle>
-              <CardDescription>
-                Quản lý tất cả người dùng trong hệ thống
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <UsersTable
-                users={users}
-                searchTerm={searchTerm}
-                pageSize={pageSize}
-                onSearch={handleSearch}
-                onPageSizeChange={handlePageSizeChange}
-                onEdit={handleEditUser}
-                onDelete={handleDeleteUser}
-                onView={handleViewUser}
-                onRoleFilterChange={handleRoleFilterChange}
-                onVerifiedFilterChange={handleVerifiedFilterChange}
-                selectedRole={selectedRole}
-                selectedVerified={selectedVerified}
-              />
+          <UserPagination
+            currentPage={currentPage}
+            totalPages={pagination?.totalPages || 1}
+            totalItems={pagination?.totalItems}
+            pageSize={pageSize}
+            onPageChange={handlePageChange}
+          />
 
-              <UserPagination
-                currentPage={currentPage}
-                totalPages={pagination?.totalPages || 1}
-                totalItems={pagination?.totalItems}
-                pageSize={pageSize}
-                onPageChange={handlePageChange}
-              />
+          <CreateModelUser
+            open={createModalOpen}
+            onOpenChange={setCreateModalOpen}
+            onCreate={handleCreateUser}
+            isLoading={isCreating}
+          />
 
-              <CreateModelUser
-                open={createModalOpen}
-                onOpenChange={setCreateModalOpen}
-                onCreate={handleCreateUser}
-                isLoading={isCreating}
-              />
+          <ViewModelUser
+            open={viewModalOpen}
+            onOpenChange={handleCloseModals}
+            user={selectedUser}
+            onEdit={handleEditFromView}
+          />
 
-              <ViewModelUser
-                open={viewModalOpen}
-                onOpenChange={handleCloseModals}
-                user={selectedUser}
-                onEdit={handleEditFromView}
-              />
-
-              <UpdateModelUser
-                open={updateModalOpen}
-                onOpenChange={handleCloseEditModal}
-                user={selectedUser}
-                onUpdate={handleUpdateUser}
-                isLoading={isUpdating}
-              />
-            </CardContent>
-          </Card>
-        </>
-      )}
+          <UpdateModelUser
+            open={updateModalOpen}
+            onOpenChange={handleCloseEditModal}
+            user={selectedUser}
+            onUpdate={handleUpdateUser}
+            isLoading={isUpdating}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -93,7 +93,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Input */}
-        <div className="flex items-center gap-2 p-4 border-b flex-shrink-0">
+        <div className="flex items-center gap-2 p-4 border-b shrink-0">
           <Search className="w-5 h-5 text-muted-foreground" />
           <Input
             ref={inputRef}
@@ -125,7 +125,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                     className="flex items-center gap-4 p-3 hover:bg-muted/50 rounded-lg cursor-pointer transition-colors"
                     onClick={() => handleProductClick(product.slug)}
                   >
-                    <div className="w-16 h-16 bg-muted rounded flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    <div className="w-16 h-16 bg-muted rounded flex items-center justify-center shrink-0 overflow-hidden">
                       {product.images && product.images.length > 0 ? (
                         <Image
                           width={64}
@@ -144,7 +144,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                         {product.category?.name || "Chưa phân loại"}
                       </p>
                     </div>
-                    <div className="text-base font-semibold text-foreground flex-shrink-0">
+                    <div className="text-base font-semibold text-foreground shrink-0">
                       {formatPrice(product.price)}
                     </div>
                   </div>

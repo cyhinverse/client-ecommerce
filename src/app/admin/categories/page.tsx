@@ -209,75 +209,70 @@ export default function CategoriesAdminPage() {
     <div className="space-y-6">
       <CategoriesHeader onAddCategory={handleOpenCreateModal} />
 
-      {categoryState.isLoading ? (
-        <SpinnerLoading />
-      ) : (
-        <>
-          <CategoriesStats
-            totalCategories={totalCategories}
-            activeCategories={activeCategories}
-            childCategories={childCategories}
-            totalProducts={totalProducts}
-          />
+      <CategoriesStats
+        totalCategories={totalCategories}
+        activeCategories={activeCategories}
+        childCategories={childCategories}
+        totalProducts={totalProducts}
+      />
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Danh sách danh mục</CardTitle>
-              <CardDescription>
-                Quản lý tất cả danh mục sản phẩm
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <CategoriesTable
-                categories={categories}
-                searchTerm={searchTerm}
-                pageSize={pageSize}
-                onSearch={handleSearch}
-                onPageSizeChange={handlePageSizeChange}
-                onEdit={handleEditCategory}
-                onDelete={handleDeleteCategory}
-                onView={handleViewCategory}
-                getParentName={getParentName}
-                getProductCount={getProductCount}
-              />
-
-              <CreateCategoryModal
-                isOpen={createModalOpen}
-                onClose={() => setCreateModalOpen(false)}
-                onCreate={handleCreateCategory as any}
-                categories={categories}
-                isLoading={isCreating}
-              />
-
-              <ViewCategoryModal
-                isOpen={viewModalOpen}
-                onClose={handleCloseModals}
-                onEdit={handleEditFromView}
-                category={selectedCategory}
-              />
-
-              <EditCategoryModal
-                isOpen={editModalOpen}
-                onClose={handleCloseEditModal}
-                onSave={handleSaveCategory}
-                category={selectedCategory}
-                isLoading={isUpdating}
-              />
-
-              <PaginationControls
-                pagination={pagination}
-                onPageChange={handlePageChange}
-              />
-            </CardContent>
-          </Card>
-
-          <CategoryTreeView
+      <Card>
+        <CardHeader>
+          <CardTitle>Danh sách danh mục</CardTitle>
+          <CardDescription>
+            Quản lý tất cả danh mục sản phẩm
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <CategoriesTable
             categories={categories}
-            getChildCategories={getChildCategories}
+            searchTerm={searchTerm}
+            pageSize={pageSize}
+            isLoading={categoryState.isLoading}
+            onSearch={handleSearch}
+            onPageSizeChange={handlePageSizeChange}
+            onEdit={handleEditCategory}
+            onDelete={handleDeleteCategory}
+            onView={handleViewCategory}
+            getParentName={getParentName}
             getProductCount={getProductCount}
           />
-        </>
-      )}
+
+          <CreateCategoryModal
+            isOpen={createModalOpen}
+            onClose={() => setCreateModalOpen(false)}
+            onCreate={handleCreateCategory as any}
+            categories={categories}
+            isLoading={isCreating}
+          />
+
+          <ViewCategoryModal
+            isOpen={viewModalOpen}
+            onClose={handleCloseModals}
+            onEdit={handleEditFromView}
+            category={selectedCategory}
+          />
+
+          <EditCategoryModal
+            isOpen={editModalOpen}
+            onClose={handleCloseEditModal}
+            onSave={handleSaveCategory}
+            category={selectedCategory}
+            isLoading={isUpdating}
+          />
+
+          <PaginationControls
+            pagination={pagination}
+            onPageChange={handlePageChange}
+          />
+        </CardContent>
+      </Card>
+
+      <CategoryTreeView
+        categories={categories}
+        getChildCategories={getChildCategories}
+        getProductCount={getProductCount}
+      />
     </div>
   );
 }

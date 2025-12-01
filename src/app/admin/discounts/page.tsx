@@ -243,16 +243,12 @@ export default function AdminDiscountsPage() {
     <div className="space-y-6">
       <DiscountsHeader onOpenCreate={handleOpenCreateModal} />
 
-      {discountState.loading ? (
-        <SpinnerLoading />
-      ) : (
-        <>
-          <DiscountsStats
-            totalDiscounts={totalDiscounts}
-            activeDiscounts={activeDiscounts}
-            expiredDiscounts={expiredDiscounts}
-            highUsageDiscounts={highUsageDiscounts}
-          />
+      <DiscountsStats
+        totalDiscounts={totalDiscounts}
+        activeDiscounts={activeDiscounts}
+        expiredDiscounts={expiredDiscounts}
+        highUsageDiscounts={highUsageDiscounts}
+      />
 
           <Card>
             <CardHeader>
@@ -266,6 +262,7 @@ export default function AdminDiscountsPage() {
                 discounts={discounts}
                 searchTerm={searchTerm}
                 pageSize={pageSize}
+                isLoading={discountState.loading}
                 onSearch={handleSearch}
                 onPageSizeChange={handlePageSizeChange}
                 onEdit={handleEditDiscount}
@@ -299,17 +296,15 @@ export default function AdminDiscountsPage() {
                 onEdit={handleEditFromView}
               />
 
-              <UpdateModelDiscount
-                open={updateModalOpen}
-                onOpenChange={handleCloseEditModal}
-                discount={selectedDiscount}
-                onUpdate={handleUpdateDiscount}
-                isLoading={isUpdating}
-              />
-            </CardContent>
-          </Card>
-        </>
-      )}
+          <UpdateModelDiscount
+            open={updateModalOpen}
+            onOpenChange={handleCloseEditModal}
+            discount={selectedDiscount}
+            onUpdate={handleUpdateDiscount}
+            isLoading={isUpdating}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }
