@@ -4,16 +4,19 @@ import Image from "next/image";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAppSelector } from "@/hooks/hooks";
-import { ShoppingCart, Search } from "lucide-react";
+import { ShoppingCart, Search, Bell } from "lucide-react";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { usePathname } from "next/navigation";
 import SearchModal from "@/components/search/SearchModal";
+import { pathArray } from "@/constants/PathArray";
+import NotificationModel from "@/components/notifications/NotificationModel";
 
 export default function HeaderLayout() {
   const { loading, isAuthenticated, token, data } = useAppSelector(
     (state) => state.auth
   );
   const { data: cartData } = useAppSelector((state) => state.cart);
+  const [isOpen, setIsOpen] = useState(false);
 
   // Calculate total items in cart (sum of quantities)
   const cartItemsCount = cartData?.items?.reduce((total, item) => total + item.quantity, 0) || 0;
@@ -25,17 +28,6 @@ export default function HeaderLayout() {
     return <SpinnerLoading />;
   }
 
-  const pathArray = [
-    "/admin",
-    "/admin/products",
-    "/admin/orders",
-    "/admin/users",
-    "/admin/notifications",
-    "/admin/categories",
-    "/admin/discounts",
-    "/admin/settings",
-    "/admin/dashboard"
-  ];
 
   if (pathArray.includes(path)) return null;
 
@@ -98,7 +90,7 @@ export default function HeaderLayout() {
             {/* Cart */}
             {isAuthenticated && token && (
               <Link href="/cart">
-                <Button variant="ghost" size="icon" className="relative">
+                <Button variant="ghost" size="icon" className="relative cursor-pointer">
                   <ShoppingCart className="h-5 w-5" />
                   {cartItemsCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
@@ -109,6 +101,17 @@ export default function HeaderLayout() {
                 </Button>
               </Link>
             )}
+
+            {
+              isAuthenticated && token ? (
+                <Button onClick={() => setIsOpen(pre => !pre)} variant="ghost" size="icon" className="cursor-pointer">
+                  <Bell className="h-5 w-5" />
+                  <span className="sr-only">Notifications</span>
+                </Button>
+              ) : null
+            }
+
+            <NotificationModel isOpen={isOpen} onClose={() => setIsOpen(false)} />
 
             {/* Avatar or Login */}
             {isAuthenticated && token ? (
