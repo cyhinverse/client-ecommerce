@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Client E-commerce
 
-## Getting Started
+Dự án Frontend cho hệ thống thương mại điện tử, được xây dựng bằng Next.js 16 và React 19.
 
-First, run the development server:
+## 🛠 Công nghệ sử dụng
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Framework**: [Next.js 16](https://nextjs.org/) (App Router)
+- **Library**: [React 19](https://react.dev/)
+- **State Management**: [Redux Toolkit](https://redux-toolkit.js.org/) & Redux Persist
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **UI Components**: [Shadcn UI](https://ui.shadcn.com/) (Radix UI)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Form Handling**: React Hook Form + Zod Validation
+- **Animations**: Framer Motion
+- **Charts**: Recharts
+- **Notifications**: Sonner
+- **Maps**: React Google Maps
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨ Tính năng chính
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Người dùng (Customer)
+- **Authentication**: Đăng nhập, Đăng ký, Quên mật khẩu.
+- **Sản phẩm**:
+  - Xem danh sách sản phẩm, lọc theo danh mục, giá.
+  - Xem chi tiết sản phẩm (Hình ảnh, mô tả, đánh giá).
+  - Tìm kiếm sản phẩm (Search Modal với lịch sử tìm kiếm).
+- **Giỏ hàng & Thanh toán**:
+  - Thêm/Sửa/Xóa sản phẩm trong giỏ.
+  - Thanh toán (Checkout) tích hợp VNPay.
+- **Tài khoản**:
+  - Quản lý thông tin cá nhân, địa chỉ.
+  - Xem lịch sử đơn hàng.
+- **Thông báo**: Hệ thống thông báo realtime (Socket.io).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Quản trị viên (Admin)
+- **Dashboard**: Thống kê doanh thu, đơn hàng, người dùng.
+- **Quản lý sản phẩm**: Thêm, sửa, xóa, quản lý biến thể (variants).
+- **Quản lý đơn hàng**: Cập nhật trạng thái đơn hàng.
+- **Quản lý danh mục & Khuyến mãi**.
 
-## Learn More
+## 🚀 Cài đặt và chạy dự án
 
-To learn more about Next.js, take a look at the following resources:
+1. **Cài đặt dependencies**:
+   ```bash
+   npm install
+   # hoặc
+   yarn install
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. **Cấu hình môi trường**:
+   Tạo file `.env.local` và cấu hình các biến môi trường cần thiết (API URL, Google Maps Key, etc.).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. **Chạy server development**:
+   ```bash
+   npm run dev
+   ```
+   Truy cập [http://localhost:3000](http://localhost:3000).
 
-## Deploy on Vercel
+4. **Build production**:
+   ```bash
+   npm run build
+   npm start
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📂 Cấu trúc thư mục
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `src/app`: Next.js App Router pages.
+- `src/components`: Reusable UI components.
+- `src/features`: Redux slices và actions (Auth, Cart, Product...).
+- `src/hooks`: Custom React hooks.
+- `src/lib`: Utility functions.
+- `src/types`: TypeScript definitions.
