@@ -17,17 +17,11 @@ export default function NotificationModel({isOpen,onClose}: {isOpen: boolean, on
 
     useEffect(() => {
         if (isOpen) {
-            //     // document.body.style.overflow = "unset";
-            // ref.current?.style.overflow = "hidden";
-            if (ref.current) {
-                ref.current.style.overflow = "hidden";
-            }
+                document.body.style.overflow = "unset";
         }
         return () => {
-            // document.body.style.overflow = "unset";
-            if (ref.current) {
-                ref.current.style.overflow = "unset";
-            }
+            document.body.style.overflow = "unset";
+
         };
     }, [isOpen]);
 
