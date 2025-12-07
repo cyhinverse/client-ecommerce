@@ -4,6 +4,7 @@ import "./globals.css";
 import { ReduxProvider } from "./Provider";
 import HeaderLayout from "@/components/layout/header/layout";
 import FooterLayout from "@/components/layout/footer/page";
+import { SocketProvider } from "@/context/SocketContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,10 +33,11 @@ export default function RootLayout({
         suppressHydrationWarning={true}
       >
         <ReduxProvider>
-          <HeaderLayout />
-          <main className="flex-1">{children}</main>
-          <FooterLayout />
-
+          <SocketProvider>
+            <HeaderLayout />
+            <main className="flex-1">{children}</main>
+            <FooterLayout />
+          </SocketProvider>
         </ReduxProvider>
       </body>
     </html>

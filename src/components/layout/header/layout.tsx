@@ -3,22 +3,32 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useAppSelector } from "@/hooks/hooks";
+import { useAppSelector, useAppDispatch } from "@/hooks/hooks";
 import { ShoppingCart, Search, Bell } from "lucide-react";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { usePathname } from "next/navigation";
+import NotificationModel from "@/components/notifications/NotificationModel";
+import { countUnreadNotification } from "@/features/notification/notificationAction";
+import { useEffect } from "react";
+import IconBadge from "@/components/common/IconBadge";
 import SearchModal from "@/components/search/SearchModal";
 import { pathArray } from "@/constants/PathArray";
-import NotificationModel from "@/components/notifications/NotificationModel";
 
 export default function HeaderLayout() {
+  const dispatch = useAppDispatch();
   const { loading, isAuthenticated, token, data } = useAppSelector(
     (state) => state.auth
   );
   const { data: cartData } = useAppSelector((state) => state.cart);
+  const { unreadCount } = useAppSelector((state) => state.notification);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Calculate total items in cart (sum of quantities)
+  useEffect(() => {
+    if (isAuthenticated && token) {
+      dispatch(countUnreadNotification());
+    }
+  }, [isAuthenticated, token, dispatch]);
+
   const cartItemsCount = cartData?.items?.reduce((total, item) => total + item.quantity, 0) || 0;
 
   const path = usePathname();
@@ -90,24 +100,21 @@ export default function HeaderLayout() {
             {/* Cart */}
             {isAuthenticated && token && (
               <Link href="/cart">
-                <Button variant="ghost" size="icon" className="relative cursor-pointer">
-                  <ShoppingCart className="h-5 w-5" />
-                  {cartItemsCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
-                      {cartItemsCount > 99 ? "99+" : cartItemsCount}
-                    </span>
-                  )}
-                  <span className="sr-only">Cart</span>
-                </Button>
+                <IconBadge 
+                  count={cartItemsCount} 
+                  icon={<ShoppingCart className="h-5 w-5" />} 
+                />
               </Link>
             )}
 
             {
               isAuthenticated && token ? (
-                <Button onClick={() => setIsOpen(pre => !pre)} variant="ghost" size="icon" className="cursor-pointer">
-                  <Bell className="h-5 w-5" />
-                  <span className="sr-only">Notifications</span>
-                </Button>
+                <IconBadge 
+                  count={unreadCount} 
+                  icon={<Bell className="h-5 w-5" />} 
+                  onClick={() => setIsOpen((pre) => !pre)}
+                  variant="destructive"
+                />
               ) : null
             }
 
@@ -119,7 +126,7 @@ export default function HeaderLayout() {
                 <div className="relative w-8 h-8 rounded-full overflow-hidden ring-2 ring-transparent hover:ring-primary transition-all">
                   <Image
                     alt={data?.username as string}
-                    src={data?.avatar as string}
+                    src={data?.avatar || "/images/CyBer.jpg"}
                     fill
                     className="object-cover"
                   />

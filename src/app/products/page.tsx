@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState, useMemo, useCallback, Activity } from "react";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
 import { getAllProducts } from "@/features/product/productAction";
@@ -14,14 +13,13 @@ import { ProductCard } from "@/components/product/ProductCard";
 import { isColorMatch } from "@/lib/color-mapping";
 
 export default function ProductsPage() {
-  const router = useRouter();
   const dispatch = useAppDispatch();
   const { all: products, isLoading } = useAppSelector(
     (state) => state.product
   );
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   
-  const { filters: urlFilters, updateFilter, updateFilters, resetFilters } = useUrlFilters<ProductUrlFilters>({
+  const { filters: urlFilters, updateFilters, resetFilters } = useUrlFilters<ProductUrlFilters>({
     defaultFilters: {
       search: "",
       minPrice: 0,
@@ -208,10 +206,10 @@ export default function ProductsPage() {
         )}
 
         {/* Products Grid */}
-        <div className="flex-1">
-          {isLoading ? (
-            <SpinnerLoading />
-          ) : filteredAndSortedProducts.length > 0 ? (
+        <div className="flex-1 relative min-h-[400px]">
+          {isLoading && <SpinnerLoading className="absolute inset-0 m-auto" />}
+          <Activity mode={isLoading ? "hidden" : "visible"}>
+          {filteredAndSortedProducts.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {filteredAndSortedProducts.map((product, index) => (
                 <ProductCard 
@@ -232,6 +230,7 @@ export default function ProductsPage() {
               </Button>
             </div>
           )}
+          </Activity>
         </div>
       </div>
     </div>

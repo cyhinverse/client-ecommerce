@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Activity } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -61,13 +61,13 @@ export default function ProductDetailPage() {
     dispatch(getProductBySlug(path.slug as string));
   }, [dispatch, path.slug]);
 
+
   if (error) {
     toast.error(error);
   }
 
-  if (isLoading) {
-    return <ProductDetailSkeleton />;
-  }
+  // Loading handled by Activity below
+
 
   if (!currentProduct) {
     return (
@@ -98,372 +98,377 @@ export default function ProductDetailPage() {
   };
 
   return (
-    <div className="container max-w-6xl mx-auto py-6 px-4 space-y-8">
-      {/* Breadcrumb */}
-      <nav className="flex items-center text-sm text-muted-foreground">
-        <Link
-          href="/"
-          className="hover:text-foreground transition-colors flex items-center gap-1"
-        >
-          <Home className="h-3 w-3" />
-          Home
-        </Link>
-        <ChevronRight className="h-3 w-3 mx-2" />
-        <span className="text-foreground">{product.name}</span>
-      </nav>
+    <>
+      {isLoading && <ProductDetailSkeleton />}
+      <Activity mode={isLoading ? "hidden" : "visible"}>
+        <div className="container max-w-6xl mx-auto py-6 px-4 space-y-8">
+          {/* Breadcrumb */}
+          <nav className="flex items-center text-sm text-muted-foreground">
+            <Link
+              href="/"
+              className="hover:text-foreground transition-colors flex items-center gap-1"
+            >
+              <Home className="h-3 w-3" />
+              Home
+            </Link>
+            <ChevronRight className="h-3 w-3 mx-2" />
+            <span className="text-foreground">{product.name}</span>
+          </nav>
 
-      <div className="grid gap-8 lg:grid-cols-2">
-        {/* Image Gallery */}
-        <div className="space-y-4">
-          <div className="aspect-square overflow-hidden bg-muted">
-            {product.images && product.images.length > 0 ? (
-              <Image
-                src={product.images[selectedImageIndex]}
-                alt={product.name}
-                width={600}
-                height={600}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <div className="flex h-full w-full flex-col items-center justify-center bg-muted/30">
-                <div className="mb-3 h-16 w-16 rounded-xl bg-muted flex items-center justify-center">
-                  <span className="text-2xl">👗</span>
-                </div>
-                <p className="font-medium">{product.brand}</p>
-                <p className="text-sm text-muted-foreground">Product Image</p>
-              </div>
-            )}
-          </div>
-
-          {product.images && product.images.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto pb-2">
-              {product.images.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedImageIndex(index)}
-                  className={`shrink-0 w-16 h-16 border-2 transition-all ${selectedImageIndex === index
-                    ? "border-primary"
-                    : "border-transparent hover:border-border"
-                    }`}
-                >
+          <div className="grid gap-8 lg:grid-cols-2">
+            {/* Image Gallery */}
+            <div className="space-y-4">
+              <div className="aspect-square overflow-hidden bg-muted">
+                {product.images && product.images.length > 0 ? (
                   <Image
-                    src={image}
-                    alt={`${product.name} ${index + 1}`}
-                    width={64}
-                    height={64}
+                    src={product.images[selectedImageIndex]}
+                    alt={product.name}
+                    width={600}
+                    height={600}
                     className="h-full w-full object-cover"
                   />
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Product Info */}
-        <div className="space-y-6">
-          <div className="space-y-4">
-            {/* Badges */}
-            <div className="flex flex-wrap gap-2">
-              {product.isNewArrival && (
-                <Badge className="bg-primary text-primary-foreground border-0 text-xs px-2 py-0.5">
-                  NEW
-                </Badge>
-              )}
-              {product.onSale && (
-                <Badge className="bg-primary text-primary-foreground border-0 text-xs px-2 py-0.5">
-                  -{calculateDiscount()}%
-                </Badge>
-              )}
-              {product.isFeatured && (
-                <Badge className="bg-primary text-primary-foreground border-0 text-xs px-2 py-0.5">
-                  FEATURED
-                </Badge>
-              )}
-            </div>
-
-            {/* Brand & Title */}
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">
-                {product.brand}
-              </p>
-              <h1 className="text-2xl font-semibold tracking-tight">
-                {product.name}
-              </h1>
-            </div>
-
-            {/* Rating */}
-            <div className="flex items-center gap-2">
-              <div className="flex">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className="h-4 w-4 fill-warning text-warning"
-                  />
-                ))}
+                ) : (
+                  <div className="flex h-full w-full flex-col items-center justify-center bg-muted/30">
+                    <div className="mb-3 h-16 w-16 rounded-xl bg-muted flex items-center justify-center">
+                      <span className="text-2xl">👗</span>
+                    </div>
+                    <p className="font-medium">{product.brand}</p>
+                    <p className="text-sm text-muted-foreground">Product Image</p>
+                  </div>
+                )}
               </div>
-              <span className="text-sm text-muted-foreground">
-                (4.8) • {product.reviews?.length || 0} reviews
-              </span>
+
+              {product.images && product.images.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                  {product.images.map((image, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedImageIndex(index)}
+                      className={`shrink-0 w-16 h-16 border-2 transition-all ${selectedImageIndex === index
+                        ? "border-primary"
+                        : "border-transparent hover:border-border"
+                        }`}
+                    >
+                      <Image
+                        src={image}
+                        alt={`${product.name} ${index + 1}`}
+                        width={64}
+                        height={64}
+                        className="h-full w-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Price */}
-            <div>
-              {product.price?.discountPrice &&
-                product.price?.currentPrice &&
-                product.price.discountPrice < product.price.currentPrice ? (
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-semibold">
-                    {new Intl.NumberFormat("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    }).format(product.price.discountPrice)}
-                  </span>
-                  <span className="text-lg text-muted-foreground line-through">
-                    {new Intl.NumberFormat("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    }).format(product.price.currentPrice)}
+            {/* Product Info */}
+            <div className="space-y-6">
+              <div className="space-y-4">
+                {/* Badges */}
+                <div className="flex flex-wrap gap-2">
+                  {product.isNewArrival && (
+                    <Badge className="bg-primary text-primary-foreground border-0 text-xs px-2 py-0.5">
+                      NEW
+                    </Badge>
+                  )}
+                  {product.onSale && (
+                    <Badge className="bg-primary text-primary-foreground border-0 text-xs px-2 py-0.5">
+                      -{calculateDiscount()}%
+                    </Badge>
+                  )}
+                  {product.isFeatured && (
+                    <Badge className="bg-primary text-primary-foreground border-0 text-xs px-2 py-0.5">
+                      FEATURED
+                    </Badge>
+                  )}
+                </div>
+
+                {/* Brand & Title */}
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">
+                    {product.brand}
+                  </p>
+                  <h1 className="text-2xl font-semibold tracking-tight">
+                    {product.name}
+                  </h1>
+                </div>
+
+                {/* Rating */}
+                <div className="flex items-center gap-2">
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className="h-4 w-4 fill-warning text-warning"
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    (4.8) • {product.reviews?.length || 0} reviews
                   </span>
                 </div>
-              ) : (
-                <span className="text-2xl font-semibold">
-                  {new Intl.NumberFormat("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                  }).format(product.price?.currentPrice || 0)}
-                </span>
-              )}
-            </div>
-          </div>
 
-          <Separator />
-
-          {/* Description */}
-          <div>
-            <p className="text-foreground leading-relaxed">
-              {product.description}
-            </p>
-          </div>
-
-          {/* Tags */}
-          {product.tags && product.tags.length > 0 && (
-            <div>
-              <p className="text-sm font-medium mb-2">Tags</p>
-              <div className="flex flex-wrap gap-1">
-                {product.tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="px-2 py-1 bg-muted text-xs rounded-md text-muted-foreground"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Variants */}
-          {product.variants && product.variants.length > 0 && (
-            <div>
-              <p className="font-medium mb-3">Options</p>
-              <div className="grid gap-2">
-                {product.variants.map((variant, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedVariant(index)}
-                    className={`p-3 border text-left transition-colors ${selectedVariant === index
-                      ? "border-primary bg-muted/50"
-                      : "border-border hover:border-muted-foreground"
-                      }`}
-                  >
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <p className="font-medium text-sm">
-                          {variant.color} - {variant.size}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          Stock: {variant.stock}
-                        </p>
-                      </div>
-                      <p className="font-semibold text-sm">
-                        {variant.price?.discountPrice &&
-                          variant.price.discountPrice <
-                          variant.price.currentPrice ? (
-                          <span className="text-destructive">
-                            {new Intl.NumberFormat("vi-VN", {
-                              style: "currency",
-                              currency: "VND",
-                            }).format(variant.price.discountPrice)}
-                          </span>
-                        ) : (
-                          <span>
-                            {new Intl.NumberFormat("vi-VN", {
-                              style: "currency",
-                              currency: "VND",
-                            }).format(variant.price?.currentPrice || 0)}
-                          </span>
-                        )}
-                      </p>
+                {/* Price */}
+                <div>
+                  {product.price?.discountPrice &&
+                    product.price?.currentPrice &&
+                    product.price.discountPrice < product.price.currentPrice ? (
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-semibold">
+                        {new Intl.NumberFormat("vi-VN", {
+                          style: "currency",
+                          currency: "VND",
+                        }).format(product.price.discountPrice)}
+                      </span>
+                      <span className="text-lg text-muted-foreground line-through">
+                        {new Intl.NumberFormat("vi-VN", {
+                          style: "currency",
+                          currency: "VND",
+                        }).format(product.price.currentPrice)}
+                      </span>
                     </div>
-                  </button>
-                ))}
+                  ) : (
+                    <span className="text-2xl font-semibold">
+                      {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(product.price?.currentPrice || 0)}
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
 
-          {/* Quantity */}
-          <div>
-            <p className="font-medium mb-3">Quantity</p>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center border">
-                <button
-                  onClick={() => handleQuantityChange(-1)}
-                  disabled={quantity <= 1}
-                  className="p-2 hover:bg-muted transition-colors disabled:opacity-50"
-                >
-                  <Minus className="h-4 w-4" />
-                </button>
-                <span className="w-12 text-center font-medium text-sm">
-                  {quantity}
-                </span>
-                <button
-                  onClick={() => handleQuantityChange(1)}
-                  disabled={quantity >= 10}
-                  className="p-2 hover:bg-muted transition-colors disabled:opacity-50"
-                >
-                  <Plus className="h-4 w-4" />
-                </button>
+              <Separator />
+
+              {/* Description */}
+              <div>
+                <p className="text-foreground leading-relaxed">
+                  {product.description}
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground">Max: 10 items</p>
-            </div>
-          </div>
 
-          {/* Action Buttons */}
-          <div className="space-y-3">
-            <div className="flex gap-3">
-              <Button
-                onClick={() => HandleAddToCart()}
-                className="flex-1"
-                size="lg"
-              >
-                <ShoppingCart className="mr-2 h-4 w-4" />
-                Add to Cart
-              </Button>
-              <Button variant="outline" size="icon" className="h-11 w-11">
-                <Heart className="h-4 w-4" />
-              </Button>
-            </div>
-            <Button variant="outline" className="w-full" size="lg">
-              Buy Now
-            </Button>
-          </div>
+              {/* Tags */}
+              {product.tags && product.tags.length > 0 && (
+                <div>
+                  <p className="text-sm font-medium mb-2">Tags</p>
+                  <div className="flex flex-wrap gap-1">
+                    {product.tags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="px-2 py-1 bg-muted text-xs rounded-md text-muted-foreground"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-          {/* Features */}
-          <div className="border-t pt-4 space-y-3">
-            <div className="flex items-center gap-3 text-sm">
-              <Truck className="h-4 w-4 text-muted-foreground" />
-              <span className="text-muted-foreground">
-                Free shipping on orders over ₫500,000
-              </span>
-            </div>
-            <div className="flex items-center gap-3 text-sm">
-              <RotateCcw className="h-4 w-4 text-muted-foreground" />
-              <span className="text-muted-foreground">
-                30-day return policy
-              </span>
-            </div>
-            <div className="flex items-center gap-3 text-sm">
-              <Shield className="h-4 w-4 text-muted-foreground" />
-              <span className="text-muted-foreground">
-                2-year warranty included
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+              {/* Variants */}
+              {product.variants && product.variants.length > 0 && (
+                <div>
+                  <p className="font-medium mb-3">Options</p>
+                  <div className="grid gap-2">
+                    {product.variants.map((variant, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedVariant(index)}
+                        className={`p-3 border text-left transition-colors ${selectedVariant === index
+                          ? "border-primary bg-muted/50"
+                          : "border-border hover:border-muted-foreground"
+                          }`}
+                      >
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="font-medium text-sm">
+                              {variant.color} - {variant.size}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Stock: {variant.stock}
+                            </p>
+                          </div>
+                          <p className="font-semibold text-sm">
+                            {variant.price?.discountPrice &&
+                              variant.price.discountPrice <
+                              variant.price.currentPrice ? (
+                              <span className="text-destructive">
+                                {new Intl.NumberFormat("vi-VN", {
+                                  style: "currency",
+                                  currency: "VND",
+                                }).format(variant.price.discountPrice)}
+                              </span>
+                            ) : (
+                              <span>
+                                {new Intl.NumberFormat("vi-VN", {
+                                  style: "currency",
+                                  currency: "VND",
+                                }).format(variant.price?.currentPrice || 0)}
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-      {/* Reviews Section */}
-      <div className="border-t pt-8">
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Customer Reviews</h2>
-            <ReviewDialog productId={product._id} />
-          </div>
-
-          {/* Review Summary */}
-          <div className="grid gap-6 md:grid-cols-3">
-            <div className="text-center p-4 border rounded-lg">
-              <div className="text-3xl font-semibold mb-1">4.8</div>
-              <div className="flex justify-center mb-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className="h-4 w-4 fill-warning text-warning"
-                  />
-                ))}
+              {/* Quantity */}
+              <div>
+                <p className="font-medium mb-3">Quantity</p>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center border">
+                    <button
+                      onClick={() => handleQuantityChange(-1)}
+                      disabled={quantity <= 1}
+                      className="p-2 hover:bg-muted transition-colors disabled:opacity-50"
+                    >
+                      <Minus className="h-4 w-4" />
+                    </button>
+                    <span className="w-12 text-center font-medium text-sm">
+                      {quantity}
+                    </span>
+                    <button
+                      onClick={() => handleQuantityChange(1)}
+                      disabled={quantity >= 10}
+                      className="p-2 hover:bg-muted transition-colors disabled:opacity-50"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Max: 10 items</p>
+                </div>
               </div>
-              <p className="text-sm text-muted-foreground">
-                {product.reviews?.length || 0} reviews
-              </p>
-            </div>
 
-            <div className="md:col-span-2 space-y-2">
-              {product.reviews?.map((review) => (
-                <div key={review._id} className="flex items-center gap-3">
-                  <span className="text-sm w-6 text-muted-foreground">
-                    {review.rating} stars
+              {/* Action Buttons */}
+              <div className="space-y-3">
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => HandleAddToCart()}
+                    className="flex-1"
+                    size="lg"
+                  >
+                    <ShoppingCart className="mr-2 h-4 w-4" />
+                    Add to Cart
+                  </Button>
+                  <Button variant="outline" size="icon" className="h-11 w-11">
+                    <Heart className="h-4 w-4" />
+                  </Button>
+                </div>
+                <Button variant="outline" className="w-full" size="lg">
+                  Buy Now
+                </Button>
+              </div>
+
+              {/* Features */}
+              <div className="border-t pt-4 space-y-3">
+                <div className="flex items-center gap-3 text-sm">
+                  <Truck className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">
+                    Free shipping on orders over ₫500,000
                   </span>
-                  <div className="flex-1 bg-muted rounded-full h-1.5">
-                    <div
-                      className="bg-warning h-1.5 rounded-full"
-                      style={{
-                        width:
-                          review.rating === 5
-                            ? "70%"
-                            : review.rating === 4
-                              ? "20%"
-                              : "5%",
-                      }}
+                </div>
+                <div className="flex items-center gap-3 text-sm">
+                  <RotateCcw className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">
+                    30-day return policy
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 text-sm">
+                  <Shield className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">
+                    2-year warranty included
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Reviews Section */}
+          <div className="border-t pt-8">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold">Customer Reviews</h2>
+                <ReviewDialog productId={product._id} />
+              </div>
+
+              {/* Review Summary */}
+              <div className="grid gap-6 md:grid-cols-3">
+                <div className="text-center p-4 border rounded-lg">
+                  <div className="text-3xl font-semibold mb-1">4.8</div>
+                  <div className="flex justify-center mb-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className="h-4 w-4 fill-warning text-warning"
+                      />
+                    ))}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {product.reviews?.length || 0} reviews
+                  </p>
+                </div>
+
+                <div className="md:col-span-2 space-y-2">
+                  {product.reviews?.map((review) => (
+                    <div key={review._id} className="flex items-center gap-3">
+                      <span className="text-sm w-6 text-muted-foreground">
+                        {review.rating} stars
+                      </span>
+                      <div className="flex-1 bg-muted rounded-full h-1.5">
+                        <div
+                          className="bg-warning h-1.5 rounded-full"
+                          style={{
+                            width:
+                              review.rating === 5
+                                ? "70%"
+                                : review.rating === 4
+                                  ? "20%"
+                                  : "5%",
+                          }}
+                        />
+                      </div>
+                      <span className="text-sm w-10 text-muted-foreground">
+                        {review.rating === 5
+                          ? "70%"
+                          : review.rating === 4
+                            ? "20%"
+                            : "5%"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {product.reviews && product.reviews.length > 0 ? (
+                product.reviews?.map((review) => (
+                  <div key={review._id} className="space-y-6">
+                    <ReviewItem
+                      initial={review.username.charAt(0)}
+                      name={review.username}
+                      rating={review.rating}
+                      date={review.createdAt}
+                      verified
+                      comment={review.comment}
                     />
                   </div>
-                  <span className="text-sm w-10 text-muted-foreground">
-                    {review.rating === 5
-                      ? "70%"
-                      : review.rating === 4
-                        ? "20%"
-                        : "5%"}
-                  </span>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-center text-muted-foreground">No reviews yet.</p>
+              )}
+
+              {/* Load More Reviews */}
+              <div className="text-center">
+                <Button variant="outline" size="sm">
+                  Load More Reviews
+                </Button>
+              </div>
             </div>
           </div>
-
-          {product.reviews && product.reviews.length > 0 ? (
-            product.reviews?.map((review) => (
-              <div key={review._id} className="space-y-6">
-                <ReviewItem
-                  initial={review.username.charAt(0)}
-                  name={review.username}
-                  rating={review.rating}
-                  date={review.createdAt}
-                  verified
-                  comment={review.comment}
-                />
-              </div>
-            ))
-          ) : (
-            <p className="text-center text-muted-foreground">No reviews yet.</p>
-          )}
-
-          {/* Load More Reviews */}
-          <div className="text-center">
-            <Button variant="outline" size="sm">
-              Load More Reviews
-            </Button>
-          </div>
         </div>
-      </div>
-    </div>
+      </Activity>
+    </>
   );
 }
 

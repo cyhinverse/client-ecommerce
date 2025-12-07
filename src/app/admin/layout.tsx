@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut, Menu, ChevronLeft, ChevronRight } from "lucide-react";
+import { LogOut, Menu, ChevronLeft, ChevronRight, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { toast } from "sonner";
 import Image from "next/image";
 import { ADMIN_NAVIGATION } from "@/constants";
+import NotificationModel from "@/components/notifications/NotificationModel";
 
 export default function AdminLayout({
   children,
@@ -19,6 +20,7 @@ export default function AdminLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [notificationOpen, setNotificationOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -149,17 +151,25 @@ export default function AdminLayout({
 
           <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
             <div className="flex flex-1"></div>
-            {data && (
-              <Link href={"/admin"} className="flex items-center justify-center  rounded-full overflow-hidden">
-                <Image 
-                  className="rounded-full object-cover aspect-square" 
-                  src={data.avatar} 
-                  alt={data.username} 
-                  height={30} 
-                  width={30} 
-                />
-              </Link>
-            )}
+            <div className="flex items-center gap-x-4 lg:gap-x-6">
+              <Button variant="ghost" size="icon" className="relative" onClick={() => setNotificationOpen(true)}>
+                <Bell className="h-6 w-6" />
+                {/* Badge could go here */}
+              </Button>
+              <div className="h-6 w-px bg-gray-200" aria-hidden="true" />
+              {data && (
+                <Link href={"/admin"} className="flex items-center justify-center  rounded-full overflow-hidden">
+                  <Image 
+                    className="rounded-full object-cover aspect-square" 
+                    src={data.avatar} 
+                    alt={data.username} 
+                    height={30} 
+                    width={30} 
+                  />
+                </Link>
+              )}
+            </div>
+            <NotificationModel isOpen={notificationOpen} onClose={() => setNotificationOpen(false)} />
           </div>
         </div>
 

@@ -1,7 +1,7 @@
 "use client";
 import { getProfile } from "@/features/user/userAction";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Activity } from "react";
 import { logout } from "@/features/auth/authAction";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -44,10 +44,6 @@ export default function ProfilePage() {
     router.push("/");
   };
 
-  if (loading || isLoading) {
-    return <SpinnerLoading />;
-  }
-
   const tabs = [
     { value: "profile", label: "Hồ sơ", icon: User },
     { value: "orders", label: "Đơn hàng", icon: Package },
@@ -56,109 +52,117 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="w-full max-w-7xl mx-auto  h-full m-5">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Sidebar Navigation */}
-          <Card className="lg:w-80 h-fit">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-xl">Tài khoản</CardTitle>
-              <CardDescription>
-                Quản lý thông tin tài khoản của bạn
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-0">
-              <TabsList className="flex flex-col h-auto w-full p-2 bg-transparent gap-1">
-                {tabs.map((tab) => {
-                  const IconComponent = tab.icon;
-                  return (
-                    <TabsTrigger
-                      key={tab.value}
-                      value={tab.value}
-                      className="w-full justify-start px-4 py-3 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground"
-                    >
-                      <IconComponent className="h-4 w-4 mr-3" />
-                      {tab.label}
-                    </TabsTrigger>
-                  );
-                })}
-                <Separator className="my-2" />
-                <Button
-                  onClick={handleLogout}
-                  variant="ghost"
-                  className="w-full justify-start px-4 py-3 text-destructive hover:text-destructive hover:bg-destructive/10"
-                >
-                  <LogOut className="h-4 w-4 mr-3" />
-                  Đăng xuất
-                </Button>
-              </TabsList>
-            </CardContent>
-          </Card>
-
-          {/* Main Content */}
-          <Card className="flex-1">
-            <CardHeader className="flex flex-row items-center justify-between pb-4">
-              <div>
-                <CardTitle className="text-2xl">
-                  {activeTab === "profile" && "Thông tin cá nhân"}
-                  {activeTab === "orders" && "Lịch sử đơn hàng"}
-                  {activeTab === "address" && "Sổ địa chỉ"}
-                  {activeTab === "settings" && "Cài đặt tài khoản"}
-                </CardTitle>
+    <div className="w-full max-w-7xl mx-auto  h-full m-5 relative">
+      {(loading || isLoading) && (
+        <SpinnerLoading className="absolute inset-0 z-50 m-auto" />
+      )}
+      <Activity mode={loading || isLoading ? "hidden" : "visible"}>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Sidebar Navigation */}
+            <Card className="lg:w-80 h-fit">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-xl">Tài khoản</CardTitle>
                 <CardDescription>
-                  {activeTab === "profile" && "Quản lý thông tin cá nhân của bạn"}
-                  {activeTab === "orders" && "Theo dõi và quản lý đơn hàng"}
-                  {activeTab === "address" && "Quản lý địa chỉ giao hàng"}
-                  {activeTab === "settings" && "Tùy chỉnh cài đặt tài khoản"}
+                  Quản lý thông tin tài khoản của bạn
                 </CardDescription>
-              </div>
-              {/* CHỈ GIỮ NÚT CHO TAB PROFILE */}
-              {activeTab === "profile" && (
-                <Button onClick={() => setOpen(true)}>
-                  <SquarePen className="h-4 w-4 mr-2" />
-                  Chỉnh sửa
-                </Button>
-              )}
-              {/* ĐÃ XÓA NÚT "THÊM ĐỊA CHỈ MỚI" Ở ĐÂY */}
-            </CardHeader>
-
-            <CardContent>
-              {!isAuthenticated ? (
-                <div className="text-center py-12">
-                  <div className="mx-auto w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-4">
-                    <User className="h-10 w-10 text-muted-foreground" />
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2">Chưa đăng nhập</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Vui lòng đăng nhập để xem thông tin cá nhân
-                  </p>
-                  <Button onClick={() => router.push("/login")}>
-                    Đăng nhập ngay
+              </CardHeader>
+              <CardContent className="p-0">
+                <TabsList className="flex flex-col h-auto w-full p-2 bg-transparent gap-1">
+                  {tabs.map((tab) => {
+                    const IconComponent = tab.icon;
+                    return (
+                      <TabsTrigger
+                        key={tab.value}
+                        value={tab.value}
+                        className="w-full justify-start px-4 py-3 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground"
+                      >
+                        <IconComponent className="h-4 w-4 mr-3" />
+                        {tab.label}
+                      </TabsTrigger>
+                    );
+                  })}
+                  <Separator className="my-2" />
+                  <Button
+                    onClick={handleLogout}
+                    variant="ghost"
+                    className="w-full justify-start px-4 py-3 text-destructive hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <LogOut className="h-4 w-4 mr-3" />
+                    Đăng xuất
                   </Button>
+                </TabsList>
+              </CardContent>
+            </Card>
+
+            {/* Main Content */}
+            <Card className="flex-1">
+              <CardHeader className="flex flex-row items-center justify-between pb-4">
+                <div>
+                  <CardTitle className="text-2xl">
+                    {activeTab === "profile" && "Thông tin cá nhân"}
+                    {activeTab === "orders" && "Lịch sử đơn hàng"}
+                    {activeTab === "address" && "Sổ địa chỉ"}
+                    {activeTab === "settings" && "Cài đặt tài khoản"}
+                  </CardTitle>
+                  <CardDescription>
+                    {activeTab === "profile" &&
+                      "Quản lý thông tin cá nhân của bạn"}
+                    {activeTab === "orders" && "Theo dõi và quản lý đơn hàng"}
+                    {activeTab === "address" && "Quản lý địa chỉ giao hàng"}
+                    {activeTab === "settings" && "Tùy chỉnh cài đặt tài khoản"}
+                  </CardDescription>
                 </div>
-              ) : (
-                <>
-                  <TabsContent value="profile" className="m-0">
-                    <ProfileTab user={currentUser} />
-                  </TabsContent>
+                {/* CHỈ GIỮ NÚT CHO TAB PROFILE */}
+                {activeTab === "profile" && (
+                  <Button onClick={() => setOpen(true)}>
+                    <SquarePen className="h-4 w-4 mr-2" />
+                    Chỉnh sửa
+                  </Button>
+                )}
+                {/* ĐÃ XÓA NÚT "THÊM ĐỊA CHỈ MỚI" Ở ĐÂY */}
+              </CardHeader>
 
-                  <TabsContent value="orders" className="m-0">
-                    <OrdersTab />
-                  </TabsContent>
+              <CardContent>
+                {!isAuthenticated ? (
+                  <div className="text-center py-12">
+                    <div className="mx-auto w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-4">
+                      <User className="h-10 w-10 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">
+                      Chưa đăng nhập
+                    </h3>
+                    <p className="text-muted-foreground mb-4">
+                      Vui lòng đăng nhập để xem thông tin cá nhân
+                    </p>
+                    <Button onClick={() => router.push("/login")}>
+                      Đăng nhập ngay
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <TabsContent value="profile" className="m-0">
+                      <ProfileTab user={currentUser} />
+                    </TabsContent>
 
-                  <TabsContent value="address" className="m-0">
-                    <AddressTab user={currentUser} />
-                  </TabsContent>
+                    <TabsContent value="orders" className="m-0">
+                      <OrdersTab />
+                    </TabsContent>
 
-                  <TabsContent value="settings" className="m-0">
-                    <SettingsTab user={currentUser} />
-                  </TabsContent>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </Tabs>
+                    <TabsContent value="address" className="m-0">
+                      <AddressTab user={currentUser} />
+                    </TabsContent>
+
+                    <TabsContent value="settings" className="m-0">
+                      <SettingsTab user={currentUser} />
+                    </TabsContent>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </Tabs>
+      </Activity>
 
       <UpdateUserProfile open={open} setOpen={setOpen} />
     </div>

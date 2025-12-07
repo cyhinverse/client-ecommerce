@@ -81,5 +81,41 @@ export const countUnreadNotification = createAsyncThunk(
     }
 )
 
+export const createNotification = createAsyncThunk(
+    "notification/createNotification",
+    async (data: any, { rejectWithValue }) => {
+        try{
+            const response = await instance.post(`/notifications`, data, {
+                withCredentials: true,
+            });
+            return response.data;
+        }catch(error: any) {
+            const message = error.response?.data?.message || "Tạo thông báo thất bại";
+            return rejectWithValue({ message });
+        }
+    }
+)
 
+export const getNotificationById = createAsyncThunk(
+    "notification/getDetails",
+    async (id: string, { rejectWithValue }) => {
+        try {
+            const response = await instance.get(`/notifications/${id}`, { withCredentials: true });
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue({ message: error.response?.data?.message || "Lấy chi tiết thông báo thất bại" });
+        }
+    }
+);
 
+export const updateNotification = createAsyncThunk(
+    "notification/update",
+    async ({ id, data }: { id: string, data: any }, { rejectWithValue }) => {
+        try {
+            const response = await instance.patch(`/notifications/${id}`, data, { withCredentials: true });
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue({ message: error.response?.data?.message || "Cập nhật thông báo thất bại" });
+        }
+    }
+);

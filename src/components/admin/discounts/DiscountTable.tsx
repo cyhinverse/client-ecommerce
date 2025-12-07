@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Search, MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
+import { Activity } from "react";
 import { Discount } from "@/types/discount";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 
@@ -179,7 +180,7 @@ export function DiscountsTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoading ? (
+            {isLoading && (
               <TableRow>
                 <TableCell colSpan={8} className="h-24 text-center">
                   <div className="flex justify-center items-center">
@@ -187,65 +188,68 @@ export function DiscountsTable({
                   </div>
                 </TableCell>
               </TableRow>
-            ) : discounts.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={8} className="text-center h-24">
-                  Không tìm thấy mã giảm giá nào.
-                </TableCell>
-              </TableRow>
-            ) : (
-              discounts.map((discount) => (
-                <TableRow key={discount._id}>
-                  <TableCell className="font-medium">
-                    <div className="flex flex-col">
-                      <span className="font-bold">{discount.code}</span>
-                      {discount.description && (
-                        <span className="text-sm text-muted-foreground">
-                          {discount.description}
-                        </span>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>{getDiscountTypeText(discount.discountType)}</TableCell>
-                  <TableCell>{getDiscountValueText(discount)}</TableCell>
-                  <TableCell>{formatDate(discount.startDate)}</TableCell>
-                  <TableCell>{formatDate(discount.endDate)}</TableCell>
-                  <TableCell>
-                    {discount.usedCount} / {discount.usageLimit}
-                  </TableCell>
-                  <TableCell>{getStatusBadge(discount)}</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Mở menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => onView(discount)}>
-                          <Eye className="h-4 w-4 mr-2" />
-                          Xem chi tiết
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onEdit(discount)}>
-                          <Edit className="h-4 w-4 mr-2" />
-                          Chỉnh sửa
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => onDelete(discount)}
-                          className="text-destructive focus:text-destructive focus:bg-destructive/10"
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Xóa
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+            )}
+            <Activity mode={isLoading ? "hidden" : "visible"}>
+              {discounts.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center h-24">
+                    Không tìm thấy mã giảm giá nào.
                   </TableCell>
                 </TableRow>
-              ))
-            )}
+              ) : (
+                discounts.map((discount) => (
+                  <TableRow key={discount._id}>
+                    <TableCell className="font-medium">
+                      <div className="flex flex-col">
+                        <span className="font-bold">{discount.code}</span>
+                        {discount.description && (
+                          <span className="text-sm text-muted-foreground">
+                            {discount.description}
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>{getDiscountTypeText(discount.discountType)}</TableCell>
+                    <TableCell>{getDiscountValueText(discount)}</TableCell>
+                    <TableCell>{formatDate(discount.startDate)}</TableCell>
+                    <TableCell>{formatDate(discount.endDate)}</TableCell>
+                    <TableCell>
+                      {discount.usedCount} / {discount.usageLimit}
+                    </TableCell>
+                    <TableCell>{getStatusBadge(discount)}</TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Mở menu</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
+                          <DropdownMenuItem onClick={() => onView(discount)}>
+                            <Eye className="h-4 w-4 mr-2" />
+                            Xem chi tiết
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => onEdit(discount)}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Chỉnh sửa
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => onDelete(discount)}
+                            className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Xóa
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </Activity>
           </TableBody>
         </Table>
       </div>

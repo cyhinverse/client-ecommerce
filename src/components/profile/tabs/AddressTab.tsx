@@ -1,14 +1,14 @@
-"use client";
 import { MapPin, Plus, Star, Edit, Phone, Navigation, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import AddressDialog from "../address/AddressDialog";
-import { useState } from "react";
+import { useState, Activity } from "react";
 import { useAppSelector, useAppDispatch } from "@/hooks/hooks";
 import { deleteAddress, getProfile } from "@/features/user/userAction";
 import { toast } from "sonner";
 import { Address, AddressTabProps } from "@/types/address";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 export default function AddressTab({ user }: AddressTabProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -55,9 +55,9 @@ export default function AddressTab({ user }: AddressTabProps) {
       await dispatch(deleteAddress(addressId)).unwrap();
       await dispatch(getProfile()).unwrap();
       toast.success("Đã xóa địa chỉ thành công");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error deleting address:", error);
-      const errorMessage = error.response?.data?.message || "Không thể xóa địa chỉ. Vui lòng thử lại.";
+      const errorMessage = (error as any).response?.data?.message || "Không thể xóa địa chỉ. Vui lòng thử lại.";
       toast.error(errorMessage);
     } finally {
       setIsDeleting(null);
@@ -151,52 +151,57 @@ export default function AddressTab({ user }: AddressTabProps) {
   );
 
   return (
-    <div className="space-y-4">
-      {addresses.length === 0 && (
-        <div className="text-center space-y-1">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <div className="p-2 bg-muted rounded-full">
-              <MapPin className="h-5 w-5 text-foreground" />
+    <div className="space-y-4 relative min-h-[200px]">
+      {isLoading && <SpinnerLoading className="absolute inset-0 m-auto" />}
+      <Activity mode={isLoading ? "hidden" : "visible"}>
+        {addresses.length === 0 && (
+          <div className="text-center space-y-1">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <div className="p-2 bg-muted rounded-full">
+                <MapPin className="h-5 w-5 text-foreground" />
+              </div>
             </div>
+            <h1 className="text-xl font-bold text-foreground">Sổ địa chỉ</h1>
+            <p className="text-sm text-muted-foreground">Quản lý địa chỉ giao hàng của bạn</p>
           </div>
-          <h1 className="text-xl font-bold text-foreground">Sổ địa chỉ</h1>
-          <p className="text-sm text-muted-foreground">Quản lý địa chỉ giao hàng của bạn</p>
-        </div>
-      )}
+        )}
 
-      {addresses.length === 0 ? (
-        renderEmptyState()
-      ) : (
-        <>
-          <div className="flex justify-between items-center mb-3">
-            <div>
-              <h2 className="text-base font-semibold text-foreground">
-                Địa chỉ của bạn ({addresses.length})
-              </h2>
-              <p className="text-xs text-muted-foreground">Quản lý và chỉnh sửa địa chỉ giao hàng</p>
+        {addresses.length === 0 ? (
+          renderEmptyState()
+        ) : (
+          <>
+            <div className="flex justify-between items-center mb-3">
+              <div>
+                <h2 className="text-base font-semibold text-foreground">
+                  Địa chỉ của bạn ({addresses.length})
+                </h2>
+                <p className="text-xs text-muted-foreground">Quản lý và chỉnh sửa địa chỉ giao hàng</p>
+              </div>
+              <Button
+                onClick={openAddDialog}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground text-sm"
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Thêm địa chỉ
+              </Button>
             </div>
-            <Button
-              onClick={openAddDialog}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground text-sm"
-            >
-              <Plus className="h-3 w-3 mr-1" />
-              Thêm địa chỉ
-            </Button>
-          </div>
 
-          <div className="grid gap-3">
-            {addresses.map(renderAddressCard)}
-          </div>
-        </>
-      )}
+            <div className="grid gap-3">
+              {addresses.map(renderAddressCard)}
+            </div>
+          </>
+        )}
 
-      <AddressDialog
-        open={isDialogOpen}
-        onClose={closeDialog}
-        editingAddress={editingAddress}
-        onSuccess={handleSuccess}
-        user={user}
-      />
+        <AddressDialog
+          open={isDialogOpen}
+          onClose={closeDialog}
+          editingAddress={editingAddress}
+          onSuccess={handleSuccess}
+          user={user}
+        />
+      </Activity>
     </div>
   );
 }
+
+// End of file

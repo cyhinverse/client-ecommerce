@@ -9,6 +9,7 @@ import { userSlice } from "@/features/user/userSlice";
 import { discountSlice } from "@/features/discount/discountSlice";
 import { orderSlice } from "@/features/order/orderSlice";
 import { paymentSlice } from "@/features/payment/paymentSlice";
+import { notificationSlice } from "@/features/notification/notificationSlice";
 
 
 const createNoopStorage = () => {
@@ -39,6 +40,7 @@ export const rootReducer = combineReducers({
   discount: discountSlice.reducer,
   order: orderSlice.reducer,
   payment: paymentSlice.reducer,
+  notification: notificationSlice.reducer,
 
 });
 

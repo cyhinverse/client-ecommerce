@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Search, MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
+import { Activity } from "react";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 
@@ -164,7 +165,7 @@ export function OrdersTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoading ? (
+            {isLoading && (
               <TableRow>
                 <TableCell colSpan={7} className="h-24 text-center">
                   <div className="flex justify-center items-center">
@@ -172,55 +173,58 @@ export function OrdersTable({
                   </div>
                 </TableCell>
               </TableRow>
-            ) : orders.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                  Không có đơn hàng nào
-                </TableCell>
-              </TableRow>
-            ) : (
-              orders.map((order) => (
-                <TableRow key={order._id}>
-                  <TableCell className="font-medium">#{order._id.slice(-8).toUpperCase()}</TableCell>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{order.shippingAddress.fullName}</div>
-                      <div className="text-sm text-muted-foreground">{order.shippingAddress.phone}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{formatDate(order.createdAt)}</TableCell>
-                  <TableCell>{formatCurrency(order.totalAmount)}</TableCell>
-                  <TableCell>{getStatusBadge(order.status)}</TableCell>
-                  <TableCell>{getPaymentStatusBadge(order.paymentStatus)}</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => onView(order)}>
-                          <Eye className="w-4 h-4 mr-2" />
-                          Xem chi tiết
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onEdit(order)}>
-                          <Edit className="w-4 h-4 mr-2" />
-                          Cập nhật trạng thái
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => onDelete(order)}
-                          className="text-destructive"
-                        >
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Xóa
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+            )}
+            <Activity mode={isLoading ? "hidden" : "visible"}>
+              {orders.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                    Không có đơn hàng nào
                   </TableCell>
                 </TableRow>
-              ))
-            )}
+              ) : (
+                orders.map((order) => (
+                  <TableRow key={order._id}>
+                    <TableCell className="font-medium">#{order._id.slice(-8).toUpperCase()}</TableCell>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{order.shippingAddress.fullName}</div>
+                        <div className="text-sm text-muted-foreground">{order.shippingAddress.phone}</div>
+                      </div>
+                    </TableCell>
+                    <TableCell>{formatDate(order.createdAt)}</TableCell>
+                    <TableCell>{formatCurrency(order.totalAmount)}</TableCell>
+                    <TableCell>{getStatusBadge(order.status)}</TableCell>
+                    <TableCell>{getPaymentStatusBadge(order.paymentStatus)}</TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => onView(order)}>
+                            <Eye className="w-4 h-4 mr-2" />
+                            Xem chi tiết
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => onEdit(order)}>
+                            <Edit className="w-4 h-4 mr-2" />
+                            Cập nhật trạng thái
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => onDelete(order)}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Xóa
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </Activity>
           </TableBody>
         </Table>
       </div>

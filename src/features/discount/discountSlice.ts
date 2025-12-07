@@ -62,9 +62,9 @@ export const discountSlice = createSlice({
       })
       .addCase(getAllDiscounts.fulfilled, (state, action) => {
         state.loading = false;
-        state.discounts = action.payload?.data?.data || [];// ✅ ĐÚNG
+        state.discounts = action.payload?.data?.data || [];
         console.log("discount", state.discounts)
-        state.pagination = action.payload?.data?.pagination || null; // ✅ ĐÚNG
+        state.pagination = action.payload?.data?.pagination || null;
         console.log(`pagination`, state.pagination)
       })
       .addCase(getAllDiscounts.rejected, (state, action) => {

@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardContent,
@@ -18,30 +20,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Search,
-  MoreHorizontal,
-  Eye,
-  Trash2,
   Bell,
   Send,
-  Plus,
-  Filter,
   Users,
-  Mail,
   MessageSquare,
   AlertTriangle,
-  CheckCircle,
   Clock,
+  MoreHorizontal,
+  Edit,
+  Eye,
 } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -50,173 +38,162 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useEffect, useState, Activity } from "react";
+import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { 
+  createNotification, 
+  getListNotification, 
+  getNotificationById, 
+  updateNotification 
+} from "@/features/notification/notificationAction";
+import { toast } from "sonner";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 
-// Mock data for notifications
-const mockNotifications = [
-  {
-    id: "1",
-    title: "Đơn hàng mới #ORD-001",
-    message: "Bạn có đơn hàng mới từ Nguyễn Văn A",
-    type: "order",
-    priority: "high",
-    status: "sent",
-    recipients: "all_customers",
-    sentAt: "2024-01-15 14:30:00",
-    createdBy: "Admin System",
-  },
-  {
-    id: "2",
-    title: "Khuyến mãi cuối tuần",
-    message: "Giảm giá 20% cho tất cả sản phẩm điện tử",
-    type: "promotion",
-    priority: "medium",
-    status: "scheduled",
-    recipients: "subscribed_users",
-    sentAt: "2024-01-16 09:00:00",
-    createdBy: "Marketing Team",
-  },
-  {
-    id: "3",
-    title: "Bảo trì hệ thống",
-    message: "Hệ thống sẽ bảo trì từ 2:00 - 4:00 sáng mai",
-    type: "system",
-    priority: "high",
-    status: "sent",
-    recipients: "all_users",
-    sentAt: "2024-01-14 20:15:00",
-    createdBy: "Tech Team",
-  },
-  {
-    id: "4",
-    title: "Chào mừng thành viên mới",
-    message: "Cảm ơn bạn đã đăng ký tài khoản!",
-    type: "welcome",
-    priority: "low",
-    status: "draft",
-    recipients: "new_users",
-    sentAt: "-",
-    createdBy: "Admin System",
-  },
-  {
-    id: "5",
-    title: "Cập nhật chính sách bảo mật",
-    message: "Chúng tôi đã cập nhật điều khoản sử dụng",
-    type: "announcement",
-    priority: "medium",
-    status: "sent",
-    recipients: "all_users",
-    sentAt: "2024-01-13 10:00:00",
-    createdBy: "Admin System",
-  },
-];
-
+// Helper functions (kept for UI consistency)
 const getTypeBadge = (type: string) => {
   switch (type) {
     case "order":
-      return (
-        <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-          <Bell className="h-3 w-3 mr-1" />
-          Đơn hàng
-        </Badge>
-      );
+      return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100"><Bell className="h-3 w-3 mr-1" />Đơn hàng</Badge>;
     case "promotion":
-      return (
-        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-          <Send className="h-3 w-3 mr-1" />
-          Khuyến mãi
-        </Badge>
-      );
+      return <Badge className="bg-green-100 text-green-800 hover:bg-green-100"><Send className="h-3 w-3 mr-1" />Khuyến mãi</Badge>;
     case "system":
-      return (
-        <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">
-          <AlertTriangle className="h-3 w-3 mr-1" />
-          Hệ thống
-        </Badge>
-      );
+      return <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100"><AlertTriangle className="h-3 w-3 mr-1" />Hệ thống</Badge>;
     case "welcome":
-      return (
-        <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100">
-          <Users className="h-3 w-3 mr-1" />
-          Chào mừng
-        </Badge>
-      );
+      return <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100"><Users className="h-3 w-3 mr-1" />Chào mừng</Badge>;
     case "announcement":
-      return (
-        <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">
-          <MessageSquare className="h-3 w-3 mr-1" />
-          Thông báo
-        </Badge>
-      );
+      return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100"><MessageSquare className="h-3 w-3 mr-1" />Thông báo</Badge>;
     default:
-      return <Badge variant="outline">Không xác định</Badge>;
-  }
-};
-
-const getPriorityBadge = (priority: string) => {
-  switch (priority) {
-    case "high":
-      return <Badge variant="destructive">Cao</Badge>;
-    case "medium":
-      return (
-        <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">
-          Trung bình
-        </Badge>
-      );
-    case "low":
-      return <Badge variant="outline">Thấp</Badge>;
-    default:
-      return <Badge variant="outline">Không xác định</Badge>;
-  }
-};
-
-const getStatusBadge = (status: string) => {
-  switch (status) {
-    case "sent":
-      return (
-        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-          <CheckCircle className="h-3 w-3 mr-1" />
-          Đã gửi
-        </Badge>
-      );
-    case "scheduled":
-      return (
-        <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-          <Clock className="h-3 w-3 mr-1" />
-          Đã lên lịch
-        </Badge>
-      );
-    case "draft":
-      return <Badge variant="outline">Bản nháp</Badge>;
-    case "failed":
-      return <Badge variant="destructive">Thất bại</Badge>;
-    default:
-      return <Badge variant="outline">Không xác định</Badge>;
-  }
-};
-
-const getRecipientsLabel = (recipients: string) => {
-  switch (recipients) {
-    case "all_users":
-      return "Tất cả người dùng";
-    case "all_customers":
-      return "Tất cả khách hàng";
-    case "subscribed_users":
-      return "Người dùng đã đăng ký";
-    case "new_users":
-      return "Thành viên mới";
-    case "specific_group":
-      return "Nhóm cụ thể";
-    default:
-      return "Không xác định";
+      return <Badge variant="outline">{type}</Badge>;
   }
 };
 
 const formatDateTime = (dateTime: string) => {
-  if (dateTime === "-") return "-";
+  if (!dateTime) return "-";
   return new Date(dateTime).toLocaleString("vi-VN");
 };
 
 export default function NotificationAdminPage() {
+  const dispatch = useAppDispatch();
+  const { notifications, pagination, loading } = useAppSelector((state) => state.notification);
+  
+  // Local state for Create form
+  const [formData, setFormData] = useState({
+      title: "",
+      message: "",
+      type: "system",
+      link: "",
+      orderId: "",
+  });
+
+  // Local state for Edit Dialog
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+      _id: "",
+      title: "",
+      message: "",
+      type: "system",
+      link: "",
+      orderId: "",
+  });
+
+  // Local state for View Dialog
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [viewData, setViewData] = useState<any>(null);
+
+  useEffect(() => {
+    dispatch(getListNotification({ page: 1, limit: 10 }));
+  }, [dispatch]);
+
+  const handleCreate = async () => {
+      try {
+        // Clean payload to match validator
+        const payload: any = {
+           title: formData.title,
+           message: formData.message,
+           type: formData.type,
+        };
+        if (formData.link) payload.link = formData.link;
+        if (formData.orderId) payload.orderId = formData.orderId;
+
+        await dispatch(createNotification(payload)).unwrap();
+        toast.success("Thông báo đã được tạo");
+        // dispatch(getListNotification({ page: 1, limit: 10 })); // Socket handles update
+        setFormData({ title: "", message: "", type: "system", link: "", orderId: "" });
+      } catch {
+        toast.error("Tạo thông báo thất bại");
+      }
+  };
+
+  const handleEditClick = async (id: string) => {
+    try {
+        const res = await dispatch(getNotificationById(id)).unwrap();
+        const data = res.data; 
+        setEditFormData({
+            _id: data._id,
+            title: data.title,
+            message: data.message,
+            type: data.type,
+            link: data.link || "",
+            orderId: data.orderId || "",
+        });
+        setIsEditDialogOpen(true);
+    } catch {
+        toast.error("Không thể lấy chi tiết thông báo");
+    }
+  };
+
+  const handleViewClick = async (id: string) => {
+    try {
+        const res = await dispatch(getNotificationById(id)).unwrap();
+        setViewData(res.data);
+        setIsViewDialogOpen(true);
+    } catch {
+        toast.error("Không thể xem chi tiết");
+    }
+  };
+
+  const handleUpdate = async () => {
+    try {
+         await dispatch(updateNotification({
+             id: editFormData._id,
+             data: {
+                 title: editFormData.title,
+                 message: editFormData.message,
+                 type: editFormData.type,
+                 link: editFormData.link,
+                 orderId: editFormData.orderId
+             }
+         })).unwrap();
+         toast.success("Cập nhật thành công");
+         setIsEditDialogOpen(false);
+         // Refresh list to show updated data
+         dispatch(getListNotification({ page: pagination?.currentPage || 1, limit: 10 }));
+    } catch {
+         toast.error("Cập nhật thất bại");
+    }
+  };
+
+  const handlePageChange = (newPage: number) => {
+      if (pagination && newPage >= 1 && newPage <= pagination.totalPages) {
+          dispatch(getListNotification({ page: newPage, limit: 10 }));
+      }
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -229,80 +206,26 @@ export default function NotificationAdminPage() {
             Gửi và quản lý thông báo đến người dùng
           </p>
         </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Tạo thông báo
-        </Button>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Tổng thông báo
-            </CardTitle>
-            <Bell className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">1,248</div>
-            <p className="text-xs text-muted-foreground">
-              +24 so với tháng trước
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Đã gửi</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">1,156</div>
-            <p className="text-xs text-muted-foreground">
-              Thông báo thành công
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Đang chờ</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">42</div>
-            <p className="text-xs text-muted-foreground">Đã lên lịch gửi</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tỷ lệ mở</CardTitle>
-            <Eye className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">68.5%</div>
-            <p className="text-xs text-muted-foreground">
-              +5.2% so với tháng trước
-            </p>
-          </CardContent>
-        </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Create Notification Form */}
-        <Card className="lg:col-span-1">
+        <Card className="lg:col-span-1 h-fit sticky top-20">
           <CardHeader>
             <CardTitle>Tạo thông báo mới</CardTitle>
             <CardDescription>
-              Gửi thông báo đến người dùng của bạn
+              Gửi thông báo (Hiện tại: Gửi cho chính mình để test)
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="title">Tiêu đề</Label>
-              <Input id="title" placeholder="Nhập tiêu đề thông báo" />
+              <Input 
+                id="title" 
+                placeholder="Nhập tiêu đề thông báo" 
+                value={formData.title} 
+                onChange={(e) => setFormData({...formData, title: e.target.value})}
+              />
             </div>
 
             <div className="space-y-2">
@@ -311,66 +234,50 @@ export default function NotificationAdminPage() {
                 id="message"
                 placeholder="Nhập nội dung thông báo"
                 rows={4}
+                value={formData.message}
+                onChange={(e) => setFormData({...formData, message: e.target.value})}
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="type">Loại thông báo</Label>
-              <Select>
+              <Select value={formData.type} onValueChange={(val) => setFormData({...formData, type: val})}>
                 <SelectTrigger>
                   <SelectValue placeholder="Chọn loại thông báo" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="order">Đơn hàng</SelectItem>
-                  <SelectItem value="promotion">Khuyến mãi</SelectItem>
                   <SelectItem value="system">Hệ thống</SelectItem>
-                  <SelectItem value="announcement">Thông báo</SelectItem>
-                  <SelectItem value="welcome">Chào mừng</SelectItem>
+                  <SelectItem value="order_status">Trạng thái đơn hàng</SelectItem>
+                  <SelectItem value="promotion">Khuyến mãi</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="recipients">Người nhận</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Chọn nhóm người nhận" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all_users">Tất cả người dùng</SelectItem>
-                  <SelectItem value="all_customers">
-                    Tất cả khách hàng
-                  </SelectItem>
-                  <SelectItem value="subscribed_users">
-                    Người dùng đã đăng ký
-                  </SelectItem>
-                  <SelectItem value="new_users">Thành viên mới</SelectItem>
-                </SelectContent>
-              </Select>
+               <Label htmlFor="link">Link (Tuỳ chọn)</Label>
+               <Input 
+                 id="link" 
+                 placeholder="https://..." 
+                 value={formData.link}
+                 onChange={(e) => setFormData({...formData, link: e.target.value})}
+               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="priority">Mức độ ưu tiên</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Chọn mức độ ưu tiên" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="high">Cao</SelectItem>
-                  <SelectItem value="medium">Trung bình</SelectItem>
-                  <SelectItem value="low">Thấp</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {formData.type === "order_status" && (
+                <div className="space-y-2">
+                   <Label htmlFor="orderId">Mã đơn hàng (Order ID)</Label>
+                   <Input 
+                     id="orderId" 
+                     placeholder="24 ký tự hex..." 
+                     value={formData.orderId}
+                     onChange={(e) => setFormData({...formData, orderId: e.target.value})}
+                   />
+                </div>
+            )}
 
-            <div className="flex items-center space-x-2">
-              <Switch id="schedule" />
-              <Label htmlFor="schedule">Lên lịch gửi</Label>
-            </div>
-
-            <Button className="w-full">
+            <Button className="w-full" onClick={handleCreate} disabled={loading}>
               <Send className="h-4 w-4 mr-2" />
-              Gửi thông báo
+              {loading ? "Đang gửi..." : "Gửi thông báo"}
             </Button>
           </CardContent>
         </Card>
@@ -380,22 +287,15 @@ export default function NotificationAdminPage() {
           <CardHeader>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <CardTitle>Lịch sử thông báo</CardTitle>
+                <CardTitle>Lịch sử thông báo (Inbox của Admin)</CardTitle>
                 <CardDescription>
-                  Danh sách các thông báo đã gửi và đang chờ
+                  Danh sách thông báo nhận được
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-                  <Input
-                    placeholder="Tìm kiếm thông báo..."
-                    className="pl-9 w-[200px]"
-                  />
-                </div>
-                <Button variant="outline" size="icon">
-                  <Filter className="h-4 w-4" />
-                </Button>
+                 <Button variant="outline" size="icon" onClick={() => dispatch(getListNotification({ page: 1, limit: 10 }))}>
+                    <Clock className="h-4 w-4" />
+                 </Button>
               </div>
             </div>
           </CardHeader>
@@ -405,99 +305,211 @@ export default function NotificationAdminPage() {
                 <TableRow>
                   <TableHead>Thông báo</TableHead>
                   <TableHead>Loại</TableHead>
-                  <TableHead>Người nhận</TableHead>
-                  <TableHead>Ưu tiên</TableHead>
-                  <TableHead>Trạng thái</TableHead>
                   <TableHead>Thời gian</TableHead>
                   <TableHead className="text-right">Thao tác</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockNotifications.map((notification) => (
-                  <TableRow key={notification.id}>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{notification.title}</p>
-                        <p className="text-sm text-gray-600 line-clamp-1">
-                          {notification.message}
-                        </p>
+                {loading && (
+                  <TableRow>
+                    <TableCell colSpan={4} className="h-24 text-center">
+                      <div className="flex justify-center items-center">
+                        <SpinnerLoading />
                       </div>
-                    </TableCell>
-                    <TableCell>{getTypeBadge(notification.type)}</TableCell>
-                    <TableCell>
-                      <span className="text-sm">
-                        {getRecipientsLabel(notification.recipients)}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      {getPriorityBadge(notification.priority)}
-                    </TableCell>
-                    <TableCell>{getStatusBadge(notification.status)}</TableCell>
-                    <TableCell>
-                      <div className="text-sm">
-                        <div>{formatDateTime(notification.sentAt)}</div>
-                        <div className="text-gray-500 text-xs">
-                          bởi {notification.createdBy}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem>
-                            <Eye className="h-4 w-4 mr-2" />
-                            Xem chi tiết
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Send className="h-4 w-4 mr-2" />
-                            Gửi lại
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-red-600">
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Xóa thông báo
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
+                <Activity mode={loading ? "hidden" : "visible"}>
+                  {notifications && notifications.length > 0 ? (
+                    notifications.map((notification) => (
+                      <TableRow key={notification._id}>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">{notification.title}</p>
+                            <p className="text-sm text-gray-600 line-clamp-1">
+                              {notification.message}
+                            </p>
+                          </div>
+                        </TableCell>
+                        <TableCell>{getTypeBadge(notification.type)}</TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            <div>{formatDateTime(notification.createdAt)}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="hover:bg-muted text-muted-foreground hover:text-foreground"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => handleViewClick(notification._id)}>
+                                <Eye className="h-4 w-4 mr-2" />
+                                Xem chi tiết
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleEditClick(notification._id)}>
+                                <Edit className="h-4 w-4 mr-2" />
+                                Chỉnh sửa
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center py-4">
+                        Chưa có thông báo nào
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </Activity>
               </TableBody>
             </Table>
 
             {/* Pagination */}
+            {pagination && (
             <div className="flex items-center justify-between mt-6">
               <div className="text-sm text-gray-600">
-                Hiển thị 1 đến 5 của 124 thông báo
+                Hiển thị {(pagination.currentPage - 1) * pagination.pageSize + 1} đến {Math.min(pagination.currentPage * pagination.pageSize, pagination.totalItems)} của {pagination.totalItems} thông báo
               </div>
               <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm" disabled>
+                <Button 
+                    variant="outline" 
+                    size="sm" 
+                    disabled={pagination.currentPage === 1}
+                    onClick={() => handlePageChange(pagination.currentPage - 1)}
+                >
                   Trước
                 </Button>
-                <Button variant="outline" size="sm" className="bg-gray-100">
-                  1
-                </Button>
-                <Button variant="outline" size="sm">
-                  2
-                </Button>
-                <Button variant="outline" size="sm">
-                  3
-                </Button>
-                <Button variant="outline" size="sm">
+                <span className="text-sm font-medium mx-2">Trang {pagination.currentPage} / {pagination.totalPages}</span>
+                <Button 
+                    variant="outline" 
+                    size="sm"
+                    disabled={pagination.currentPage >= pagination.totalPages}
+                    onClick={() => handlePageChange(pagination.currentPage + 1)}
+                >
                   Sau
                 </Button>
               </div>
             </div>
+            )}
           </CardContent>
         </Card>
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Chỉnh sửa thông báo</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-title">Tiêu đề</Label>
+              <Input 
+                id="edit-title" 
+                value={editFormData.title} 
+                onChange={(e) => setEditFormData({...editFormData, title: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-message">Nội dung</Label>
+              <Textarea
+                id="edit-message"
+                rows={4}
+                value={editFormData.message}
+                onChange={(e) => setEditFormData({...editFormData, message: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-type">Loại thông báo</Label>
+              <Select value={editFormData.type} onValueChange={(val) => setEditFormData({...editFormData, type: val})}>
+                <SelectTrigger id="edit-type">
+                  <SelectValue placeholder="Chọn loại thông báo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="system">Hệ thống</SelectItem>
+                  <SelectItem value="order_status">Trạng thái đơn hàng</SelectItem>
+                  <SelectItem value="promotion">Khuyến mãi</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+               <Label htmlFor="edit-link">Link</Label>
+               <Input 
+                 id="edit-link" 
+                 value={editFormData.link}
+                 onChange={(e) => setEditFormData({...editFormData, link: e.target.value})}
+               />
+            </div>
+            {editFormData.type === "order_status" && (
+                <div className="space-y-2">
+                   <Label htmlFor="edit-orderId">Mã đơn hàng</Label>
+                   <Input 
+                     id="edit-orderId" 
+                     value={editFormData.orderId}
+                     onChange={(e) => setEditFormData({...editFormData, orderId: e.target.value})}
+                   />
+                </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Hủy</Button>
+            <Button onClick={handleUpdate}>Cập nhật</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Chi tiết thông báo</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+             {viewData && (
+                <>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right font-medium text-gray-500">Tiêu đề</Label>
+                    <div className="col-span-3 font-medium">{viewData.title}</div>
+                  </div>
+                  <div className="grid grid-cols-4 items-start gap-4">
+                    <Label className="text-right font-medium text-gray-500 mt-1">Nội dung</Label>
+                    <div className="col-span-3 text-sm text-gray-700 bg-gray-50 p-3 rounded-md">
+                        {viewData.message}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right font-medium text-gray-500">Loại</Label>
+                    <div className="col-span-3">{getTypeBadge(viewData.type)}</div>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right font-medium text-gray-500">Thời gian</Label>
+                    <div className="col-span-3 text-sm text-gray-600">{formatDateTime(viewData.createdAt)}</div>
+                  </div>
+                   {viewData.link && (
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right font-medium text-gray-500">Link</Label>
+                        <div className="col-span-3 text-sm text-blue-600 truncate">{viewData.link}</div>
+                      </div>
+                   )}
+                </>
+             )}
+          </div>
+          <DialogFooter>
+             <Button onClick={() => setIsViewDialogOpen(false)}>Đóng</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

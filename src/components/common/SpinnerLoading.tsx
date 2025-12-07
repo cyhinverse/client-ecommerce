@@ -1,6 +1,15 @@
-export default function SpinnerLoading() {
+import { cn } from "@/lib/utils";
+
+interface SpinnerLoadingProps extends React.HTMLAttributes<HTMLDivElement> {
+  className?: string;
+}
+
+export default function SpinnerLoading({ className, ...props }: SpinnerLoadingProps) {
   return (
-    <div className="grid min-h-[140px] w-full place-items-center overflow-x-scroll rounded-lg p-6 lg:overflow-visible">
+    <div 
+        className={cn("grid min-h-[140px] w-full place-items-center overflow-x-scroll rounded-lg p-6 lg:overflow-visible", className)}
+        {...props}
+    >
       <svg
         className="text-muted animate-spin"
         viewBox="0 0 64 64"

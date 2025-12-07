@@ -13,6 +13,7 @@ export interface AuthRegister extends AuthLogin {
 
 
 export interface User {
+  _id: string;
   username: string;
   email: string;
   roles: string;

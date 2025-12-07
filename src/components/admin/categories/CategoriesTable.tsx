@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, Activity } from "react";
 import {
   Table,
   TableBody,
@@ -268,7 +268,7 @@ export function CategoriesTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoading ? (
+            {isLoading && (
               <TableRow>
                 <TableCell colSpan={7} className="h-24 text-center">
                   <div className="flex justify-center items-center">
@@ -276,28 +276,31 @@ export function CategoriesTable({
                   </div>
                 </TableCell>
               </TableRow>
-            ) : categories.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-8">
-                  <div className="flex flex-col items-center justify-center text-muted-foreground">
-                    <Package className="h-12 w-12 mb-2 opacity-50" />
-                    <div className="text-muted-foreground">Không có danh mục nào</div>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : (
-              categories.map((category) => (
-                <CategoryRow
-                  key={category._id}
-                  category={category}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
-                  onView={onView}
-                  getParentName={getParentName}
-                  getProductCount={getProductCount}
-                />
-              ))
             )}
+            <Activity mode={isLoading ? "hidden" : "visible"}>
+              {categories.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-8">
+                    <div className="flex flex-col items-center justify-center text-muted-foreground">
+                      <Package className="h-12 w-12 mb-2 opacity-50" />
+                      <div className="text-muted-foreground">Không có danh mục nào</div>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                categories.map((category) => (
+                  <CategoryRow
+                    key={category._id}
+                    category={category}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                    onView={onView}
+                    getParentName={getParentName}
+                    getProductCount={getProductCount}
+                  />
+                ))
+              )}
+            </Activity>
           </TableBody>
         </Table>
       </div>

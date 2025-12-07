@@ -6,79 +6,16 @@ import {
   removeFromCart,
   updateCartItem,
 } from "./cartAction";
+import { CartItem, CartState } from "@/types/cart";
 
-interface Product {
-  _id: string;
-  name: string;
-  slug: string;
-  category: {
-    _id: string;
-    name: string;
-    slug: string;
-  };
-  images: string[];
-  price: {
-    currentPrice: number;
-    discountPrice: number;
-    currency: string;
-    _id: string;
-  };
-  isActive: boolean;
-}
 
-interface Variant {
-  _id: string;
-  sku: string;
-  color: string;
-  size: string;
-  stock: number;
-  price: {
-    currentPrice: number;
-    discountPrice: number;
-    currency: string;
-    _id: string;
-  };
-  images: string[];
-}
-
-interface CartItem {
-  _id: string;
-  productId: Product;
-  variantId: string;
-  quantity: number;
-  price: {
-    currentPrice: number;
-    discountPrice: number;
-    currency: string;
-  };
-  variant?: Variant;
-  selected?: boolean; // ✅ THÊM TRƯỜNG SELECTED
-}
-
-interface Cart {
-  _id?: string;
-  userId: string;
-  items: CartItem[];
-  totalAmount: number;
-  createdAt?: string;
-  updatedAt?: string;
-  __v?: number;
-}
-
-interface CartState {
-  data: Cart | null;
-  isLoading: boolean;
-  error: string | null;
-  selectedItems: CartItem[]; // ✅ THÊM SELECTED ITEMS
-  checkoutTotal: number; // ✅ THÊM CHECKOUT TOTAL
-}
 
 const initialState: CartState = {
   data: null,
   isLoading: false,
   error: null,
-  selectedItems: [], // ✅ ITEMS ĐƯỢC CHỌN ĐỂ CHECKOUT
-  checkoutTotal: 0, // ✅ TỔNG TIỀN CỦA SELECTED ITEMS
+  selectedItems: [], 
+  checkoutTotal: 0, 
 };
 
 export const cartSlice = createSlice({
@@ -417,7 +354,7 @@ export const cartSlice = createSlice({
       }
 
       if (cartData) {
-        const updatedItems = cartData.items.map((newItem: any) => {
+        const updatedItems = cartData.items.map((newItem: Record<string,string>) => {
           const oldItem = oldItemsWithVariants.find(
             (item) => item._id === newItem._id
           );

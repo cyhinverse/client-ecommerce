@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, Activity } from "react";
 import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -164,12 +164,11 @@ export default function CartPage() {
 
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Cart Items */}
-        <div className="lg:col-span-2 space-y-4">
-          {isLoading ? (
-            <SpinnerLoading />
-          ) : (
-            // Sửa lỗi: Đảm bảo cartData.items tồn tại trước khi map
-            cartData.items?.map((item) => (
+        <div className="lg:col-span-2 space-y-4 relative min-h-[200px]">
+          {isLoading && <SpinnerLoading className="absolute inset-0 m-auto" />}
+          <Activity mode={isLoading ? "hidden" : "visible"}>
+            {/* Sửa lỗi: Đảm bảo cartData.items tồn tại trước khi map */}
+            {cartData.items?.map((item) => (
               <Card key={item._id} className="overflow-hidden">
                 <CardContent className="p-0">
                   <div className="p-6">
@@ -363,8 +362,8 @@ export default function CartPage() {
                   </div>
                 </CardContent>
               </Card>
-            ))
-          )}
+            ))}
+          </Activity>
         </div>
 
         {/* Order Summary */}

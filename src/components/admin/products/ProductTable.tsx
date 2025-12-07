@@ -1,5 +1,4 @@
-// components/admin/ProductAdminPage/ProductTable.tsx
-import { useState } from "react";
+import { useState, Activity } from "react";
 import {
   Table,
   TableBody,
@@ -33,9 +32,6 @@ import {
   Eye,
   Filter,
   Package,
-  Star,
-  Sparkles,
-  Percent,
 } from "lucide-react";
 import { Product } from "@/types/product";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
@@ -295,7 +291,7 @@ export function ProductsTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoading ? (
+            {isLoading && (
               <TableRow>
                 <TableCell colSpan={10} className="h-24 text-center">
                   <div className="flex justify-center items-center">
@@ -303,105 +299,108 @@ export function ProductsTable({
                   </div>
                 </TableCell>
               </TableRow>
-            ) : products.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={10} className="h-24 text-center">
-                  Không tìm thấy sản phẩm nào.
-                </TableCell>
-              </TableRow>
-            ) : (
-              products.map((product) => (
-                <TableRow key={product._id} className="border-border hover:bg-muted/50">
-                <TableCell>
-                  {product.images && product.images.length > 0 ? (
-                    <img
-                      src={product.images[0]}
-                      alt={product.name}
-                      className="h-10 w-10 object-cover border border-border"
-                    />
-                  ) : (
-                    <div className="h-10 w-10 bg-muted flex items-center justify-center border border-border">
-                      <Package className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                  )}
-                </TableCell>
-                <TableCell className="font-medium">
-                  <div className="max-w-[250px]">
-                    <div className="flex items-center gap-2">
-                      <div className="text-foreground truncate font-medium" title={product.name}>
-                        {product.name}
-                      </div>
-                      <div className="flex items-center gap-1 shrink-0">
-                        {product.isNewArrival && (
-                          <Badge variant="secondary" className="h-4 px-1 text-[9px] rounded-sm bg-info/10 text-info border-info/20">Mới</Badge>
-                        )}
-                        {product.isFeatured && (
-                          <Badge variant="secondary" className="h-4 px-1 text-[9px] rounded-sm bg-primary/10 text-primary border-primary/20">Hot</Badge>
-                        )}
-                        {product.onSale && (
-                          <Badge variant="secondary" className="h-4 px-1 text-[9px] rounded-sm bg-destructive/10 text-destructive border-destructive/20">Sale</Badge>
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-xs text-muted-foreground font-normal truncate" title={product.slug}>
-                      {product.slug}
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell className="text-muted-foreground">
-                  <div className="max-w-[120px] truncate" title={getCategoryName(product.category)}>
-                    {getCategoryName(product.category)}
-                  </div>
-                </TableCell>
-                <TableCell className="text-muted-foreground">
-                  <div className="max-w-[100px] truncate" title={product.brand || "Không có"}>
-                    {product.brand || "Không có"}
-                  </div>
-                </TableCell>
-                <TableCell>{getPriceDisplay(product.price)}</TableCell>
-                <TableCell>
-                  <Badge variant="outline" className="rounded-none border-border font-normal">{getStockCount(product)}</Badge>
-                </TableCell>
-                <TableCell>
-                  <span className="text-sm text-muted-foreground">{product.soldCount || 0}</span>
-                </TableCell>
-                <TableCell>
-                  <Badge variant={product.isActive ? "default" : "secondary"} className={`rounded-none font-normal whitespace-nowrap ${product.isActive ? "bg-success/10 text-success hover:bg-success/20" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}>
-                    {product.isActive ? "Đang bán" : "Ngừng bán"}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
-                  {new Date(product.createdAt).toLocaleDateString("vi-VN")}
-                </TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0 rounded-none hover:bg-muted">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="rounded-none border-border">
-                      <DropdownMenuItem onClick={() => onView(product)} className="cursor-pointer">
-                        <Eye className="h-4 w-4 mr-2" />
-                        Xem chi tiết
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onEdit(product)} className="cursor-pointer">
-                        <Edit className="h-4 w-4 mr-2" />
-                        Chỉnh sửa
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => onDelete(product)}
-                        className="text-destructive cursor-pointer focus:text-destructive focus:bg-destructive/10"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Xóa
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))
             )}
+            <Activity mode={isLoading ? "hidden" : "visible"}>
+              {products.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={10} className="h-24 text-center">
+                    Không tìm thấy sản phẩm nào.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                products.map((product) => (
+                  <TableRow key={product._id} className="border-border hover:bg-muted/50">
+                    <TableCell>
+                      {product.images && product.images.length > 0 ? (
+                        <img
+                          src={product.images[0]}
+                          alt={product.name}
+                          className="h-10 w-10 object-cover border border-border"
+                        />
+                      ) : (
+                        <div className="h-10 w-10 bg-muted flex items-center justify-center border border-border">
+                          <Package className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      <div className="max-w-[250px]">
+                        <div className="flex items-center gap-2">
+                          <div className="text-foreground truncate font-medium" title={product.name}>
+                            {product.name}
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            {product.isNewArrival && (
+                              <Badge variant="secondary" className="h-4 px-1 text-[9px] rounded-sm bg-info/10 text-info border-info/20">Mới</Badge>
+                            )}
+                            {product.isFeatured && (
+                              <Badge variant="secondary" className="h-4 px-1 text-[9px] rounded-sm bg-primary/10 text-primary border-primary/20">Hot</Badge>
+                            )}
+                            {product.onSale && (
+                              <Badge variant="secondary" className="h-4 px-1 text-[9px] rounded-sm bg-destructive/10 text-destructive border-destructive/20">Sale</Badge>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-xs text-muted-foreground font-normal truncate" title={product.slug}>
+                          {product.slug}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      <div className="max-w-[120px] truncate" title={getCategoryName(product.category)}>
+                        {getCategoryName(product.category)}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      <div className="max-w-[100px] truncate" title={product.brand || "Không có"}>
+                        {product.brand || "Không có"}
+                      </div>
+                    </TableCell>
+                    <TableCell>{getPriceDisplay(product.price)}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="rounded-none border-border font-normal">{getStockCount(product)}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm text-muted-foreground">{product.soldCount || 0}</span>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={product.isActive ? "default" : "secondary"} className={`rounded-none font-normal whitespace-nowrap ${product.isActive ? "bg-success/10 text-success hover:bg-success/20" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}>
+                        {product.isActive ? "Đang bán" : "Ngừng bán"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
+                      {new Date(product.createdAt).toLocaleDateString("vi-VN")}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0 rounded-none hover:bg-muted">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="rounded-none border-border">
+                          <DropdownMenuItem onClick={() => onView(product)} className="cursor-pointer">
+                            <Eye className="h-4 w-4 mr-2" />
+                            Xem chi tiết
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => onEdit(product)} className="cursor-pointer">
+                            <Edit className="h-4 w-4 mr-2" />
+                            Chỉnh sửa
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => onDelete(product)}
+                            className="text-destructive cursor-pointer focus:text-destructive focus:bg-destructive/10"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Xóa
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </Activity>
           </TableBody>
         </Table>
       </div>

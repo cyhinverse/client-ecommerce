@@ -1,3 +1,4 @@
+import { Activity } from "react";
 import {
   Table,
   TableBody,
@@ -268,7 +269,7 @@ export function UsersTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoading ? (
+            {isLoading && (
               <TableRow>
                 <TableCell colSpan={6} className="h-24 text-center">
                   <div className="flex justify-center items-center">
@@ -276,115 +277,118 @@ export function UsersTable({
                   </div>
                 </TableCell>
               </TableRow>
-            ) : users.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-8">
-                  <div className="flex flex-col items-center justify-center text-muted-foreground">
-                    <UserIcon className="h-12 w-12 mb-2 opacity-50" />
-                    <div className="text-muted-foreground">Không có người dùng nào</div>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : (
-              users.map((user) => (
-                <TableRow
-                  key={user._id}
-                  className="border-border hover:bg-muted/50"
-                >
-                  <TableCell>
-                    <div>
-                      <div className="flex items-center gap-3">
-                        {user.avatar ? (
-                          <div className="relative w-8 h-8 rounded-full overflow-hidden">
-                            <Image
-                              alt={user?.username as string}
-                              src={user?.avatar as string}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-                            <UserIcon className="h-5 w-5 text-muted-foreground" />
-                          </div>
-                        )}
-                        <div>
-                          <p className="font-medium text-foreground">
-                            {user.username}
-                          </p>
-                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                            <Mail className="h-3 w-3" />
-                            <span>{user.email}</span>
+            )}
+            <Activity mode={isLoading ? "hidden" : "visible"}>
+              {users.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8">
+                    <div className="flex flex-col items-center justify-center text-muted-foreground">
+                      <UserIcon className="h-12 w-12 mb-2 opacity-50" />
+                      <div className="text-muted-foreground">Không có người dùng nào</div>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                users.map((user) => (
+                  <TableRow
+                    key={user._id}
+                    className="border-border hover:bg-muted/50"
+                  >
+                    <TableCell>
+                      <div>
+                        <div className="flex items-center gap-3">
+                          {user.avatar ? (
+                            <div className="relative w-8 h-8 rounded-full overflow-hidden">
+                              <Image
+                                alt={user?.username as string}
+                                src={user?.avatar as string}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+                              <UserIcon className="h-5 w-5 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-medium text-foreground">
+                              {user.username}
+                            </p>
+                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                              <Mail className="h-3 w-3" />
+                              <span>{user.email}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{getRoleBadge(user.roles || "user")}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <MapPin className="h-3 w-3" />
-                      <span className="line-clamp-1">
-                        {getPrimaryAddress(user.addresses)}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {getVerifiedBadge(user.isVerifiedEmail)}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                      <Calendar className="h-3 w-3" />
-                      <span>{formatDate(user.createdAt)}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="hover:bg-muted text-muted-foreground hover:text-foreground"
+                    </TableCell>
+                    <TableCell>{getRoleBadge(user.roles || "user")}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                        <MapPin className="h-3 w-3" />
+                        <span className="line-clamp-1">
+                          {getPrimaryAddress(user.addresses)}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {getVerifiedBadge(user.isVerifiedEmail)}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <Calendar className="h-3 w-3" />
+                        <span>{formatDate(user.createdAt)}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="hover:bg-muted text-muted-foreground hover:text-foreground"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="end"
+                          className="bg-background border-border text-foreground shadow-lg"
                         >
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent
-                        align="end"
-                        className="bg-background border-border text-foreground shadow-lg"
-                      >
-                        <DropdownMenuLabel className="text-foreground font-semibold">
-                          Thao tác
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator className="bg-border" />
-                        <DropdownMenuItem
-                          onClick={() => onView(user)}
-                          className="text-muted-foreground hover:bg-muted hover:text-foreground"
-                        >
-                          <Eye className="h-4 w-4 mr-2 text-muted-foreground" />
-                          Xem chi tiết
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => onEdit(user)}
-                          className="text-muted-foreground hover:bg-muted hover:text-foreground"
-                        >
-                          <Edit className="h-4 w-4 mr-2 text-muted-foreground" />
-                          Chỉnh sửa
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-border" />
-                        <DropdownMenuItem
-                          className="text-muted-foreground hover:bg-muted hover:text-foreground"
-                          onClick={() => onDelete(user)}
-                        >
-                          <Trash2 className="h-4 w-4 mr-2 text-muted-foreground" />
-                          Xóa người dùng
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
+                          <DropdownMenuLabel className="text-foreground font-semibold">
+                            Thao tác
+                          </DropdownMenuLabel>
+                          <DropdownMenuSeparator className="bg-border" />
+                          <DropdownMenuItem
+                            onClick={() => onView(user)}
+                            className="text-muted-foreground hover:bg-muted hover:text-foreground"
+                          >
+                            <Eye className="h-4 w-4 mr-2 text-muted-foreground" />
+                            Xem chi tiết
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => onEdit(user)}
+                            className="text-muted-foreground hover:bg-muted hover:text-foreground"
+                          >
+                            <Edit className="h-4 w-4 mr-2 text-muted-foreground" />
+                            Chỉnh sửa
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator className="bg-border" />
+                          <DropdownMenuItem
+                            className="text-muted-foreground hover:bg-muted hover:text-foreground"
+                            onClick={() => onDelete(user)}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2 text-muted-foreground" />
+                            Xóa người dùng
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </Activity>
           </TableBody>
         </Table>
       </div>
