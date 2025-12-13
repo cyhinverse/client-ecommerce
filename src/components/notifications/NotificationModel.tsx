@@ -2,21 +2,22 @@ import { useEffect } from "react";
 import NotificationItem from "./NotificationItem";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { cleanNotification, getListNotification, markAllAsReadNotification } from "@/features/notification/notificationAction";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 export default function NotificationModel({isOpen,onClose}: {isOpen: boolean, onClose: () => void}) {
     const dispatch = useAppDispatch();
-    const { notifications, unreadCount } = useAppSelector(state => state.notification);
+    const { notifications, unreadCount, loading } = useAppSelector(state => state.notification);
     const { token } = useAppSelector(state => state.auth);
 
     useEffect(() => {
-        if (isOpen && token) {
+        if (isOpen && token && notifications.length === 0) {
             document.body.style.overflow = "unset";
             dispatch(getListNotification({ page: 1, limit: 10 }));
         }
         return () => {
             document.body.style.overflow = "unset";
         };
-    }, [isOpen, dispatch, token]);
+    }, [isOpen, dispatch, token, notifications.length]);
 
 
     const cleanAllNotification = () => {
@@ -37,7 +38,11 @@ export default function NotificationModel({isOpen,onClose}: {isOpen: boolean, on
                 </div>
                 <div  className="max-h-80 overflow-y-auto overscroll-contain no-scrollbar">
                     <div className="flex flex-col">
-                        {notifications.length > 0 ? (
+                        {loading && notifications.length === 0 ? (
+                            <div className="flex justify-center p-4">
+                                <SpinnerLoading />
+                            </div>
+                        ) : notifications.length > 0 ? (
                             notifications.map((noti) => (
                                 <NotificationItem key={noti._id} notification={noti} />
                             ) )

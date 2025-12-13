@@ -1,14 +1,10 @@
 // components/admin/OrderAdminPage/OrderStats.tsx
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Package,
   Clock,
   CheckCircle,
-  XCircle,
   DollarSign,
   ShoppingCart,
-  Truck,
-  AlertCircle,
 } from "lucide-react";
 
 interface OrderStatusCount {
@@ -81,39 +77,11 @@ export function OrdersStats({
       bgColor: "bg-orange-500/10",
     },
     {
-      title: "Đã xác nhận",
-      value: calculatedStats.confirmed.toLocaleString(),
-      icon: AlertCircle,
-      color: "text-blue-500",
-      bgColor: "bg-blue-500/10",
-    },
-    {
-      title: "Đang xử lý",
-      value: calculatedStats.processing.toLocaleString(),
-      icon: Package,
-      color: "text-indigo-500",
-      bgColor: "bg-indigo-500/10",
-    },
-    {
-      title: "Đang giao",
-      value: calculatedStats.shipped.toLocaleString(),
-      icon: Truck,
-      color: "text-purple-500",
-      bgColor: "bg-purple-500/10",
-    },
-    {
       title: "Thành công",
       value: calculatedStats.delivered.toLocaleString(),
       icon: CheckCircle,
       color: "text-success",
       bgColor: "bg-success/10",
-    },
-    {
-      title: "Đã hủy",
-      value: calculatedStats.cancelled.toLocaleString(),
-      icon: XCircle,
-      color: "text-destructive",
-      bgColor: "bg-destructive/10",
     },
     {
       title: "Tổng doanh thu",
@@ -125,7 +93,7 @@ export function OrdersStats({
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {stats.map((stat, index) => (
         <Card
           key={index}

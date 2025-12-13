@@ -11,7 +11,9 @@ import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { toast } from "sonner";
 import Image from "next/image";
 import { ADMIN_NAVIGATION } from "@/constants";
+import { useEffect } from "react";
 import NotificationModel from "@/components/notifications/NotificationModel";
+import { countUnreadNotification } from "@/features/notification/notificationAction";
 
 export default function AdminLayout({
   children,
@@ -25,6 +27,13 @@ export default function AdminLayout({
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { data } = useAppSelector(state => state.auth)
+  const { unreadCount } = useAppSelector(state => state.notification);
+
+  useEffect(() => {
+    if (data) {
+      dispatch(countUnreadNotification());
+    }
+  }, [data, dispatch]);
   
   const handleLogout = () => {
     dispatch(logout());
@@ -152,9 +161,13 @@ export default function AdminLayout({
           <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
             <div className="flex flex-1"></div>
             <div className="flex items-center gap-x-4 lg:gap-x-6">
-              <Button variant="ghost" size="icon" className="relative" onClick={() => setNotificationOpen(true)}>
-                <Bell className="h-6 w-6" />
-                {/* Badge could go here */}
+              <Button variant="ghost" size="icon" className="relative h-9 w-9" onClick={() => setNotificationOpen(true)}>
+                <Bell className="h-5 w-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white pointer-events-none">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                )}
               </Button>
               <div className="h-6 w-px bg-gray-200" aria-hidden="true" />
               {data && (
