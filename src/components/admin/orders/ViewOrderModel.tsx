@@ -81,7 +81,7 @@ export  function ViewOrderModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto no-scrollbar">
         <DialogHeader>
           <DialogTitle className="flex justify-between items-center">
             <span>Chi tiết đơn hàng #{order._id.slice(-8).toUpperCase()}</span>

@@ -8,7 +8,6 @@ import {
   Twitter,
   Instagram,
   Youtube,
-  Mail,
   ArrowRight,
 } from "lucide-react";
 
@@ -23,7 +22,7 @@ export default function FooterLayout() {
     "/admin/categories",
     "/admin/discounts",
     "/admin/settings",
-    "/admin/dashboard"
+    "/admin/dashboard",
   ];
 
   if (adminPaths.includes(path)) return null;
@@ -36,11 +35,12 @@ export default function FooterLayout() {
           <div className="md:col-span-2 space-y-6">
             <h4 className="text-xl font-bold tracking-tight">STORE</h4>
             <p className="text-muted-foreground max-w-sm">
-              Subscribe to our newsletter to get updates on our latest collections, campaigns, and special offers.
+              Subscribe to our newsletter to get updates on our latest
+              collections, campaigns, and special offers.
             </p>
             <div className="flex gap-2 max-w-sm">
-              <Input 
-                placeholder="Enter your email" 
+              <Input
+                placeholder="Enter your email"
                 className="bg-background border-input focus-visible:ring-1"
               />
               <Button size="icon">
@@ -48,16 +48,32 @@ export default function FooterLayout() {
               </Button>
             </div>
             <div className="flex gap-4 pt-4">
-              <Button variant="ghost" size="icon" className="hover:text-foreground">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hover:text-foreground"
+              >
                 <Instagram className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="icon" className="hover:text-foreground">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hover:text-foreground"
+              >
                 <Facebook className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="icon" className="hover:text-foreground">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hover:text-foreground"
+              >
                 <Twitter className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="icon" className="hover:text-foreground">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hover:text-foreground"
+              >
                 <Youtube className="h-5 w-5" />
               </Button>
             </div>
@@ -65,25 +81,99 @@ export default function FooterLayout() {
 
           {/* Shop */}
           <div className="space-y-6">
-            <h4 className="font-semibold tracking-wider text-sm uppercase">Shop</h4>
+            <h4 className="font-semibold tracking-wider text-sm uppercase">
+              Shop
+            </h4>
             <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><a href="/men" className="hover:text-foreground transition-colors">Men</a></li>
-              <li><a href="/women" className="hover:text-foreground transition-colors">Women</a></li>
-              <li><a href="/children" className="hover:text-foreground transition-colors">Children</a></li>
-              <li><a href="/new-arrivals" className="hover:text-foreground transition-colors">New Arrivals</a></li>
-              <li><a href="/accessories" className="hover:text-foreground transition-colors">Accessories</a></li>
+              <li>
+                <a
+                  href="/men"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Men
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/women"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Women
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/children"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Children
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/new-arrivals"
+                  className="hover:text-foreground transition-colors"
+                >
+                  New Arrivals
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/accessories"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Accessories
+                </a>
+              </li>
             </ul>
           </div>
 
           {/* Help */}
           <div className="space-y-6">
-            <h4 className="font-semibold tracking-wider text-sm uppercase">Help</h4>
+            <h4 className="font-semibold tracking-wider text-sm uppercase">
+              Help
+            </h4>
             <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><a href="/support" className="hover:text-foreground transition-colors">Customer Service</a></li>
-              <li><a href="/shipping" className="hover:text-foreground transition-colors">Shipping & Returns</a></li>
-              <li><a href="/terms" className="hover:text-foreground transition-colors">Terms & Conditions</a></li>
-              <li><a href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</a></li>
-              <li><a href="/contact" className="hover:text-foreground transition-colors">Contact Us</a></li>
+              <li>
+                <a
+                  href="/support"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Customer Service
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/shipping"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Shipping & Returns
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/terms"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Terms & Conditions
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/privacy"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Privacy Policy
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/contact"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Contact Us
+                </a>
+              </li>
             </ul>
           </div>
         </div>

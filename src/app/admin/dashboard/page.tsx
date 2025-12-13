@@ -19,7 +19,7 @@ import {
   ArrowUpRight,
   ArrowDownRight,
 } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, XAxis, Line, LineChart, Tooltip } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, Line, LineChart } from "recharts";
 import {
   ChartConfig,
   ChartContainer,
@@ -200,10 +200,9 @@ const formatPrice = (price: number) => {
   }).format(price);
 };
 
-
 export default function AdminDashboard() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 no-scrollbar">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -426,7 +425,10 @@ export default function AdminDashboard() {
             <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <h4 className="text-sm font-medium mb-2">Biểu đồ doanh thu</h4>
-                <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+                <ChartContainer
+                  config={chartConfig}
+                  className="min-h-[200px] w-full"
+                >
                   <BarChart accessibilityLayer data={chartData}>
                     <CartesianGrid vertical={false} />
                     <XAxis
@@ -437,14 +439,21 @@ export default function AdminDashboard() {
                       tickFormatter={(value) => value.slice(0, 3)}
                     />
                     <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey="revenue" fill="var(--color-revenue)" radius={4} />
+                    <Bar
+                      dataKey="revenue"
+                      fill="var(--color-revenue)"
+                      radius={4}
+                    />
                   </BarChart>
                 </ChartContainer>
               </div>
-              
+
               <div>
                 <h4 className="text-sm font-medium mb-2">Khách truy cập mới</h4>
-                <ChartContainer config={visitorConfig} className="min-h-[200px] w-full">
+                <ChartContainer
+                  config={visitorConfig}
+                  className="min-h-[200px] w-full"
+                >
                   <LineChart accessibilityLayer data={visitorData}>
                     <CartesianGrid vertical={false} />
                     <XAxis
@@ -455,12 +464,12 @@ export default function AdminDashboard() {
                       tickFormatter={(value) => value.slice(0, 3)}
                     />
                     <ChartTooltip content={<ChartTooltipContent />} />
-                    <Line 
-                      type="monotone" 
-                      dataKey="visitors" 
-                      stroke="var(--color-visitors)" 
-                      strokeWidth={2} 
-                      dot={false} 
+                    <Line
+                      type="monotone"
+                      dataKey="visitors"
+                      stroke="var(--color-visitors)"
+                      strokeWidth={2}
+                      dot={false}
                     />
                   </LineChart>
                 </ChartContainer>

@@ -46,7 +46,7 @@ export default function ForgotPasswordPage() {
       await dispatch(forgotPassword(data.email)).unwrap();
       toast.success("Liên kết đặt lại mật khẩu đã được gửi đến email của bạn");
       router.push("/reset-password");
-    } catch (error) {
+    } catch {
       toast.error("Gửi liên kết đặt lại mật khẩu thất bại");
     } finally {
       setIsLoading(false);

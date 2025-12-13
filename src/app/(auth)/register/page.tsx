@@ -64,7 +64,7 @@ export default function RegisterPage() {
           "Đăng ký thất bại, vui lòng thử lại!";
         toast.error(errorMessage);
       }
-    } catch (error: any) {
+    } catch {
       toast.error("Có lỗi xảy ra, vui lòng thử lại!");
     }
   }

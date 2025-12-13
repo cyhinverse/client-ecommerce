@@ -11,13 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { variants } from "@/types/product";
 import { Switch } from "@/components/ui/switch";
 import { X, Upload } from "lucide-react";
 import Image from "next/image";
@@ -50,7 +44,7 @@ export function CreateModelProduct({
       discountPrice: 0,
       currency: "VND",
     },
-    variants: [] as any[],
+    variants: [] as variants[],
     tags: [] as string[],
   });
   const [images, setImages] = useState<File[]>([]);
@@ -124,9 +118,11 @@ export function CreateModelProduct({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-background border-border text-foreground max-w-4xl max-h-[90vh] overflow-y-auto rounded-none p-0 gap-0">
+      <DialogContent className="bg-background border-border text-foreground max-w-4xl max-h-[90vh] overflow-y-auto rounded-none p-0 gap-0 no-scrollbar">
         <DialogHeader className="p-6 border-b border-border">
-          <DialogTitle className="text-xl font-bold uppercase tracking-tight">Tạo sản phẩm mới</DialogTitle>
+          <DialogTitle className="text-xl font-bold uppercase tracking-tight">
+            Tạo sản phẩm mới
+          </DialogTitle>
           <DialogDescription className="text-muted-foreground">
             Thêm sản phẩm mới vào cửa hàng của bạn
           </DialogDescription>
@@ -135,10 +131,17 @@ export function CreateModelProduct({
           <div className="grid grid-cols-2 gap-8">
             {/* Thông tin cơ bản */}
             <div className="space-y-6">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-foreground border-b border-border pb-2">Thông tin cơ bản</h3>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-foreground border-b border-border pb-2">
+                Thông tin cơ bản
+              </h3>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-xs font-bold uppercase text-muted-foreground">Tên sản phẩm *</Label>
+                  <Label
+                    htmlFor="name"
+                    className="text-xs font-bold uppercase text-muted-foreground"
+                  >
+                    Tên sản phẩm *
+                  </Label>
                   <Input
                     id="name"
                     value={formData.name}
@@ -152,7 +155,12 @@ export function CreateModelProduct({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="slug" className="text-xs font-bold uppercase text-muted-foreground">Slug *</Label>
+                  <Label
+                    htmlFor="slug"
+                    className="text-xs font-bold uppercase text-muted-foreground"
+                  >
+                    Slug *
+                  </Label>
                   <Input
                     id="slug"
                     value={formData.slug}
@@ -166,7 +174,12 @@ export function CreateModelProduct({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="category" className="text-xs font-bold uppercase text-muted-foreground">Danh mục *</Label>
+                  <Label
+                    htmlFor="category"
+                    className="text-xs font-bold uppercase text-muted-foreground"
+                  >
+                    Danh mục *
+                  </Label>
                   <Input
                     id="category"
                     value={formData.category}
@@ -180,7 +193,12 @@ export function CreateModelProduct({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="brand" className="text-xs font-bold uppercase text-muted-foreground">Thương hiệu *</Label>
+                  <Label
+                    htmlFor="brand"
+                    className="text-xs font-bold uppercase text-muted-foreground"
+                  >
+                    Thương hiệu *
+                  </Label>
                   <Input
                     id="brand"
                     value={formData.brand}
@@ -197,10 +215,17 @@ export function CreateModelProduct({
 
             {/* Giá và trạng thái */}
             <div className="space-y-6">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-foreground border-b border-border pb-2">Giá & Trạng thái</h3>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-foreground border-b border-border pb-2">
+                Giá & Trạng thái
+              </h3>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="currentPrice" className="text-xs font-bold uppercase text-muted-foreground">Giá hiện tại *</Label>
+                  <Label
+                    htmlFor="currentPrice"
+                    className="text-xs font-bold uppercase text-muted-foreground"
+                  >
+                    Giá hiện tại *
+                  </Label>
                   <Input
                     id="currentPrice"
                     type="number"
@@ -221,7 +246,12 @@ export function CreateModelProduct({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="discountPrice" className="text-xs font-bold uppercase text-muted-foreground">Giá khuyến mãi</Label>
+                  <Label
+                    htmlFor="discountPrice"
+                    className="text-xs font-bold uppercase text-muted-foreground"
+                  >
+                    Giá khuyến mãi
+                  </Label>
                   <Input
                     id="discountPrice"
                     type="number"
@@ -242,7 +272,9 @@ export function CreateModelProduct({
 
                 <div className="space-y-3 pt-2">
                   <div className="flex items-center justify-between border p-3 border-border">
-                    <Label htmlFor="isActive" className="text-sm font-medium">Đang hoạt động</Label>
+                    <Label htmlFor="isActive" className="text-sm font-medium">
+                      Đang hoạt động
+                    </Label>
                     <Switch
                       checked={formData.isActive}
                       onCheckedChange={(checked) =>
@@ -253,7 +285,12 @@ export function CreateModelProduct({
                   </div>
 
                   <div className="flex items-center justify-between border p-3 border-border">
-                    <Label htmlFor="isNewArrival" className="text-sm font-medium">Sản phẩm mới</Label>
+                    <Label
+                      htmlFor="isNewArrival"
+                      className="text-sm font-medium"
+                    >
+                      Sản phẩm mới
+                    </Label>
                     <Switch
                       checked={formData.isNewArrival}
                       onCheckedChange={(checked) =>
@@ -264,7 +301,9 @@ export function CreateModelProduct({
                   </div>
 
                   <div className="flex items-center justify-between border p-3 border-border">
-                    <Label htmlFor="isFeatured" className="text-sm font-medium">Nổi bật</Label>
+                    <Label htmlFor="isFeatured" className="text-sm font-medium">
+                      Nổi bật
+                    </Label>
                     <Switch
                       checked={formData.isFeatured}
                       onCheckedChange={(checked) =>
@@ -275,7 +314,9 @@ export function CreateModelProduct({
                   </div>
 
                   <div className="flex items-center justify-between border p-3 border-border">
-                    <Label htmlFor="onSale" className="text-sm font-medium">Đang giảm giá</Label>
+                    <Label htmlFor="onSale" className="text-sm font-medium">
+                      Đang giảm giá
+                    </Label>
                     <Switch
                       checked={formData.onSale}
                       onCheckedChange={(checked) =>
@@ -291,7 +332,12 @@ export function CreateModelProduct({
 
           {/* Mô tả */}
           <div className="space-y-2">
-            <Label htmlFor="description" className="text-xs font-bold uppercase text-muted-foreground">Mô tả sản phẩm</Label>
+            <Label
+              htmlFor="description"
+              className="text-xs font-bold uppercase text-muted-foreground"
+            >
+              Mô tả sản phẩm
+            </Label>
             <Textarea
               id="description"
               value={formData.description}
@@ -306,7 +352,12 @@ export function CreateModelProduct({
 
           {/* Tags */}
           <div className="space-y-2">
-            <Label htmlFor="tags" className="text-xs font-bold uppercase text-muted-foreground">Tags</Label>
+            <Label
+              htmlFor="tags"
+              className="text-xs font-bold uppercase text-muted-foreground"
+            >
+              Tags
+            </Label>
             <div className="flex gap-2">
               <Input
                 value={newTag}
@@ -321,7 +372,12 @@ export function CreateModelProduct({
                 }}
                 className="rounded-none border-border focus-visible:ring-0 focus-visible:border-primary"
               />
-              <Button type="button" onClick={addTag} disabled={isLoading} className="rounded-none bg-primary text-primary-foreground hover:bg-primary/90">
+              <Button
+                type="button"
+                onClick={addTag}
+                disabled={isLoading}
+                className="rounded-none bg-primary text-primary-foreground hover:bg-primary/90"
+              >
                 Thêm
               </Button>
             </div>
@@ -346,7 +402,9 @@ export function CreateModelProduct({
 
           {/* Hình ảnh */}
           <div className="space-y-2">
-            <Label className="text-xs font-bold uppercase text-muted-foreground">Hình ảnh sản phẩm</Label>
+            <Label className="text-xs font-bold uppercase text-muted-foreground">
+              Hình ảnh sản phẩm
+            </Label>
             <input
               type="file"
               multiple

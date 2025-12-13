@@ -124,7 +124,8 @@ export const userSlice = createSlice({
         state.isUploadingAvatar = false;
         // Cập nhật avatar ngay lập tức trong state
         if (state.user.length > 0) {
-          state.user[0].avatar = action.payload.data?.avatar ||
+          state.user[0].avatar =
+            action.payload.data?.avatar ||
             action.payload.avatarUrl ||
             action.payload.data?.user?.avatar;
         }
@@ -176,7 +177,9 @@ export const userSlice = createSlice({
       .addCase(updateUser.fulfilled, (state, action) => {
         state.isLoading = false;
         if (state.user.length > 0) {
-          const index = state.user.findIndex((u) => u._id === action.payload.data?._id);
+          const index = state.user.findIndex(
+            (u) => u._id === action.payload.data?._id
+          );
           if (index !== -1) {
             state.user[index] = action.payload.data;
           }
@@ -203,7 +206,7 @@ export const userSlice = createSlice({
 
     // Verify Email
     builder
-      .addCase(verifyEmail.fulfilled, (state) => {
+      .addCase(verifyEmail.fulfilled, () => {
         // Có thể cập nhật state nếu cần
       })
       .addCase(verifyEmail.rejected, (state, action) => {
@@ -212,17 +215,17 @@ export const userSlice = createSlice({
 
     // Two-Factor Authentication
     builder
-      .addCase(enableTwoFactor.fulfilled, (state, action) => {
+      .addCase(enableTwoFactor.fulfilled, (state) => {
         if (state.user.length > 0) {
           state.user[0].isTwoFactorEnabled = true;
         }
       })
-      .addCase(verifyTwoFactor.fulfilled, (state, action) => {
+      .addCase(verifyTwoFactor.fulfilled, (state) => {
         if (state.user.length > 0) {
           state.user[0].isTwoFactorEnabled = true;
         }
       })
-      .addCase(disableTwoFactor.fulfilled, (state, action) => {
+      .addCase(disableTwoFactor.fulfilled, (state) => {
         if (state.user.length > 0) {
           state.user[0].isTwoFactorEnabled = false;
         }
@@ -255,7 +258,7 @@ export const userSlice = createSlice({
       .addCase(setDefaultAddress.fulfilled, (state, action) => {
         if (state.user.length > 0 && action.payload.data) {
           // Set all addresses to non-default first
-          state.user[0].addresses.forEach(addr => {
+          state.user[0].addresses.forEach((addr) => {
             addr.isDefault = false;
           });
           // Set the specified address as default
@@ -270,5 +273,6 @@ export const userSlice = createSlice({
   },
 });
 
-export const { clearError, setUser, updateAvatarLocal, clearUser } = userSlice.actions;
+export const { clearError, setUser, updateAvatarLocal, clearUser } =
+  userSlice.actions;
 export default userSlice.reducer;

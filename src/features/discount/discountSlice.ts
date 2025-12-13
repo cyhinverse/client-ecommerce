@@ -18,13 +18,19 @@ export interface PaginationData {
   prevPage: number | null;
 }
 
+interface DiscountStatistics {
+  totalDiscounts: number;
+  activeDiscounts: number;
+  expiredDiscounts: number;
+  highUsageDiscounts: number;
+}
+
 interface DiscountState {
   discounts: Discount[];
   pagination: PaginationData | null;
   loading: boolean;
   error: string | null;
-  statistics: any | null
-
+  statistics: DiscountStatistics | null;
 }
 
 const initState: DiscountState = {
@@ -33,7 +39,6 @@ const initState: DiscountState = {
   loading: false,
   error: null,
   statistics: null,
-
 };
 
 export const discountSlice = createSlice({
@@ -44,28 +49,28 @@ export const discountSlice = createSlice({
       state.error = null;
     },
     setDiscounts: (state, action) => {
-      state.loading = false
-      console.log(action.payload)
-      state.discounts = action.payload
+      state.loading = false;
+      console.log(action.payload);
+      state.discounts = action.payload;
     },
     setLoading: (state) => {
-      state.loading = true
-    }
+      state.loading = true;
+    },
   },
   extraReducers: (builder) => {
     builder
       // Get All Discounts
       .addCase(getAllDiscounts.pending, (state) => {
-        console.log(`Peding loading discount`, state.loading)
+        console.log(`Peding loading discount`, state.loading);
         state.loading = true;
         state.error = null;
       })
       .addCase(getAllDiscounts.fulfilled, (state, action) => {
         state.loading = false;
         state.discounts = action.payload?.data?.data || [];
-        console.log("discount", state.discounts)
+        console.log("discount", state.discounts);
         state.pagination = action.payload?.data?.pagination || null;
-        console.log(`pagination`, state.pagination)
+        console.log(`pagination`, state.pagination);
       })
       .addCase(getAllDiscounts.rejected, (state, action) => {
         state.loading = false;
@@ -116,8 +121,6 @@ export const discountSlice = createSlice({
       .addCase(deleteDiscount.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Failed to delete discount";
-      })
-
+      });
   },
 });
-

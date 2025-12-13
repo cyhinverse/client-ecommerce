@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Activity } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -31,15 +31,17 @@ export default function ProductDetailPage() {
   const dispatch = useAppDispatch();
   const path = useParams();
   const { currentProduct, isLoading, error } = useAppSelector(
-    (state) => state.product,
+    (state) => state.product
   );
   const [selectedVariant, setSelectedVariant] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const router = useRouter();
 
-  const hasVariant = currentProduct?.variants[selectedVariant] && currentProduct.variants.length > 0
-  const variant = hasVariant ? currentProduct.variants[selectedVariant] : null
+  const hasVariant =
+    currentProduct?.variants[selectedVariant] &&
+    currentProduct.variants.length > 0;
+  const variant = hasVariant ? currentProduct.variants[selectedVariant] : null;
 
   const HandleAddToCart = async () => {
     const result = await dispatch(
@@ -47,7 +49,7 @@ export default function ProductDetailPage() {
         productId: currentProduct?._id as string,
         quantity,
         variantId: variant?._id,
-      }),
+      })
     );
     if (result) {
       toast.success("Product added to cart");
@@ -61,13 +63,11 @@ export default function ProductDetailPage() {
     dispatch(getProductBySlug(path.slug as string));
   }, [dispatch, path.slug]);
 
-
   if (error) {
     toast.error(error);
   }
 
   // Loading handled by Activity below
-
 
   if (!currentProduct) {
     return (
@@ -91,7 +91,7 @@ export default function ProductDetailPage() {
       return Math.round(
         ((product.price.currentPrice - product.price.discountPrice) /
           product.price.currentPrice) *
-        100,
+          100
       );
     }
     return 0;
@@ -100,7 +100,7 @@ export default function ProductDetailPage() {
   return (
     <>
       {isLoading && <ProductDetailSkeleton />}
-      <Activity mode={isLoading ? "hidden" : "visible"}>
+      <div className={isLoading ? "opacity-50 pointer-events-none" : ""}>
         <div className="container max-w-6xl mx-auto py-6 px-4 space-y-8">
           {/* Breadcrumb */}
           <nav className="flex items-center text-sm text-muted-foreground">
@@ -133,7 +133,9 @@ export default function ProductDetailPage() {
                       <span className="text-2xl">👗</span>
                     </div>
                     <p className="font-medium">{product.brand}</p>
-                    <p className="text-sm text-muted-foreground">Product Image</p>
+                    <p className="text-sm text-muted-foreground">
+                      Product Image
+                    </p>
                   </div>
                 )}
               </div>
@@ -144,10 +146,11 @@ export default function ProductDetailPage() {
                     <button
                       key={index}
                       onClick={() => setSelectedImageIndex(index)}
-                      className={`shrink-0 w-16 h-16 border-2 transition-all ${selectedImageIndex === index
-                        ? "border-primary"
-                        : "border-transparent hover:border-border"
-                        }`}
+                      className={`shrink-0 w-16 h-16 border-2 transition-all ${
+                        selectedImageIndex === index
+                          ? "border-primary"
+                          : "border-transparent hover:border-border"
+                      }`}
                     >
                       <Image
                         src={image}
@@ -212,8 +215,8 @@ export default function ProductDetailPage() {
                 {/* Price */}
                 <div>
                   {product.price?.discountPrice &&
-                    product.price?.currentPrice &&
-                    product.price.discountPrice < product.price.currentPrice ? (
+                  product.price?.currentPrice &&
+                  product.price.discountPrice < product.price.currentPrice ? (
                     <div className="flex items-baseline gap-2">
                       <span className="text-2xl font-semibold">
                         {new Intl.NumberFormat("vi-VN", {
@@ -274,10 +277,11 @@ export default function ProductDetailPage() {
                       <button
                         key={index}
                         onClick={() => setSelectedVariant(index)}
-                        className={`p-3 border text-left transition-colors ${selectedVariant === index
-                          ? "border-primary bg-muted/50"
-                          : "border-border hover:border-muted-foreground"
-                          }`}
+                        className={`p-3 border text-left transition-colors ${
+                          selectedVariant === index
+                            ? "border-primary bg-muted/50"
+                            : "border-border hover:border-muted-foreground"
+                        }`}
                       >
                         <div className="flex justify-between items-center">
                           <div>
@@ -290,7 +294,7 @@ export default function ProductDetailPage() {
                           </div>
                           <p className="font-semibold text-sm">
                             {variant.price?.discountPrice &&
-                              variant.price.discountPrice <
+                            variant.price.discountPrice <
                               variant.price.currentPrice ? (
                               <span className="text-destructive">
                                 {new Intl.NumberFormat("vi-VN", {
@@ -424,8 +428,8 @@ export default function ProductDetailPage() {
                               review.rating === 5
                                 ? "70%"
                                 : review.rating === 4
-                                  ? "20%"
-                                  : "5%",
+                                ? "20%"
+                                : "5%",
                           }}
                         />
                       </div>
@@ -433,8 +437,8 @@ export default function ProductDetailPage() {
                         {review.rating === 5
                           ? "70%"
                           : review.rating === 4
-                            ? "20%"
-                            : "5%"}
+                          ? "20%"
+                          : "5%"}
                       </span>
                     </div>
                   ))}
@@ -455,7 +459,9 @@ export default function ProductDetailPage() {
                   </div>
                 ))
               ) : (
-                <p className="text-center text-muted-foreground">No reviews yet.</p>
+                <p className="text-center text-muted-foreground">
+                  No reviews yet.
+                </p>
               )}
 
               {/* Load More Reviews */}
@@ -467,7 +473,7 @@ export default function ProductDetailPage() {
             </div>
           </div>
         </div>
-      </Activity>
+      </div>
     </>
   );
 }
@@ -545,4 +551,3 @@ function ProductDetailSkeleton() {
     </div>
   );
 }
-

@@ -1,7 +1,14 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Search, X, Loader2, Clock, TrendingUp, ArrowRight } from "lucide-react";
+import {
+  Search,
+  X,
+  Loader2,
+  Clock,
+  TrendingUp,
+  ArrowRight,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -10,7 +17,7 @@ import Image from "next/image";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { searchProducts } from "@/features/product/productAction";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { price } from "@/types/product";
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -39,13 +46,16 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { searchResults, isSearching } = useAppSelector((state) => state.product);
+  const { searchResults, isSearching } = useAppSelector(
+    (state) => state.product
+  );
 
   // Load recent searches from localStorage
   useEffect(() => {
     const saved = localStorage.getItem("recentSearches");
     if (saved) {
       try {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setRecentSearches(JSON.parse(saved));
       } catch (e) {
         console.error("Failed to parse recent searches", e);
@@ -55,14 +65,17 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
   const saveRecentSearch = (term: string) => {
     if (!term.trim()) return;
-    const newRecent = [term, ...recentSearches.filter(s => s !== term)].slice(0, 5);
+    const newRecent = [term, ...recentSearches.filter((s) => s !== term)].slice(
+      0,
+      5
+    );
     setRecentSearches(newRecent);
     localStorage.setItem("recentSearches", JSON.stringify(newRecent));
   };
 
   const removeRecentSearch = (term: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    const newRecent = recentSearches.filter(s => s !== term);
+    const newRecent = recentSearches.filter((s) => s !== term);
     setRecentSearches(newRecent);
     localStorage.setItem("recentSearches", JSON.stringify(newRecent));
   };
@@ -75,7 +88,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
     const debounceTimer = setTimeout(() => {
       dispatch(searchProducts({ keyword: searchQuery, limit: 5 }));
-    }, 300); 
+    }, 300);
 
     return () => clearTimeout(debounceTimer);
   }, [searchQuery, dispatch]);
@@ -87,6 +100,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
         inputRef.current?.focus();
       }, 100);
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSearchQuery("");
     }
   }, [isOpen]);
@@ -133,7 +147,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   };
 
   // Format price in VND
-  const formatPrice = (price: any) => {
+  const formatPrice = (price: price | null) => {
     const actualPrice = price?.discountPrice || price?.currentPrice || 0;
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -164,10 +178,12 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
               className="border-0 focus-visible:ring-0 text-lg px-0 shadow-none h-11"
             />
           </form>
-          {isSearching && <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />}
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          {isSearching && (
+            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={handleClose}
             className="hover:bg-muted rounded-full"
           >
@@ -189,9 +205,9 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                         <Clock className="h-4 w-4" />
                         <span className="font-medium">Tìm kiếm gần đây</span>
                       </div>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         className="h-auto p-0 text-xs hover:bg-transparent hover:text-destructive"
                         onClick={() => {
                           setRecentSearches([]);
@@ -209,8 +225,8 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                           onClick={() => handleSearchSubmit(undefined, term)}
                         >
                           <span>{term}</span>
-                          <X 
-                            className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-destructive transition-opacity" 
+                          <X
+                            className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-destructive transition-opacity"
                             onClick={(e) => removeRecentSearch(term, e)}
                           />
                         </div>
@@ -241,7 +257,9 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
                 {/* Trending Categories */}
                 <div className="space-y-3">
-                  <span className="text-sm font-medium text-muted-foreground">Danh mục nổi bật</span>
+                  <span className="text-sm font-medium text-muted-foreground">
+                    Danh mục nổi bật
+                  </span>
                   <div className="grid grid-cols-2 gap-2">
                     {TRENDING_CATEGORIES.map((category) => (
                       <div
@@ -252,7 +270,9 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                           handleClose();
                         }}
                       >
-                        <span className="text-sm font-medium">{category.name}</span>
+                        <span className="text-sm font-medium">
+                          {category.name}
+                        </span>
                         <ArrowRight className="h-4 w-4 text-muted-foreground -translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all" />
                       </div>
                     ))}
@@ -272,7 +292,11 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 ) : searchResults.length > 0 ? (
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground mb-3">
-                      Kết quả cho "<span className="font-medium text-foreground">{searchQuery}</span>"
+                      Kết quả cho &quot;
+                      <span className="font-medium text-foreground">
+                        {searchQuery}
+                      </span>
+                      &quot;
                     </p>
                     {searchResults.map((product) => (
                       <div
@@ -290,7 +314,9 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                             />
                           ) : (
-                            <span className="text-[10px] text-muted-foreground/70">No Image</span>
+                            <span className="text-[10px] text-muted-foreground/70">
+                              No Image
+                            </span>
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -298,7 +324,9 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                             {product.name}
                           </h4>
                           <p className="text-xs text-muted-foreground mt-0.5">
-                            {typeof product.category === 'string' ? product.category : product.category?.name || "Chưa phân loại"}
+                            {typeof product.category === "string"
+                              ? product.category
+                              : product.category?.name || "Chưa phân loại"}
                           </p>
                         </div>
                         <div className="text-sm font-semibold text-foreground shrink-0">
@@ -306,9 +334,9 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                         </div>
                       </div>
                     ))}
-                    
-                    <Button 
-                      variant="ghost" 
+
+                    <Button
+                      variant="ghost"
                       className="w-full mt-4 text-primary hover:text-primary hover:bg-primary/5"
                       onClick={(e) => handleSearchSubmit(e)}
                     >
@@ -322,7 +350,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                       <Search className="h-6 w-6 text-muted-foreground" />
                     </div>
                     <p className="text-muted-foreground">
-                      Không tìm thấy sản phẩm nào cho "{searchQuery}"
+                      Không tìm thấy sản phẩm nào cho &quot;{searchQuery}&quot;
                     </p>
                   </div>
                 )}

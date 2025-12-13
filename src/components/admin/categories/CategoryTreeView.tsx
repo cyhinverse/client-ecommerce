@@ -12,7 +12,11 @@ import { Category } from "@/types/category";
 export const getStatusBadge = (status: boolean) => {
   switch (status) {
     case true:
-      return <Badge className="bg-success text-success-foreground hover:bg-success/90">Đang hoạt động</Badge>;
+      return (
+        <Badge className="bg-success text-success-foreground hover:bg-success/90">
+          Đang hoạt động
+        </Badge>
+      );
     case false:
       return <Badge variant="secondary">Không hoạt động</Badge>;
     default:
@@ -72,32 +76,34 @@ export function CategoryTreeView({
                     </div>
                   </div>
 
-                  {getChildCategories(category._id as any).length > 0 && (
+                  {getChildCategories(category._id as string).length > 0 && (
                     <div className="mt-3 ml-8 space-y-2 border-l-2 border-border pl-4">
-                      {getChildCategories(category._id as any).map((subCategory) => (
-                        <div
-                          key={subCategory._id}
-                          className="flex items-center justify-between py-2"
-                        >
-                          <div className="flex items-center gap-3">
-                            <Layers className="h-4 w-4 text-success" />
-                            <div>
-                              <h5 className="font-medium">
-                                {subCategory.name}
-                              </h5>
-                              <p className="text-sm text-muted-foreground">
-                                {subCategory.description}
-                              </p>
+                      {getChildCategories(category._id as string).map(
+                        (subCategory) => (
+                          <div
+                            key={subCategory._id}
+                            className="flex items-center justify-between py-2"
+                          >
+                            <div className="flex items-center gap-3">
+                              <Layers className="h-4 w-4 text-success" />
+                              <div>
+                                <h5 className="font-medium">
+                                  {subCategory.name}
+                                </h5>
+                                <p className="text-sm text-muted-foreground">
+                                  {subCategory.description}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <Badge variant="outline">
+                                {getProductCount(subCategory)} sản phẩm
+                              </Badge>
+                              {getStatusBadge(subCategory.isActive)}
                             </div>
                           </div>
-                          <div className="flex items-center gap-4">
-                            <Badge variant="outline">
-                              {getProductCount(subCategory)} sản phẩm
-                            </Badge>
-                            {getStatusBadge(subCategory.isActive)}
-                          </div>
-                        </div>
-                      ))}
+                        )
+                      )}
                     </div>
                   )}
                 </div>

@@ -26,7 +26,6 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Search, MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
-import { Activity } from "react";
 import { Discount } from "@/types/discount";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 
@@ -94,7 +93,7 @@ export function DiscountsTable({
   };
 
   const getDiscountValueText = (discount: Discount) => {
-    return discount.discountType === "percent" 
+    return discount.discountType === "percent"
       ? `${discount.discountValue}%`
       : `${discount.discountValue.toLocaleString()}đ`;
   };
@@ -116,8 +115,8 @@ export function DiscountsTable({
             </div>
           </form>
 
-          <Select 
-            value={selectedDiscountType} 
+          <Select
+            value={selectedDiscountType}
             onValueChange={onDiscountTypeFilterChange}
           >
             <SelectTrigger className="w-[180px] rounded-none border-border focus:ring-0 focus:border-primary">
@@ -131,9 +130,11 @@ export function DiscountsTable({
             </SelectContent>
           </Select>
 
-          <Select 
-            value={selectedIsActive === null ? "all" : selectedIsActive.toString()} 
-            onValueChange={(value) => 
+          <Select
+            value={
+              selectedIsActive === null ? "all" : selectedIsActive.toString()
+            }
+            onValueChange={(value) =>
               onActiveFilterChange(value === "all" ? null : value === "true")
             }
           >
@@ -149,8 +150,8 @@ export function DiscountsTable({
           </Select>
         </div>
 
-        <Select 
-          value={pageSize.toString()} 
+        <Select
+          value={pageSize.toString()}
           onValueChange={(value) => onPageSizeChange(Number(value))}
         >
           <SelectTrigger className="w-[130px] rounded-none border-border focus:ring-0 focus:border-primary">
@@ -165,7 +166,7 @@ export function DiscountsTable({
       </div>
 
       {/* Table */}
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-x-auto no-scrollbar">
         <Table>
           <TableHeader>
             <TableRow>
@@ -189,67 +190,70 @@ export function DiscountsTable({
                 </TableCell>
               </TableRow>
             )}
-            <Activity mode={isLoading ? "hidden" : "visible"}>
-              {discounts.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-center h-24">
-                    Không tìm thấy mã giảm giá nào.
+            {!isLoading && discounts.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={8} className="text-center h-24">
+                  Không tìm thấy mã giảm giá nào.
+                </TableCell>
+              </TableRow>
+            ) : (
+              discounts.map((discount) => (
+                <TableRow
+                  key={discount._id}
+                  className={isLoading ? "opacity-50 pointer-events-none" : ""}
+                >
+                  <TableCell className="font-medium">
+                    <div className="flex flex-col">
+                      <span className="font-bold">{discount.code}</span>
+                      {discount.description && (
+                        <span className="text-sm text-muted-foreground">
+                          {discount.description}
+                        </span>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {getDiscountTypeText(discount.discountType)}
+                  </TableCell>
+                  <TableCell>{getDiscountValueText(discount)}</TableCell>
+                  <TableCell>{formatDate(discount.startDate)}</TableCell>
+                  <TableCell>{formatDate(discount.endDate)}</TableCell>
+                  <TableCell>
+                    {discount.usedCount} / {discount.usageLimit}
+                  </TableCell>
+                  <TableCell>{getStatusBadge(discount)}</TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Mở menu</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => onView(discount)}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          Xem chi tiết
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onEdit(discount)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Chỉnh sửa
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => onDelete(discount)}
+                          className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Xóa
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
-              ) : (
-                discounts.map((discount) => (
-                  <TableRow key={discount._id}>
-                    <TableCell className="font-medium">
-                      <div className="flex flex-col">
-                        <span className="font-bold">{discount.code}</span>
-                        {discount.description && (
-                          <span className="text-sm text-muted-foreground">
-                            {discount.description}
-                          </span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>{getDiscountTypeText(discount.discountType)}</TableCell>
-                    <TableCell>{getDiscountValueText(discount)}</TableCell>
-                    <TableCell>{formatDate(discount.startDate)}</TableCell>
-                    <TableCell>{formatDate(discount.endDate)}</TableCell>
-                    <TableCell>
-                      {discount.usedCount} / {discount.usageLimit}
-                    </TableCell>
-                    <TableCell>{getStatusBadge(discount)}</TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Mở menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
-                          <DropdownMenuItem onClick={() => onView(discount)}>
-                            <Eye className="h-4 w-4 mr-2" />
-                            Xem chi tiết
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => onEdit(discount)}>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Chỉnh sửa
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => onDelete(discount)}
-                            className="text-destructive focus:text-destructive focus:bg-destructive/10"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Xóa
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </Activity>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>

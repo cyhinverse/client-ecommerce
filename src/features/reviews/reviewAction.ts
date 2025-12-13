@@ -1,6 +1,10 @@
 import instance from "@/api/api";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
+interface ApiErrorResponse {
+  message?: string;
+}
+
 export const createReview = createAsyncThunk(
   "review/create",
   async (
@@ -20,9 +24,10 @@ export const createReview = createAsyncThunk(
         }
       );
       return response.data;
-    } catch (error: any) {
+    } catch (error) {
+      const axiosError = error as { response?: { data?: ApiErrorResponse } };
       const message =
-        error.response?.data?.message || "Failed to create review";
+        axiosError.response?.data?.message || "Failed to create review";
       return rejectWithValue({ message });
     }
   }

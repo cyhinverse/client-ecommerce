@@ -1,14 +1,13 @@
 "use client";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { Card, CardHeader } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { getTreeCategories } from "@/features/category/categoryAction";
 import { getProductsBySlugOfCategory } from "@/features/product/productAction";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState, Activity } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function CategoriesPage() {
@@ -16,10 +15,9 @@ export default function CategoriesPage() {
   const path = usePathname();
   const [currentIndex, setIndex] = useState(0);
   const { isLoading, categories, error } = useAppSelector(
-    (state) => state.category,
+    (state) => state.category
   );
   const { byCategory } = useAppSelector((state) => state.product);
-
 
   useEffect(() => {
     dispatch(getTreeCategories());
@@ -80,7 +78,7 @@ export default function CategoriesPage() {
       </section>
 
       {isLoading && <SpinnerLoading />}
-      <Activity mode={isLoading ? "hidden" : "visible"}>
+      <div className={isLoading ? "opacity-50 pointer-events-none" : ""}>
         <section className="mb-20">
           <h1 className="text-3xl font-bold mb-8 text-center tracking-tight">
             Products
@@ -88,7 +86,11 @@ export default function CategoriesPage() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 m-10">
             {byCategory && byCategory.length > 0 ? (
               byCategory.map((p) => (
-                <Link key={p._id} href={`/products/${p.slug}`} className="group block">
+                <Link
+                  key={p._id}
+                  href={`/products/${p.slug}`}
+                  className="group block"
+                >
                   <Card className="overflow-hidden border-0 shadow-none bg-transparent">
                     {/* Product Image - 3:4 Aspect Ratio */}
                     <div className="relative aspect-[3/4] bg-muted mb-3">
@@ -114,7 +116,8 @@ export default function CategoriesPage() {
 
                       {/* Price */}
                       <div className="flex items-baseline gap-2 pt-1">
-                        {p.price?.discountPrice && p.price?.currentPrice !== p.price?.discountPrice ? (
+                        {p.price?.discountPrice &&
+                        p.price?.currentPrice !== p.price?.discountPrice ? (
                           <>
                             <span className="font-semibold text-sm">
                               {p.price.discountPrice.toLocaleString("vi-VN")}đ
@@ -142,7 +145,7 @@ export default function CategoriesPage() {
             )}
           </div>
         </section>
-      </Activity>
+      </div>
     </main>
   );
 }

@@ -15,14 +15,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState, useEffect } from "react";
+import { useState, useLayoutEffect } from "react";
 import { User } from "@/types/user";
+
+interface UpdateUserData {
+  id: string;
+  username: string;
+  email: string;
+  roles: string;
+  isVerifiedEmail: boolean;
+}
 
 interface UpdateModelUserProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   user: User | null;
-  onUpdate: (userData: any) => void;
+  onUpdate: (userData: UpdateUserData) => void;
   isLoading?: boolean;
 }
 
@@ -40,8 +48,9 @@ export function UpdateModelUser({
     isVerifiedEmail: false,
   });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         username: user.username || "",
         email: user.email || "",

@@ -31,8 +31,10 @@ export default function VerifyEmailPage() {
         toast.success("Mã xác thực đã được gửi đến email của bạn");
         router.push("/verify-code");
       }
-    } catch (error: any) {
-      toast.error(error?.message || "Gửi mã xác thực thất bại");
+    } catch (error) {
+      toast.error(
+        (error as { message?: string })?.message || "Gửi mã xác thực thất bại"
+      );
     } finally {
       setIsLoading(false);
     }

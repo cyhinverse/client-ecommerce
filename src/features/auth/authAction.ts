@@ -1,6 +1,11 @@
 import instance from "@/api/api";
 import { AuthLogin, AuthRegister } from "@/types/auth";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { AxiosError } from "axios";
+
+interface ApiErrorResponse {
+  message?: string;
+}
 
 export const login = createAsyncThunk(
   "auth/login",
@@ -10,8 +15,10 @@ export const login = createAsyncThunk(
         withCredentials: true,
       });
       return response.data;
-    } catch (error: any) {
-      const message = error.response?.data?.message || "Đăng nhập thất bại";
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiErrorResponse>;
+      const message =
+        axiosError.response?.data?.message || "Đăng nhập thất bại";
       return rejectWithValue({ message });
     }
   }
@@ -25,8 +32,9 @@ export const register = createAsyncThunk(
         withCredentials: true,
       });
       return response.data;
-    } catch (error: any) {
-      const message = error.response?.data?.message || "Đăng ký thất bại";
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiErrorResponse>;
+      const message = axiosError.response?.data?.message || "Đăng ký thất bại";
       return rejectWithValue({ message });
     }
   }
@@ -44,9 +52,10 @@ export const sendCode = createAsyncThunk(
         }
       );
       return response.data;
-    } catch (error: any) {
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiErrorResponse>;
       const message =
-        error.response?.data?.message || "Xác thực email thất bại";
+        axiosError.response?.data?.message || "Xác thực email thất bại";
       return rejectWithValue({ message });
     }
   }
@@ -71,9 +80,11 @@ export const forgotPassword = createAsyncThunk(
     try {
       const response = await instance.post("/auth/forgot-password", { email });
       return response.data;
-    } catch (error: any) {
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiErrorResponse>;
       const message =
-        error.response?.data?.message || "Yêu cầu đặt lại mật khẩu thất bại";
+        axiosError.response?.data?.message ||
+        "Yêu cầu đặt lại mật khẩu thất bại";
       return rejectWithValue({ message });
     }
   }
@@ -96,10 +107,11 @@ export const resetPassword = createAsyncThunk(
         newPassword,
       });
       return response.data;
-    } catch (error: any) {
-      console.error("Reset password error:", error.response?.data);
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiErrorResponse>;
+      console.error("Reset password error:", axiosError.response?.data);
       return rejectWithValue(
-        error.response?.data || { message: "Reset password failed" }
+        axiosError.response?.data || { message: "Reset password failed" }
       );
     }
   }

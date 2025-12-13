@@ -1,9 +1,17 @@
-import { MapPin, Plus, Star, Edit, Phone, Navigation, Trash2 } from "lucide-react";
+import {
+  MapPin,
+  Plus,
+  Star,
+  Edit,
+  Phone,
+  Navigation,
+  Trash2,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import AddressDialog from "../address/AddressDialog";
-import { useState, Activity } from "react";
+import { useState } from "react";
 import { useAppSelector, useAppDispatch } from "@/hooks/hooks";
 import { deleteAddress, getProfile } from "@/features/user/userAction";
 import { toast } from "sonner";
@@ -57,7 +65,10 @@ export default function AddressTab({ user }: AddressTabProps) {
       toast.success("Đã xóa địa chỉ thành công");
     } catch (error) {
       console.error("Error deleting address:", error);
-      const errorMessage = (error as any).response?.data?.message || "Không thể xóa địa chỉ. Vui lòng thử lại.";
+      const err = error as { response?: { data?: { message?: string } } };
+      const errorMessage =
+        err.response?.data?.message ||
+        "Không thể xóa địa chỉ. Vui lòng thử lại.";
       toast.error(errorMessage);
     } finally {
       setIsDeleting(null);
@@ -86,10 +97,11 @@ export default function AddressTab({ user }: AddressTabProps) {
   const renderAddressCard = (address: Address) => (
     <Card
       key={address._id}
-      className={`relative transition-all duration-200 hover:shadow-sm ${address.isDefault
-        ? 'border-primary border-2 bg-muted/50'
-        : 'border-border'
-        }`}
+      className={`relative transition-all duration-200 hover:shadow-sm ${
+        address.isDefault
+          ? "border-primary border-2 bg-muted/50"
+          : "border-border"
+      }`}
     >
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
@@ -114,9 +126,7 @@ export default function AddressTab({ user }: AddressTabProps) {
             <div className="flex items-start gap-1.5">
               <Navigation className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
               <div className="text-sm">
-                <p className="font-medium text-foreground">
-                  {address.address}
-                </p>
+                <p className="font-medium text-foreground">{address.address}</p>
               </div>
             </div>
           </div>
@@ -153,7 +163,7 @@ export default function AddressTab({ user }: AddressTabProps) {
   return (
     <div className="space-y-4 relative min-h-[200px]">
       {isLoading && <SpinnerLoading className="absolute inset-0 m-auto" />}
-      <Activity mode={isLoading ? "hidden" : "visible"}>
+      <div className={isLoading ? "opacity-50 pointer-events-none" : ""}>
         {addresses.length === 0 && (
           <div className="text-center space-y-1">
             <div className="flex items-center justify-center gap-2 mb-2">
@@ -162,7 +172,9 @@ export default function AddressTab({ user }: AddressTabProps) {
               </div>
             </div>
             <h1 className="text-xl font-bold text-foreground">Sổ địa chỉ</h1>
-            <p className="text-sm text-muted-foreground">Quản lý địa chỉ giao hàng của bạn</p>
+            <p className="text-sm text-muted-foreground">
+              Quản lý địa chỉ giao hàng của bạn
+            </p>
           </div>
         )}
 
@@ -175,7 +187,9 @@ export default function AddressTab({ user }: AddressTabProps) {
                 <h2 className="text-base font-semibold text-foreground">
                   Địa chỉ của bạn ({addresses.length})
                 </h2>
-                <p className="text-xs text-muted-foreground">Quản lý và chỉnh sửa địa chỉ giao hàng</p>
+                <p className="text-xs text-muted-foreground">
+                  Quản lý và chỉnh sửa địa chỉ giao hàng
+                </p>
               </div>
               <Button
                 onClick={openAddDialog}
@@ -186,9 +200,7 @@ export default function AddressTab({ user }: AddressTabProps) {
               </Button>
             </div>
 
-            <div className="grid gap-3">
-              {addresses.map(renderAddressCard)}
-            </div>
+            <div className="grid gap-3">{addresses.map(renderAddressCard)}</div>
           </>
         )}
 
@@ -199,7 +211,7 @@ export default function AddressTab({ user }: AddressTabProps) {
           onSuccess={handleSuccess}
           user={user}
         />
-      </Activity>
+      </div>
     </div>
   );
 }

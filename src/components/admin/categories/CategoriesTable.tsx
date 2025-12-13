@@ -1,4 +1,4 @@
-import { useState, Activity } from "react";
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -57,7 +57,10 @@ export const getStatusBadge = (status: boolean) => {
       Đang hoạt động
     </Badge>
   ) : (
-    <Badge variant="outline" className="border-muted-foreground text-muted-foreground">
+    <Badge
+      variant="outline"
+      className="border-muted-foreground text-muted-foreground"
+    >
       <XCircle className="h-3 w-3 mr-1" />
       Không hoạt động
     </Badge>
@@ -76,6 +79,7 @@ const CategoryRow = ({
   onView,
   getParentName,
   getProductCount,
+  isLoading = false,
 }: {
   category: Category;
   level?: number;
@@ -84,15 +88,24 @@ const CategoryRow = ({
   onView: (c: Category) => void;
   getParentName: (c: Category) => string;
   getProductCount: (c: Category) => number;
+  isLoading?: boolean;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const hasChildren = category.subcategories && category.subcategories.length > 0;
+  const hasChildren =
+    category.subcategories && category.subcategories.length > 0;
 
   return (
     <>
-      <TableRow className="hover:bg-muted/50 border-b border-border">
+      <TableRow
+        className={`hover:bg-muted/50 border-b border-border ${
+          isLoading ? "opacity-50 pointer-events-none" : ""
+        }`}
+      >
         <TableCell className="font-medium">
-          <div className="flex items-center" style={{ paddingLeft: `${level * 24}px` }}>
+          <div
+            className="flex items-center"
+            style={{ paddingLeft: `${level * 24}px` }}
+          >
             {hasChildren ? (
               <Button
                 variant="ghost"
@@ -120,7 +133,9 @@ const CategoryRow = ({
                 <Package className="h-4 w-4 text-muted-foreground" />
               </div>
             )}
-            <span className={level > 0 ? "text-muted-foreground" : "font-medium"}>
+            <span
+              className={level > 0 ? "text-muted-foreground" : "font-medium"}
+            >
               {category.name}
             </span>
           </div>
@@ -131,7 +146,9 @@ const CategoryRow = ({
           </code>
         </TableCell>
         <TableCell>{getParentName(category)}</TableCell>
-        <TableCell className="text-center">{getProductCount(category)}</TableCell>
+        <TableCell className="text-center">
+          {getProductCount(category)}
+        </TableCell>
         <TableCell>{getStatusBadge(category.isActive)}</TableCell>
         <TableCell>{formatDate(category.updatedAt)}</TableCell>
         <TableCell className="text-right">
@@ -142,7 +159,10 @@ const CategoryRow = ({
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="rounded-none border-border">
+            <DropdownMenuContent
+              align="end"
+              className="rounded-none border-border"
+            >
               <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
               <DropdownMenuItem onClick={() => onView(category)}>
                 <Eye className="mr-2 h-4 w-4" />
@@ -213,10 +233,18 @@ export function CategoriesTable({
               className="pl-8 rounded-none border-border focus-visible:ring-0 focus-visible:border-primary"
             />
           </div>
-          <Button variant="outline" size="icon" className="rounded-none border-border">
+          <Button
+            variant="outline"
+            size="icon"
+            className="rounded-none border-border"
+          >
             <Filter className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="icon" className="rounded-none border-border">
+          <Button
+            variant="outline"
+            size="icon"
+            className="rounded-none border-border"
+          >
             <Download className="h-4 w-4" />
           </Button>
         </div>
@@ -240,7 +268,7 @@ export function CategoriesTable({
       </div>
 
       {/* Table */}
-      <div className="rounded-none border border-border bg-background shadow-sm">
+      <div className="rounded-none border border-border bg-background shadow-sm overflow-x-auto no-scrollbar">
         <Table>
           <TableHeader>
             <TableRow className="border-border hover:bg-muted/50 bg-muted/50">
@@ -277,30 +305,31 @@ export function CategoriesTable({
                 </TableCell>
               </TableRow>
             )}
-            <Activity mode={isLoading ? "hidden" : "visible"}>
-              {categories.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
-                    <div className="flex flex-col items-center justify-center text-muted-foreground">
-                      <Package className="h-12 w-12 mb-2 opacity-50" />
-                      <div className="text-muted-foreground">Không có danh mục nào</div>
+            {!isLoading && categories.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-8">
+                  <div className="flex flex-col items-center justify-center text-muted-foreground">
+                    <Package className="h-12 w-12 mb-2 opacity-50" />
+                    <div className="text-muted-foreground">
+                      Không có danh mục nào
                     </div>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                categories.map((category) => (
-                  <CategoryRow
-                    key={category._id}
-                    category={category}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                    onView={onView}
-                    getParentName={getParentName}
-                    getProductCount={getProductCount}
-                  />
-                ))
-              )}
-            </Activity>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : (
+              categories.map((category) => (
+                <CategoryRow
+                  key={category._id}
+                  category={category}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                  onView={onView}
+                  getParentName={getParentName}
+                  getProductCount={getProductCount}
+                  isLoading={isLoading}
+                />
+              ))
+            )}
           </TableBody>
         </Table>
       </div>

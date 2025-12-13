@@ -35,7 +35,7 @@ export default function VerifyCodePage() {
       await dispatch(verifyCode(otp)).unwrap();
       toast.success("Xác thực email thành công");
       router.push("/login");
-    } catch (error) {
+    } catch {
       toast.error("Xác thực email thất bại");
     } finally {
       setIsLoading(false);

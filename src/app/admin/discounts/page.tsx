@@ -17,7 +17,11 @@ import {
   createDiscount,
   getDiscountStatistics,
 } from "@/features/discount/discountAction";
-import { Discount, DiscountFilters } from "@/types/discount";
+import {
+  Discount,
+  DiscountFilters,
+  CreateDiscountData,
+} from "@/types/discount";
 import { DiscountsHeader } from "@/components/admin/discounts/DiscountHeader";
 import { DiscountsStats } from "@/components/admin/discounts/DiscountStats";
 import { DiscountsTable } from "@/components/admin/discounts/DiscountTable";
@@ -25,23 +29,23 @@ import { DiscountPagination } from "@/components/admin/discounts/DiscountPaginat
 import { CreateModelDiscount } from "@/components/admin/discounts/CreateModelDiscount";
 import { ViewModelDiscount } from "@/components/admin/discounts/ViewModelDiscount";
 import { UpdateModelDiscount } from "@/components/admin/discounts/UpdateModelDiscount";
-import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 export default function AdminDiscountsPage() {
   const dispatch = useAppDispatch();
   const discountState = useAppSelector((state) => state.discount);
 
   // Use URL filters hook
-  const { filters, updateFilter, updateFilters } = useUrlFilters<DiscountFilters>({
-    defaultFilters: {
-      page: 1,
-      limit: 10,
-      search: '',
-      discountType: '',
-      isActive: null,
-    },
-    basePath: '/admin/discounts',
-  });
+  const { filters, updateFilter, updateFilters } =
+    useUrlFilters<DiscountFilters>({
+      defaultFilters: {
+        page: 1,
+        limit: 10,
+        search: "",
+        discountType: "",
+        isActive: null,
+      },
+      basePath: "/admin/discounts",
+    });
 
   // Extract filter values
   const currentPage = Number(filters.page);
@@ -56,7 +60,9 @@ export default function AdminDiscountsPage() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [selectedDiscount, setSelectedDiscount] = useState<Discount | null>(null);
+  const [selectedDiscount, setSelectedDiscount] = useState<Discount | null>(
+    null
+  );
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -79,7 +85,14 @@ export default function AdminDiscountsPage() {
 
     dispatch(getAllDiscounts(params));
     dispatch(getDiscountStatistics());
-  }, [dispatch, currentPage, pageSize, searchTerm, selectedDiscountType, selectedIsActive]);
+  }, [
+    dispatch,
+    currentPage,
+    pageSize,
+    searchTerm,
+    selectedDiscountType,
+    selectedIsActive,
+  ]);
 
   // ============= Event Handlers =============
 
@@ -87,12 +100,12 @@ export default function AdminDiscountsPage() {
     setCreateModalOpen(true);
   };
 
-
-
   const handleCreateDiscount = async (discountData: Partial<Discount>) => {
     setIsCreating(true);
     try {
-      await dispatch(createDiscount(discountData as any)).unwrap();
+      await dispatch(
+        createDiscount(discountData as CreateDiscountData)
+      ).unwrap();
 
       // Refresh list
       const params: Record<string, string | number | boolean> = {
@@ -102,7 +115,7 @@ export default function AdminDiscountsPage() {
       if (searchTerm) params.search = searchTerm;
       if (selectedDiscountType) params.discountType = selectedDiscountType;
       if (selectedIsActive !== null) params.isActive = selectedIsActive;
-      
+
       dispatch(getAllDiscounts(params));
       dispatch(getDiscountStatistics());
 
@@ -144,8 +157,6 @@ export default function AdminDiscountsPage() {
         })
       ).unwrap();
 
-
-
       // Refresh list
       const params: Record<string, string | number | boolean> = {
         page: currentPage,
@@ -169,7 +180,7 @@ export default function AdminDiscountsPage() {
 
   // Filter handlers
   const handlePageChange = (page: number) => {
-    updateFilter('page', page);
+    updateFilter("page", page);
   };
 
   const handlePageSizeChange = (size: number) => {
@@ -222,8 +233,10 @@ export default function AdminDiscountsPage() {
   };
 
   // Calculate stats
-  const totalDiscounts = pagination?.totalItems || discounts.length
-  const activeDiscounts = discounts.filter((discount) => discount.isActive).length;
+  const totalDiscounts = pagination?.totalItems || discounts.length;
+  const activeDiscounts = discounts.filter(
+    (discount) => discount.isActive
+  ).length;
   const expiredDiscounts = discounts.filter(
     (discount) => new Date(discount.endDate) < new Date()
   ).length;
@@ -240,7 +253,7 @@ export default function AdminDiscountsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 no-scrollbar">
       <DiscountsHeader onOpenCreate={handleOpenCreateModal} />
 
       <DiscountsStats
@@ -250,51 +263,51 @@ export default function AdminDiscountsPage() {
         highUsageDiscounts={highUsageDiscounts}
       />
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Danh sách mã giảm giá</CardTitle>
-              <CardDescription>
-                Quản lý tất cả mã giảm giá trong hệ thống
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <DiscountsTable
-                discounts={discounts}
-                searchTerm={searchTerm}
-                pageSize={pageSize}
-                isLoading={discountState.loading}
-                onSearch={handleSearch}
-                onPageSizeChange={handlePageSizeChange}
-                onEdit={handleEditDiscount}
-                onDelete={handleDeleteDiscount}
-                onView={handleViewDiscount}
-                onDiscountTypeFilterChange={handleDiscountTypeFilterChange}
-                onActiveFilterChange={handleActiveFilterChange}
-                selectedDiscountType={selectedDiscountType}
-                selectedIsActive={selectedIsActive}
-              />
+      <Card>
+        <CardHeader>
+          <CardTitle>Danh sách mã giảm giá</CardTitle>
+          <CardDescription>
+            Quản lý tất cả mã giảm giá trong hệ thống
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <DiscountsTable
+            discounts={discounts}
+            searchTerm={searchTerm}
+            pageSize={pageSize}
+            isLoading={discountState.loading}
+            onSearch={handleSearch}
+            onPageSizeChange={handlePageSizeChange}
+            onEdit={handleEditDiscount}
+            onDelete={handleDeleteDiscount}
+            onView={handleViewDiscount}
+            onDiscountTypeFilterChange={handleDiscountTypeFilterChange}
+            onActiveFilterChange={handleActiveFilterChange}
+            selectedDiscountType={selectedDiscountType}
+            selectedIsActive={selectedIsActive}
+          />
 
-              <DiscountPagination
-                currentPage={currentPage}
-                totalPages={pagination?.totalPages || 1}
-                totalItems={pagination?.totalItems}
-                pageSize={pageSize}
-                onPageChange={handlePageChange}
-              />
+          <DiscountPagination
+            currentPage={currentPage}
+            totalPages={pagination?.totalPages || 1}
+            totalItems={pagination?.totalItems}
+            pageSize={pageSize}
+            onPageChange={handlePageChange}
+          />
 
-              <CreateModelDiscount
-                open={createModalOpen}
-                onOpenChange={setCreateModalOpen}
-                onCreate={handleCreateDiscount}
-                isLoading={isCreating}
-              />
+          <CreateModelDiscount
+            open={createModalOpen}
+            onOpenChange={setCreateModalOpen}
+            onCreate={handleCreateDiscount}
+            isLoading={isCreating}
+          />
 
-              <ViewModelDiscount
-                open={viewModalOpen}
-                onOpenChange={handleCloseModals}
-                discount={selectedDiscount}
-                onEdit={handleEditFromView}
-              />
+          <ViewModelDiscount
+            open={viewModalOpen}
+            onOpenChange={handleCloseModals}
+            discount={selectedDiscount}
+            onEdit={handleEditFromView}
+          />
 
           <UpdateModelDiscount
             open={updateModalOpen}

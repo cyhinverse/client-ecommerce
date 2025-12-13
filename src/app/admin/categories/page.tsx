@@ -26,21 +26,21 @@ import { ViewCategoryModal } from "@/components/admin/categories/ViewModal";
 import { CreateCategoryModal } from "@/components/admin/categories/CreateModel";
 import { toast } from "sonner";
 import { Params } from "@/types/product";
-import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 export default function CategoriesAdminPage() {
   const dispatch = useAppDispatch();
   const categoryState = useAppSelector((state) => state.category);
 
   // Use URL filters hook
-  const { filters, updateFilter, updateFilters } = useUrlFilters<CategoryFilters>({
-    defaultFilters: {
-      page: 1,
-      limit: 10,
-      search: '',
-    },
-    basePath: '/admin/categories',
-  });
+  const { filters, updateFilter, updateFilters } =
+    useUrlFilters<CategoryFilters>({
+      defaultFilters: {
+        page: 1,
+        limit: 10,
+        search: "",
+      },
+      basePath: "/admin/categories",
+    });
 
   // Extract filter values
   const currentPage = Number(filters.page);
@@ -61,7 +61,10 @@ export default function CategoriesAdminPage() {
 
   // Fetch categories when filters change
   useEffect(() => {
-    const params: Record<string, string | number> = { page: currentPage, limit: pageSize };
+    const params: Record<string, string | number> = {
+      page: currentPage,
+      limit: pageSize,
+    };
     if (searchTerm && searchTerm.trim() !== "") {
       params.search = searchTerm.trim();
     } else {
@@ -71,7 +74,6 @@ export default function CategoriesAdminPage() {
     dispatch(getAllCategories(params));
   }, [dispatch, currentPage, pageSize, searchTerm]);
 
-
   const handleOpenCreateModal = () => {
     setCreateModalOpen(true);
   };
@@ -79,7 +81,18 @@ export default function CategoriesAdminPage() {
   const handleCreateCategory = async (categoryData: Partial<Category>) => {
     setIsCreating(true);
     try {
-      await dispatch(creatCategory(categoryData as any)).unwrap();
+      await dispatch(
+        creatCategory(
+          categoryData as {
+            name: string;
+            slug: string;
+            description?: string;
+            images: string[];
+            isActive?: boolean;
+            parentCategory?: string;
+          }
+        )
+      ).unwrap();
 
       // Refresh list
       const params: Params = { page: currentPage, limit: pageSize };
@@ -123,7 +136,14 @@ export default function CategoriesAdminPage() {
         updateCategory({
           id: selectedCategory._id,
           ...categoryData,
-        } as any)
+        } as {
+          id: string;
+          name: string;
+          slug: string;
+          description?: string;
+          isActive: boolean;
+          isFeatured?: boolean;
+        })
       ).unwrap();
 
       // Refresh list
@@ -145,7 +165,7 @@ export default function CategoriesAdminPage() {
 
   // Filter handlers
   const handlePageChange = (page: number) => {
-    updateFilter('page', page);
+    updateFilter("page", page);
   };
 
   const handlePageSizeChange = (size: number) => {
@@ -206,7 +226,7 @@ export default function CategoriesAdminPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 no-scrollbar">
       <CategoriesHeader onAddCategory={handleOpenCreateModal} />
 
       <CategoriesStats
@@ -219,9 +239,7 @@ export default function CategoriesAdminPage() {
       <Card>
         <CardHeader>
           <CardTitle>Danh sách danh mục</CardTitle>
-          <CardDescription>
-            Quản lý tất cả danh mục sản phẩm
-          </CardDescription>
+          <CardDescription>Quản lý tất cả danh mục sản phẩm</CardDescription>
         </CardHeader>
         <CardContent>
           <CategoriesTable
@@ -241,7 +259,7 @@ export default function CategoriesAdminPage() {
           <CreateCategoryModal
             isOpen={createModalOpen}
             onClose={() => setCreateModalOpen(false)}
-            onCreate={handleCreateCategory as any}
+            onCreate={handleCreateCategory}
             categories={categories}
             isLoading={isCreating}
           />

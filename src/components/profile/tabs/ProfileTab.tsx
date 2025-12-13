@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Address, ProfileTabProps } from "@/types/address";
 
-
 export default function ProfileTab({ user }: ProfileTabProps) {
   const dispatch = useAppDispatch();
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
@@ -32,7 +31,7 @@ export default function ProfileTab({ user }: ProfileTabProps) {
         .then(() => {
           toast.success("Cập nhật ảnh đại diện thành công");
         })
-        .catch((error) => {
+        .catch(() => {
           toast.error("Cập nhật ảnh đại diện thất bại");
         })
         .finally(() => {
@@ -140,8 +139,11 @@ export default function ProfileTab({ user }: ProfileTabProps) {
               <div className="text-right">
                 {user.addresses && user.addresses.length > 0 ? (
                   <p className="text-sm font-medium">
-                    {user.addresses.find((addr: Address) => addr.isDefault)?.district || user.addresses[0]?.district}, {" "}
-                    {user.addresses.find((addr: Address) => addr.isDefault)?.city || user.addresses[0]?.city}
+                    {user.addresses.find((addr: Address) => addr.isDefault)
+                      ?.district || user.addresses[0]?.district}
+                    ,{" "}
+                    {user.addresses.find((addr: Address) => addr.isDefault)
+                      ?.city || user.addresses[0]?.city}
                   </p>
                 ) : (
                   <p className="text-sm text-muted-foreground">

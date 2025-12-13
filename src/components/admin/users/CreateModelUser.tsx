@@ -17,10 +17,18 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 
+interface CreateUserData {
+  username: string;
+  email: string;
+  password: string;
+  roles: string;
+  isVerifiedEmail: boolean;
+}
+
 interface CreateModelUserProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreate: (userData: any) => void;
+  onCreate: (userData: CreateUserData) => void;
   isLoading?: boolean;
 }
 
@@ -35,7 +43,7 @@ export function CreateModelUser({
     username: "",
     email: "",
     phone: "",
-    roles: "user", 
+    roles: "user",
     isVerifiedEmail: false,
     password: "",
   });

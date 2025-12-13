@@ -1,3 +1,5 @@
+import { Address } from "./address";
+
 export interface address {
   fullName: string;
   phone: string;
@@ -17,7 +19,7 @@ export interface User {
   avatar: string | null;
   isVerifiedEmail: boolean;
   provider: string;
-  addresses: any[];
+  addresses: Address[];
   createdAt: string;
   updatedAt: string;
   __v: number;

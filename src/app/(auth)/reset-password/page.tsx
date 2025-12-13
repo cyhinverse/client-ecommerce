@@ -67,7 +67,7 @@ export default function ResetPasswordPage() {
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
-      console.log("Submitting data:", data); 
+      console.log("Submitting data:", data);
 
       const result = await dispatch(
         resetPassword({
@@ -81,13 +81,13 @@ export default function ResetPasswordPage() {
         toast.success("Đặt lại mật khẩu thành công!");
         router.push("/login");
       } else {
-        const errorMessage =
-         "Đặt lại mật khẩu thất bại";
+        const errorMessage = "Đặt lại mật khẩu thất bại";
         toast.error(errorMessage);
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Reset password error:", error);
-      const errorMessage = error?.message || "Đặt lại mật khẩu thất bại";
+      const errorMessage =
+        (error as Error)?.message || "Đặt lại mật khẩu thất bại";
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -127,7 +127,9 @@ export default function ResetPasswordPage() {
                 />
               </div>
               {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
+                <p className="text-sm text-destructive">
+                  {errors.email.message}
+                </p>
               )}
             </div>
 
@@ -147,7 +149,9 @@ export default function ResetPasswordPage() {
                 />
               </div>
               {errors.code && (
-                <p className="text-sm text-destructive">{errors.code.message}</p>
+                <p className="text-sm text-destructive">
+                  {errors.code.message}
+                </p>
               )}
             </div>
 

@@ -22,7 +22,9 @@ export const notificationSlice = createSlice({
   reducers: {
     // Actions for Socket updates
     addNotification: (state, action: PayloadAction<Notification>) => {
-      const exists = state.notifications.some(n => n._id === action.payload._id);
+      const exists = state.notifications.some(
+        (n) => n._id === action.payload._id
+      );
       if (!exists) {
         state.notifications.unshift(action.payload);
         state.unreadCount += 1;
@@ -53,8 +55,8 @@ export const notificationSlice = createSlice({
       const { data, pagination, unreadCount } = action.payload.data;
       state.notifications = data; // data is now the notifications array
       state.pagination = pagination;
-      
-      // Also sync unread count 
+
+      // Also sync unread count
       if (unreadCount !== undefined) {
         state.unreadCount = unreadCount;
       }
@@ -65,15 +67,15 @@ export const notificationSlice = createSlice({
     });
 
     // =========================== MARK AS READ NOTIFICATION ===========================
-    builder.addCase(markAsReadNotification.pending, (state) => {
+    builder.addCase(markAsReadNotification.pending, () => {
       // Optimistic update could go here, or just loading state
     });
-    builder.addCase(markAsReadNotification.fulfilled, (state, action) => {
-       // Typically we refresh or update local state
-       // Logic to mark local notification as read if needed
+    builder.addCase(markAsReadNotification.fulfilled, () => {
+      // Typically we refresh or update local state
+      // Logic to mark local notification as read if needed
     });
-    builder.addCase(markAsReadNotification.rejected, (state, action) => {
-        // Handle error
+    builder.addCase(markAsReadNotification.rejected, () => {
+      // Handle error
     });
 
     // =========================== MARK ALL AS READ NOTIFICATION ===========================

@@ -6,7 +6,7 @@ import NewArrivals from "@/components/product/NewArrivals";
 import OnSaleProduct from "@/components/product/OnSaleProduct";
 import ProductFeatures from "@/components/product/ProductFeatures";
 
-export default function Home({ children }: { children: React.ReactNode }) {
+export default function Home() {
   return (
     <>
       <main className="w-full min-h-screen">

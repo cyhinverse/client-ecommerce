@@ -1,6 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
-import { createAddress, updateAddress, getProfile } from "@/features/user/userAction";
+import {
+  createAddress,
+  updateAddress,
+  getProfile,
+} from "@/features/user/userAction";
 import { useAppDispatch } from "@/hooks/hooks";
 import {
   Dialog,
@@ -15,16 +19,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { AddressDialogProps, AddressFormData, Address } from "@/types/address";
-
-
+import { AddressDialogProps, AddressFormData } from "@/types/address";
 
 export default function AddressDialog({
   open,
   onClose,
   editingAddress,
   onSuccess,
-  user
+  user,
 }: AddressDialogProps) {
   const dispatch = useAppDispatch();
 
@@ -40,7 +42,8 @@ export default function AddressDialog({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
-  const [locationPermissionDenied, setLocationPermissionDenied] = useState(false);
+  const [locationPermissionDenied, setLocationPermissionDenied] =
+    useState(false);
 
   useEffect(() => {
     if (editingAddress) {
@@ -68,7 +71,9 @@ export default function AddressDialog({
 
   // Hàm phân tích địa chỉ và điền vào các trường phù hợp
   const parseAndFillAddress = (fullAddress: string) => {
-    const address = fullAddress.replace(/,\s*Việt Nam$/, "").replace(/,\s*Vietnam$/i, "");
+    const address = fullAddress
+      .replace(/,\s*Việt Nam$/, "")
+      .replace(/,\s*Vietnam$/i, "");
 
     // Mẫu regex để phân tích địa chỉ Việt Nam
     const patterns = [
@@ -77,7 +82,7 @@ export default function AddressDialog({
       // Pattern cho địa chỉ dạng: Số nhà, Đường, Phường, Quận, Thành phố
       /(.*?),\s*(Phường|Xã)\s*(.*?),\s*(Quận|Huyện)\s*(.*?),\s*(.*)/,
       // Pattern đơn giản hơn
-      /(.*?),\s*(.*?),\s*(.*?),\s*(.*)/
+      /(.*?),\s*(.*?),\s*(.*?),\s*(.*)/,
     ];
 
     let city = "";
@@ -102,9 +107,9 @@ export default function AddressDialog({
           city = match[6].trim();
         } else {
           // Pattern đơn giản - chia thành 4 phần
-          const parts = address.split(',').map(part => part.trim());
+          const parts = address.split(",").map((part) => part.trim());
           if (parts.length >= 4) {
-            detailedAddress = parts.slice(0, parts.length - 3).join(', ');
+            detailedAddress = parts.slice(0, parts.length - 3).join(", ");
             ward = parts[parts.length - 3];
             district = parts[parts.length - 2];
             city = parts[parts.length - 1];
@@ -116,7 +121,7 @@ export default function AddressDialog({
 
     // Nếu không phân tích được bằng regex, thử phân tích thủ công
     if (!city) {
-      const parts = address.split(',').map(part => part.trim());
+      const parts = address.split(",").map((part) => part.trim());
 
       if (parts.length > 0) {
         // Phần cuối cùng thường là thành phố/tỉnh
@@ -133,24 +138,30 @@ export default function AddressDialog({
         }
 
         // Phần còn lại là địa chỉ chi tiết
-        detailedAddress = parts.slice(0, Math.max(0, parts.length - 3)).join(', ');
+        detailedAddress = parts
+          .slice(0, Math.max(0, parts.length - 3))
+          .join(", ");
       }
     }
 
     // Chuẩn hóa tên thành phố
-    if (city.includes('Hồ Chí Minh') || city.includes('TP.HCM') || city.includes('TP HCM')) {
-      city = 'Thành phố Hồ Chí Minh';
-    } else if (city.includes('Hà Nội')) {
-      city = 'Thành phố Hà Nội';
-    } else if (city.includes('Đà Nẵng')) {
-      city = 'Thành phố Đà Nẵng';
+    if (
+      city.includes("Hồ Chí Minh") ||
+      city.includes("TP.HCM") ||
+      city.includes("TP HCM")
+    ) {
+      city = "Thành phố Hồ Chí Minh";
+    } else if (city.includes("Hà Nội")) {
+      city = "Thành phố Hà Nội";
+    } else if (city.includes("Đà Nẵng")) {
+      city = "Thành phố Đà Nẵng";
     }
 
     return {
       detailedAddress: detailedAddress || address,
       city,
       district,
-      ward
+      ward,
     };
   };
 
@@ -187,12 +198,12 @@ export default function AddressDialog({
             const fullAddress = data.display_name;
             const parsedAddress = parseAndFillAddress(fullAddress);
 
-            setAddressForm(prev => ({
+            setAddressForm((prev) => ({
               ...prev,
               address: parsedAddress.detailedAddress,
               city: parsedAddress.city,
               district: parsedAddress.district,
-              ward: parsedAddress.ward
+              ward: parsedAddress.ward,
             }));
 
             toast.success("Đã lấy và tự động điền địa chỉ từ vị trí hiện tại");
@@ -228,7 +239,7 @@ export default function AddressDialog({
       {
         enableHighAccuracy: true,
         timeout: 15000,
-        maximumAge: 60000
+        maximumAge: 60000,
       }
     );
   };
@@ -256,10 +267,12 @@ export default function AddressDialog({
       };
 
       if (editingAddress) {
-        await dispatch(updateAddress({
-          addressId: editingAddress._id,
-          addressData: addressDataToSend
-        })).unwrap();
+        await dispatch(
+          updateAddress({
+            addressId: editingAddress._id,
+            addressData: addressDataToSend,
+          })
+        ).unwrap();
         toast.success("Cập nhật địa chỉ thành công");
       } else {
         await dispatch(createAddress(addressDataToSend)).unwrap();
@@ -270,10 +283,19 @@ export default function AddressDialog({
 
       onClose();
       onSuccess();
-    } catch (error: any) {
-      console.error('Address operation error:', error);
-      const errorMessage = error.response?.data?.message || error.message || 'Có lỗi xảy ra';
-      toast.error(`${editingAddress ? "Cập nhật địa chỉ thất bại" : "Thêm địa chỉ thất bại"}: ${errorMessage}`);
+    } catch (error: unknown) {
+      console.error("Address operation error:", error);
+      const err = error as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
+      const errorMessage =
+        err.response?.data?.message || err.message || "Có lỗi xảy ra";
+      toast.error(
+        `${
+          editingAddress ? "Cập nhật địa chỉ thất bại" : "Thêm địa chỉ thất bại"
+        }: ${errorMessage}`
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -305,8 +327,7 @@ export default function AddressDialog({
           <DialogDescription>
             {editingAddress
               ? "Cập nhật thông tin địa chỉ của bạn"
-              : "Thêm địa chỉ giao hàng mới"
-            }
+              : "Thêm địa chỉ giao hàng mới"}
           </DialogDescription>
         </DialogHeader>
 
@@ -326,13 +347,17 @@ export default function AddressDialog({
                   disabled={isGettingLocation}
                   className="h-8 text-xs"
                 >
-                  {isGettingLocation ? "📍 Đang lấy vị trí..." : "📍 Lấy vị trí hiện tại"}
+                  {isGettingLocation
+                    ? "📍 Đang lấy vị trí..."
+                    : "📍 Lấy vị trí hiện tại"}
                 </Button>
               </div>
               <Input
                 type="text"
                 value={addressForm.address}
-                onChange={(e) => setAddressForm({ ...addressForm, address: e.target.value })}
+                onChange={(e) =>
+                  setAddressForm({ ...addressForm, address: e.target.value })
+                }
                 placeholder="Số nhà, tên đường, địa chỉ chi tiết"
                 className="h-10"
               />
@@ -351,14 +376,18 @@ export default function AddressDialog({
                 <Input
                   type="text"
                   value={addressForm.fullName}
-                  onChange={(e) => setAddressForm({ ...addressForm, fullName: e.target.value })}
+                  onChange={(e) =>
+                    setAddressForm({ ...addressForm, fullName: e.target.value })
+                  }
                   placeholder="Nhập họ và tên"
                   className="h-10"
                 />
                 <Input
                   type="text"
                   value={addressForm.phone}
-                  onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })}
+                  onChange={(e) =>
+                    setAddressForm({ ...addressForm, phone: e.target.value })
+                  }
                   placeholder="VD: 0912345678"
                   className="h-10"
                 />
@@ -375,7 +404,9 @@ export default function AddressDialog({
                   <Input
                     type="text"
                     value={addressForm.city}
-                    onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
+                    onChange={(e) =>
+                      setAddressForm({ ...addressForm, city: e.target.value })
+                    }
                     placeholder="Tỉnh/Thành phố"
                     className="h-10"
                   />
@@ -385,7 +416,12 @@ export default function AddressDialog({
                   <Input
                     type="text"
                     value={addressForm.district}
-                    onChange={(e) => setAddressForm({ ...addressForm, district: e.target.value })}
+                    onChange={(e) =>
+                      setAddressForm({
+                        ...addressForm,
+                        district: e.target.value,
+                      })
+                    }
                     placeholder="Quận/Huyện"
                     className="h-10"
                   />
@@ -395,14 +431,17 @@ export default function AddressDialog({
                   <Input
                     type="text"
                     value={addressForm.ward}
-                    onChange={(e) => setAddressForm({ ...addressForm, ward: e.target.value })}
+                    onChange={(e) =>
+                      setAddressForm({ ...addressForm, ward: e.target.value })
+                    }
                     placeholder="Phường/Xã"
                     className="h-10"
                   />
                 </div>
               </div>
               <p className="text-xs text-gray-500">
-                Các trường này sẽ được tự động điền khi sử dụng tính năng lấy vị trí hiện tại
+                Các trường này sẽ được tự động điền khi sử dụng tính năng lấy vị
+                trí hiện tại
               </p>
             </div>
 
@@ -411,9 +450,14 @@ export default function AddressDialog({
               <Switch
                 id="isDefault"
                 checked={addressForm.isDefault}
-                onCheckedChange={(checked) => setAddressForm({ ...addressForm, isDefault: checked })}
+                onCheckedChange={(checked) =>
+                  setAddressForm({ ...addressForm, isDefault: checked })
+                }
               />
-              <Label htmlFor="isDefault" className="text-sm font-normal cursor-pointer">
+              <Label
+                htmlFor="isDefault"
+                className="text-sm font-normal cursor-pointer"
+              >
                 Đặt làm địa chỉ mặc định
               </Label>
             </div>
@@ -428,12 +472,12 @@ export default function AddressDialog({
             >
               Hủy
             </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="h-10 px-6"
-            >
-              {isSubmitting ? "Đang xử lý..." : editingAddress ? "Cập nhật" : "Thêm địa chỉ"}
+            <Button type="submit" disabled={isSubmitting} className="h-10 px-6">
+              {isSubmitting
+                ? "Đang xử lý..."
+                : editingAddress
+                ? "Cập nhật"
+                : "Thêm địa chỉ"}
             </Button>
           </DialogFooter>
         </form>

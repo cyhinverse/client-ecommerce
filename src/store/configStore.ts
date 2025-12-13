@@ -11,16 +11,15 @@ import { orderSlice } from "@/features/order/orderSlice";
 import { paymentSlice } from "@/features/payment/paymentSlice";
 import { notificationSlice } from "@/features/notification/notificationSlice";
 
-
 const createNoopStorage = () => {
   return {
-    getItem(_key: string) {
+    getItem(_key: string): Promise<null> {
       return Promise.resolve(null);
     },
-    setItem(_key: string, value: any) {
+    setItem(_key: string, value: string): Promise<string> {
       return Promise.resolve(value);
     },
-    removeItem(_key: string) {
+    removeItem(_key: string): Promise<void> {
       return Promise.resolve();
     },
   };
@@ -41,7 +40,6 @@ export const rootReducer = combineReducers({
   order: orderSlice.reducer,
   payment: paymentSlice.reducer,
   notification: notificationSlice.reducer,
-
 });
 
 const persistConfig = {

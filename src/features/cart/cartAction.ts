@@ -9,7 +9,7 @@ export const addToCart = createAsyncThunk(
     quantity = 1,
   }: {
     productId: string;
-    variantId: any;
+    variantId: string | null;
     quantity: number;
   }) => {
     const response = await instance.post("/cart", {
@@ -22,7 +22,7 @@ export const addToCart = createAsyncThunk(
     }
 
     return response.data;
-  },
+  }
 );
 
 export const removeFromCart = createAsyncThunk(
@@ -34,7 +34,7 @@ export const removeFromCart = createAsyncThunk(
     }
 
     return response.data;
-  },
+  }
 );
 
 export const clearCart = createAsyncThunk("clear/cart", async () => {
@@ -56,7 +56,7 @@ export const updateCartItem = createAsyncThunk(
     }
 
     return response.data;
-  },
+  }
 );
 
 export const getCart = createAsyncThunk("get/cart", async () => {

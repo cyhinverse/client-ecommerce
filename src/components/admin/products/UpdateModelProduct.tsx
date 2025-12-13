@@ -77,6 +77,7 @@ export function UpdateModelProduct({
         },
       }));
 
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         name: product.name || "",
         description: product.description || "",
@@ -275,7 +276,11 @@ export function UpdateModelProduct({
     }));
   };
 
-  const updateVariant = (index: number, field: string, value: any) => {
+  const updateVariant = (
+    index: number,
+    field: string,
+    value: string | number | string[]
+  ) => {
     setFormData((prev) => ({
       ...prev,
       variants: prev.variants.map((variant, i) =>
@@ -295,7 +300,7 @@ export function UpdateModelProduct({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-background border-border text-foreground max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-background border-border text-foreground max-w-4xl max-h-[90vh] overflow-y-auto no-scrollbar">
         <DialogHeader>
           <DialogTitle>Cập nhật sản phẩm</DialogTitle>
           <DialogDescription>Chỉnh sửa thông tin sản phẩm</DialogDescription>

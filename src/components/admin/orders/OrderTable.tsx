@@ -24,9 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Search, MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
-import { Activity } from "react";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
-
 
 export interface OrdersTableProps {
   orders: Order[];
@@ -55,7 +53,6 @@ export function OrdersTable({
   statusFilter,
   pageSize,
   onSearch,
-  paymentStatusFilter,
   onStatusFilter,
   onPageSizeChange,
   onEdit,
@@ -64,7 +61,12 @@ export function OrdersTable({
   isLoading = false,
 }: OrdersTableProps) {
   const getStatusBadge = (status: string) => {
-    const statusConfig: { [key: string]: { label: string; variant: "default" | "secondary" | "destructive" | "outline" } } = {
+    const statusConfig: {
+      [key: string]: {
+        label: string;
+        variant: "default" | "secondary" | "destructive" | "outline";
+      };
+    } = {
       pending: { label: "Chờ xác nhận", variant: "secondary" },
       confirmed: { label: "Đã xác nhận", variant: "outline" },
       processing: { label: "Đang xử lý", variant: "default" },
@@ -78,13 +80,16 @@ export function OrdersTable({
       variant: "secondary",
     };
 
-    return (
-      <Badge variant={config.variant}>{config.label}</Badge>
-    );
+    return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
   const getPaymentStatusBadge = (status: string) => {
-    const statusConfig: { [key: string]: { label: string; variant: "default" | "secondary" | "destructive" | "outline" } } = {
+    const statusConfig: {
+      [key: string]: {
+        label: string;
+        variant: "default" | "secondary" | "destructive" | "outline";
+      };
+    } = {
       unpaid: { label: "Chưa thanh toán", variant: "secondary" },
       paid: { label: "Đã thanh toán", variant: "outline" },
       refunded: { label: "Đã hoàn tiền", variant: "destructive" },
@@ -95,9 +100,7 @@ export function OrdersTable({
       variant: "secondary",
     };
 
-    return (
-      <Badge variant={config.variant}>{config.label}</Badge>
-    );
+    return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
   const formatDate = (dateString: string) => {
@@ -139,7 +142,10 @@ export function OrdersTable({
             </SelectContent>
           </Select>
         </div>
-        <Select value={pageSize.toString()} onValueChange={(value) => onPageSizeChange(Number(value))}>
+        <Select
+          value={pageSize.toString()}
+          onValueChange={(value) => onPageSizeChange(Number(value))}
+        >
           <SelectTrigger className="w-[120px] rounded-none border-border focus:ring-0 focus:border-primary">
             <SelectValue placeholder="Hiển thị" />
           </SelectTrigger>
@@ -151,7 +157,7 @@ export function OrdersTable({
         </Select>
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-x-auto no-scrollbar">
         <Table>
           <TableHeader>
             <TableRow>
@@ -174,57 +180,69 @@ export function OrdersTable({
                 </TableCell>
               </TableRow>
             )}
-            <Activity mode={isLoading ? "hidden" : "visible"}>
-              {orders.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    Không có đơn hàng nào
+            {!isLoading && orders.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={7}
+                  className="text-center py-8 text-muted-foreground"
+                >
+                  Không có đơn hàng nào
+                </TableCell>
+              </TableRow>
+            ) : (
+              orders.map((order) => (
+                <TableRow
+                  key={order._id}
+                  className={isLoading ? "opacity-50 pointer-events-none" : ""}
+                >
+                  <TableCell className="font-medium">
+                    #{order._id.slice(-8).toUpperCase()}
+                  </TableCell>
+                  <TableCell>
+                    <div>
+                      <div className="font-medium">
+                        {order.shippingAddress.fullName}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {order.shippingAddress.phone}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>{formatDate(order.createdAt)}</TableCell>
+                  <TableCell>{formatCurrency(order.totalAmount)}</TableCell>
+                  <TableCell>{getStatusBadge(order.status)}</TableCell>
+                  <TableCell>
+                    {getPaymentStatusBadge(order.paymentStatus)}
+                  </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => onView(order)}>
+                          <Eye className="w-4 h-4 mr-2" />
+                          Xem chi tiết
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onEdit(order)}>
+                          <Edit className="w-4 h-4 mr-2" />
+                          Cập nhật trạng thái
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => onDelete(order)}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Xóa
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
-              ) : (
-                orders.map((order) => (
-                  <TableRow key={order._id}>
-                    <TableCell className="font-medium">#{order._id.slice(-8).toUpperCase()}</TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{order.shippingAddress.fullName}</div>
-                        <div className="text-sm text-muted-foreground">{order.shippingAddress.phone}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{formatDate(order.createdAt)}</TableCell>
-                    <TableCell>{formatCurrency(order.totalAmount)}</TableCell>
-                    <TableCell>{getStatusBadge(order.status)}</TableCell>
-                    <TableCell>{getPaymentStatusBadge(order.paymentStatus)}</TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => onView(order)}>
-                            <Eye className="w-4 h-4 mr-2" />
-                            Xem chi tiết
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => onEdit(order)}>
-                            <Edit className="w-4 h-4 mr-2" />
-                            Cập nhật trạng thái
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => onDelete(order)}
-                            className="text-destructive"
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Xóa
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </Activity>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>

@@ -1,7 +1,7 @@
 "use client";
 import { getProfile } from "@/features/user/userAction";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { useEffect, useState, Activity } from "react";
+import { useEffect, useState } from "react";
 import { logout } from "@/features/auth/authAction";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -21,7 +21,14 @@ import ProfileTab from "@/components/profile/tabs/ProfileTab";
 import OrdersTab from "@/components/profile/tabs/OrdersTab";
 import AddressTab from "@/components/profile/tabs/AddressTab";
 import SettingsTab from "@/components/profile/tabs/SettingsTab";
-import { User, Package, MapPin, Settings, LogOut, SquarePen } from "lucide-react";
+import {
+  User,
+  Package,
+  MapPin,
+  Settings,
+  LogOut,
+  SquarePen,
+} from "lucide-react";
 
 export default function ProfilePage() {
   const dispatch = useAppDispatch();
@@ -56,7 +63,9 @@ export default function ProfilePage() {
       {(loading || isLoading) && (
         <SpinnerLoading className="absolute inset-0 z-50 m-auto" />
       )}
-      <Activity mode={loading || isLoading ? "hidden" : "visible"}>
+      <div
+        className={loading || isLoading ? "opacity-50 pointer-events-none" : ""}
+      >
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Sidebar Navigation */}
@@ -162,7 +171,7 @@ export default function ProfilePage() {
             </Card>
           </div>
         </Tabs>
-      </Activity>
+      </div>
 
       <UpdateUserProfile open={open} setOpen={setOpen} />
     </div>

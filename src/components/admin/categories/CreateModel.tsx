@@ -1,7 +1,7 @@
 // components/CreateCategoryModal.tsx
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
@@ -38,7 +38,6 @@ import {
 } from "lucide-react";
 import { Category } from "@/types/category";
 import Image from "next/image";
-
 
 // Zod validation schema
 const createFormSchema = z.object({
@@ -80,7 +79,7 @@ export function CreateCategoryModal({
 
   // Initialize form
   const form = useForm<CreateFormData>({
-    resolver: zodResolver(createFormSchema) as any,
+    resolver: zodResolver(createFormSchema) as Resolver<CreateFormData>,
     defaultValues: {
       name: "",
       slug: "",
@@ -234,25 +233,7 @@ export function CreateCategoryModal({
             className="flex flex-col flex-1  min-h-0"
           >
             {/* Scrollable Form Content */}
-            <div className="space-y-4 flex-1 overflow-y-auto p-2 pb-4">
-              {/* Custom scrollbar styling */}
-              <style jsx>{`
-                .overflow-y-auto::-webkit-scrollbar {
-                  width: 6px;
-                }
-                .overflow-y-auto::-webkit-scrollbar-track {
-                  background: #f1f5f9;
-                  border-radius: 3px;
-                }
-                .overflow-y-auto::-webkit-scrollbar-thumb {
-                  background: #cbd5e1;
-                  border-radius: 3px;
-                }
-                .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-                  background: #94a3b8;
-                }
-              `}</style>
-
+            <div className="space-y-4 flex-1 overflow-y-auto p-2 pb-4 no-scrollbar">
               {/* Name Field */}
               <FormField
                 control={form.control}
@@ -417,7 +398,7 @@ export function CreateCategoryModal({
               <FormField
                 control={form.control}
                 name="images"
-                render={({  }) => (
+                render={({}) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium">
                       Hình ảnh

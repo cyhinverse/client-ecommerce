@@ -1,5 +1,11 @@
 "use client";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,24 +25,47 @@ export default function Banner() {
   // Banner data memoized so reference stable
   const banners: BannerItem[] = useMemo(
     () => [
-      { id: 1, imageUrl: "/images/CyBer.jpg", title: "SUMMER COLLECTION", subtitle: "Discover the latest trends." },
-      { id: 2, imageUrl: "/images/lading.jpg", title: "WINTER ESSENTIALS", subtitle: "Stay warm in style." },
-      { id: 3, imageUrl: "/images/online.jpg", title: "NEW ARRIVALS", subtitle: "Be the first to wear it." },
-      { id: 4, imageUrl: "/images/shopping.jpg", title: "FALL FASHION", subtitle: "Upgrade your wardrobe." },
+      {
+        id: 1,
+        imageUrl: "/images/CyBer.jpg",
+        title: "SUMMER COLLECTION",
+        subtitle: "Discover the latest trends.",
+      },
+      {
+        id: 2,
+        imageUrl: "/images/lading.jpg",
+        title: "WINTER ESSENTIALS",
+        subtitle: "Stay warm in style.",
+      },
+      {
+        id: 3,
+        imageUrl: "/images/online.jpg",
+        title: "NEW ARRIVALS",
+        subtitle: "Be the first to wear it.",
+      },
+      {
+        id: 4,
+        imageUrl: "/images/shopping.jpg",
+        title: "FALL FASHION",
+        subtitle: "Upgrade your wardrobe.",
+      },
     ],
     []
   );
 
   const length = banners.length;
 
-  const goTo = useCallback((idx: number) => {
-    setCurrentIndex((prev) => {
-      if (idx === prev) return prev;
-      if (idx < 0) return length - 1;
-      if (idx >= length) return 0;
-      return idx;
-    });
-  }, [length]);
+  const goTo = useCallback(
+    (idx: number) => {
+      setCurrentIndex((prev) => {
+        if (idx === prev) return prev;
+        if (idx < 0) return length - 1;
+        if (idx >= length) return 0;
+        return idx;
+      });
+    },
+    [length]
+  );
 
   const handleNext = useCallback(() => {
     setCurrentIndex((prev) => (prev === length - 1 ? 0 : prev + 1));
@@ -50,7 +79,6 @@ export default function Banner() {
   useEffect(() => {
     const startAutoplay = () => {
       if (autoplayRef.current) return;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       autoplayRef.current = window.setInterval(() => {
         if (!isHoveringRef.current) {
           setCurrentIndex((prev) => (prev === length - 1 ? 0 : prev + 1));

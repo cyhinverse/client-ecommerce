@@ -67,7 +67,10 @@ export function ViewCategoryModal({
         Đang hoạt động
       </Badge>
     ) : (
-      <Badge variant="outline" className="border-muted-foreground text-muted-foreground">
+      <Badge
+        variant="outline"
+        className="border-muted-foreground text-muted-foreground"
+      >
         <XCircle className="h-3 w-3 mr-1" />
         Không hoạt động
       </Badge>
@@ -79,7 +82,7 @@ export function ViewCategoryModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto no-scrollbar">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Eye className="h-5 w-5 text-primary" />
@@ -325,7 +328,7 @@ export function ViewCategoryModal({
                     <div className="flex items-center gap-2 mt-1">
                       <Calendar className="h-3 w-3 text-muted-foreground" />
                       <span className="text-sm">
-                        {formatDate(category.createdAt as any)}
+                        {formatDate(category.createdAt || "")}
                       </span>
                     </div>
                   </div>

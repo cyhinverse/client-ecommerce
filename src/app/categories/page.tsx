@@ -3,7 +3,7 @@ import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { getTreeCategories } from "@/features/category/categoryAction";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import Link from "next/link";
-import { useEffect, Activity } from "react";
+import { useEffect } from "react";
 import { toast } from "sonner";
 
 export default function CategoriesPage() {
@@ -31,7 +31,7 @@ export default function CategoriesPage() {
   return (
     <main className="w-full min-h-screen p-4 mt-10 mx-auto max-w-7xl relative">
       {isLoading && <SpinnerLoading className="absolute inset-0 m-auto" />}
-      <Activity mode={isLoading ? "hidden" : "visible"}>
+      <div className={isLoading ? "opacity-50 pointer-events-none" : ""}>
         <section className="m-10">
           <h1 className="text-4xl font-bold mb-8 text-center tracking-tight">
             Product Categories
@@ -58,7 +58,7 @@ export default function CategoriesPage() {
         </section>
 
         <section></section>
-      </Activity>
+      </div>
     </main>
   );
 }

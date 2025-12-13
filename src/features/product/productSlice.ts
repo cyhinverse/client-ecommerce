@@ -2,7 +2,6 @@ import { createSlice } from "@reduxjs/toolkit";
 import {
   createProduct,
   deleteProduct,
-  deleteVariantByVariantId,
   getAllProducts,
   getFeaturedProducts,
   getNewArrivals,
@@ -11,8 +10,6 @@ import {
   getProductBySlug,
   getProductsByCategory,
   getProductsBySlugOfCategory,
-  updateProduct,
-  updateVariant,
   searchProducts,
 } from "./productAction";
 import { ProductState } from "@/types/product";
@@ -82,12 +79,11 @@ export const productSlice = createSlice({
     builder.addCase(getFeaturedProducts.fulfilled, (state, action) => {
       state.isLoading = false;
       state.featured = action.payload?.data || [];
-      console.log("Check data from product features: ",state.featured)
+      console.log("Check data from product features: ", state.featured);
     });
     builder.addCase(getFeaturedProducts.rejected, (state, action) => {
       state.isLoading = false;
-      state.error =
-        action.error.message || "Failed to fetch featured products";
+      state.error = action.error.message || "Failed to fetch featured products";
     });
 
     // =========================== NEW ARRIVALS ===========================
@@ -101,8 +97,7 @@ export const productSlice = createSlice({
     });
     builder.addCase(getNewArrivals.rejected, (state, action) => {
       state.isLoading = false;
-      state.error =
-        action.error.message || "Failed to fetch new arrivals";
+      state.error = action.error.message || "Failed to fetch new arrivals";
     });
 
     // =========================== ON SALE ===========================
@@ -116,8 +111,7 @@ export const productSlice = createSlice({
     });
     builder.addCase(getOnSaleProducts.rejected, (state, action) => {
       state.isLoading = false;
-      state.error =
-        action.error.message || "Failed to fetch on sale products";
+      state.error = action.error.message || "Failed to fetch on sale products";
     });
 
     // =========================== CATEGORY ===========================
@@ -131,8 +125,7 @@ export const productSlice = createSlice({
     });
     builder.addCase(getProductsByCategory.rejected, (state, action) => {
       state.isLoading = false;
-      state.error =
-        action.error.message || "Failed to fetch category products";
+      state.error = action.error.message || "Failed to fetch category products";
     });
 
     // =========================== PRODUCT BY SLUG OF CATEGORY ===========================
@@ -161,8 +154,7 @@ export const productSlice = createSlice({
     });
     builder.addCase(getProductById.rejected, (state, action) => {
       state.isLoading = false;
-      state.error =
-        action.error.message || "Failed to fetch product by id";
+      state.error = action.error.message || "Failed to fetch product by id";
     });
 
     // =========================== CREATE PRODUCT ===========================
@@ -176,8 +168,7 @@ export const productSlice = createSlice({
     });
     builder.addCase(createProduct.rejected, (state, action) => {
       state.isLoading = false;
-      state.error =
-        action.error.message || "Failed to create new product";
+      state.error = action.error.message || "Failed to create new product";
     });
 
     // =========================== DELETE PRODUCT ===========================
@@ -196,8 +187,7 @@ export const productSlice = createSlice({
     });
     builder.addCase(deleteProduct.rejected, (state, action) => {
       state.isLoading = false;
-      state.error =
-        action.error.message || "Failed to delete product";
+      state.error = action.error.message || "Failed to delete product";
     });
 
     // =========================== SEARCH ===========================
@@ -211,8 +201,7 @@ export const productSlice = createSlice({
     });
     builder.addCase(searchProducts.rejected, (state, action) => {
       state.isSearching = false;
-      state.searchError =
-        action.error.message || "Failed to search products";
+      state.searchError = action.error.message || "Failed to search products";
     });
   },
 });

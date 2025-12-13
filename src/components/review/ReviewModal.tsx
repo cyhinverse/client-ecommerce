@@ -82,8 +82,9 @@ export default function ReviewDialog({
       reset();
       setOpen(false);
       onReviewSubmitted?.();
-    } catch (error: any) {
-      const errorMessage = error?.message || "Gửi đánh giá thất bại";
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      const errorMessage = err?.message || "Gửi đánh giá thất bại";
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -136,10 +137,11 @@ export default function ReviewDialog({
                       disabled={isSubmitting}
                     >
                       <Star
-                        className={`h-7 w-7 ${star <= (hoverRating || rating)
-                          ? "fill-warning text-warning"
-                          : "text-muted"
-                          } transition-colors`}
+                        className={`h-7 w-7 ${
+                          star <= (hoverRating || rating)
+                            ? "fill-warning text-warning"
+                            : "text-muted"
+                        } transition-colors`}
                       />
                     </button>
                   ))}

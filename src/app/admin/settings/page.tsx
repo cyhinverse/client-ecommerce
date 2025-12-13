@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -15,7 +14,7 @@ import { Switch } from "@/components/ui/switch";
 
 export default function SettingsPage() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 no-scrollbar">
       <div>
         <h3 className="text-lg font-medium">Cài đặt</h3>
         <p className="text-sm text-muted-foreground">
@@ -23,7 +22,7 @@ export default function SettingsPage() {
         </p>
       </div>
       <Tabs defaultValue="general" className="space-y-4">
-        <TabsList>
+        <TabsList className="w-full justify-start overflow-x-auto no-scrollbar">
           <TabsTrigger value="general">Tổng quan</TabsTrigger>
           <TabsTrigger value="notifications">Thông báo</TabsTrigger>
           <TabsTrigger value="display">Hiển thị</TabsTrigger>

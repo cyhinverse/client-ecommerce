@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useLayoutEffect, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -20,13 +20,13 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Loader2 } from "lucide-react";
-import { Discount } from "@/types/discount";
+import { Discount, UpdateDiscountData } from "@/types/discount";
 
 interface UpdateModelDiscountProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   discount: Discount | null;
-  onUpdate: (discountData: any) => void;
+  onUpdate: (discountData: UpdateDiscountData) => void;
   isLoading: boolean;
 }
 
@@ -37,27 +37,34 @@ export function UpdateModelDiscount({
   onUpdate,
   isLoading,
 }: UpdateModelDiscountProps) {
-  const [formData, setFormData] = useState({
-    code: "",
-    description: "",
-    discountType: "percent",
-    discountValue: "",
-    startDate: "",
-    endDate: "",
-    minOrderValue: "",
-    usageLimit: "1",
-    isActive: true,
-  });
+  const initialFormData = useMemo(
+    () => ({
+      code: discount?.code || "",
+      description: discount?.description || "",
+      discountType: discount?.discountType || "percent",
+      discountValue: discount?.discountValue?.toString() || "",
+      startDate: discount?.startDate?.split("T")[0] || "",
+      endDate: discount?.endDate?.split("T")[0] || "",
+      minOrderValue: discount?.minOrderValue?.toString() || "",
+      usageLimit: discount?.usageLimit?.toString() || "1",
+      isActive: discount?.isActive ?? true,
+    }),
+    [discount]
+  );
 
-  useEffect(() => {
+  const [formData, setFormData] = useState(initialFormData);
+
+  // Reset form when discount changes
+  useLayoutEffect(() => {
     if (discount) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         code: discount.code,
         description: discount.description || "",
         discountType: discount.discountType,
         discountValue: discount.discountValue.toString(),
-        startDate: discount.startDate.split('T')[0],
-        endDate: discount.endDate.split('T')[0],
+        startDate: discount.startDate.split("T")[0],
+        endDate: discount.endDate.split("T")[0],
         minOrderValue: discount.minOrderValue.toString(),
         usageLimit: discount.usageLimit.toString(),
         isActive: discount.isActive,
@@ -67,7 +74,7 @@ export function UpdateModelDiscount({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!discount) return;
 
     const discountData = {
@@ -80,8 +87,8 @@ export function UpdateModelDiscount({
     onUpdate(discountData);
   };
 
-  const handleChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleChange = (field: string, value: string | boolean | number) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -93,7 +100,7 @@ export function UpdateModelDiscount({
             Chỉnh sửa thông tin mã giảm giá {discount?.code}.
           </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-2 gap-4">
@@ -106,7 +113,7 @@ export function UpdateModelDiscount({
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="discountType">Loại giảm giá *</Label>
                 <Select
@@ -136,19 +143,22 @@ export function UpdateModelDiscount({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="discountValue">
-                  Giá trị giảm * {formData.discountType === "percent" ? "(%)" : "(VNĐ)"}
+                  Giá trị giảm *{" "}
+                  {formData.discountType === "percent" ? "(%)" : "(VNĐ)"}
                 </Label>
                 <Input
                   id="discountValue"
                   type="number"
                   value={formData.discountValue}
-                  onChange={(e) => handleChange("discountValue", e.target.value)}
+                  onChange={(e) =>
+                    handleChange("discountValue", e.target.value)
+                  }
                   min="0"
                   max={formData.discountType === "percent" ? "100" : undefined}
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="usageLimit">Giới hạn lượt dùng *</Label>
                 <Input
@@ -173,7 +183,7 @@ export function UpdateModelDiscount({
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="endDate">Ngày kết thúc *</Label>
                 <Input
@@ -187,7 +197,9 @@ export function UpdateModelDiscount({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="minOrderValue">Giá trị đơn hàng tối thiểu (VNĐ)</Label>
+              <Label htmlFor="minOrderValue">
+                Giá trị đơn hàng tối thiểu (VNĐ)
+              </Label>
               <Input
                 id="minOrderValue"
                 type="number"

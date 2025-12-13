@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useState } from "react";
 import {
   Dialog,
@@ -18,10 +18,20 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
+interface CreateOrderData {
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  shippingAddress: string;
+  paymentMethod: string;
+  status: string;
+  notes: string;
+}
+
 interface CreateOrderModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (orderData: any) => void;
+  onCreate: (orderData: CreateOrderData) => void;
   isLoading: boolean;
 }
 
@@ -47,9 +57,9 @@ export function CreateOrderModal({
   };
 
   const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -108,13 +118,18 @@ export function CreateOrderModal({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="paymentMethod">Phương thức thanh toán</Label>
-              <Select value={formData.paymentMethod} onValueChange={(value) => handleChange("paymentMethod", value)}>
+              <Select
+                value={formData.paymentMethod}
+                onValueChange={(value) => handleChange("paymentMethod", value)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="cod">Thanh toán khi nhận hàng</SelectItem>
-                  <SelectItem value="banking">Chuyển khoản ngân hàng</SelectItem>
+                  <SelectItem value="banking">
+                    Chuyển khoản ngân hàng
+                  </SelectItem>
                   <SelectItem value="card">Thẻ tín dụng</SelectItem>
                 </SelectContent>
               </Select>
@@ -122,7 +137,10 @@ export function CreateOrderModal({
 
             <div className="space-y-2">
               <Label htmlFor="status">Trạng thái</Label>
-              <Select value={formData.status} onValueChange={(value) => handleChange("status", value)}>
+              <Select
+                value={formData.status}
+                onValueChange={(value) => handleChange("status", value)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

@@ -20,11 +20,12 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Loader2 } from "lucide-react";
+import { CreateDiscountData } from "@/types/discount";
 
 interface CreateModelDiscountProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreate: (discountData: any) => void;
+  onCreate: (discountData: CreateDiscountData) => void;
   isLoading: boolean;
 }
 
@@ -48,7 +49,7 @@ export function CreateModelDiscount({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const discountData = {
       ...formData,
       discountValue: Number(formData.discountValue),
@@ -60,8 +61,8 @@ export function CreateModelDiscount({
     onCreate(discountData);
   };
 
-  const handleChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleChange = (field: string, value: string | boolean | number) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const resetForm = () => {
@@ -94,7 +95,7 @@ export function CreateModelDiscount({
             Điền thông tin để tạo mã giảm giá mới cho cửa hàng.
           </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-2 gap-4">
@@ -108,7 +109,7 @@ export function CreateModelDiscount({
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="discountType">Loại giảm giá *</Label>
                 <Select
@@ -139,20 +140,25 @@ export function CreateModelDiscount({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="discountValue">
-                  Giá trị giảm * {formData.discountType === "percent" ? "(%)" : "(VNĐ)"}
+                  Giá trị giảm *{" "}
+                  {formData.discountType === "percent" ? "(%)" : "(VNĐ)"}
                 </Label>
                 <Input
                   id="discountValue"
                   type="number"
                   value={formData.discountValue}
-                  onChange={(e) => handleChange("discountValue", e.target.value)}
-                  placeholder={formData.discountType === "percent" ? "10" : "50000"}
+                  onChange={(e) =>
+                    handleChange("discountValue", e.target.value)
+                  }
+                  placeholder={
+                    formData.discountType === "percent" ? "10" : "50000"
+                  }
                   min="0"
                   max={formData.discountType === "percent" ? "100" : undefined}
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="usageLimit">Giới hạn lượt dùng *</Label>
                 <Input
@@ -178,7 +184,7 @@ export function CreateModelDiscount({
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="endDate">Ngày kết thúc *</Label>
                 <Input
@@ -192,7 +198,9 @@ export function CreateModelDiscount({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="minOrderValue">Giá trị đơn hàng tối thiểu (VNĐ)</Label>
+              <Label htmlFor="minOrderValue">
+                Giá trị đơn hàng tối thiểu (VNĐ)
+              </Label>
               <Input
                 id="minOrderValue"
                 type="number"

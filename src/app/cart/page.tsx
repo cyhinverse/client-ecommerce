@@ -1,6 +1,13 @@
 "use client";
-import { useEffect, Activity } from "react";
-import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, Check } from "lucide-react";
+import { useEffect } from "react";
+import {
+  Trash2,
+  Plus,
+  Minus,
+  ShoppingBag,
+  ArrowLeft,
+  Check,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
@@ -82,18 +89,22 @@ export default function CartPage() {
     }).format(price);
   };
 
-  const subtotal = cartData?.items?.reduce(
-    (sum, item) => sum + (item.price?.currentPrice || 0) * item.quantity,
-    0
-  ) ?? 0;
+  const subtotal =
+    cartData?.items?.reduce(
+      (sum, item) => sum + (item.price?.currentPrice || 0) * item.quantity,
+      0
+    ) ?? 0;
 
-  const totalItems = cartData?.items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
+  const totalItems =
+    cartData?.items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
 
-  const selectedItemsCount = selectedItems?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
+  const selectedItemsCount =
+    selectedItems?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
 
-  const isAllSelected = cartData?.items && cartData.items.length > 0
-    ? cartData.items.every(item => item.selected)
-    : false;
+  const isAllSelected =
+    cartData?.items && cartData.items.length > 0
+      ? cartData.items.every((item) => item.selected)
+      : false;
 
   const hasCartItems = cartData?.items && cartData.items.length > 0;
 
@@ -144,17 +155,16 @@ export default function CartPage() {
             Giỏ hàng ({totalItems} sản phẩm)
           </h1>
           <div className="flex items-center gap-4">
-            {hasCartItems && (
-              isAllSelected ? (
-                <Button  variant="outline" onClick={handleUnselectAll}>
+            {hasCartItems &&
+              (isAllSelected ? (
+                <Button variant="outline" onClick={handleUnselectAll}>
                   Bỏ chọn tất cả
                 </Button>
               ) : (
                 <Button variant="outline" onClick={handleSelectAll}>
                   Chọn tất cả
                 </Button>
-              )
-            )}
+              ))}
             <Button onClick={handleClearCart} variant="outline">
               Xóa tất cả
             </Button>
@@ -166,7 +176,7 @@ export default function CartPage() {
         {/* Cart Items */}
         <div className="lg:col-span-2 space-y-4 relative min-h-[200px]">
           {isLoading && <SpinnerLoading className="absolute inset-0 m-auto" />}
-          <Activity mode={isLoading ? "hidden" : "visible"}>
+          <div className={isLoading ? "opacity-50 pointer-events-none" : ""}>
             {/* Sửa lỗi: Đảm bảo cartData.items tồn tại trước khi map */}
             {cartData.items?.map((item) => (
               <Card key={item._id} className="overflow-hidden">
@@ -306,23 +316,23 @@ export default function CartPage() {
                               {/* Original Price if different */}
                               {item.price.currentPrice >
                                 item.price.discountPrice && (
-                                  <span className="text-sm text-muted-foreground line-through">
-                                    {formatPrice(item.price.currentPrice)}
-                                  </span>
-                                )}
+                                <span className="text-sm text-muted-foreground line-through">
+                                  {formatPrice(item.price.currentPrice)}
+                                </span>
+                              )}
                             </div>
 
                             {/* Savings */}
                             {item.price.currentPrice >
                               item.price.discountPrice && (
-                                <span className="text-xs text-success mt-1">
-                                  Tiết kiệm{" "}
-                                  {formatPrice(
-                                    item.price.currentPrice -
+                              <span className="text-xs text-success mt-1">
+                                Tiết kiệm{" "}
+                                {formatPrice(
+                                  item.price.currentPrice -
                                     item.price.discountPrice
-                                  )}
-                                </span>
-                              )}
+                                )}
+                              </span>
+                            )}
                           </div>
 
                           {/* Quantity Controls */}
@@ -363,7 +373,7 @@ export default function CartPage() {
                 </CardContent>
               </Card>
             ))}
-          </Activity>
+          </div>
         </div>
 
         {/* Order Summary */}
@@ -387,12 +397,16 @@ export default function CartPage() {
                     {hasSelectedItems && ` (${selectedItemsCount} sản phẩm)`}
                   </span>
                   <span className="font-medium text-foreground">
-                    {formatPrice(hasSelectedItems ? (checkoutTotal || 0) : subtotal)}
+                    {formatPrice(
+                      hasSelectedItems ? checkoutTotal || 0 : subtotal
+                    )}
                   </span>
                 </div>
 
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Nhập mã giảm giá</span>
+                  <span className="text-muted-foreground">
+                    Nhập mã giảm giá
+                  </span>
                   <div className="flex gap-2">
                     <Input
                       type="text"
@@ -408,9 +422,13 @@ export default function CartPage() {
 
               <div className="border-t border-border pt-4">
                 <div className="flex justify-between items-center">
-                  <span className="font-semibold text-foreground">Tổng cộng</span>
+                  <span className="font-semibold text-foreground">
+                    Tổng cộng
+                  </span>
                   <span className="text-xl font-bold text-foreground">
-                    {formatPrice(hasSelectedItems ? (checkoutTotal || 0) : subtotal)}
+                    {formatPrice(
+                      hasSelectedItems ? checkoutTotal || 0 : subtotal
+                    )}
                   </span>
                 </div>
               </div>

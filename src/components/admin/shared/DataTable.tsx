@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import {
   Table,
@@ -17,26 +16,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Search,
-  MoreHorizontal,
-  Eye,
-  Edit,
-  Trash2,
-  Download,
-  Filter,
-} from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import StatusBadge from "./StatusBadge";
+import { MoreHorizontal } from "lucide-react";
 import SearchFilterBar from "./SearchFilterBar";
 import React from "react";
 
-interface DataTableProps {
+interface DataTableProps<T = Record<string, unknown>> {
   title: string;
   description: string;
-  columns: Column[];
-  data: any[];
-  actions?: Action[];
+  columns: Column<T>[];
+  data: T[];
+  actions?: Action<T>[];
   enableSearch?: boolean;
   searchPlaceholder?: string;
   enableFilter?: boolean;
@@ -52,17 +41,17 @@ interface DataTableProps {
   onPageChange?: (page: number) => void;
 }
 
-interface Column {
+interface Column<T = Record<string, unknown>> {
   key: string;
   title: string;
   className?: string;
-  render?: (item: any) => React.ReactNode;
+  render?: (item: T) => React.ReactNode;
 }
 
-interface Action {
+interface Action<T = Record<string, unknown>> {
   label: string;
   icon?: React.ReactNode;
-  onClick: (item: any) => void;
+  onClick: (item: T) => void;
   variant?: "default" | "destructive";
 }
 
@@ -81,7 +70,7 @@ const DataTable: React.FC<DataTableProps> = ({
   onExport,
   onPageChange,
 }) => {
-  const handleAction = (action: Action, item: any) => {
+  const handleAction = <T,>(action: Action<T>, item: T) => {
     action.onClick(item);
   };
 
@@ -101,16 +90,13 @@ const DataTable: React.FC<DataTableProps> = ({
       {/* Table */}
       <Card>
         <div className="p-4">
-          <div className="border rounded-lg mt-4">
+          <div className="border rounded-lg mt-4 overflow-x-auto no-scrollbar">
             <div className="p-4">
               <Table>
                 <TableHeader>
                   <TableRow>
                     {columns.map((column) => (
-                      <TableHead 
-                        key={column.key} 
-                        className={column.className}
-                      >
+                      <TableHead key={column.key} className={column.className}>
                         {column.title}
                       </TableHead>
                     ))}
@@ -125,7 +111,9 @@ const DataTable: React.FC<DataTableProps> = ({
                       <TableRow key={item.id || index}>
                         {columns.map((column) => (
                           <TableCell key={`${item.id || index}-${column.key}`}>
-                            {column.render ? column.render(item) : item[column.key]}
+                            {column.render
+                              ? column.render(item)
+                              : item[column.key]}
                           </TableCell>
                         ))}
                         {actions.length > 0 && (
@@ -143,9 +131,17 @@ const DataTable: React.FC<DataTableProps> = ({
                                   <DropdownMenuItem
                                     key={idx}
                                     onClick={() => handleAction(action, item)}
-                                    className={action.variant === "destructive" ? "text-destructive" : ""}
+                                    className={
+                                      action.variant === "destructive"
+                                        ? "text-destructive"
+                                        : ""
+                                    }
                                   >
-                                    {action.icon && <span className="mr-2">{action.icon}</span>}
+                                    {action.icon && (
+                                      <span className="mr-2">
+                                        {action.icon}
+                                      </span>
+                                    )}
                                     {action.label}
                                   </DropdownMenuItem>
                                 ))}
@@ -157,7 +153,10 @@ const DataTable: React.FC<DataTableProps> = ({
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={columns.length + (actions.length > 0 ? 1 : 0)} className="text-center py-8">
+                      <TableCell
+                        colSpan={columns.length + (actions.length > 0 ? 1 : 0)}
+                        className="text-center py-8"
+                      >
                         Không có dữ liệu
                       </TableCell>
                     </TableRow>
@@ -169,37 +168,53 @@ const DataTable: React.FC<DataTableProps> = ({
               {pagination && (
                 <div className="flex items-center justify-between mt-6">
                   <div className="text-sm text-muted-foreground">
-                    Hiển thị {(pagination.currentPage - 1) * (pagination.itemsPerPage || 10) + 1} đến{" "}
-                    {Math.min(pagination.currentPage * (pagination.itemsPerPage || 10), pagination.totalItems)}{" "}
+                    Hiển thị{" "}
+                    {(pagination.currentPage - 1) *
+                      (pagination.itemsPerPage || 10) +
+                      1}{" "}
+                    đến{" "}
+                    {Math.min(
+                      pagination.currentPage * (pagination.itemsPerPage || 10),
+                      pagination.totalItems
+                    )}{" "}
                     của {pagination.totalItems} mục
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       disabled={pagination.currentPage === 1}
                       onClick={() => onPageChange?.(pagination.currentPage - 1)}
                     >
                       Trước
                     </Button>
-                    {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                      const pageNum = i + 1;
-                      return (
-                        <Button
-                          key={pageNum}
-                          variant="outline"
-                          size="sm"
-                          className={pagination.currentPage === pageNum ? "bg-muted" : ""}
-                          onClick={() => onPageChange?.(pageNum)}
-                        >
-                          {pageNum}
-                        </Button>
-                      );
-                    })}
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      disabled={pagination.currentPage === pagination.totalPages}
+                    {Array.from(
+                      { length: Math.min(5, pagination.totalPages) },
+                      (_, i) => {
+                        const pageNum = i + 1;
+                        return (
+                          <Button
+                            key={pageNum}
+                            variant="outline"
+                            size="sm"
+                            className={
+                              pagination.currentPage === pageNum
+                                ? "bg-muted"
+                                : ""
+                            }
+                            onClick={() => onPageChange?.(pageNum)}
+                          >
+                            {pageNum}
+                          </Button>
+                        );
+                      }
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={
+                        pagination.currentPage === pagination.totalPages
+                      }
                       onClick={() => onPageChange?.(pagination.currentPage + 1)}
                     >
                       Sau

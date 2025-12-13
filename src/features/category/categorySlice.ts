@@ -44,15 +44,14 @@ export const categorySlice = createSlice({
       state.isLoading = true;
       state.error = null;
     });
-    builder.addCase(getTreeCategories.fulfilled, (state, action: any) => {
+    builder.addCase(getTreeCategories.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.categories = action.payload?.data;
       const newData = action.payload?.data;
-      if(JSON.stringify(newData) !== JSON.stringify(state.categories) ){
+      if (JSON.stringify(newData) !== JSON.stringify(state.categories)) {
         state.categories = newData;
       }
     });
-    builder.addCase(getTreeCategories.rejected, (state, action: any) => {
+    builder.addCase(getTreeCategories.rejected, (state, action) => {
       state.isLoading = false;
       state.error = action.error.message || "Failed to fetch category tree";
     });

@@ -1,9 +1,20 @@
 "use client";
 import { useState } from "react";
-import { changePassword, verifyEmail, enableTwoFactor, verifyTwoFactor } from "@/features/user/userAction";
+import {
+  changePassword,
+  verifyEmail,
+  enableTwoFactor,
+  verifyTwoFactor,
+} from "@/features/user/userAction";
 import { useAppDispatch } from "@/hooks/hooks";
 import { Shield, MailCheck, Key, Lock, Eye, EyeOff, Check } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,9 +22,10 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { User } from "@/types/user";
 
 interface SettingsTabProps {
-  user: any;
+  user: User;
 }
 
 export default function SettingsTab({ user }: SettingsTabProps) {
@@ -28,7 +40,9 @@ export default function SettingsTab({ user }: SettingsTabProps) {
     new: false,
     confirm: false,
   });
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(user?.isTwoFactorEnabled || false);
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(
+    user?.isTwoFactorEnabled || false
+  );
   const [verificationCode, setVerificationCode] = useState("");
   const [showVerificationInput, setShowVerificationInput] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -38,7 +52,11 @@ export default function SettingsTab({ user }: SettingsTabProps) {
     setIsChangingPassword(true);
 
     // Validation
-    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+    if (
+      !passwordData.currentPassword ||
+      !passwordData.newPassword ||
+      !passwordData.confirmPassword
+    ) {
       toast.error("Vui lòng điền đầy đủ thông tin");
       setIsChangingPassword(false);
       return;
@@ -63,10 +81,12 @@ export default function SettingsTab({ user }: SettingsTabProps) {
     }
 
     try {
-      await dispatch(changePassword({
-        oldPassword: passwordData.currentPassword,
-        newPassword: passwordData.newPassword,
-      })).unwrap();
+      await dispatch(
+        changePassword({
+          oldPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+        })
+      ).unwrap();
 
       toast.success("Đổi mật khẩu thành công");
       setPasswordData({
@@ -74,8 +94,10 @@ export default function SettingsTab({ user }: SettingsTabProps) {
         newPassword: "",
         confirmPassword: "",
       });
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || "Đổi mật khẩu thất bại";
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      const errorMessage =
+        err.response?.data?.message || "Đổi mật khẩu thất bại";
       toast.error(errorMessage);
     } finally {
       setIsChangingPassword(false);
@@ -85,9 +107,13 @@ export default function SettingsTab({ user }: SettingsTabProps) {
   const handleEmailVerification = async () => {
     try {
       await dispatch(verifyEmail()).unwrap();
-      toast.success("Đã gửi email xác minh. Vui lòng kiểm tra hộp thư của bạn.");
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || "Gửi email xác minh thất bại";
+      toast.success(
+        "Đã gửi email xác minh. Vui lòng kiểm tra hộp thư của bạn."
+      );
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      const errorMessage =
+        err.response?.data?.message || "Gửi email xác minh thất bại";
       toast.error(errorMessage);
     }
   };
@@ -100,8 +126,10 @@ export default function SettingsTab({ user }: SettingsTabProps) {
           setShowVerificationInput(true);
           toast.success("Quét mã QR bằng ứng dụng xác thực của bạn");
         }
-      } catch (error: any) {
-        const errorMessage = error.response?.data?.message || "Kích hoạt xác thực 2 lớp thất bại";
+      } catch (error: unknown) {
+        const err = error as { response?: { data?: { message?: string } } };
+        const errorMessage =
+          err.response?.data?.message || "Kích hoạt xác thực 2 lớp thất bại";
         toast.error(errorMessage);
       }
     } else {
@@ -124,16 +152,18 @@ export default function SettingsTab({ user }: SettingsTabProps) {
         setVerificationCode("");
         toast.success("Kích hoạt xác thực 2 lớp thành công");
       }
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || "Mã xác minh không hợp lệ";
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      const errorMessage =
+        err.response?.data?.message || "Mã xác minh không hợp lệ";
       toast.error(errorMessage);
     }
   };
 
-  const togglePasswordVisibility = (field: 'current' | 'new' | 'confirm') => {
-    setShowPasswords(prev => ({
+  const togglePasswordVisibility = (field: "current" | "new" | "confirm") => {
+    setShowPasswords((prev) => ({
       ...prev,
-      [field]: !prev[field]
+      [field]: !prev[field],
     }));
   };
 
@@ -175,10 +205,12 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                       id="currentPassword"
                       type={showPasswords.current ? "text" : "password"}
                       value={passwordData.currentPassword}
-                      onChange={(e) => setPasswordData({
-                        ...passwordData,
-                        currentPassword: e.target.value
-                      })}
+                      onChange={(e) =>
+                        setPasswordData({
+                          ...passwordData,
+                          currentPassword: e.target.value,
+                        })
+                      }
                       placeholder="Nhập mật khẩu hiện tại"
                       required
                     />
@@ -187,7 +219,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                       variant="ghost"
                       size="sm"
                       className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => togglePasswordVisibility('current')}
+                      onClick={() => togglePasswordVisibility("current")}
                     >
                       {showPasswords.current ? (
                         <EyeOff className="h-4 w-4" />
@@ -206,10 +238,12 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                       id="newPassword"
                       type={showPasswords.new ? "text" : "password"}
                       value={passwordData.newPassword}
-                      onChange={(e) => setPasswordData({
-                        ...passwordData,
-                        newPassword: e.target.value
-                      })}
+                      onChange={(e) =>
+                        setPasswordData({
+                          ...passwordData,
+                          newPassword: e.target.value,
+                        })
+                      }
                       placeholder="Nhập mật khẩu mới (ít nhất 6 ký tự)"
                       required
                       minLength={6}
@@ -219,7 +253,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                       variant="ghost"
                       size="sm"
                       className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => togglePasswordVisibility('new')}
+                      onClick={() => togglePasswordVisibility("new")}
                     >
                       {showPasswords.new ? (
                         <EyeOff className="h-4 w-4" />
@@ -238,10 +272,12 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                       id="confirmPassword"
                       type={showPasswords.confirm ? "text" : "password"}
                       value={passwordData.confirmPassword}
-                      onChange={(e) => setPasswordData({
-                        ...passwordData,
-                        confirmPassword: e.target.value
-                      })}
+                      onChange={(e) =>
+                        setPasswordData({
+                          ...passwordData,
+                          confirmPassword: e.target.value,
+                        })
+                      }
                       placeholder="Nhập lại mật khẩu mới"
                       required
                     />
@@ -250,7 +286,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                       variant="ghost"
                       size="sm"
                       className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => togglePasswordVisibility('confirm')}
+                      onClick={() => togglePasswordVisibility("confirm")}
                     >
                       {showPasswords.confirm ? (
                         <EyeOff className="h-4 w-4" />
@@ -284,8 +320,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                 <p className="text-sm text-muted-foreground">
                   {user?.isVerifiedEmail
                     ? "Email của bạn đã được xác minh"
-                    : "Xác minh email để bảo vệ tài khoản"
-                  }
+                    : "Xác minh email để bảo vệ tài khoản"}
                 </p>
               </div>
             </div>
@@ -336,7 +371,11 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                     type="text"
                     placeholder="123456"
                     value={verificationCode}
-                    onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    onChange={(e) =>
+                      setVerificationCode(
+                        e.target.value.replace(/\D/g, "").slice(0, 6)
+                      )
+                    }
                     className="flex-1"
                   />
                   <Button
@@ -372,7 +411,9 @@ export default function SettingsTab({ user }: SettingsTabProps) {
             <div className="flex justify-between items-center">
               <span className="text-sm">Xác minh email</span>
               {user?.isVerifiedEmail ? (
-                <Badge className="bg-success text-success-foreground hover:bg-success/90">Đã xác minh</Badge>
+                <Badge className="bg-success text-success-foreground hover:bg-success/90">
+                  Đã xác minh
+                </Badge>
               ) : (
                 <Badge variant="outline">Chưa xác minh</Badge>
               )}
@@ -380,14 +421,18 @@ export default function SettingsTab({ user }: SettingsTabProps) {
             <div className="flex justify-between items-center">
               <span className="text-sm">Xác thực 2 lớp</span>
               {twoFactorEnabled ? (
-                <Badge className="bg-success text-success-foreground hover:bg-success/90">Đã bật</Badge>
+                <Badge className="bg-success text-success-foreground hover:bg-success/90">
+                  Đã bật
+                </Badge>
               ) : (
                 <Badge variant="outline">Chưa bật</Badge>
               )}
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm">Tài khoản</span>
-              <Badge className="bg-info text-info-foreground hover:bg-info/90">Đang hoạt động</Badge>
+              <Badge className="bg-info text-info-foreground hover:bg-info/90">
+                Đang hoạt động
+              </Badge>
             </div>
           </div>
         </CardContent>

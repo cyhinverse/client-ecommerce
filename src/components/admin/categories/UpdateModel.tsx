@@ -1,7 +1,7 @@
 // components/EditCategoryModal.tsx
 "use client";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
@@ -61,7 +61,7 @@ export function EditCategoryModal({
   isLoading = false,
 }: EditCategoryModalProps) {
   const form = useForm<FormData>({
-    resolver: zodResolver(formSchema) as any, // ← Sử dụng type assertion nếu cần
+    resolver: zodResolver(formSchema) as Resolver<FormData>,
     defaultValues: {
       name: "",
       slug: "",
@@ -95,7 +95,7 @@ export function EditCategoryModal({
   // Xử lý khi name thay đổi
   const handleNameChange = (name: string) => {
     const currentSlug = form.getValues("slug");
-    const originalSlug = category ? generateSlug(category.name as any) : "";
+    const originalSlug = category ? generateSlug(category.name || "") : "";
 
     // Auto-generate slug nếu slug chưa được chỉnh sửa thủ công
     if (!currentSlug || currentSlug === originalSlug) {
@@ -231,7 +231,9 @@ export function EditCategoryModal({
                   Ngày tạo
                 </FormLabel>
                 <p className="text-sm font-medium">
-                  {new Date(category.createdAt as any).toLocaleDateString("vi-VN")}
+                  {new Date(category.createdAt || "").toLocaleDateString(
+                    "vi-VN"
+                  )}
                 </p>
               </div>
               <div>

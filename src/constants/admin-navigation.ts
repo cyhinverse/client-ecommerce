@@ -1,5 +1,4 @@
 import {
-  BarChart3,
   ShoppingCart,
   Users,
   Package,

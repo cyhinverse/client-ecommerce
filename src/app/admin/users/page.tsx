@@ -24,7 +24,6 @@ import {
   createUser,
 } from "@/features/user/userAction";
 import { User, UserFilters } from "@/types/user";
-import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 export default function AdminUsersPage() {
   const dispatch = useAppDispatch();
@@ -35,11 +34,11 @@ export default function AdminUsersPage() {
     defaultFilters: {
       page: 1,
       limit: 10,
-      search: '',
-      role: '',
+      search: "",
+      role: "",
       isVerifiedEmail: null,
     },
-    basePath: '/admin/users',
+    basePath: "/admin/users",
   });
 
   // Extract filter values
@@ -92,15 +91,24 @@ export default function AdminUsersPage() {
   const handleCreateUser = async (userData: Partial<User>) => {
     setIsCreating(true);
     try {
-      await dispatch(createUser(userData as any)).unwrap();
+      await dispatch(
+        createUser(
+          userData as {
+            name: string;
+            email: string;
+            phone: string;
+            roles: string;
+            isVerifiedEmail: boolean;
+          }
+        )
+      ).unwrap();
       fetchUsers();
       setCreateModalOpen(false);
       toast.success("Tạo người dùng thành công");
-    } catch (error: any) {
-      console.error("Create user error:", error);
-      toast.error(
-        error?.message || "Lỗi khi tạo người dùng. Vui lòng thử lại."
-      );
+    } catch (error) {
+      const err = error as Error;
+      console.error("Create user error:", err);
+      toast.error(err?.message || "Lỗi khi tạo người dùng. Vui lòng thử lại.");
     } finally {
       setIsCreating(false);
     }
@@ -132,14 +140,21 @@ export default function AdminUsersPage() {
         updateUser({
           id: selectedUser._id,
           ...userData,
-        } as any)
+        } as {
+          username: string;
+          email: string;
+          id: string;
+          isVerifiedEmail: boolean;
+          roles: string;
+        })
       ).unwrap();
       fetchUsers();
       handleCloseEditModal();
       toast.success("Cập nhật người dùng thành công");
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as Error;
       toast.error(
-        error?.message || "Cập nhật người dùng thất bại. Vui lòng thử lại."
+        err?.message || "Cập nhật người dùng thất bại. Vui lòng thử lại."
       );
     } finally {
       setIsUpdating(false);
@@ -148,7 +163,7 @@ export default function AdminUsersPage() {
 
   // Filter handlers
   const handlePageChange = (page: number) => {
-    updateFilter('page', page);
+    updateFilter("page", page);
   };
 
   const handlePageSizeChange = (size: number) => {
@@ -178,7 +193,7 @@ export default function AdminUsersPage() {
       await dispatch(deleteUser(user._id)).unwrap();
       fetchUsers();
       toast.success("Xóa người dùng thành công");
-    } catch (error) {
+    } catch {
       toast.error("Xóa người dùng thất bại. Vui lòng thử lại.");
     }
   };
@@ -214,7 +229,7 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 no-scrollbar">
       <UsersHeader onOpenCreate={handleOpenCreateModal} />
 
       <UsersStats

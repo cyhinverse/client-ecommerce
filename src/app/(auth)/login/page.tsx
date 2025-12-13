@@ -64,7 +64,7 @@ export default function LoginPage() {
           "Đăng nhập thất bại!";
         toast.error(errorMessage);
       }
-    } catch (error: any) {
+    } catch {
       toast.error("Có lỗi xảy ra, vui lòng thử lại!");
     }
   }

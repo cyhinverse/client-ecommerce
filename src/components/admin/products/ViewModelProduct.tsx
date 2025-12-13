@@ -49,7 +49,7 @@ export function ViewModelProduct({
           <DialogDescription className="text-muted-foreground">Thông tin chi tiết về sản phẩm</DialogDescription>
         </DialogHeader>
 
-        <div className="p-6 space-y-8 max-h-[80vh] overflow-y-auto">
+        <div className="p-6 space-y-8 max-h-[80vh] overflow-y-auto no-scrollbar">
           {/* Basic Info */}
           <div className="grid grid-cols-2 gap-8">
             <div className="space-y-6">

@@ -1,4 +1,8 @@
-import axios from "axios";
+import axios, { InternalAxiosRequestConfig } from "axios";
+
+interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
 
 const instance = axios.create({
   baseURL: "http://localhost:5000/api",
@@ -11,7 +15,7 @@ const instance = axios.create({
 
 instance.interceptors.response.use(
   async (response) => {
-    const originalReq = response.config as any;
+    const originalReq = response.config as CustomAxiosRequestConfig;
 
     if (response.status === 401 && !originalReq._retry) {
       originalReq._retry = true;
@@ -41,4 +45,3 @@ instance.interceptors.response.use(
 );
 
 export default instance;
-

@@ -40,7 +40,7 @@ export const getAllProducts = createAsyncThunk(
     } = params;
 
     // Lọc bỏ các giá trị undefined/null/empty
-    const queryParams: any = {
+    const queryParams: Record<string, string | number | boolean | string[]> = {
       page,
       limit,
     };
@@ -122,7 +122,7 @@ export const getProductsBySlugOfCategory = createAsyncThunk(
     if (!response) {
       throw new Error("Failed to fetch products by category slug");
     }
-    console.log(`Lay product by slug cua category`, response.data)
+    console.log(`Lay product by slug cua category`, response.data);
     return response.data;
   }
 );
@@ -148,9 +148,12 @@ export const createProduct = createAsyncThunk(
         },
       });
       return response.data;
-    } catch (error: any) {
+    } catch (error) {
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
       return rejectWithValue(
-        error.response?.data?.message || "Failed to create product"
+        axiosError.response?.data?.message || "Failed to create product"
       );
     }
   }
@@ -191,12 +194,16 @@ export const deleteProduct = createAsyncThunk(
       } else {
         throw new Error(response.data?.message || "Xóa sản phẩm thất bại");
       }
-    } catch (error: any) {
+    } catch (error) {
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
       // Sử dụng rejectWithValue để có structured error
       return rejectWithValue(
-        error.response?.data?.message ||
-        error.message ||
-        "Xóa sản phẩm thất bại"
+        axiosError.response?.data?.message ||
+          axiosError.message ||
+          "Xóa sản phẩm thất bại"
       );
     }
   }
@@ -230,7 +237,10 @@ export const updateVariant = createAsyncThunk(
 // Search products
 export const searchProducts = createAsyncThunk(
   "product/search",
-  async ({ keyword, limit = 10 }: { keyword: string; limit?: number }, { rejectWithValue }) => {
+  async (
+    { keyword, limit = 10 }: { keyword: string; limit?: number },
+    { rejectWithValue }
+  ) => {
     try {
       const response = await instance.get(`/products/search`, {
         params: {
@@ -239,11 +249,13 @@ export const searchProducts = createAsyncThunk(
         },
       });
       return response.data.data;
-    } catch (error: any) {
+    } catch (error) {
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
       return rejectWithValue(
-        error.response?.data?.message || "Failed to search products"
+        axiosError.response?.data?.message || "Failed to search products"
       );
     }
   }
 );
-

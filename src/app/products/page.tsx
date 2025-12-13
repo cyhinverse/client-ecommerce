@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback, Activity } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
 import { getAllProducts } from "@/features/product/productAction";
@@ -8,18 +8,20 @@ import { Button } from "@/components/ui/button";
 import { SlidersHorizontal } from "lucide-react";
 import ProductFilter from "@/components/product/ProductFilter";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
-import { Params , ProductFilters, ProductUrlFilters } from "@/types/product";
+import { Params, ProductFilters, ProductUrlFilters } from "@/types/product";
 import { ProductCard } from "@/components/product/ProductCard";
 import { isColorMatch } from "@/lib/color-mapping";
 
 export default function ProductsPage() {
   const dispatch = useAppDispatch();
-  const { all: products, isLoading } = useAppSelector(
-    (state) => state.product
-  );
+  const { all: products, isLoading } = useAppSelector((state) => state.product);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
-  
-  const { filters: urlFilters, updateFilters, resetFilters } = useUrlFilters<ProductUrlFilters>({
+
+  const {
+    filters: urlFilters,
+    updateFilters,
+    resetFilters,
+  } = useUrlFilters<ProductUrlFilters>({
     defaultFilters: {
       search: "",
       minPrice: 0,
@@ -29,24 +31,31 @@ export default function ProductsPage() {
       sizes: "",
       sortBy: "newest",
     },
-    basePath: '/products',
+    basePath: "/products",
   });
 
   // Convert URL filters to component filters
-  const filters: ProductFilters = useMemo(() => ({
-    search: urlFilters.search as string,
-    minPrice: Number(urlFilters.minPrice),
-    maxPrice: Number(urlFilters.maxPrice),
-    rating: (urlFilters.rating as string)?.split(",").map(Number).filter(n => n > 0) || [],
-    colors: (urlFilters.colors as string)?.split(",").filter(Boolean) || [],
-    sizes: (urlFilters.sizes as string)?.split(",").filter(Boolean) || [],
-    sortBy: urlFilters.sortBy as string,
-  }), [urlFilters]);
+  const filters: ProductFilters = useMemo(
+    () => ({
+      search: urlFilters.search as string,
+      minPrice: Number(urlFilters.minPrice),
+      maxPrice: Number(urlFilters.maxPrice),
+      rating:
+        (urlFilters.rating as string)
+          ?.split(",")
+          .map(Number)
+          .filter((n) => n > 0) || [],
+      colors: (urlFilters.colors as string)?.split(",").filter(Boolean) || [],
+      sizes: (urlFilters.sizes as string)?.split(",").filter(Boolean) || [],
+      sortBy: urlFilters.sortBy as string,
+    }),
+    [urlFilters]
+  );
 
   // Debounce API calls
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      const params: Params= {
+      const params: Params = {
         page: 1,
         limit: 50,
       };
@@ -60,21 +69,35 @@ export default function ProductsPage() {
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [dispatch, filters.search, filters.minPrice, filters.maxPrice, filters.sortBy]);
+  }, [
+    dispatch,
+    filters.search,
+    filters.minPrice,
+    filters.maxPrice,
+    filters.sortBy,
+  ]);
 
-  const handleFilterChange = useCallback((newFilters: Partial<ProductFilters>) => {
-    const updates: Partial<ProductUrlFilters> = {};
-    
-    if (newFilters.search !== undefined) updates.search = newFilters.search;
-    if (newFilters.minPrice !== undefined) updates.minPrice = newFilters.minPrice;
-    if (newFilters.maxPrice !== undefined) updates.maxPrice = newFilters.maxPrice;
-    if (newFilters.rating !== undefined) updates.rating = newFilters.rating.join(",");
-    if (newFilters.colors !== undefined) updates.colors = newFilters.colors.join(",");
-    if (newFilters.sizes !== undefined) updates.sizes = newFilters.sizes.join(",");
-    if (newFilters.sortBy !== undefined) updates.sortBy = newFilters.sortBy;
+  const handleFilterChange = useCallback(
+    (newFilters: Partial<ProductFilters>) => {
+      const updates: Partial<ProductUrlFilters> = {};
 
-    updateFilters(updates);
-  }, [updateFilters]);
+      if (newFilters.search !== undefined) updates.search = newFilters.search;
+      if (newFilters.minPrice !== undefined)
+        updates.minPrice = newFilters.minPrice;
+      if (newFilters.maxPrice !== undefined)
+        updates.maxPrice = newFilters.maxPrice;
+      if (newFilters.rating !== undefined)
+        updates.rating = newFilters.rating.join(",");
+      if (newFilters.colors !== undefined)
+        updates.colors = newFilters.colors.join(",");
+      if (newFilters.sizes !== undefined)
+        updates.sizes = newFilters.sizes.join(",");
+      if (newFilters.sortBy !== undefined) updates.sortBy = newFilters.sortBy;
+
+      updateFilters(updates);
+    },
+    [updateFilters]
+  );
 
   const handleClearFilters = useCallback(() => {
     resetFilters();
@@ -85,12 +108,16 @@ export default function ProductsPage() {
 
     const filtered = products.filter((product) => {
       // Search filter
-      if (filters.search && !product.name?.toLowerCase().includes(filters.search.toLowerCase())) {
+      if (
+        filters.search &&
+        !product.name?.toLowerCase().includes(filters.search.toLowerCase())
+      ) {
         return false;
       }
 
       // Price filter
-      const price = product.price?.discountPrice || product.price?.currentPrice || 0;
+      const price =
+        product.price?.discountPrice || product.price?.currentPrice || 0;
       if (price < filters.minPrice || price > filters.maxPrice) {
         return false;
       }
@@ -105,18 +132,16 @@ export default function ProductsPage() {
 
       // Color filter - FIXED: Improved logic
       if (filters.colors.length > 0) {
-
-        
         // Kiểm tra nếu product có variants
         if (!product.variants || product.variants.length === 0) {
           return false;
         }
 
         // Kiểm tra từng variant của product
-        const hasMatchingColor = product.variants.some(variant => {
+        const hasMatchingColor = product.variants.some((variant) => {
           if (!variant.color) return false;
-          
-          return filters.colors.some(filterColor => 
+
+          return filters.colors.some((filterColor) =>
             isColorMatch(filterColor, variant.color)
           );
         });
@@ -129,9 +154,9 @@ export default function ProductsPage() {
         if (!product.variants || product.variants.length === 0) {
           return false;
         }
-        const hasMatchingSize = product.variants?.some(variant =>
-          filters.sizes.some(size => 
-            variant.size?.toUpperCase() === size.toUpperCase()
+        const hasMatchingSize = product.variants?.some((variant) =>
+          filters.sizes.some(
+            (size) => variant.size?.toUpperCase() === size.toUpperCase()
           )
         );
         if (!hasMatchingSize) return false;
@@ -146,11 +171,16 @@ export default function ProductsPage() {
       const priceB = b.price?.discountPrice || b.price?.currentPrice || 0;
 
       switch (filters.sortBy) {
-        case "price_asc": return priceA - priceB;
-        case "price_desc": return priceB - priceA;
-        case "name_asc": return (a.name || "").localeCompare(b.name || "");
-        case "name_desc": return (b.name || "").localeCompare(a.name || "");
-        case "rating_desc": return (b.averageRating || 0) - (a.averageRating || 0);
+        case "price_asc":
+          return priceA - priceB;
+        case "price_desc":
+          return priceB - priceA;
+        case "name_asc":
+          return (a.name || "").localeCompare(b.name || "");
+        case "name_desc":
+          return (b.name || "").localeCompare(a.name || "");
+        case "rating_desc":
+          return (b.averageRating || 0) - (a.averageRating || 0);
         case "newest":
         default:
           const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
@@ -208,32 +238,30 @@ export default function ProductsPage() {
         {/* Products Grid */}
         <div className="flex-1 relative min-h-[400px]">
           {isLoading && <SpinnerLoading className="absolute inset-0 m-auto" />}
-          <Activity mode={isLoading ? "hidden" : "visible"}>
-          {filteredAndSortedProducts.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {filteredAndSortedProducts.map((product, index) => (
-                <ProductCard 
-                  key={product._id || index} 
-                  product={product} 
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="col-span-full text-center py-20">
-              <p className="text-muted-foreground">Không tìm thấy sản phẩm nào</p>
-              <Button 
-                variant="outline" 
-                onClick={handleClearFilters}
-                className="mt-4"
-              >
-                Xóa tất cả bộ lọc
-              </Button>
-            </div>
-          )}
-          </Activity>
+          <div className={isLoading ? "opacity-50 pointer-events-none" : ""}>
+            {filteredAndSortedProducts.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {filteredAndSortedProducts.map((product, index) => (
+                  <ProductCard key={product._id || index} product={product} />
+                ))}
+              </div>
+            ) : (
+              <div className="col-span-full text-center py-20">
+                <p className="text-muted-foreground">
+                  Không tìm thấy sản phẩm nào
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={handleClearFilters}
+                  className="mt-4"
+                >
+                  Xóa tất cả bộ lọc
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
   );
 }
-
