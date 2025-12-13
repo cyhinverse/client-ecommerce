@@ -78,20 +78,24 @@ export default function CategoriesAdminPage() {
     setCreateModalOpen(true);
   };
 
-  const handleCreateCategory = async (categoryData: Partial<Category>) => {
+  const handleCreateCategory = async (categoryData: {
+    name: string;
+    slug: string;
+    description: string;
+    isActive: boolean;
+    parentCategory: string;
+    images: string[];
+  }) => {
     setIsCreating(true);
     try {
       await dispatch(
-        creatCategory(
-          categoryData as {
-            name: string;
-            slug: string;
-            description?: string;
-            images: string[];
-            isActive?: boolean;
-            parentCategory?: string;
-          }
-        )
+        creatCategory({
+          ...categoryData,
+          parentCategory:
+            categoryData.parentCategory === ""
+              ? undefined
+              : categoryData.parentCategory,
+        })
       ).unwrap();
 
       // Refresh list

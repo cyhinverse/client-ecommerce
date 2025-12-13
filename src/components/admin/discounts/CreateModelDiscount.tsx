@@ -52,10 +52,11 @@ export function CreateModelDiscount({
 
     const discountData = {
       ...formData,
+      discountType: formData.discountType as "percent" | "fixed",
       discountValue: Number(formData.discountValue),
       minOrderValue: Number(formData.minOrderValue) || 0,
       usageLimit: Number(formData.usageLimit),
-      applicableProducts: [], // Có thể thêm sau
+      applicableProducts: [] as string[], // Có thể thêm sau
     };
 
     onCreate(discountData);

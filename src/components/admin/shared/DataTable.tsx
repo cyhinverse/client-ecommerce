@@ -108,12 +108,15 @@ const DataTable: React.FC<DataTableProps> = ({
                 <TableBody>
                   {data.length > 0 ? (
                     data.map((item, index) => (
-                      <TableRow key={item.id || index}>
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      <TableRow key={(item as any).id || index}>
                         {columns.map((column) => (
-                          <TableCell key={`${item.id || index}-${column.key}`}>
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                          <TableCell key={`${(item as any).id || index}-${column.key}`}>
                             {column.render
                               ? column.render(item)
-                              : item[column.key]}
+                              : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                ((item as any)[column.key] as React.ReactNode)}
                           </TableCell>
                         ))}
                         {actions.length > 0 && (

@@ -60,6 +60,7 @@ import {
   getListNotification,
   getNotificationById,
   updateNotification,
+  CreateNotificationData,
 } from "@/features/notification/notificationAction";
 import { Notification } from "@/types/notification";
 import { toast } from "sonner";
@@ -150,7 +151,8 @@ export default function NotificationAdminPage() {
   const handleCreate = async () => {
     try {
       // Clean payload to match validator
-      const payload: Record<string, unknown> = {
+      // Clean payload to match validator
+      const payload: CreateNotificationData = {
         title: formData.title,
         message: formData.message,
         type: formData.type,

@@ -25,6 +25,7 @@ export interface User {
   __v: number;
   codeVerifiEmail?: string;
   expiresCodeVerifiEmail?: string;
+  isTwoFactorEnabled?: boolean;
 }
 
 export interface PaginationData {

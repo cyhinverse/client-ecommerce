@@ -6,11 +6,13 @@ interface ApiErrorResponse {
   message?: string;
 }
 
-interface CreateNotificationData {
+export interface CreateNotificationData {
   title: string;
   message: string;
   type?: string;
   userId?: string;
+  link?: string;
+  orderId?: string;
 }
 
 interface UpdateNotificationData {
@@ -18,6 +20,8 @@ interface UpdateNotificationData {
   message?: string;
   type?: string;
   isRead?: boolean;
+  link?: string;
+  orderId?: string;
 }
 
 export const getListNotification = createAsyncThunk(

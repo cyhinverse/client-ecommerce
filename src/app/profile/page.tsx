@@ -151,7 +151,7 @@ export default function ProfilePage() {
                 ) : (
                   <>
                     <TabsContent value="profile" className="m-0">
-                      <ProfileTab user={currentUser} />
+                      {currentUser && <ProfileTab user={currentUser} />}
                     </TabsContent>
 
                     <TabsContent value="orders" className="m-0">
@@ -159,11 +159,11 @@ export default function ProfilePage() {
                     </TabsContent>
 
                     <TabsContent value="address" className="m-0">
-                      <AddressTab user={currentUser} />
+                      {currentUser && <AddressTab user={currentUser} />}
                     </TabsContent>
 
                     <TabsContent value="settings" className="m-0">
-                      <SettingsTab user={currentUser} />
+                      {currentUser && <SettingsTab user={currentUser} />}
                     </TabsContent>
                   </>
                 )}

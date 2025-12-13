@@ -48,7 +48,7 @@ export default function ProductDetailPage() {
       addToCart({
         productId: currentProduct?._id as string,
         quantity,
-        variantId: variant?._id,
+        variantId: variant?._id ?? null,
       })
     );
     if (result) {
