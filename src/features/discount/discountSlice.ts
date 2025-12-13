@@ -5,6 +5,7 @@ import {
   createDiscount,
   updateDiscount,
   deleteDiscount,
+  applyDiscountCode,
 } from "./discountAction";
 
 export interface PaginationData {
@@ -25,12 +26,23 @@ interface DiscountStatistics {
   highUsageDiscounts: number;
 }
 
+interface AppliedDiscount {
+  discountId: string;
+  code: string;
+  discountType: string;
+  discountValue: number;
+  discountAmount: number;
+  finalTotal: number;
+  originalTotal: number;
+}
+
 interface DiscountState {
   discounts: Discount[];
   pagination: PaginationData | null;
   loading: boolean;
   error: string | null;
   statistics: DiscountStatistics | null;
+  appliedDiscount: AppliedDiscount | null;
 }
 
 const initState: DiscountState = {
@@ -39,6 +51,7 @@ const initState: DiscountState = {
   loading: false,
   error: null,
   statistics: null,
+  appliedDiscount: null,
 };
 
 export const discountSlice = createSlice({
@@ -55,6 +68,10 @@ export const discountSlice = createSlice({
     },
     setLoading: (state) => {
       state.loading = true;
+    },
+    clearAppliedDiscount: (state) => {
+      state.appliedDiscount = null;
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
@@ -121,6 +138,24 @@ export const discountSlice = createSlice({
       .addCase(deleteDiscount.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Failed to delete discount";
+      })
+      // Apply Discount
+      .addCase(applyDiscountCode.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(applyDiscountCode.fulfilled, (state, action) => {
+        state.loading = false;
+        state.appliedDiscount = action.payload?.data;
+      })
+      .addCase(applyDiscountCode.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Failed to apply discount";
+        state.appliedDiscount = null;
       });
   },
 });
+
+export const { clearError, setDiscounts, setLoading, clearAppliedDiscount } =
+  discountSlice.actions;
+export default discountSlice.reducer;

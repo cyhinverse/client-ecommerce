@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Trash2,
   Plus,
@@ -27,6 +27,8 @@ import {
   unselectAllItems,
   prepareForCheckout,
 } from "@/features/cart/cartSlice";
+import { applyDiscountCode } from "@/features/discount/discountAction";
+import { clearAppliedDiscount } from "@/features/discount/discountSlice";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -40,8 +42,12 @@ export default function CartPage() {
     selectedItems,
     checkoutTotal,
   } = useAppSelector((state) => state.cart);
+  const { appliedDiscount, loading: discountLoading } = useAppSelector(
+    (state) => state.discount
+  );
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const [promoCode, setPromoCode] = useState("");
 
   useEffect(() => {
     dispatch(getCart());
@@ -54,6 +60,7 @@ export default function CartPage() {
 
   const handleClearCart = () => {
     dispatch(clearCart());
+    dispatch(clearAppliedDiscount());
     toast.success("Giỏ hàng đã được xóa thành công");
   };
 
@@ -80,6 +87,41 @@ export default function CartPage() {
     }
     dispatch(prepareForCheckout());
     router.push("/checkout");
+  };
+
+  const handleApplyDiscount = async () => {
+    if (!promoCode.trim()) {
+      toast.error("Vui lòng nhập mã giảm giá");
+      return;
+    }
+
+    if (!selectedItems || selectedItems.length === 0) {
+      toast.error("Vui lòng chọn sản phẩm để áp dụng mã giảm giá");
+      return;
+    }
+
+    const orderTotal = checkoutTotal || 0;
+    const productIds = selectedItems.map((item) => item.productId._id);
+
+    try {
+      await dispatch(
+        applyDiscountCode({
+          code: promoCode,
+          orderTotal,
+          productIds,
+        })
+      ).unwrap();
+      toast.success("Áp dụng mã giảm giá thành công!");
+    } catch (err: any) {
+      toast.error(err.message || "Không thể áp dụng mã giảm giá");
+      dispatch(clearAppliedDiscount());
+    }
+  };
+
+  const handleRemoveDiscount = () => {
+    dispatch(clearAppliedDiscount());
+    setPromoCode("");
+    toast.success("Đã gỡ bỏ mã giảm giá");
   };
 
   const formatPrice = (price: number) => {
@@ -403,6 +445,23 @@ export default function CartPage() {
                   </span>
                 </div>
 
+                {appliedDiscount && (
+                  <div className="flex justify-between text-sm text-green-600">
+                    <span className="flex items-center gap-2">
+                      Giảm giá ({appliedDiscount.code})
+                      <button
+                        onClick={handleRemoveDiscount}
+                        className="text-xs text-red-500 hover:underline"
+                      >
+                        (Xóa)
+                      </button>
+                    </span>
+                    <span className="font-medium">
+                      -{formatPrice(appliedDiscount.discountAmount)}
+                    </span>
+                  </div>
+                )}
+
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">
                     Nhập mã giảm giá
@@ -412,9 +471,17 @@ export default function CartPage() {
                       type="text"
                       placeholder="Mã giảm giá"
                       className="w-32"
+                      value={promoCode}
+                      onChange={(e) => setPromoCode(e.target.value)}
+                      disabled={!!appliedDiscount}
                     />
-                    <Button variant="outline" size="sm">
-                      Áp dụng
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleApplyDiscount}
+                      disabled={!!appliedDiscount || discountLoading}
+                    >
+                       {discountLoading ? "..." : "Áp dụng"}
                     </Button>
                   </div>
                 </div>
@@ -427,7 +494,11 @@ export default function CartPage() {
                   </span>
                   <span className="text-xl font-bold text-foreground">
                     {formatPrice(
-                      hasSelectedItems ? checkoutTotal || 0 : subtotal
+                      appliedDiscount
+                        ? appliedDiscount.finalTotal
+                        : hasSelectedItems
+                        ? checkoutTotal || 0
+                        : subtotal
                     )}
                   </span>
                 </div>

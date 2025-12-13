@@ -11,6 +11,8 @@ import {
   getProductsByCategory,
   getProductsBySlugOfCategory,
   searchProducts,
+  updateProduct,
+  deleteVariantByVariantId,
 } from "./productAction";
 import { ProductState } from "@/types/product";
 

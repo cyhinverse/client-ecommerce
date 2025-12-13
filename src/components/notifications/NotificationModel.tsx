@@ -43,8 +43,8 @@ export default function NotificationModel({isOpen,onClose}: {isOpen: boolean, on
                                 <SpinnerLoading />
                             </div>
                         ) : notifications.length > 0 ? (
-                            notifications.map((noti) => (
-                                <NotificationItem key={noti._id} notification={noti} />
+                            notifications.map((noti, index) => (
+                                <NotificationItem key={`${noti._id}-${index}`} notification={noti} />
                             ) )
                         ) : (
                             <div className="p-4 text-center text-sm text-gray-500">No notifications</div>

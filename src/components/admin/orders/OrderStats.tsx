@@ -61,31 +61,42 @@ export function OrdersStats({
     };
   }
 
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(value);
+  };
+
+  const formatNumber = (value: number) => {
+    return new Intl.NumberFormat("vi-VN").format(value);
+  };
+
   const stats = [
     {
       title: "Tổng đơn hàng",
-      value: calculatedStats.total.toLocaleString(),
+      value: formatNumber(calculatedStats.total),
       icon: ShoppingCart,
       color: "text-primary",
       bgColor: "bg-primary/10",
     },
     {
       title: "Chờ xác nhận",
-      value: calculatedStats.pending.toLocaleString(),
+      value: formatNumber(calculatedStats.pending),
       icon: Clock,
       color: "text-orange-500",
       bgColor: "bg-orange-500/10",
     },
     {
       title: "Thành công",
-      value: calculatedStats.delivered.toLocaleString(),
+      value: formatNumber(calculatedStats.delivered),
       icon: CheckCircle,
       color: "text-success",
       bgColor: "bg-success/10",
     },
     {
-      title: "Tổng doanh thu",
-      value: `₫${calculatedStats.revenue.toLocaleString()}`,
+      title: "TỔNG DOANH THU",
+      value: formatCurrency(calculatedStats.revenue),
       icon: DollarSign,
       color: "text-primary",
       bgColor: "bg-primary/10",

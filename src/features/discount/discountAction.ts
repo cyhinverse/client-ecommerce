@@ -57,3 +57,23 @@ export const getDiscountStatistics = createAsyncThunk(
     return response.data;
   }
 );
+
+export const applyDiscountCode = createAsyncThunk(
+  "discount/applyDiscountCode",
+  async ({
+    code,
+    orderTotal,
+    productIds,
+  }: {
+    code: string;
+    orderTotal: number;
+    productIds: string[];
+  }) => {
+    const response = await instance.post("/discounts/apply", {
+      code,
+      orderTotal,
+      productIds,
+    });
+    return response.data;
+  }
+);

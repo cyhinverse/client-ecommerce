@@ -20,6 +20,8 @@ import { createOrder } from "@/features/order/orderAction";
 import { clearCart } from "@/features/cart/cartAction";
 import { toast } from "sonner";
 import { createPaymentUrl } from "@/features/payment/paymentAction";
+import { applyDiscountCode } from "@/features/discount/discountAction";
+import { clearAppliedDiscount } from "@/features/discount/discountSlice";
 
 export default function CheckoutPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -40,15 +42,18 @@ export default function CheckoutPage() {
 
   const { data: userData } = useAppSelector((state) => state.auth);
   const { data: cartData, checkoutTotal } = useAppSelector((state) => state.cart);
+  const { appliedDiscount, loading: discountLoading } = useAppSelector(
+    (state) => state.discount
+  );
   const dispatch = useAppDispatch();
   const router = useRouter();
 
   const cartItems = useMemo(() => {
     return cartData?.items || [];
   }, [cartData]);
-
-  const discount = 0;
-  const finalTotal = (checkoutTotal || 0) - discount;
+  
+  const discount = appliedDiscount ? appliedDiscount.discountAmount : 0;
+  const finalTotal = appliedDiscount ? appliedDiscount.finalTotal : (checkoutTotal || 0);
   const cartItemIds = cartItems.map(item => item._id);
 
   useEffect(() => {
@@ -112,7 +117,7 @@ export default function CheckoutPage() {
           note: formData.note
         },
         paymentMethod,
-        discountCode: promoCode || undefined,
+        discountCode: appliedDiscount?.code,
         note: note || undefined
       };
 
@@ -120,20 +125,27 @@ export default function CheckoutPage() {
 
       const result = await dispatch(createOrder(orderData)).unwrap();
 
+      console.log("Order created result:", result);
+
       if (result) {
         dispatch(clearCart()).unwrap().catch(console.error);
 
         if (paymentMethod === "vnpay") {
           try {
             toast.loading("Đang chuyển hướng đến VNPay...");
-            const paymentResult = await dispatch(createPaymentUrl(result._id)).unwrap();
+            // Use result.data._id or result._id dependent on api response structure
+            const orderId = result.data ? result.data._id : result._id; 
+            if(!orderId) throw new Error("Missing order ID");
+            
+            const paymentResult = await dispatch(createPaymentUrl(orderId)).unwrap();
 
             if (paymentResult.paymentUrl) {
               window.location.href = paymentResult.paymentUrl;
               return;
             }
           } catch (paymentError) {
-            toast.error("Không thể tạo thanh toán VNPay. Vui lòng thanh toán lại trong lịch sử đơn hàng." + paymentError);
+            console.error("Payment error:", paymentError);
+            toast.error("Không thể tạo thanh toán VNPay. Vui lòng thanh toán lại trong lịch sử đơn hàng.");
             router.push("/");
           }
         } else {
@@ -147,6 +159,36 @@ export default function CheckoutPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleApplyDiscount = async () => {
+    if (!promoCode.trim()) {
+      toast.error("Vui lòng nhập mã giảm giá");
+      return;
+    }
+
+    const orderTotal = checkoutTotal || 0;
+    const productIds = cartItems.map((item) => item.productId._id);
+
+    try {
+      await dispatch(
+        applyDiscountCode({
+          code: promoCode,
+          orderTotal,
+          productIds,
+        })
+      ).unwrap();
+      toast.success("Áp dụng mã giảm giá thành công!");
+    } catch (err: any) {
+      toast.error(err.message || "Không thể áp dụng mã giảm giá");
+      dispatch(clearAppliedDiscount());
+    }
+  };
+
+  const handleRemoveDiscount = () => {
+    dispatch(clearAppliedDiscount());
+    setPromoCode("");
+    toast.success("Đã gỡ bỏ mã giảm giá");
   };
 
   const formatPrice = (price: number) => {
@@ -407,15 +449,36 @@ export default function CheckoutPage() {
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="promoCode">Mã giảm giá</Label>
+                      {appliedDiscount && (
+                        <div className="text-sm text-green-600 mb-2 flex justify-between items-center">
+                          <span>
+                            Đang dùng: <strong>{appliedDiscount.code}</strong> (-
+                            {formatPrice(appliedDiscount.discountAmount)})
+                          </span>
+                          <button
+                            type="button"
+                            onClick={handleRemoveDiscount}
+                            className="text-red-500 hover:underline"
+                          >
+                            Gỡ bỏ
+                          </button>
+                        </div>
+                      )}
                       <div className="flex gap-2">
                         <Input
                           id="promoCode"
                           placeholder="Nhập mã giảm giá"
                           value={promoCode}
                           onChange={(e) => setPromoCode(e.target.value)}
+                          disabled={!!appliedDiscount}
                         />
-                        <Button type="button" variant="outline">
-                          Áp dụng
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handleApplyDiscount}
+                          disabled={!!appliedDiscount || discountLoading}
+                        >
+                          {discountLoading ? "..." : "Áp dụng"}
                         </Button>
                       </div>
                     </div>

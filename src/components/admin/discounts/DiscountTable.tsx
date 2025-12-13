@@ -95,7 +95,7 @@ export function DiscountsTable({
   const getDiscountValueText = (discount: Discount) => {
     return discount.discountType === "percent"
       ? `${discount.discountValue}%`
-      : `${discount.discountValue.toLocaleString()}đ`;
+      : `${(discount.discountValue ?? 0).toLocaleString()}đ`;
   };
 
   return (
