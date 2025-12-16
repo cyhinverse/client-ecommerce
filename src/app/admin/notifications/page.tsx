@@ -380,12 +380,12 @@ export default function NotificationAdminPage() {
                     </TableCell>
                   </TableRow>
                 )}
-                <div
-                  className={loading ? "opacity-50 pointer-events-none" : ""}
-                >
                   {notifications && notifications.length > 0 ? (
                     notifications.map((notification) => (
-                      <TableRow key={notification._id}>
+                      <TableRow 
+                        key={notification._id}
+                        className={loading ? "opacity-50 pointer-events-none" : ""}
+                      >
                         <TableCell>
                           <div>
                             <p className="font-medium">{notification.title}</p>
@@ -442,7 +442,6 @@ export default function NotificationAdminPage() {
                       </TableCell>
                     </TableRow>
                   )}
-                </div>
               </TableBody>
             </Table>
 

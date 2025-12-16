@@ -47,14 +47,7 @@ export default function HeaderLayout() {
         <div className="container flex h-16 items-center justify-between mx-auto px-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 mr-6">
-            <Image
-              width={32}
-              height={32}
-              className="object-contain"
-              src="/images/logoEcom.png"
-              alt="Logo"
-            />
-            <span className="text-xl font-bold tracking-tight">STORE</span>
+            <span className="text-xl font-bold tracking-tight">𝓢𝓣𝓞𝓡𝓔</span>
           </Link>
 
           {/* Navigation */}

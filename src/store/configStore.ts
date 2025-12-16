@@ -10,6 +10,7 @@ import { discountSlice } from "@/features/discount/discountSlice";
 import { orderSlice } from "@/features/order/orderSlice";
 import { paymentSlice } from "@/features/payment/paymentSlice";
 import { notificationSlice } from "@/features/notification/notificationSlice";
+import { reviewSlice } from "@/features/reviews/reviewSlice";
 
 const createNoopStorage = () => {
   return {
@@ -40,10 +41,11 @@ export const rootReducer = combineReducers({
   order: orderSlice.reducer,
   payment: paymentSlice.reducer,
   notification: notificationSlice.reducer,
+  reviews: reviewSlice.reducer,
 });
 
 const persistConfig = {
-  key: "root",
+  key: "root_ecommerce_v1",
   storage,
   whitelist: ["auth", "cart", "order"],
 };

@@ -1,6 +1,5 @@
-// components/admin/ProductAdminPage/ProductsStats.tsx
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, Tag, DollarSign, TrendingUp } from "lucide-react";
+import { Package, Tag, DollarSign, BarChart3 } from "lucide-react";
 
 interface ProductsStatsProps {
   totalProducts: number;
@@ -25,7 +24,7 @@ export function ProductsStats({
     {
       title: "Đang hoạt động",
       value: activeProducts,
-      icon: TrendingUp,
+      icon: BarChart3,
       description: "Sản phẩm đang bán",
     },
     {

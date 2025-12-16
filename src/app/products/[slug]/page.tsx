@@ -26,6 +26,7 @@ import ReviewDialog from "@/components/review/ReviewModal";
 import { addToCart } from "@/features/cart/cartAction";
 import Link from "next/link";
 import ReviewItem from "@/components/review/ReviewItem";
+import RelatedProducts from "@/components/product/RelatedProducts";
 
 export default function ProductDetailPage() {
   const dispatch = useAppDispatch();
@@ -67,7 +68,6 @@ export default function ProductDetailPage() {
     toast.error(error);
   }
 
-  // Loading handled by Activity below
 
   if (!currentProduct) {
     return (
@@ -86,16 +86,7 @@ export default function ProductDetailPage() {
     }
   };
 
-  const calculateDiscount = () => {
-    if (product.price?.discountPrice && product.price.currentPrice) {
-      return Math.round(
-        ((product.price.currentPrice - product.price.discountPrice) /
-          product.price.currentPrice) *
-          100
-      );
-    }
-    return 0;
-  };
+
 
   return (
     <>
@@ -171,15 +162,16 @@ export default function ProductDetailPage() {
                 {/* Badges */}
                 <div className="flex flex-wrap gap-2">
                   {product.isNewArrival && (
-                    <Badge className="bg-primary text-primary-foreground border-0 text-xs px-2 py-0.5">
+                    <Badge className="bg-primary text-primary-foreground border-0 text-[10px] h-5 px-2">
                       NEW
                     </Badge>
                   )}
                   {product.onSale && (
-                    <Badge className="bg-primary text-primary-foreground border-0 text-xs px-2 py-0.5">
-                      -{calculateDiscount()}%
+                    <Badge className="bg-black text-white border-0 text-[10px] h-5 px-2">
+                      SALE
                     </Badge>
                   )}
+
                   {product.isFeatured && (
                     <Badge className="bg-primary text-primary-foreground border-0 text-xs px-2 py-0.5">
                       FEATURED
@@ -472,6 +464,8 @@ export default function ProductDetailPage() {
               </div>
             </div>
           </div>
+
+          <RelatedProducts productId={product._id} />
         </div>
       </div>
     </>

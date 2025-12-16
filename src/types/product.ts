@@ -75,6 +75,7 @@ export interface ProductState {
   searchResults: Product[];
   isSearching: boolean;
   searchError: string | null;
+  related: Product[];
 }
 
 

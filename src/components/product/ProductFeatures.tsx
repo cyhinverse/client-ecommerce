@@ -7,6 +7,7 @@ import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { toast } from "sonner";
 import Image from "next/image";
 import Link from "next/link";
+
 import { Badge } from "../ui/badge";
 import { motion } from "framer-motion";
 
@@ -84,19 +85,11 @@ export default function ProductFeatures() {
                             </div>
                           )}
 
-                          {p.price?.discountPrice &&
-                            p.price.discountPrice < p.price.currentPrice && (
-                              <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground border-0 text-xs px-2 py-0.5">
-                                -
-                                {Math.round(
-                                  ((p.price.currentPrice -
-                                    p.price.discountPrice) /
-                                    p.price.currentPrice) *
-                                    100
-                                )}
-                                %
-                              </Badge>
-                            )}
+                          {p.onSale && (
+                            <Badge className="absolute top-2 right-2 bg-black text-white border-0 text-[10px] h-5 px-2">
+                              SALE
+                            </Badge>
+                          )}
                         </div>
 
                         <div className="space-y-1">

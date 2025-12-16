@@ -13,6 +13,7 @@ import {
   searchProducts,
   updateProduct,
   deleteVariantByVariantId,
+  getRelatedProducts,
 } from "./productAction";
 import { ProductState } from "@/types/product";
 
@@ -29,6 +30,7 @@ const initState: ProductState = {
   searchResults: [],
   isSearching: false,
   searchError: null,
+  related: [],
 };
 
 export const productSlice = createSlice({
@@ -204,6 +206,70 @@ export const productSlice = createSlice({
     builder.addCase(searchProducts.rejected, (state, action) => {
       state.isSearching = false;
       state.searchError = action.error.message || "Failed to search products";
+    });
+
+    // =========================== UPDATE PRODUCT ===========================
+    builder.addCase(updateProduct.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(updateProduct.fulfilled, (state, action) => {
+      state.isLoading = false;
+      const updatedProduct = action.payload?.data;
+      if (updatedProduct) {
+        state.all = state.all.map((p) =>
+          p._id === updatedProduct._id ? updatedProduct : p
+        );
+        state.featured = state.featured.map((p) =>
+          p._id === updatedProduct._id ? updatedProduct : p
+        );
+        state.newArrivals = state.newArrivals.map((p) =>
+          p._id === updatedProduct._id ? updatedProduct : p
+        );
+        state.onSale = state.onSale.map((p) =>
+          p._id === updatedProduct._id ? updatedProduct : p
+        );
+        state.byCategory = state.byCategory.map((p) =>
+          p._id === updatedProduct._id ? updatedProduct : p
+        );
+        if (state.currentProduct?._id === updatedProduct._id) {
+          state.currentProduct = updatedProduct;
+        }
+      }
+    });
+    builder.addCase(updateProduct.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.error.message || "Failed to update product";
+    });
+
+    // =========================== DELETE VARIANT ===========================
+    builder.addCase(deleteVariantByVariantId.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(deleteVariantByVariantId.fulfilled, (state, action) => {
+      state.isLoading = false;
+      if (action.payload?.data) {
+         state.currentProduct = action.payload.data;
+      }
+    });
+    builder.addCase(deleteVariantByVariantId.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.error.message || "Failed to delete variant";
+    });
+
+    // =========================== RELATED PRODUCTS ===========================
+    builder.addCase(getRelatedProducts.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(getRelatedProducts.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.related = action.payload || [];
+    });
+    builder.addCase(getRelatedProducts.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.error.message || "Failed to load related products";
     });
   },
 });

@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { getOnSaleProducts } from "@/features/product/productAction";
 import Image from "next/image";
 import Link from "next/link";
+
 import { Badge } from "../ui/badge";
 import { motion } from "framer-motion";
 
@@ -70,11 +71,7 @@ export default function OnSaleProduct() {
                 if (!p.price?.currentPrice || !p.price?.discountPrice)
                   return null;
 
-                const discountPercentage = Math.round(
-                  ((p.price.currentPrice - p.price.discountPrice) /
-                    p.price.currentPrice) *
-                    100
-                );
+
 
                 return (
                   <motion.div key={p._id} variants={item}>
@@ -97,8 +94,8 @@ export default function OnSaleProduct() {
                               </div>
                             )}
 
-                            <Badge className="absolute top-2 left-2 bg-destructive text-destructive-foreground border-0 text-xs px-2 py-0.5">
-                              -{discountPercentage}%
+                            <Badge className="absolute top-2 left-2 bg-black text-white border-0 text-[10px] h-5 px-2">
+                              SALE
                             </Badge>
                           </div>
 

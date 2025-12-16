@@ -210,9 +210,9 @@ export const deleteProduct = createAsyncThunk(
 );
 
 export const deleteVariantByVariantId = createAsyncThunk(
-  "vairant/delete/:variantId",
-  async (variantId: string) => {
-    const res = await instance.delete(`products/:id/variant/${variantId}`);
+  "variant/delete/:variantId",
+  async ({ productId, variantId }: { productId: string; variantId: string }) => {
+    const res = await instance.delete(`/products/${productId}/variant/${variantId}`);
     if (!res) {
       throw new Error("Failed to delete variant");
     }
@@ -255,6 +255,28 @@ export const searchProducts = createAsyncThunk(
       };
       return rejectWithValue(
         axiosError.response?.data?.message || "Failed to search products"
+      );
+    }
+  }
+);
+
+export const getRelatedProducts = createAsyncThunk(
+  "product/related",
+  async (
+    {
+      productId,
+    }: { productId: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await instance.get(`/products/related/${productId}`);
+      return response.data.data;
+    } catch (error) {
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
+      return rejectWithValue(
+        axiosError.response?.data?.message || "Failed to fetch related products"
       );
     }
   }

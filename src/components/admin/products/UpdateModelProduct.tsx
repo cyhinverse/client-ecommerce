@@ -20,6 +20,7 @@ interface UpdateModelProductProps {
   onOpenChange: (open: boolean) => void;
   product: Product | null;
   onUpdate: (formData: FormData) => void;
+  onDeleteVariant?: (variantId: string) => Promise<void>;
   isLoading?: boolean;
 }
 
@@ -28,6 +29,7 @@ export function UpdateModelProduct({
   onOpenChange,
   product,
   onUpdate,
+  onDeleteVariant,
   isLoading = false,
 }: UpdateModelProductProps) {
   const [formData, setFormData] = useState({
@@ -48,6 +50,42 @@ export function UpdateModelProduct({
     variants: [] as variants[],
     tags: [] as string[],
   });
+// ...
+  const removeVariant = async (index: number) => {
+    const variantToDelete = formData.variants[index];
+    
+    // Check if it's an existing variant (has real ID) or a new temp one
+    if (variantToDelete._id && !variantToDelete._id.startsWith("temp-")) {
+      if (onDeleteVariant) {
+        // Confirmation could be added here or in parent
+        if (confirm("Bạn có chắc chắn muốn xóa biến thể này không?")) {
+           try {
+             await onDeleteVariant(variantToDelete._id);
+             // Remove from local UI only after success
+             setFormData((prev) => ({
+               ...prev,
+               variants: prev.variants.filter((_, i) => i !== index),
+             }));
+           } catch (error) {
+             // Error handled by parent usually
+             console.error("Failed to delete variant", error);
+           }
+        }
+      } else {
+        // If no handler provided, just remove from UI (fallback behavior, though risky for synced data)
+        setFormData((prev) => ({
+          ...prev,
+          variants: prev.variants.filter((_, i) => i !== index),
+        }));
+      }
+    } else {
+      // It's a temp variant, just remove from state
+      setFormData((prev) => ({
+        ...prev,
+        variants: prev.variants.filter((_, i) => i !== index),
+      }));
+    }
+  };
   const [images, setImages] = useState<File[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
@@ -289,12 +327,7 @@ export function UpdateModelProduct({
     }));
   };
 
-  const removeVariant = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      variants: prev.variants.filter((_, i) => i !== index),
-    }));
-  };
+
 
   if (!product) return null;
 

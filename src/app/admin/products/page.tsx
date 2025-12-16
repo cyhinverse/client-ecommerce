@@ -22,13 +22,12 @@ import {
   deleteProduct,
   updateProduct,
   createProduct,
+  deleteVariantByVariantId,
 } from "@/features/product/productAction";
 import { Product, AdminProductFilters } from "@/types/product";
 
 export default function AdminProductsPage() {
   const dispatch = useAppDispatch();
-
-  // SỬA: Lấy đúng state từ slice mới
   const {
     all: products,
     pagination,
@@ -83,7 +82,6 @@ export default function AdminProductsPage() {
     isActive?: boolean;
   };
 
-  // Fetch products when filters change
   useEffect(() => {
     const params: Params = {
       page: currentPage,
@@ -228,17 +226,14 @@ export default function AdminProductsPage() {
 
   const handleDeleteProduct = async (product: Product) => {
     try {
-      // Sử dụng unwrap() để throw error nếu rejected
       await dispatch(deleteProduct(product._id)).unwrap();
 
       toast.success("Xóa sản phẩm thành công");
 
-      // Refresh data sau khi xóa thành công
       refreshData();
     } catch (error) {
       console.error("Delete product error:", error);
 
-      // Kiểm tra nếu error thực sự là string message
       if (error && typeof error === "string") {
         toast.error(error);
       } else {
@@ -271,7 +266,7 @@ export default function AdminProductsPage() {
   );
   const totalCategories = categories.length;
 
-  // SỬA: Kiểm tra error từ state
+
   if (error) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -279,6 +274,24 @@ export default function AdminProductsPage() {
       </div>
     );
   }
+
+  const handleDeleteVariant = async (variantId: string) => {
+    if (!selectedProduct) return;
+    try {
+      await dispatch(
+        deleteVariantByVariantId({
+          productId: selectedProduct._id,
+          variantId,
+        })
+      ).unwrap();
+      refreshData();
+      toast.success("Xóa biến thể thành công");
+    } catch (error) {
+      const msg = typeof error === "string" ? error : "Xóa biến thể thất bại";
+      toast.error(msg);
+      throw error; // Re-throw to prevent UI removal in child
+    }
+  };
 
   return (
     <div className="space-y-6 no-scrollbar">
@@ -300,7 +313,7 @@ export default function AdminProductsPage() {
         </CardHeader>
         <CardContent>
           <ProductsTable
-            products={productList} // SỬA: sử dụng productList
+            products={productList} 
             searchTerm={searchTerm}
             pageSize={pageSize}
             isLoading={isLoading}
@@ -347,6 +360,7 @@ export default function AdminProductsPage() {
             onOpenChange={handleCloseEditModal}
             product={selectedProduct}
             onUpdate={handleUpdateProduct}
+            onDeleteVariant={handleDeleteVariant}
             isLoading={isUpdating}
           />
         </CardContent>

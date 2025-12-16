@@ -23,11 +23,12 @@ import { Loader2 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { getAllProducts } from "@/features/product/productAction";
 import { Product } from "@/types/product";
-import { Check, X, Search } from "lucide-react";
+import {  X, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
-import { AppDispatch } from "@/store/store";
+import { AppDispatch } from "@/store/configStore";
+import { CreateDiscountData } from "@/types/discount";
 
 interface CreateModelDiscountProps {
   open: boolean;
@@ -60,7 +61,6 @@ export function CreateModelDiscount({
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    // Fetch products for selection
     dispatch(getAllProducts({ page: 1, limit: 100 }))
       .unwrap()
       .then((res: any) => {

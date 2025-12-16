@@ -24,9 +24,18 @@ export const ProductCard = ({ product }: { product: Product }) => (
             </div>
           )}
 
-          {product.price?.discountPrice && product.price.discountPrice < product.price.currentPrice && (
-            <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground border-0 text-xs px-2 py-0.5">
-              -{Math.round(((product.price.currentPrice - product.price.discountPrice) / product.price.currentPrice) * 100)}%
+          {product.onSale && (
+            <Badge className="absolute top-2 right-2 bg-black text-white border-0 text-[10px] h-5 px-2">
+              SALE
+            </Badge>
+          )}
+
+          {product.isNewArrival && (
+            <Badge
+              variant="secondary"
+              className="absolute top-2 left-2 text-[10px] h-5 px-2 backdrop-blur-sm bg-white/80"
+            >
+              NEW
             </Badge>
           )}
         </div>
@@ -37,7 +46,7 @@ export const ProductCard = ({ product }: { product: Product }) => (
           </h3>
           <p className="text-xs text-muted-foreground">{product.brand || "Brand"}</p>
           <div className="flex items-baseline gap-2 pt-1">
-            {product.price?.discountPrice && product.price.discountPrice < product.price.currentPrice ? (
+            {product.onSale && product.price?.discountPrice && product.price.discountPrice < product.price.currentPrice ? (
               <>
                 <span className="font-semibold text-sm">
                   {new Intl.NumberFormat("vi-VN", {

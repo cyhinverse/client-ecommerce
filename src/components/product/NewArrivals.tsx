@@ -90,24 +90,15 @@ export default function NewArrivals() {
                             </div>
                           )}
 
-                          {p.price?.discountPrice &&
-                            p.price.discountPrice < p.price.currentPrice && (
-                              <Badge className="absolute top-2 right-2 bg-red-500 text-white border-0 text-xs px-2 py-0.5 shadow-sm">
-                                -
-                                {Math.round(
-                                  ((p.price.currentPrice -
-                                    p.price.discountPrice) /
-                                    p.price.currentPrice) *
-                                    100
-                                )}
-                                %
-                              </Badge>
-                            )}
-
+                          {p.onSale && (
+                             <Badge className="absolute top-2 right-2 bg-black text-white border-0 text-[10px] h-5 px-2">
+                               SALE
+                             </Badge>
+                           )}
                           {p.isNewArrival && (
                             <Badge
                               variant="secondary"
-                              className="absolute top-2 left-2 text-[10px] h-5 px-1.5 backdrop-blur-sm bg-white/80"
+                              className="absolute top-2 left-2 text-[10px] h-5 px-2 backdrop-blur-sm bg-white/80"
                             >
                               NEW
                             </Badge>
