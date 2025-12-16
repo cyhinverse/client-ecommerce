@@ -109,14 +109,14 @@ export default function ProductDetailPage() {
           <div className="grid gap-8 lg:grid-cols-2">
             {/* Image Gallery */}
             <div className="space-y-4">
-              <div className="aspect-square overflow-hidden bg-muted">
+              <div className="aspect-square overflow-hidden bg-white border rounded-lg">
                 {product.images && product.images.length > 0 ? (
                   <Image
                     src={product.images[selectedImageIndex]}
                     alt={product.name}
                     width={600}
                     height={600}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-contain p-4"
                   />
                 ) : (
                   <div className="flex h-full w-full flex-col items-center justify-center bg-muted/30">
@@ -148,7 +148,7 @@ export default function ProductDetailPage() {
                         alt={`${product.name} ${index + 1}`}
                         width={64}
                         height={64}
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-contain p-1"
                       />
                     </button>
                   ))}
@@ -211,13 +211,13 @@ export default function ProductDetailPage() {
                   product.price.discountPrice < product.price.currentPrice ? (
                     <div className="flex items-baseline gap-2">
                       <span className="text-2xl font-semibold">
-                        {new Intl.NumberFormat("vi-VN", {
+                        {new Intl.NumberFormat("en-US", {
                           style: "currency",
                           currency: "VND",
                         }).format(product.price.discountPrice)}
                       </span>
                       <span className="text-lg text-muted-foreground line-through">
-                        {new Intl.NumberFormat("vi-VN", {
+                        {new Intl.NumberFormat("en-US", {
                           style: "currency",
                           currency: "VND",
                         }).format(product.price.currentPrice)}
@@ -225,7 +225,7 @@ export default function ProductDetailPage() {
                     </div>
                   ) : (
                     <span className="text-2xl font-semibold">
-                      {new Intl.NumberFormat("vi-VN", {
+                      {new Intl.NumberFormat("en-US", {
                         style: "currency",
                         currency: "VND",
                       }).format(product.price?.currentPrice || 0)}
@@ -289,14 +289,14 @@ export default function ProductDetailPage() {
                             variant.price.discountPrice <
                               variant.price.currentPrice ? (
                               <span className="text-destructive">
-                                {new Intl.NumberFormat("vi-VN", {
+                                {new Intl.NumberFormat("en-US", {
                                   style: "currency",
                                   currency: "VND",
                                 }).format(variant.price.discountPrice)}
                               </span>
                             ) : (
                               <span>
-                                {new Intl.NumberFormat("vi-VN", {
+                                {new Intl.NumberFormat("en-US", {
                                   style: "currency",
                                   currency: "VND",
                                 }).format(variant.price?.currentPrice || 0)}

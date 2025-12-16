@@ -10,28 +10,28 @@ interface UsersStatsProps {
 
 const stats = [
   {
-    title: "Tổng người dùng",
+    title: "Total Users",
     value: "totalUsers",
     icon: Users,
     bgColor: "bg-muted",
     iconColor: "text-muted-foreground",
   },
   {
-    title: "Đã xác thực email",
+    title: "Verified Email",
     value: "verifiedUsers",
     icon: MailCheck,
     bgColor: "bg-muted",
     iconColor: "text-muted-foreground",
   },
   {
-    title: "Có địa chỉ",
+    title: "Has Address",
     value: "usersWithAddress",
     icon: MapPin,
     bgColor: "bg-muted",
     iconColor: "text-muted-foreground",
   },
   {
-    title: "Người dùng mới",
+    title: "New Users",
     value: "recentUsers",
     icon: UserCheck,
     bgColor: "bg-muted",

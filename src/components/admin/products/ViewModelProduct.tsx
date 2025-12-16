@@ -29,10 +29,10 @@ export function ViewModelProduct({
 
   // Hàm lấy tên category
   const getCategoryName = (category: category | string | null): string => {
-    if (!category) return "Không có";
+    if (!category) return "None";
     return typeof category === "string"
       ? category
-      : category.name || "Không có";
+      : category.name || "None";
   };
 
   // Hàm lấy slug category
@@ -45,8 +45,8 @@ export function ViewModelProduct({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl rounded-none p-0 gap-0">
         <DialogHeader className="p-6 border-b border-border">
-          <DialogTitle className="text-xl font-bold uppercase tracking-tight">Chi tiết sản phẩm</DialogTitle>
-          <DialogDescription className="text-muted-foreground">Thông tin chi tiết về sản phẩm</DialogDescription>
+          <DialogTitle className="text-xl font-bold uppercase tracking-tight">Product Details</DialogTitle>
+          <DialogDescription className="text-muted-foreground">Detailed product information</DialogDescription>
         </DialogHeader>
 
         <div className="p-6 space-y-8 max-h-[80vh] overflow-y-auto no-scrollbar">
@@ -56,11 +56,11 @@ export function ViewModelProduct({
               <div>
                 <h3 className="text-sm font-bold uppercase tracking-wider text-foreground border-b border-border pb-2 mb-4 flex items-center gap-2">
                   <Package className="h-4 w-4" />
-                  Thông tin cơ bản
+                  Basic Info
                 </h3>
                 <div className="space-y-3 text-sm">
                   <div className="grid grid-cols-3 gap-2">
-                    <span className="font-bold text-muted-foreground uppercase text-xs">Tên:</span>
+                    <span className="font-bold text-muted-foreground uppercase text-xs">Name:</span>
                     <span className="col-span-2 font-medium">{product.name}</span>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
@@ -68,7 +68,7 @@ export function ViewModelProduct({
                     <span className="col-span-2 text-muted-foreground">{product.slug}</span>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
-                    <span className="font-bold text-muted-foreground uppercase text-xs">Danh mục:</span>
+                    <span className="font-bold text-muted-foreground uppercase text-xs">Category:</span>
                     <div className="col-span-2">
                       <span className="font-medium">{getCategoryName(product.category)}</span>
                       {getCategorySlug(product.category) && (
@@ -79,8 +79,8 @@ export function ViewModelProduct({
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
-                    <span className="font-bold text-muted-foreground uppercase text-xs">Thương hiệu:</span>
-                    <span className="col-span-2 font-medium">{product.brand || "Không có"}</span>
+                    <span className="font-bold text-muted-foreground uppercase text-xs">Brand:</span>
+                    <span className="col-span-2 font-medium">{product.brand || "None"}</span>
                   </div>
                 </div>
               </div>
@@ -88,11 +88,11 @@ export function ViewModelProduct({
               <div>
                 <h3 className="text-sm font-bold uppercase tracking-wider text-foreground border-b border-border pb-2 mb-4 flex items-center gap-2">
                   <DollarSign className="h-4 w-4" />
-                  Giá
+                  Price
                 </h3>
                 <div className="space-y-3 text-sm">
                   <div className="grid grid-cols-3 gap-2">
-                    <span className="font-bold text-muted-foreground uppercase text-xs">Giá hiện tại:</span>
+                    <span className="font-bold text-muted-foreground uppercase text-xs">Current Price:</span>
                     <span className="col-span-2 font-bold text-lg">{product.price?.currentPrice?.toLocaleString()}₫</span>
                   </div>
                   {product.price?.discountPrice &&
@@ -105,7 +105,7 @@ export function ViewModelProduct({
                       </div>
                     )}
                   <div className="grid grid-cols-3 gap-2">
-                    <span className="font-bold text-muted-foreground uppercase text-xs">Tiền tệ:</span>
+                    <span className="font-bold text-muted-foreground uppercase text-xs">Currency:</span>
                     <span className="col-span-2 text-muted-foreground">{product.price?.currency || "VND"}</span>
                   </div>
                 </div>
@@ -116,7 +116,7 @@ export function ViewModelProduct({
               <div>
                 <h3 className="text-sm font-bold uppercase tracking-wider text-foreground border-b border-border pb-2 mb-4 flex items-center gap-2">
                   <Tag className="h-4 w-4" />
-                  Trạng thái
+                  Status
                 </h3>
                 <div className="space-y-2">
                   <div className="flex flex-wrap gap-2">
@@ -139,19 +139,19 @@ export function ViewModelProduct({
               <div>
                 <h3 className="text-sm font-bold uppercase tracking-wider text-foreground border-b border-border pb-2 mb-4 flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  Thời gian & Thống kê
+                  Timing & Stats
                 </h3>
                 <div className="space-y-3 text-sm">
                   <div className="grid grid-cols-3 gap-2">
-                    <span className="font-bold text-muted-foreground uppercase text-xs">Ngày tạo:</span>
-                    <span className="col-span-2 text-muted-foreground">{new Date(product.createdAt).toLocaleDateString("vi-VN")}</span>
+                    <span className="font-bold text-muted-foreground uppercase text-xs">Created At:</span>
+                    <span className="col-span-2 text-muted-foreground">{new Date(product.createdAt).toLocaleDateString("en-US")}</span>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
-                    <span className="font-bold text-muted-foreground uppercase text-xs">Cập nhật:</span>
-                    <span className="col-span-2 text-muted-foreground">{new Date(product.updatedAt).toLocaleDateString("vi-VN")}</span>
+                    <span className="font-bold text-muted-foreground uppercase text-xs">Updated At:</span>
+                    <span className="col-span-2 text-muted-foreground">{new Date(product.updatedAt).toLocaleDateString("en-US")}</span>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
-                    <span className="font-bold text-muted-foreground uppercase text-xs">Đã bán:</span>
+                    <span className="font-bold text-muted-foreground uppercase text-xs">Sold:</span>
                     <span className="col-span-2 font-medium">{product.soldCount || 0}</span>
                   </div>
                 </div>
@@ -162,7 +162,7 @@ export function ViewModelProduct({
           {/* Description */}
           {product.description && (
             <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-foreground border-b border-border pb-2 mb-4">Mô tả</h3>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-foreground border-b border-border pb-2 mb-4">Description</h3>
               <div className="bg-muted/30 p-4 border border-border text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
                 {product.description}
               </div>
@@ -186,7 +186,7 @@ export function ViewModelProduct({
           {/* Variants */}
           {product.variants && product.variants.length > 0 && (
             <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-foreground border-b border-border pb-2 mb-4">Biến thể sản phẩm</h3>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-foreground border-b border-border pb-2 mb-4">Product Variants</h3>
               <div className="space-y-3">
                 {product.variants.map((variant, index) => (
                   <div key={variant._id} className="border border-border p-4 bg-muted/30">
@@ -196,22 +196,22 @@ export function ViewModelProduct({
                         <span className="font-medium">{variant.sku}</span>
                       </div>
                       <div>
-                        <span className="font-bold text-muted-foreground uppercase text-xs block mb-1">Màu</span>
-                        <span className="font-medium">{variant.color || "Không có"}</span>
+                        <span className="font-bold text-muted-foreground uppercase text-xs block mb-1">Color</span>
+                        <span className="font-medium">{variant.color || "None"}</span>
                       </div>
                       <div>
                         <span className="font-bold text-muted-foreground uppercase text-xs block mb-1">Size</span>
-                        <span className="font-medium">{variant.size || "Không có"}</span>
+                        <span className="font-medium">{variant.size || "None"}</span>
                       </div>
                       <div>
-                        <span className="font-bold text-muted-foreground uppercase text-xs block mb-1">Tồn kho</span>
+                        <span className="font-bold text-muted-foreground uppercase text-xs block mb-1">Stock</span>
                         <span className="font-medium">{variant.stock}</span>
                       </div>
                     </div>
                     {variant.images && variant.images.length > 0 && (
                       <div className="border-t border-border pt-3">
                         <span className="font-bold text-muted-foreground uppercase text-xs block mb-2">
-                          Hình ảnh biến thể
+                          Variant Images
                         </span>
                         <div className="flex gap-2">
                           {variant.images.map((image, imgIndex) => (
@@ -236,7 +236,7 @@ export function ViewModelProduct({
           {/* Images */}
           {product.images && product.images.length > 0 && (
             <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-foreground border-b border-border pb-2 mb-4">Hình ảnh sản phẩm</h3>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-foreground border-b border-border pb-2 mb-4">Product Images</h3>
               <div className="grid grid-cols-6 gap-4">
                 {product.images.map((image, index) => (
                   <div key={index} className="relative h-24 w-full border border-border">
@@ -255,9 +255,9 @@ export function ViewModelProduct({
           {/* Reviews count */}
           {product.reviews && product.reviews.length > 0 && (
             <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-foreground border-b border-border pb-2 mb-4">Đánh giá</h3>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-foreground border-b border-border pb-2 mb-4">Reviews</h3>
               <div className="text-sm">
-                <span className="font-bold text-muted-foreground uppercase text-xs">Số lượng đánh giá:</span>{" "}
+                <span className="font-bold text-muted-foreground uppercase text-xs">Count:</span>{" "}
                 <span className="font-medium">{product.reviews.length}</span>
               </div>
             </div>
@@ -271,7 +271,7 @@ export function ViewModelProduct({
             onClick={() => onOpenChange(false)}
             className="rounded-none border-border hover:bg-background"
           >
-            Đóng
+            Close
           </Button>
           <Button
             type="button"
@@ -279,7 +279,7 @@ export function ViewModelProduct({
             className="flex items-center gap-2 rounded-none"
           >
             <Edit className="h-4 w-4" />
-            Chỉnh sửa
+            Edit
           </Button>
         </div>
       </DialogContent>

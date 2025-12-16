@@ -137,10 +137,10 @@ export function ProductsTable({
   );
 
   const getCategoryName = (category: string | category | null): string => {
-    if (!category) return "Không có";
+    if (!category) return "None";
     return typeof category === "string"
       ? category
-      : category.name || "Không có";
+      : category.name || "None";
   };
 
   const getPriceDisplay = (price: price | null) => {
@@ -178,7 +178,7 @@ export function ProductsTable({
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Tìm kiếm sản phẩm..."
+              placeholder="Search products..."
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
               className="pl-8 rounded-none border-border focus-visible:ring-0 focus-visible:border-primary"
@@ -191,10 +191,10 @@ export function ProductsTable({
             onValueChange={onCategoryFilterChange}
           >
             <SelectTrigger className="w-[180px] rounded-none border-border focus:ring-0 focus:border-primary">
-              <SelectValue placeholder="Danh mục" />
+              <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent className="rounded-none border-border">
-              <SelectItem value="all">Tất cả danh mục</SelectItem>
+              <SelectItem value="all">All Categories</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category.id} value={category.id}>
                   {category.name}
@@ -206,10 +206,10 @@ export function ProductsTable({
           {/* Brand Filter */}
           <Select value={selectedBrand} onValueChange={onBrandFilterChange}>
             <SelectTrigger className="w-[180px] rounded-none border-border focus:ring-0 focus:border-primary">
-              <SelectValue placeholder="Thương hiệu" />
+              <SelectValue placeholder="Brand" />
             </SelectTrigger>
             <SelectContent className="rounded-none border-border">
-              <SelectItem value="all">Tất cả thương hiệu</SelectItem>
+              <SelectItem value="all">All Brands</SelectItem>
               {brands.map((brand) => (
                 <SelectItem key={brand} value={brand}>
                   {brand}
@@ -225,24 +225,24 @@ export function ProductsTable({
                 className="flex items-center gap-2 rounded-none border-border hover:bg-muted"
               >
                 <Filter className="h-4 w-4" />
-                Giá
+                Price
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-80 p-4 rounded-none border-border">
               <DropdownMenuLabel className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                Lọc theo giá
+                Filter by price
               </DropdownMenuLabel>
               <div className="space-y-3 mt-2">
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Giá thấp nhất"
+                    placeholder="Min Price"
                     value={localMinPrice}
                     onChange={(e) => setLocalMinPrice(e.target.value)}
                     type="number"
                     className="rounded-none border-border focus-visible:ring-0 focus-visible:border-primary"
                   />
                   <Input
-                    placeholder="Giá cao nhất"
+                    placeholder="Max Price"
                     value={localMaxPrice}
                     onChange={(e) => setLocalMaxPrice(e.target.value)}
                     type="number"
@@ -253,7 +253,7 @@ export function ProductsTable({
                   onClick={handlePriceFilterApply}
                   className="w-full rounded-none bg-primary text-primary-foreground hover:bg-primary/90"
                 >
-                  Áp dụng
+                  Apply
                 </Button>
               </div>
             </DropdownMenuContent>
@@ -271,12 +271,12 @@ export function ProductsTable({
             }}
           >
             <SelectTrigger className="w-[180px] rounded-none border-border focus:ring-0 focus:border-primary">
-              <SelectValue placeholder="Trạng thái" />
+              <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent className="rounded-none border-border">
-              <SelectItem value="all">Tất cả trạng thái</SelectItem>
-              <SelectItem value="true">Đang hoạt động</SelectItem>
-              <SelectItem value="false">Ngừng kinh doanh</SelectItem>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="true">Active</SelectItem>
+              <SelectItem value="false">Inactive</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -287,12 +287,12 @@ export function ProductsTable({
           onValueChange={(value) => onPageSizeChange(Number(value))}
         >
           <SelectTrigger className="w-[180px] rounded-none border-border focus:ring-0 focus:border-primary">
-            <SelectValue placeholder="Hiển thị" />
+            <SelectValue placeholder="Show" />
           </SelectTrigger>
           <SelectContent className="rounded-none border-border">
-            <SelectItem value="10">10 sản phẩm</SelectItem>
-            <SelectItem value="20">20 sản phẩm</SelectItem>
-            <SelectItem value="50">50 sản phẩm</SelectItem>
+            <SelectItem value="10">10 products</SelectItem>
+            <SelectItem value="20">20 products</SelectItem>
+            <SelectItem value="50">50 products</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -303,34 +303,34 @@ export function ProductsTable({
           <TableHeader>
             <TableRow className="bg-muted/50 hover:bg-muted/50 border-border">
               <TableHead className="w-[50px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                Hình ảnh
+                Image
               </TableHead>
               <TableHead className="w-[250px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                Tên sản phẩm
+                Product Name
               </TableHead>
               <TableHead className="w-[120px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                Danh mục
+                Category
               </TableHead>
               <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                Thương hiệu
+                Brand
               </TableHead>
               <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                Giá
+                Price
               </TableHead>
               <TableHead className="w-[80px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                Tồn kho
+                Stock
               </TableHead>
               <TableHead className="w-[80px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                Đã bán
+                Sold
               </TableHead>
               <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                Trạng thái
+                Status
               </TableHead>
               <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                Ngày tạo
+                Created At
               </TableHead>
               <TableHead className="w-[50px] uppercase text-xs font-bold tracking-wider text-muted-foreground text-right">
-                Thao tác
+                Actions
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -347,7 +347,7 @@ export function ProductsTable({
             {!isLoading && products.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={10} className="h-24 text-center">
-                  Không tìm thấy sản phẩm nào.
+                  No products found.
                 </TableCell>
               </TableRow>
             ) : (
@@ -386,7 +386,7 @@ export function ProductsTable({
                               variant="secondary"
                               className="h-4 px-1 text-[9px] rounded-sm bg-info/10 text-info border-info/20"
                             >
-                              Mới
+                              New
                             </Badge>
                           )}
                           {product.isFeatured && (
@@ -426,9 +426,9 @@ export function ProductsTable({
                   <TableCell className="text-muted-foreground">
                     <div
                       className="max-w-[100px] truncate"
-                      title={product.brand || "Không có"}
+                      title={product.brand || "None"}
                     >
-                      {product.brand || "Không có"}
+                      {product.brand || "None"}
                     </div>
                   </TableCell>
                   <TableCell>{getPriceDisplay(product.price)}</TableCell>
@@ -454,7 +454,7 @@ export function ProductsTable({
                           : "bg-muted text-muted-foreground hover:bg-muted/80"
                       }`}
                     >
-                      {product.isActive ? "Đang bán" : "Ngừng bán"}
+                      {product.isActive ? "Active" : "Inactive"}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
@@ -479,21 +479,21 @@ export function ProductsTable({
                           className="cursor-pointer"
                         >
                           <Eye className="h-4 w-4 mr-2" />
-                          Xem chi tiết
+                          View Details
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => onEdit(product)}
                           className="cursor-pointer"
                         >
                           <Edit className="h-4 w-4 mr-2" />
-                          Chỉnh sửa
+                          Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => onDelete(product)}
                           className="text-destructive cursor-pointer focus:text-destructive focus:bg-destructive/10"
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
-                          Xóa
+                          Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

@@ -9,13 +9,13 @@ export const ProductCard = ({ product }: { product: Product }) => (
   <Link href={`/products/${product.slug || product._id}`} className="group block">
     <Card className="overflow-hidden border-0 shadow-none bg-transparent">
       <CardContent className="p-0">
-        <div className="relative aspect-[3/4] overflow-hidden bg-muted mb-3">
+        <div className="relative aspect-[3/4] overflow-hidden bg-white mb-3 rounded-md">
           {product.images && product.images.length > 0 ? (
             <Image
               src={product.images[0]}
               alt={product.name || "Product image"}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              className="object-contain p-2 group-hover:scale-105 transition-transform duration-500"
               sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
             />
           ) : (
@@ -49,13 +49,13 @@ export const ProductCard = ({ product }: { product: Product }) => (
             {product.onSale && product.price?.discountPrice && product.price.discountPrice < product.price.currentPrice ? (
               <>
                 <span className="font-semibold text-sm">
-                  {new Intl.NumberFormat("vi-VN", {
+                  {new Intl.NumberFormat("en-US", {
                     style: "currency",
                     currency: "VND",
                   }).format(product.price.discountPrice)}
                 </span>
                 <span className="text-xs text-muted-foreground line-through">
-                  {new Intl.NumberFormat("vi-VN", {
+                  {new Intl.NumberFormat("en-US", {
                     style: "currency",
                     currency: "VND",
                   }).format(product.price.currentPrice)}
@@ -63,7 +63,7 @@ export const ProductCard = ({ product }: { product: Product }) => (
               </>
             ) : (
               <span className="font-semibold text-sm">
-                {new Intl.NumberFormat("vi-VN", {
+                {new Intl.NumberFormat("en-US", {
                   style: "currency",
                   currency: "VND",
                 }).format(product.price?.currentPrice || 0)}

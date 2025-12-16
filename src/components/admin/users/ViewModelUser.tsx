@@ -39,12 +39,12 @@ export function ViewModelUser({
     return isVerified ? (
       <Badge className="bg-primary text-primary-foreground border-primary">
         <CheckCircle className="h-3 w-3 mr-1" />
-        Đã xác thực email
+        Email Verified
       </Badge>
     ) : (
       <Badge variant="outline" className="border-muted-foreground/50 text-muted-foreground">
         <XCircle className="h-3 w-3 mr-1" />
-        Chưa xác thực email
+        Email Unverified
       </Badge>
     );
   };
@@ -57,16 +57,16 @@ export function ViewModelUser({
   };
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("vi-VN");
+    return new Date(date).toLocaleDateString("en-US");
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Chi tiết người dùng</DialogTitle>
+          <DialogTitle>User Details</DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            Thông tin chi tiết về người dùng trong hệ thống
+            Detailed information about user in the system
           </DialogDescription>
         </DialogHeader>
 
@@ -105,7 +105,7 @@ export function ViewModelUser({
                 <div className="flex items-center gap-3">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                   <span className="text-foreground">
-                    Tham gia: {formatDate(user.createdAt)}
+                    Joined: {formatDate(user.createdAt)}
                   </span>
                 </div>
               </div>
@@ -117,7 +117,7 @@ export function ViewModelUser({
             <CardContent className="p-6">
               <h4 className="font-semibold text-foreground mb-4 flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-muted-foreground" />
-                Địa chỉ
+                Address
               </h4>
               {user.addresses && user.addresses.length > 0 ? (
                 <div className="space-y-3">
@@ -138,7 +138,7 @@ export function ViewModelUser({
                   ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground">Chưa có địa chỉ</p>
+                <p className="text-muted-foreground">No address available</p>
               )}
             </CardContent>
           </Card>
@@ -149,14 +149,14 @@ export function ViewModelUser({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Đóng
+              Close
             </Button>
             {onEdit && (
               <Button
                 onClick={handleEdit}
               >
                 <Edit className="h-4 w-4 mr-2" />
-                Chỉnh sửa
+                Edit
               </Button>
             )}
           </div>

@@ -16,28 +16,28 @@ export function DiscountsStats({
 }: DiscountsStatsProps) {
   const stats = [
     {
-      title: "Tổng số mã",
+      title: "Total Discounts",
       value: totalDiscounts.toString(),
       icon: Ticket,
-      description: "Tất cả mã giảm giá",
+      description: "All discount codes",
     },
     {
-      title: "Đang hoạt động",
+      title: "Active",
       value: activeDiscounts.toString(),
       icon: BarChart3,
-      description: "Mã đang kích hoạt",
+      description: "Active codes",
     },
     {
-      title: "Đã hết hạn",
+      title: "Expired",
       value: expiredDiscounts.toString(),
       icon: Clock,
-      description: "Mã hết hạn",
+      description: "Expired codes",
     },
     {
-      title: "Sắp hết lượt",
+      title: "Running Out",
       value: highUsageDiscounts.toString(),
       icon: AlertCircle,
-      description: "Sử dụng >80% lượt",
+      description: "Used >80% limit",
     },
   ];
 

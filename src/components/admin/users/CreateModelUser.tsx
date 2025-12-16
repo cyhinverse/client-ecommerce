@@ -69,16 +69,16 @@ export function CreateModelUser({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="bg-background border-border text-foreground sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Thêm người dùng mới</DialogTitle>
+          <DialogTitle>Add New User</DialogTitle>
           <DialogDescription>
-            Nhập thông tin người dùng mới vào form dưới đây
+            Enter new user information below
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="username" className="text-muted-foreground">
-              Họ và tên
+              Full Name
             </Label>
             <Input
               id="username"
@@ -89,7 +89,7 @@ export function CreateModelUser({
               className="bg-background border-border text-foreground"
               required
               disabled={isLoading}
-              placeholder="Nhập họ và tên"
+              placeholder="Enter full name"
             />
           </div>
 
@@ -107,13 +107,13 @@ export function CreateModelUser({
               className="bg-background border-border text-foreground"
               required
               disabled={isLoading}
-              placeholder="Nhập địa chỉ email"
+              placeholder="Enter email address"
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="phone" className="text-muted-foreground">
-              Số điện thoại
+              Phone Number
             </Label>
             <Input
               id="phone"
@@ -125,13 +125,13 @@ export function CreateModelUser({
               className="bg-background border-border text-foreground"
               required
               disabled={isLoading}
-              placeholder="Nhập số điện thoại"
+              placeholder="Enter phone number"
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="password" className="text-muted-foreground">
-              Mật khẩu
+              Password
             </Label>
             <Input
               id="password"
@@ -143,14 +143,14 @@ export function CreateModelUser({
               className="bg-background border-border text-foreground"
               required
               disabled={isLoading}
-              placeholder="Nhập mật khẩu (ít nhất 6 ký tự)"
+              placeholder="Enter password (at least 6 characters)"
               minLength={6}
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="roles" className="text-muted-foreground">
-              Vai trò
+              Role
             </Label>
             <Select
               value={formData.roles}
@@ -160,18 +160,18 @@ export function CreateModelUser({
               disabled={isLoading}
             >
               <SelectTrigger className="bg-background border-border text-foreground">
-                <SelectValue placeholder="Chọn vai trò" />
+                <SelectValue placeholder="Select Role" />
               </SelectTrigger>
               <SelectContent className="bg-background border-border text-foreground">
-                <SelectItem value="user">Người dùng</SelectItem>
-                <SelectItem value="admin">Quản trị viên</SelectItem>
+                <SelectItem value="user">User</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="isVerifiedEmail" className="text-muted-foreground">
-              Xác thực email
+              Email Verification
             </Label>
             <Select
               value={formData.isVerifiedEmail.toString()}
@@ -181,11 +181,11 @@ export function CreateModelUser({
               disabled={isLoading}
             >
               <SelectTrigger className="bg-background border-border text-foreground">
-                <SelectValue placeholder="Chọn trạng thái xác thực" />
+                <SelectValue placeholder="Select verification status" />
               </SelectTrigger>
               <SelectContent className="bg-background border-border text-foreground">
-                <SelectItem value="true">Đã xác thực</SelectItem>
-                <SelectItem value="false">Chưa xác thực</SelectItem>
+                <SelectItem value="true">Verified</SelectItem>
+                <SelectItem value="false">Unverified</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -198,14 +198,14 @@ export function CreateModelUser({
               className="border-border text-muted-foreground hover:bg-muted"
               disabled={isLoading}
             >
-              Hủy
+              Cancel
             </Button>
             <Button
               type="submit"
               className="bg-primary text-primary-foreground hover:bg-primary/90"
               disabled={isLoading}
             >
-              {isLoading ? "Đang tạo..." : "Tạo người dùng"}
+              {isLoading ? "Creating..." : "Create User"}
             </Button>
           </div>
         </form>

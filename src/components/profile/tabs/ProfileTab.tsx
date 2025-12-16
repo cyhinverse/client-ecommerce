@@ -29,10 +29,10 @@ export default function ProfileTab({ user }: ProfileTabProps) {
       dispatch(uploadAvatar(formData))
         .unwrap()
         .then(() => {
-          toast.success("Cập nhật ảnh đại diện thành công");
+          toast.success("Profile picture updated successfully");
         })
         .catch(() => {
-          toast.error("Cập nhật ảnh đại diện thất bại");
+          toast.error("Failed to update profile picture");
         })
         .finally(() => {
           setIsUploadingAvatar(false);
@@ -73,7 +73,7 @@ export default function ProfileTab({ user }: ProfileTabProps) {
         <div>
           <h3 className="text-xl font-semibold">{user.username}</h3>
           <p className="text-muted-foreground">
-            Thành viên từ {new Date(user.createdAt).getFullYear()}
+            Member since {new Date(user.createdAt).getFullYear()}
           </p>
         </div>
       </div>
@@ -86,9 +86,9 @@ export default function ProfileTab({ user }: ProfileTabProps) {
               <div className="flex items-center gap-3">
                 <User className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <p className="font-medium">Tên người dùng</p>
+                  <p className="font-medium">Username</p>
                   <p className="text-sm text-muted-foreground">
-                    Tên hiển thị của bạn
+                    Your display name
                   </p>
                 </div>
               </div>
@@ -103,9 +103,9 @@ export default function ProfileTab({ user }: ProfileTabProps) {
               <div className="flex items-center gap-3">
                 <Mail className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <p className="font-medium">Địa chỉ email</p>
+                  <p className="font-medium">Email Address</p>
                   <p className="text-sm text-muted-foreground">
-                    Email liên hệ của bạn
+                    Your contact email
                   </p>
                 </div>
               </div>
@@ -114,10 +114,10 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                 {user.isVerifiedEmail ? (
                   <Badge className="bg-success text-success-foreground hover:bg-success/90">
                     <Check className="h-3 w-3 mr-1" />
-                    Đã xác thực
+                    Verified
                   </Badge>
                 ) : (
-                  <Badge variant="outline">Chưa xác thực</Badge>
+                  <Badge variant="outline">Unverified</Badge>
                 )}
               </div>
             </div>
@@ -130,9 +130,9 @@ export default function ProfileTab({ user }: ProfileTabProps) {
               <div className="flex items-center gap-3">
                 <MapPin className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <p className="font-medium">Địa chỉ</p>
+                  <p className="font-medium">Address</p>
                   <p className="text-sm text-muted-foreground">
-                    Địa chỉ giao hàng mặc định
+                    Default delivery address
                   </p>
                 </div>
               </div>
@@ -147,7 +147,7 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                   </p>
                 ) : (
                   <p className="text-sm text-muted-foreground">
-                    Chưa thêm địa chỉ
+                    No address added
                   </p>
                 )}
               </div>

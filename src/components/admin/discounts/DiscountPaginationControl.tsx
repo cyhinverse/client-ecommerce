@@ -23,7 +23,7 @@ export function DiscountPagination({
   return (
     <div className="flex items-center justify-between px-2 mt-4">
       <div className="flex-1 text-sm text-muted-foreground">
-        Hiển thị {startItem} đến {endItem} trong tổng số {totalItems} mã giảm giá
+        Showing {startItem} to {endItem} of {totalItems} discounts
       </div>
       <div className="flex items-center space-x-6 lg:space-x-8">
         <div className="flex items-center space-x-2">
@@ -38,7 +38,7 @@ export function DiscountPagination({
           </Button>
           
           <span className="text-sm font-medium text-foreground">
-            Trang {currentPage} / {totalPages}
+            Page {currentPage} / {totalPages}
           </span>
           
           <Button

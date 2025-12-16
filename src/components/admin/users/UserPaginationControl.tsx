@@ -25,9 +25,9 @@ export function UserPagination({
     <div className="flex items-center justify-between px-2 mt-4">
       <div className="flex-1 text-sm text-muted-foreground">
         {totalItems ? (
-          <>Hiển thị {startItem} đến {endItem} trong tổng số {totalItems} người dùng</>
+          <>Showing {startItem} to {endItem} of {totalItems} users</>
         ) : (
-          <>Trang {currentPage} / {totalPages}</>
+          <>Page {currentPage} / {totalPages}</>
         )}
       </div>
       <div className="flex items-center space-x-6 lg:space-x-8">
@@ -42,7 +42,7 @@ export function UserPagination({
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <span className="text-sm font-medium text-foreground">
-            Trang {currentPage} / {totalPages}
+            Page {currentPage} / {totalPages}
           </span>
           <Button
             variant="outline"

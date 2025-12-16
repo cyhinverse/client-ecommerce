@@ -35,7 +35,7 @@ import { useState } from "react";
 import Image from "next/image";
 
 const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString("vi-VN");
+  return new Date(date).toLocaleDateString("en-US");
 };
 
 interface ViewCategoryModalProps {
@@ -64,7 +64,7 @@ export function ViewCategoryModal({
     return status ? (
       <Badge className="bg-primary text-primary-foreground border-primary">
         <CheckCircle className="h-3 w-3 mr-1" />
-        Đang hoạt động
+        Active
       </Badge>
     ) : (
       <Badge
@@ -72,7 +72,7 @@ export function ViewCategoryModal({
         className="border-muted-foreground text-muted-foreground"
       >
         <XCircle className="h-3 w-3 mr-1" />
-        Không hoạt động
+        Inactive
       </Badge>
     );
   };
@@ -86,13 +86,13 @@ export function ViewCategoryModal({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Eye className="h-5 w-5 text-primary" />
-              Chi tiết danh mục
+              Category Details
               <Badge variant="outline" className="text-sm">
                 {/* ID: {category._id.slice(-8)} */}
               </Badge>
             </DialogTitle>
             <DialogDescription>
-              Thông tin chi tiết về danh mục sản phẩm
+              Detailed information about product category
             </DialogDescription>
           </DialogHeader>
 
@@ -133,12 +133,12 @@ export function ViewCategoryModal({
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <ImageIcon className="h-4 w-4" />
-                    Hình ảnh ({images.length})
+                    Images ({images.length})
                   </CardTitle>
                   <CardDescription>
                     {images.length > 1
-                      ? `Danh sách hình ảnh của danh mục`
-                      : `Hình ảnh của danh mục`}
+                      ? `List of category images`
+                      : `Category image`}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -171,7 +171,7 @@ export function ViewCategoryModal({
                           </Badge>
                           {index === 0 && (
                             <Badge className="absolute top-2 left-2 bg-primary border-0 text-xs">
-                              Chính
+                              Main
                             </Badge>
                           )}
                         </div>
@@ -188,17 +188,17 @@ export function ViewCategoryModal({
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <ImageIcon className="h-4 w-4" />
-                    Hình ảnh
+                    Images
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-center py-12 border-2 border-dashed border-border rounded-xl bg-muted/30">
                     <ImageIcon className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />
                     <p className="text-muted-foreground text-sm mb-2 font-medium">
-                      Chưa có hình ảnh nào
+                      No images available
                     </p>
                     <p className="text-muted-foreground/70 text-xs">
-                      Thêm hình ảnh khi chỉnh sửa danh mục
+                      Add images when editing category
                     </p>
                   </div>
                 </CardContent>
@@ -210,14 +210,14 @@ export function ViewCategoryModal({
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Folder className="h-4 w-4" />
-                  Thông tin cơ bản
+                  Basic Information
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">
-                      Tên danh mục
+                      Category Name
                     </label>
                     <p className="text-sm font-medium mt-1">{category.name}</p>
                   </div>
@@ -235,12 +235,12 @@ export function ViewCategoryModal({
 
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">
-                    Mô tả
+                    Description
                   </label>
                   <p className="text-sm text-muted-foreground mt-1">
                     {category.description || (
                       <span className="text-muted-foreground italic">
-                        Không có mô tả
+                        No description
                       </span>
                     )}
                   </p>
@@ -249,7 +249,7 @@ export function ViewCategoryModal({
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">
-                      Trạng thái
+                      Status
                     </label>
                     <div className="mt-1">
                       {getStatusBadge(category.isActive)}
@@ -257,12 +257,12 @@ export function ViewCategoryModal({
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">
-                      Số sản phẩm
+                      Product Count
                     </label>
                     <div className="flex items-center gap-2 mt-1">
                       <Package className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm font-medium">
-                        {category.productCount || 0} sản phẩm
+                        {category.productCount || 0} products
                       </span>
                     </div>
                   </div>
@@ -271,12 +271,12 @@ export function ViewCategoryModal({
                 {/* Images Count */}
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">
-                    Số lượng ảnh
+                    Image Count
                   </label>
                   <div className="flex items-center gap-2 mt-1">
                     <ImageIcon className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm font-medium">
-                      {images.length} ảnh
+                      {images.length} images
                     </span>
                   </div>
                 </div>
@@ -289,7 +289,7 @@ export function ViewCategoryModal({
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Layers className="h-4 w-4" />
-                    Danh mục cha
+                    Parent Category
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -316,14 +316,14 @@ export function ViewCategoryModal({
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  Thông tin hệ thống
+                  System Information
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">
-                      Ngày tạo
+                      Created At
                     </label>
                     <div className="flex items-center gap-2 mt-1">
                       <Calendar className="h-3 w-3 text-muted-foreground" />
@@ -334,7 +334,7 @@ export function ViewCategoryModal({
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">
-                      Cập nhật cuối
+                      Last Updated
                     </label>
                     <div className="flex items-center gap-2 mt-1">
                       <Calendar className="h-3 w-3 text-muted-foreground" />
@@ -352,27 +352,27 @@ export function ViewCategoryModal({
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Link className="h-4 w-4" />
-                  Đường dẫn
+                  URL
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">
-                      URL truy cập
+                      Access URL
                     </label>
                     <p className="text-sm text-primary font-medium mt-1">
-                      /danh-muc/{category.slug}
+                      /categories/{category.slug}
                     </p>
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">
-                      URL đầy đủ
+                      Full URL
                     </label>
                     <p className="text-sm text-muted-foreground mt-1 break-all bg-muted p-2 rounded border">
                       {typeof window !== "undefined"
-                        ? `${window.location.origin}/danh-muc/${category.slug}`
-                        : `/danh-muc/${category.slug}`}
+                        ? `${window.location.origin}/categories/${category.slug}`
+                        : `/categories/${category.slug}`}
                     </p>
                   </div>
                 </div>
@@ -389,7 +389,7 @@ export function ViewCategoryModal({
               className="flex items-center gap-2"
             >
               <X className="h-4 w-4" />
-              Đóng
+              Close
             </Button>
             <Button
               type="button"
@@ -397,7 +397,7 @@ export function ViewCategoryModal({
               className="flex items-center gap-2"
             >
               <Edit className="h-4 w-4" />
-              Chỉnh sửa
+              Edit
             </Button>
           </div>
         </DialogContent>
@@ -411,7 +411,7 @@ export function ViewCategoryModal({
         >
           <DialogContent className="max-w-4xl max-h-[90vh] p-0 bg-black/90 border-0">
             <DialogHeader className="sr-only">
-              <DialogTitle>Xem ảnh</DialogTitle>
+              <DialogTitle>View Image</DialogTitle>
             </DialogHeader>
             <div className="relative">
               <Button
@@ -425,7 +425,7 @@ export function ViewCategoryModal({
               <div className="relative flex justify-center items-center min-h-[80vh] w-full p-8">
                 <Image
                   src={selectedImage}
-                  alt="Xem ảnh"
+                  alt="View Image"
                   fill
                   className="object-contain rounded-lg shadow-2xl"
                   sizes="90vw"
@@ -437,7 +437,7 @@ export function ViewCategoryModal({
                   className="bg-background/90 text-foreground"
                 >
                   <ZoomIn className="h-3 w-3 mr-1" />
-                  Nhấp ra ngoài để đóng
+                  Click outside to close
                 </Badge>
               </div>
             </div>

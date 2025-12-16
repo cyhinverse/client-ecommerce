@@ -29,69 +29,69 @@ import {
 
 // Mock data for dashboard
 const chartData = [
-  { month: "Tháng 1", revenue: 18600000 },
-  { month: "Tháng 2", revenue: 30500000 },
-  { month: "Tháng 3", revenue: 23700000 },
-  { month: "Tháng 4", revenue: 73000000 },
-  { month: "Tháng 5", revenue: 20900000 },
-  { month: "Tháng 6", revenue: 21400000 },
+  { month: "Jan", revenue: 18600000 },
+  { month: "Feb", revenue: 30500000 },
+  { month: "Mar", revenue: 23700000 },
+  { month: "Apr", revenue: 73000000 },
+  { month: "May", revenue: 20900000 },
+  { month: "Jun", revenue: 21400000 },
 ];
 
 const visitorData = [
-  { month: "Tháng 1", visitors: 450 },
-  { month: "Tháng 2", visitors: 520 },
-  { month: "Tháng 3", visitors: 480 },
-  { month: "Tháng 4", visitors: 650 },
-  { month: "Tháng 5", visitors: 780 },
-  { month: "Tháng 6", visitors: 900 },
+  { month: "Jan", visitors: 450 },
+  { month: "Feb", visitors: 520 },
+  { month: "Mar", visitors: 480 },
+  { month: "Apr", visitors: 650 },
+  { month: "May", visitors: 780 },
+  { month: "Jun", visitors: 900 },
 ];
 
 const chartConfig = {
   revenue: {
-    label: "Doanh thu",
+    label: "Revenue",
     color: "#2563eb",
   },
 } satisfies ChartConfig;
 
 const visitorConfig = {
   visitors: {
-    label: "Khách truy cập",
+    label: "Visitors",
     color: "#16a34a",
   },
 } satisfies ChartConfig;
 
 const stats = [
   {
-    name: "Tổng doanh thu",
+    name: "Total Revenue",
     value: "45.2M",
     change: "+12.5%",
     changeType: "positive",
     icon: DollarSign,
-    description: "So với tháng trước",
+    description: "vs last month",
   },
   {
-    name: "Đơn hàng",
+    name: "Orders",
     value: "1,248",
     change: "+8.2%",
     changeType: "positive",
     icon: ShoppingCart,
-    description: "124 đơn hàng mới",
+    description: "124 new orders",
   },
   {
-    name: "Khách hàng",
+    name: "Customers",
     value: "8,567",
     change: "+3.4%",
     changeType: "positive",
     icon: Users,
-    description: "286 khách hàng mới",
+    description: "286 new customers",
   },
   {
-    name: "Sản phẩm",
+    name: "Products",
     value: "456",
     change: "-2.1%",
     changeType: "negative",
     icon: Package,
-    description: "12 sản phẩm mới",
+    description: "12 new products",
   },
 ];
 
@@ -155,26 +155,26 @@ const topProducts = [
 
 const quickActions = [
   {
-    name: "Thêm sản phẩm",
-    description: "Thêm sản phẩm mới",
+    name: "Add Product",
+    description: "Add a new product",
     icon: Package,
     href: "/admin/products",
   },
   {
-    name: "Xem đơn hàng",
-    description: "Quản lý đơn hàng",
+    name: "View Orders",
+    description: "Manage orders",
     icon: ShoppingCart,
     href: "/admin/orders",
   },
   {
-    name: "Quản lý người dùng",
-    description: "Xem danh sách người dùng",
+    name: "Manage Users",
+    description: "View user list",
     icon: Users,
     href: "/admin/users",
   },
   {
-    name: "Xem báo cáo",
-    description: "Phân tích doanh thu",
+    name: "View Reports",
+    description: "Revenue analysis",
     icon: BarChart3,
     href: "/admin/analytics",
   },
@@ -183,13 +183,13 @@ const quickActions = [
 const getStatusBadge = (status: string) => {
   switch (status) {
     case "completed":
-      return <Badge className="bg-green-500">Hoàn thành</Badge>;
+      return <Badge className="bg-green-500">Completed</Badge>;
     case "processing":
-      return <Badge className="bg-blue-500">Đang xử lý</Badge>;
+      return <Badge className="bg-blue-500">Processing</Badge>;
     case "pending":
-      return <Badge variant="outline">Chờ xác nhận</Badge>;
+      return <Badge variant="outline">Pending</Badge>;
     default:
-      return <Badge variant="outline">Không xác định</Badge>;
+      return <Badge variant="outline">Unknown</Badge>;
   }
 };
 
@@ -207,20 +207,20 @@ export default function AdminDashboard() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            Tổng quan
+            Overview
           </h1>
           <p className="text-gray-600 mt-2">
-            Thống kê và phân tích hiệu suất cửa hàng
+            Statistics and store performance analysis
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline">
             <Calendar className="h-4 w-4 mr-2" />
-            Tháng 1, 2024
+            Jan, 2024
           </Button>
           <Button>
             <BarChart3 className="h-4 w-4 mr-2" />
-            Xuất báo cáo
+            Export Report
           </Button>
         </div>
       </div>
@@ -264,13 +264,13 @@ export default function AdminDashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Đơn hàng gần đây</CardTitle>
+              <CardTitle>Recent Orders</CardTitle>
               <CardDescription>
-                5 đơn hàng mới nhất trong 24h qua
+                5 latest orders in the last 24h
               </CardDescription>
             </div>
             <Button variant="outline" size="sm">
-              Xem tất cả
+              View all
             </Button>
           </CardHeader>
           <CardContent>
@@ -298,13 +298,13 @@ export default function AdminDashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Sản phẩm bán chạy</CardTitle>
+              <CardTitle>Top Selling Products</CardTitle>
               <CardDescription>
-                Top sản phẩm được yêu thích nhất
+                Most favorite products
               </CardDescription>
             </div>
             <Button variant="outline" size="sm">
-              Xem tất cả
+              View all
             </Button>
           </CardHeader>
           <CardContent>
@@ -321,7 +321,7 @@ export default function AdminDashboard() {
                     <div>
                       <p className="font-medium">{product.name}</p>
                       <p className="text-sm text-gray-600">
-                        {product.sales} lượt bán
+                        {product.sales} sales
                       </p>
                     </div>
                   </div>
@@ -343,9 +343,9 @@ export default function AdminDashboard() {
         {/* Quick Actions */}
         <Card className="lg:col-span-1">
           <CardHeader>
-            <CardTitle>Thao tác nhanh</CardTitle>
+            <CardTitle>Quick Actions</CardTitle>
             <CardDescription>
-              Truy cập nhanh vào các tính năng quản lý
+              Quick access to management features
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -376,45 +376,45 @@ export default function AdminDashboard() {
         {/* Performance Metrics */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Chỉ số hiệu suất</CardTitle>
+            <CardTitle>Performance Metrics</CardTitle>
             <CardDescription>
-              Phân tích hiệu suất bán hàng và người dùng
+              Sales and user performance analysis
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Tỷ lệ chuyển đổi</span>
+                  <span className="text-sm font-medium">Conversion Rate</span>
                   <Badge className="bg-green-500">68.5%</Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">
-                    Giỏ hàng trung bình
+                    Avg. Cart Value
                   </span>
                   <span className="text-sm font-medium">1,250,000₫</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">
-                    Thời gian xử lý đơn
+                    Processing Time
                   </span>
-                  <span className="text-sm font-medium">2.3 giờ</span>
+                  <span className="text-sm font-medium">2.3 hours</span>
                 </div>
               </div>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Tỷ lệ hoàn thành</span>
+                  <span className="text-sm font-medium">Completion Rate</span>
                   <Badge className="bg-blue-500">94.2%</Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">
-                    Khách hàng quay lại
+                    Returning Customers
                   </span>
                   <span className="text-sm font-medium">42.8%</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">
-                    Đánh giá trung bình
+                    Avg. Rating
                   </span>
                   <span className="text-sm font-medium">4.7/5</span>
                 </div>
@@ -424,7 +424,7 @@ export default function AdminDashboard() {
             {/* Charts */}
             <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h4 className="text-sm font-medium mb-2">Biểu đồ doanh thu</h4>
+                <h4 className="text-sm font-medium mb-2">Revenue Chart</h4>
                 <ChartContainer
                   config={chartConfig}
                   className="min-h-[200px] w-full"
@@ -449,7 +449,7 @@ export default function AdminDashboard() {
               </div>
 
               <div>
-                <h4 className="text-sm font-medium mb-2">Khách truy cập mới</h4>
+                <h4 className="text-sm font-medium mb-2">New Visitors</h4>
                 <ChartContainer
                   config={visitorConfig}
                   className="min-h-[200px] w-full"
@@ -482,36 +482,36 @@ export default function AdminDashboard() {
       {/* Recent Activity */}
       <Card>
         <CardHeader>
-          <CardTitle>Hoạt động gần đây</CardTitle>
+          <CardTitle>Recent Activity</CardTitle>
           <CardDescription>
-            Các hoạt động mới nhất trong hệ thống
+            Latest activities in the system
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {[
               {
-                action: "Đơn hàng mới",
-                description: "ORD-005 từ Hoàng Văn E",
-                time: "2 phút trước",
+                action: "New Order",
+                description: "ORD-005 from Hoàng Văn E",
+                time: "2 mins ago",
                 type: "order",
               },
               {
-                action: "Sản phẩm mới",
-                description: "iPhone 15 Pro Max được thêm vào kho",
-                time: "1 giờ trước",
+                action: "New Product",
+                description: "iPhone 15 Pro Max added to stock",
+                time: "1 hour ago",
                 type: "product",
               },
               {
-                action: "Người dùng mới",
-                description: "Nguyễn Thị F đã đăng ký tài khoản",
-                time: "2 giờ trước",
+                action: "New User",
+                description: "Nguyễn Thị F registered",
+                time: "2 hours ago",
                 type: "user",
               },
               {
-                action: "Đánh giá mới",
-                description: "Khách hàng đánh giá 5 sao cho MacBook Air M3",
-                time: "3 giờ trước",
+                action: "New Review",
+                description: "Customer rated 5 stars for MacBook Air M3",
+                time: "3 hours ago",
                 type: "review",
               },
             ].map((activity, index) => (

@@ -25,7 +25,7 @@ export function PaginationControls({
   return (
     <div className="flex items-center justify-between px-2 mt-4">
       <div className="flex-1 text-sm text-muted-foreground">
-        Hiển thị {startItem} đến {endItem} trong tổng số {pagination.totalItems} danh mục
+        Showing {startItem} to {endItem} of {pagination.totalItems} categories
       </div>
       <div className="flex items-center space-x-6 lg:space-x-8">
         <div className="flex items-center space-x-2">
@@ -39,7 +39,7 @@ export function PaginationControls({
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <span className="text-sm font-medium text-foreground">
-            Trang {pagination.currentPage} / {pagination.totalPages}
+            Page {pagination.currentPage} / {pagination.totalPages}
           </span>
           <Button
             variant="outline"

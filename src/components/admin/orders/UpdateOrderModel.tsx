@@ -51,33 +51,33 @@ export function EditOrderModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Cập nhật trạng thái đơn hàng</DialogTitle>
+          <DialogTitle>Update Order Status</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="status">Trạng thái đơn hàng</Label>
+            <Label htmlFor="status">Order Status</Label>
             <Select value={status} onValueChange={setStatus}>
               <SelectTrigger>
-                <SelectValue placeholder="Chọn trạng thái" />
+                <SelectValue placeholder="Select Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="pending">Chờ xác nhận</SelectItem>
-                <SelectItem value="confirmed">Đã xác nhận</SelectItem>
-                <SelectItem value="processing">Đang xử lý</SelectItem>
-                <SelectItem value="shipped">Đang giao</SelectItem>
-                <SelectItem value="delivered">Thành công</SelectItem>
-                <SelectItem value="cancelled">Đã hủy</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="confirmed">Confirmed</SelectItem>
+                <SelectItem value="processing">Processing</SelectItem>
+                <SelectItem value="shipped">Shipped</SelectItem>
+                <SelectItem value="delivered">Delivered</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
-              Hủy
+              Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Đang lưu..." : "Lưu thay đổi"}
+              {isLoading ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </form>

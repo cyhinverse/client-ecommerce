@@ -50,20 +50,20 @@ export default function OrdersTab() {
   };
 
   const handleCancelOrder = async (orderId: string) => {
-    if (!confirm("Bạn có chắc muốn hủy đơn hàng này?")) {
+    if (!confirm("Are you sure you want to cancel this order?")) {
       return;
     }
 
     setCancellingOrder(orderId);
     try {
       await dispatch(cancelOrder(orderId)).unwrap();
-      toast.success("Đã hủy đơn hàng thành công");
+      toast.success("Order cancelled successfully");
       dispatch(getUserOrders({ limit: 50 }));
     } catch (error: unknown) {
       console.error("Error cancelling order:", error);
       const err = error as { response?: { data?: { message?: string } } };
       const errorMessage =
-        err.response?.data?.message || "Không thể hủy đơn hàng";
+        err.response?.data?.message || "Unable to cancel order";
       toast.error(errorMessage);
     } finally {
       setCancellingOrder(null);
@@ -83,25 +83,25 @@ export default function OrdersTab() {
   };
 
   const statusTabs: { value: OrderStatus; label: string; count: number }[] = [
-    { value: "all", label: "Tất cả", count: getOrderCount("all") },
+    { value: "all", label: "All", count: getOrderCount("all") },
     {
       value: "pending",
-      label: "Chờ xác nhận",
+      label: "Pending",
       count: getOrderCount("pending"),
     },
     {
       value: "confirmed",
-      label: "Đã xác nhận",
+      label: "Confirmed",
       count: getOrderCount("confirmed"),
     },
     {
       value: "processing",
-      label: "Đang xử lý",
+      label: "Processing",
       count: getOrderCount("processing"),
     },
-    { value: "shipped", label: "Đang giao", count: getOrderCount("shipped") },
-    { value: "delivered", label: "Đã giao", count: getOrderCount("delivered") },
-    { value: "cancelled", label: "Đã hủy", count: getOrderCount("cancelled") },
+    { value: "shipped", label: "Shipping", count: getOrderCount("shipped") },
+    { value: "delivered", label: "Delivered", count: getOrderCount("delivered") },
+    { value: "cancelled", label: "Cancelled", count: getOrderCount("cancelled") },
   ];
 
   // Loading Skeleton -> Moved to overlay inside Activity
@@ -111,12 +111,12 @@ export default function OrdersTab() {
     return (
       <div className="text-center py-12">
         <Package className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-        <h3 className="text-lg font-semibold mb-2">Có lỗi xảy ra</h3>
+        <h3 className="text-lg font-semibold mb-2">An error occurred</h3>
         <p className="text-muted-foreground mb-6">
-          Không thể tải danh sách đơn hàng. Vui lòng thử lại sau.
+          Unable to load order list. Please try again later.
         </p>
         <Button onClick={() => dispatch(getUserOrders({ limit: 50 }))}>
-          Thử lại
+          Try Again
         </Button>
       </div>
     );
@@ -133,20 +133,20 @@ export default function OrdersTab() {
         {!userOrders || userOrders.length === 0 ? (
           <div className="text-center py-12">
             <Package className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Chưa có đơn hàng</h3>
+            <h3 className="text-lg font-semibold mb-2">No orders yet</h3>
             <p className="text-muted-foreground mb-6">
-              Lịch sử đơn hàng của bạn sẽ xuất hiện tại đây
+              Your order history will appear here
             </p>
             <Button onClick={() => router.push("/products")}>
-              Mua sắm ngay
+              Shop Now
             </Button>
           </div>
         ) : (
           <>
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Đơn hàng của tôi</h2>
+              <h2 className="text-2xl font-bold">My Orders</h2>
               <Button onClick={() => router.push("/products")}>
-                Mua sắm tiếp
+                Continue Shopping
               </Button>
             </div>
 
@@ -178,19 +178,19 @@ export default function OrdersTab() {
                     <Package className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
                     <h3 className="text-lg font-semibold mb-2">
                       {activeStatus === "all"
-                        ? "Chưa có đơn hàng"
-                        : `Không có đơn hàng ${statusTabs
+                        ? "No orders yet"
+                        : `No orders in ${statusTabs
                             .find((tab) => tab.value === activeStatus)
-                            ?.label.toLowerCase()}`}
+                            ?.label.toLowerCase()} status`}
                     </h3>
                     <p className="text-muted-foreground mb-6">
                       {activeStatus === "all"
-                        ? "Lịch sử đơn hàng của bạn sẽ xuất hiện tại đây"
-                        : `Không tìm thấy đơn hàng nào ở trạng thái này`}
+                        ? "Your order history will appear here"
+                        : `No orders found in this status`}
                     </p>
                     {activeStatus === "all" && (
                       <Button onClick={() => router.push("/products")}>
-                        Mua sắm ngay
+                        Shop Now
                       </Button>
                     )}
                   </div>

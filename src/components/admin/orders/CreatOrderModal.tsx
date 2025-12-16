@@ -67,13 +67,13 @@ export function CreateOrderModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Tạo đơn hàng mới</DialogTitle>
+          <DialogTitle>Create New Order</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="customerName">Tên khách hàng</Label>
+              <Label htmlFor="customerName">Customer Name</Label>
               <Input
                 id="customerName"
                 value={formData.customerName}
@@ -95,7 +95,7 @@ export function CreateOrderModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="customerPhone">Số điện thoại</Label>
+            <Label htmlFor="customerPhone">Phone Number</Label>
             <Input
               id="customerPhone"
               value={formData.customerPhone}
@@ -105,7 +105,7 @@ export function CreateOrderModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="shippingAddress">Địa chỉ giao hàng</Label>
+            <Label htmlFor="shippingAddress">Shipping Address</Label>
             <Textarea
               id="shippingAddress"
               value={formData.shippingAddress}
@@ -117,7 +117,7 @@ export function CreateOrderModal({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="paymentMethod">Phương thức thanh toán</Label>
+              <Label htmlFor="paymentMethod">Payment Method</Label>
               <Select
                 value={formData.paymentMethod}
                 onValueChange={(value) => handleChange("paymentMethod", value)}
@@ -126,17 +126,17 @@ export function CreateOrderModal({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="cod">Thanh toán khi nhận hàng</SelectItem>
+                  <SelectItem value="cod">Cash on Delivery</SelectItem>
                   <SelectItem value="banking">
-                    Chuyển khoản ngân hàng
+                    Bank Transfer
                   </SelectItem>
-                  <SelectItem value="card">Thẻ tín dụng</SelectItem>
+                  <SelectItem value="card">Credit Card</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="status">Trạng thái</Label>
+              <Label htmlFor="status">Status</Label>
               <Select
                 value={formData.status}
                 onValueChange={(value) => handleChange("status", value)}
@@ -145,31 +145,31 @@ export function CreateOrderModal({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="pending">Chờ xử lý</SelectItem>
-                  <SelectItem value="processing">Đang xử lý</SelectItem>
-                  <SelectItem value="shipped">Đang giao</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="processing">Processing</SelectItem>
+                  <SelectItem value="shipped">Shipped</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="notes">Ghi chú</Label>
+            <Label htmlFor="notes">Notes</Label>
             <Textarea
               id="notes"
               value={formData.notes}
               onChange={(e) => handleChange("notes", e.target.value)}
-              placeholder="Thêm ghi chú cho đơn hàng"
+              placeholder="Add notes for the order"
               rows={3}
             />
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
-              Hủy
+              Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Đang tạo..." : "Tạo đơn hàng"}
+              {isLoading ? "Creating..." : "Create Order"}
             </Button>
           </div>
         </form>

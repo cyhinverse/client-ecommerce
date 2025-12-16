@@ -21,11 +21,11 @@ import { createReview } from "@/features/reviews/reviewAction";
 import { toast } from "sonner";
 
 const reviewSchema = z.object({
-  rating: z.number().min(1, "Vui lòng chọn đánh giá").max(5),
+  rating: z.number().min(1, "Please select a rating").max(5),
   comment: z
     .string()
-    .min(1, "Vui lòng nhập đánh giá")
-    .max(500, "Đánh giá quá dài"),
+    .min(1, "Please enter your review")
+    .max(500, "Review is too long"),
 });
 
 type ReviewFormData = z.infer<typeof reviewSchema>;
@@ -64,7 +64,7 @@ export default function ReviewDialog({
 
   const onSubmit = async (data: ReviewFormData) => {
     if (!productId) {
-      toast.error("Không tìm thấy sản phẩm");
+      toast.error("Product not found");
       return;
     }
 
@@ -78,13 +78,13 @@ export default function ReviewDialog({
         })
       ).unwrap();
 
-      toast.success("Đánh giá đã được gửi thành công!");
+      toast.success("Review submitted successfully!");
       reset();
       setOpen(false);
       onReviewSubmitted?.();
     } catch (error: unknown) {
       const err = error as { message?: string };
-      const errorMessage = err?.message || "Gửi đánh giá thất bại";
+      const errorMessage = err?.message || "Failed to submit review";
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -108,14 +108,14 @@ export default function ReviewDialog({
       <DialogTrigger asChild>
         <Button variant="outline" className="flex items-center gap-2">
           <MessageSquare className="h-4 w-4" />
-          Viết đánh giá
+          Write a Review
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Viết đánh giá</DialogTitle>
+          <DialogTitle>Write a Review</DialogTitle>
           <DialogDescription>
-            Chia sẻ trải nghiệm của bạn về sản phẩm này
+            Share your experience about this product
           </DialogDescription>
         </DialogHeader>
 
@@ -124,7 +124,7 @@ export default function ReviewDialog({
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               {/* Rating Stars */}
               <div className="space-y-2">
-                <Label>Đánh giá của bạn</Label>
+                <Label>Your Rating</Label>
                 <div className="flex items-center space-x-1">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
@@ -146,7 +146,7 @@ export default function ReviewDialog({
                     </button>
                   ))}
                   <span className="ml-2 text-sm text-muted-foreground">
-                    {rating > 0 ? `${rating} sao` : "Chọn số sao"}
+                    {rating > 0 ? `${rating} stars` : "Select stars"}
                   </span>
                 </div>
                 {errors.rating && (
@@ -158,11 +158,11 @@ export default function ReviewDialog({
 
               {/* Comment */}
               <div className="space-y-2">
-                <Label htmlFor="comment">Nhận xét</Label>
+                <Label htmlFor="comment">Comment</Label>
                 <Textarea
                   {...register("comment")}
                   id="comment"
-                  placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..."
+                  placeholder="Share your experience about the product..."
                   className="min-h-[100px] resize-none"
                   disabled={isSubmitting}
                 />
@@ -181,12 +181,12 @@ export default function ReviewDialog({
                 {isSubmitting ? (
                   <>
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2" />
-                    Đang gửi...
+                    Sending...
                   </>
                 ) : (
                   <>
                     <Send className="h-4 w-4 mr-2" />
-                    Gửi đánh giá
+                    Submit Review
                   </>
                 )}
               </Button>

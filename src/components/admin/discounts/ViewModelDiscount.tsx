@@ -26,7 +26,7 @@ export function ViewModelDiscount({
   if (!discount) return null;
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("vi-VN", {
+    return new Date(dateString).toLocaleDateString("en-US", {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -37,25 +37,25 @@ export function ViewModelDiscount({
 
   const getStatusBadge = () => {
     if (!discount.isActive) {
-      return <Badge variant="secondary">Đã tắt</Badge>;
+      return <Badge variant="secondary">Inactive</Badge>;
     }
     if (new Date(discount.endDate) < new Date()) {
-      return <Badge variant="destructive">Hết hạn</Badge>;
+      return <Badge variant="destructive">Expired</Badge>;
     }
     if (discount.usedCount >= discount.usageLimit) {
-      return <Badge variant="destructive">Hết lượt</Badge>;
+      return <Badge variant="destructive">Limit Reached</Badge>;
     }
-    return <Badge variant="default">Đang hoạt động</Badge>;
+    return <Badge variant="default">Active</Badge>;
   };
 
   const getDiscountTypeText = () => {
-    return discount.discountType === "percent" ? "Phần trăm" : "Số tiền cố định";
+    return discount.discountType === "percent" ? "Percentage" : "Fixed Amount";
   };
 
   const getDiscountValueText = () => {
     return discount.discountType === "percent" 
       ? `${discount.discountValue}%`
-      : `${discount.discountValue.toLocaleString()} VNĐ`;
+      : `${discount.discountValue.toLocaleString()} VND`;
   };
 
   return (
@@ -64,10 +64,10 @@ export function ViewModelDiscount({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Tag className="h-5 w-5" />
-            Chi tiết mã giảm giá
+            Discount Details
           </DialogTitle>
           <DialogDescription>
-            Thông tin chi tiết về mã giảm giá {discount.code}
+            Detailed information about discount {discount.code}
           </DialogDescription>
         </DialogHeader>
 
@@ -86,7 +86,7 @@ export function ViewModelDiscount({
 
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div className="space-y-1">
-                <span className="font-medium">Loại giảm giá:</span>
+                <span className="font-medium">Discount Type:</span>
                 <div className="flex items-center gap-1">
                   <DollarSign className="h-4 w-4" />
                   <span>{getDiscountTypeText()}</span>
@@ -94,7 +94,7 @@ export function ViewModelDiscount({
               </div>
               
               <div className="space-y-1">
-                <span className="font-medium">Giá trị:</span>
+                <span className="font-medium">Value:</span>
                 <div className="text-success font-semibold">
                   {getDiscountValueText()}
                 </div>
@@ -106,19 +106,19 @@ export function ViewModelDiscount({
           <div className="space-y-4">
             <h4 className="font-semibold flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
-              Thông tin sử dụng
+              Usage Information
             </h4>
             
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div className="space-y-1">
-                <span className="font-medium">Đã sử dụng:</span>
+                <span className="font-medium">Used:</span>
                 <div>
-                  {discount.usedCount} / {discount.usageLimit} lượt
+                  {discount.usedCount} / {discount.usageLimit} times
                 </div>
               </div>
               
               <div className="space-y-1">
-                <span className="font-medium">Tỷ lệ sử dụng:</span>
+                <span className="font-medium">Usage Rate:</span>
                 <div>
                   {((discount.usedCount / discount.usageLimit) * 100).toFixed(1)}%
                 </div>
@@ -127,8 +127,8 @@ export function ViewModelDiscount({
 
             {discount.minOrderValue > 0 && (
               <div className="text-sm">
-                <span className="font-medium">Đơn hàng tối thiểu: </span>
-                <span>{discount.minOrderValue.toLocaleString()} VNĐ</span>
+                <span className="font-medium">Minimum Order Value: </span>
+                <span>{discount.minOrderValue.toLocaleString()} VND</span>
               </div>
             )}
           </div>
@@ -137,16 +137,16 @@ export function ViewModelDiscount({
           <div className="space-y-4">
             <h4 className="font-semibold flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              Thời gian hiệu lực
+              Validity Period
             </h4>
             
             <div className="space-y-2 text-sm">
               <div>
-                <span className="font-medium">Bắt đầu: </span>
+                <span className="font-medium">Start Date: </span>
                 <span>{formatDate(discount.startDate)}</span>
               </div>
               <div>
-                <span className="font-medium">Kết thúc: </span>
+                <span className="font-medium">End Date: </span>
                 <span>{formatDate(discount.endDate)}</span>
               </div>
             </div>
@@ -157,20 +157,20 @@ export function ViewModelDiscount({
             <div className="space-y-4">
               <h4 className="font-semibold flex items-center gap-2">
                 <Package className="h-4 w-4" />
-                Sản phẩm áp dụng
+                Applicable Products
               </h4>
               <div className="text-sm">
-                <span className="font-medium">Áp dụng cho: </span>
-                <span>{discount.applicableProducts.length} sản phẩm</span>
+                <span className="font-medium">Applies to: </span>
+                <span>{discount.applicableProducts.length} products</span>
               </div>
             </div>
           )}
 
           {/* Created Info */}
           <div className="text-xs text-muted-foreground border-t pt-4">
-            <div>Được tạo: {formatDate(discount.createdAt)}</div>
+            <div>Created At: {formatDate(discount.createdAt)}</div>
             {discount.updatedAt !== discount.createdAt && (
-              <div>Cập nhật lần cuối: {formatDate(discount.updatedAt)}</div>
+              <div>Last Updated: {formatDate(discount.updatedAt)}</div>
             )}
           </div>
         </div>
@@ -180,13 +180,13 @@ export function ViewModelDiscount({
             variant="outline"
             onClick={() => onOpenChange(false)}
           >
-            Đóng
+            Close
           </Button>
           <Button
             onClick={() => onEdit(discount)}
           >
             <Edit className="h-4 w-4 mr-2" />
-            Chỉnh sửa
+            Edit
           </Button>
         </div>
       </DialogContent>

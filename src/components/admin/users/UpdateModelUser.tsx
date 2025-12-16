@@ -76,15 +76,15 @@ export function UpdateModelUser({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-background border-border text-foreground sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Chi tiết người dùng</DialogTitle>
+          <DialogTitle>User Details</DialogTitle>
           <DialogDescription>
-            Thông tin chi tiết về người dùng trong hệ thống
+            Detailed information about user in the system
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="username" className="text-muted-foreground">
-              Tên người dùng
+              Username
             </Label>
             <Input
               id="username"
@@ -117,7 +117,7 @@ export function UpdateModelUser({
 
           <div className="space-y-2">
             <Label htmlFor="roles" className="text-muted-foreground">
-              Vai trò
+              Role
             </Label>
             <Select
               value={formData.roles}
@@ -130,16 +130,16 @@ export function UpdateModelUser({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-background border-border text-foreground">
-                <SelectItem value="user">Người dùng</SelectItem>
-                <SelectItem value="admin">Quản trị viên</SelectItem>
-                <SelectItem value="moderator">Điều hành viên</SelectItem>
+                <SelectItem value="user">User</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
+                <SelectItem value="moderator">Moderator</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="isVerifiedEmail" className="text-muted-foreground">
-              Xác thực email
+              Email Verification
             </Label>
             <Select
               value={formData.isVerifiedEmail.toString()}
@@ -152,8 +152,8 @@ export function UpdateModelUser({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-background border-border text-foreground">
-                <SelectItem value="true">Đã xác thực</SelectItem>
-                <SelectItem value="false">Chưa xác thực</SelectItem>
+                <SelectItem value="true">Verified</SelectItem>
+                <SelectItem value="false">Unverified</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -165,14 +165,14 @@ export function UpdateModelUser({
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Hủy
+              Cancel
             </Button>
             <Button
               type="submit"
               className="bg-primary text-primary-foreground hover:bg-primary/90"
               disabled={isLoading}
             >
-              {isLoading ? "Đang cập nhật..." : "Cập nhật"}
+              {isLoading ? "Updating..." : "Update"}
             </Button>
           </div>
         </form>

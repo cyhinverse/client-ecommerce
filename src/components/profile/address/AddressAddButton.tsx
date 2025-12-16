@@ -10,7 +10,7 @@ export default function AddressAddButton({ onClick }: AddressAddButtonProps) {
   return (
     <Button onClick={onClick}>
       <Plus className="h-4 w-4 mr-2" />
-      Thêm địa chỉ mới
+      Add New Address
     </Button>
   );
 }

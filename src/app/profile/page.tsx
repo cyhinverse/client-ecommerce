@@ -47,15 +47,15 @@ export default function ProfilePage() {
 
   const handleLogout = () => {
     dispatch(logout());
-    toast.success("Đăng xuất thành công");
+    toast.success("Logged out successfully");
     router.push("/");
   };
 
   const tabs = [
-    { value: "profile", label: "Hồ sơ", icon: User },
-    { value: "orders", label: "Đơn hàng", icon: Package },
-    { value: "address", label: "Địa chỉ", icon: MapPin },
-    { value: "settings", label: "Cài đặt", icon: Settings },
+    { value: "profile", label: "Profile", icon: User },
+    { value: "orders", label: "Orders", icon: Package },
+    { value: "address", label: "Address", icon: MapPin },
+    { value: "settings", label: "Settings", icon: Settings },
   ];
 
   return (
@@ -71,9 +71,9 @@ export default function ProfilePage() {
             {/* Sidebar Navigation */}
             <Card className="lg:w-80 h-fit">
               <CardHeader className="pb-4">
-                <CardTitle className="text-xl">Tài khoản</CardTitle>
+                <CardTitle className="text-xl">Account</CardTitle>
                 <CardDescription>
-                  Quản lý thông tin tài khoản của bạn
+                  Manage your account information
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0">
@@ -98,7 +98,7 @@ export default function ProfilePage() {
                     className="w-full justify-start px-4 py-3 text-destructive hover:text-destructive hover:bg-destructive/10"
                   >
                     <LogOut className="h-4 w-4 mr-3" />
-                    Đăng xuất
+                    Logout
                   </Button>
                 </TabsList>
               </CardContent>
@@ -109,24 +109,24 @@ export default function ProfilePage() {
               <CardHeader className="flex flex-row items-center justify-between pb-4">
                 <div>
                   <CardTitle className="text-2xl">
-                    {activeTab === "profile" && "Thông tin cá nhân"}
-                    {activeTab === "orders" && "Lịch sử đơn hàng"}
-                    {activeTab === "address" && "Sổ địa chỉ"}
-                    {activeTab === "settings" && "Cài đặt tài khoản"}
+                    {activeTab === "profile" && "Personal Information"}
+                    {activeTab === "orders" && "Order History"}
+                    {activeTab === "address" && "Address Book"}
+                    {activeTab === "settings" && "Account Settings"}
                   </CardTitle>
                   <CardDescription>
                     {activeTab === "profile" &&
-                      "Quản lý thông tin cá nhân của bạn"}
-                    {activeTab === "orders" && "Theo dõi và quản lý đơn hàng"}
-                    {activeTab === "address" && "Quản lý địa chỉ giao hàng"}
-                    {activeTab === "settings" && "Tùy chỉnh cài đặt tài khoản"}
+                      "Manage your personal information"}
+                    {activeTab === "orders" && "Track and manage your orders"}
+                    {activeTab === "address" && "Manage shipping addresses"}
+                    {activeTab === "settings" && "Customize account settings"}
                   </CardDescription>
                 </div>
                 {/* CHỈ GIỮ NÚT CHO TAB PROFILE */}
                 {activeTab === "profile" && (
                   <Button onClick={() => setOpen(true)}>
                     <SquarePen className="h-4 w-4 mr-2" />
-                    Chỉnh sửa
+                    Edit
                   </Button>
                 )}
                 {/* ĐÃ XÓA NÚT "THÊM ĐỊA CHỈ MỚI" Ở ĐÂY */}
@@ -139,13 +139,13 @@ export default function ProfilePage() {
                       <User className="h-10 w-10 text-muted-foreground" />
                     </div>
                     <h3 className="text-lg font-semibold mb-2">
-                      Chưa đăng nhập
+                      Not logged in
                     </h3>
                     <p className="text-muted-foreground mb-4">
-                      Vui lòng đăng nhập để xem thông tin cá nhân
+                      Please login to view personal information
                     </p>
                     <Button onClick={() => router.push("/login")}>
-                      Đăng nhập ngay
+                      Login now
                     </Button>
                   </div>
                 ) : (

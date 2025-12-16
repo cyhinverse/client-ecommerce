@@ -33,10 +33,10 @@ export default function VerifyCodePage() {
     setIsLoading(true);
     try {
       await dispatch(verifyCode(otp)).unwrap();
-      toast.success("Xác thực email thành công");
+      toast.success("Email verified successfully");
       router.push("/login");
     } catch {
-      toast.error("Xác thực email thất bại");
+      toast.error("Email verification failed");
     } finally {
       setIsLoading(false);
     }
@@ -51,17 +51,17 @@ export default function VerifyCodePage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-2">
           <CardTitle className="text-xl font-semibold">
-            Nhập mã xác thực
+            Enter Verification Code
           </CardTitle>
           <CardDescription>
-            Nhập mã 6 số đã được gửi đến email của bạn
+            Enter the 6-digit code sent to your email
           </CardDescription>
         </CardHeader>
 
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-6">
             <div className="space-y-3">
-              <Label>Mã xác thực</Label>
+              <Label>Verification Code</Label>
               <div className="flex justify-center">
                 <InputOTP value={otp} onChange={handleOTPChange} maxLength={6}>
                   <InputOTPGroup>
@@ -78,7 +78,7 @@ export default function VerifyCodePage() {
                 </InputOTP>
               </div>
               <p className="text-xs text-center text-muted-foreground">
-                Vui lòng nhập đủ 6 chữ số
+                Please enter all 6 digits
               </p>
             </div>
           </CardContent>
@@ -89,7 +89,7 @@ export default function VerifyCodePage() {
               className="w-full"
               disabled={isLoading || otp.length !== 6}
             >
-              {isLoading ? "Đang xác thực..." : "Xác thực"}
+              {isLoading ? "Verifying..." : "Verify"}
             </Button>
           </CardFooter>
         </form>

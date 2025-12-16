@@ -120,15 +120,24 @@ export default function CategoriesPage() {
                         p.price?.currentPrice !== p.price?.discountPrice ? (
                           <>
                             <span className="font-semibold text-sm">
-                              {p.price.discountPrice.toLocaleString("vi-VN")}đ
+                              {new Intl.NumberFormat("en-US", {
+                                style: "currency",
+                                currency: "VND",
+                              }).format(p.price.discountPrice)}
                             </span>
                             <span className="text-xs text-muted-foreground line-through">
-                              {p.price.currentPrice.toLocaleString("vi-VN")}đ
+                              {new Intl.NumberFormat("en-US", {
+                                style: "currency",
+                                currency: "VND",
+                              }).format(p.price.currentPrice)}
                             </span>
                           </>
                         ) : (
                           <span className="font-semibold text-sm">
-                            {p.price?.currentPrice?.toLocaleString("vi-VN")}đ
+                            {new Intl.NumberFormat("en-US", {
+                              style: "currency",
+                              currency: "VND",
+                            }).format(p.price?.currentPrice || 0)}
                           </span>
                         )}
                       </div>

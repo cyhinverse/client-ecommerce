@@ -58,7 +58,7 @@ export function UpdateModelProduct({
     if (variantToDelete._id && !variantToDelete._id.startsWith("temp-")) {
       if (onDeleteVariant) {
         // Confirmation could be added here or in parent
-        if (confirm("Bạn có chắc chắn muốn xóa biến thể này không?")) {
+        if (confirm("Are you sure you want to delete this variant?")) {
            try {
              await onDeleteVariant(variantToDelete._id);
              // Remove from local UI only after success
@@ -87,9 +87,28 @@ export function UpdateModelProduct({
     }
   };
   const [images, setImages] = useState<File[]>([]);
+  const [variantImages, setVariantImages] = useState<Record<string, File[]>>({});
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const variantFileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  const handleVariantImageChange = (variantId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+      setVariantImages((prev) => ({
+        ...prev,
+        [variantId]: [...(prev[variantId] || []), ...newFiles],
+      }));
+    }
+  };
+
+  const removeVariantImage = (variantId: string, imageIndex: number) => {
+    setVariantImages((prev) => ({
+      ...prev,
+      [variantId]: prev[variantId].filter((_, i) => i !== imageIndex),
+    }));
+  };
 
   useEffect(() => {
     if (product) {
@@ -255,6 +274,16 @@ export function UpdateModelProduct({
       }
     }
 
+    // Add new variant images (Process all variants to maintain index alignment)
+    formData.variants.forEach((variant, index) => {
+        const files = variantImages[variant._id];
+        if (files && files.length > 0) {
+            files.forEach((file) => {
+                formDataToSend.append(`variantImages_${index}`, file);
+            });
+        }
+    });
+
     console.log("Sending only changed fields to update");
     onUpdate(formDataToSend);
   };
@@ -335,14 +364,14 @@ export function UpdateModelProduct({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-background border-border text-foreground max-w-4xl max-h-[90vh] overflow-y-auto no-scrollbar">
         <DialogHeader>
-          <DialogTitle>Cập nhật sản phẩm</DialogTitle>
-          <DialogDescription>Chỉnh sửa thông tin sản phẩm</DialogDescription>
+          <DialogTitle>Update Product</DialogTitle>
+          <DialogDescription>Edit product information</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Tên sản phẩm *</Label>
+                <Label htmlFor="name">Product Name *</Label>
                 <Input
                   id="name"
                   value={formData.name}
@@ -368,7 +397,7 @@ export function UpdateModelProduct({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="category">Danh mục *</Label>
+                <Label htmlFor="category">Category *</Label>
                 <Input
                   id="category"
                   value={formData.category}
@@ -381,7 +410,7 @@ export function UpdateModelProduct({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="brand">Thương hiệu *</Label>
+                <Label htmlFor="brand">Brand *</Label>
                 <Input
                   id="brand"
                   value={formData.brand}
@@ -396,7 +425,7 @@ export function UpdateModelProduct({
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="currentPrice">Giá hiện tại *</Label>
+                <Label htmlFor="currentPrice">Current Price *</Label>
                 <Input
                   id="currentPrice"
                   type="number"
@@ -416,7 +445,7 @@ export function UpdateModelProduct({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="discountPrice">Giá khuyến mãi</Label>
+                <Label htmlFor="discountPrice">Discount Price</Label>
                 <Input
                   id="discountPrice"
                   type="number"
@@ -435,7 +464,7 @@ export function UpdateModelProduct({
               </div>
 
               <div className="flex items-center justify-between">
-                <Label htmlFor="isActive">Đang hoạt động</Label>
+                <Label htmlFor="isActive">Active</Label>
                 <Switch
                   checked={formData.isActive}
                   onCheckedChange={(checked) =>
@@ -446,7 +475,7 @@ export function UpdateModelProduct({
               </div>
 
               <div className="flex items-center justify-between">
-                <Label htmlFor="isNewArrival">Sản phẩm mới</Label>
+                <Label htmlFor="isNewArrival">New Arrival</Label>
                 <Switch
                   checked={formData.isNewArrival}
                   onCheckedChange={(checked) =>
@@ -457,7 +486,7 @@ export function UpdateModelProduct({
               </div>
 
               <div className="flex items-center justify-between">
-                <Label htmlFor="isFeatured">Nổi bật</Label>
+                <Label htmlFor="isFeatured">Featured</Label>
                 <Switch
                   checked={formData.isFeatured}
                   onCheckedChange={(checked) =>
@@ -468,7 +497,7 @@ export function UpdateModelProduct({
               </div>
 
               <div className="flex items-center justify-between">
-                <Label htmlFor="onSale">Đang giảm giá</Label>
+                <Label htmlFor="onSale">On Sale</Label>
                 <Switch
                   checked={formData.onSale}
                   onCheckedChange={(checked) =>
@@ -481,7 +510,7 @@ export function UpdateModelProduct({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Mô tả sản phẩm</Label>
+            <Label htmlFor="description">Product Description</Label>
             <Textarea
               id="description"
               value={formData.description}
@@ -499,7 +528,7 @@ export function UpdateModelProduct({
               <Input
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
-                placeholder="Thêm tag..."
+                placeholder="Add tag..."
                 disabled={isLoading}
                 onKeyPress={(e) => {
                   if (e.key === "Enter") {
@@ -509,7 +538,7 @@ export function UpdateModelProduct({
                 }}
               />
               <Button type="button" onClick={addTag} disabled={isLoading}>
-                Thêm
+                Add
               </Button>
             </div>
             <div className="flex flex-wrap gap-2 mt-2">
@@ -533,7 +562,7 @@ export function UpdateModelProduct({
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <Label>Biến thể sản phẩm</Label>
+              <Label>Product Variants</Label>
               <Button
                 type="button"
                 onClick={addVariant}
@@ -541,7 +570,7 @@ export function UpdateModelProduct({
                 className="flex items-center gap-2"
               >
                 <Plus className="h-4 w-4" />
-                Thêm biến thể
+                Add Variant
               </Button>
             </div>
 
@@ -551,7 +580,7 @@ export function UpdateModelProduct({
                 className="border rounded-lg p-4 space-y-3"
               >
                 <div className="flex items-center justify-between">
-                  <h4 className="font-medium">Biến thể #{index + 1}</h4>
+                  <h4 className="font-medium">Variant #{index + 1}</h4>
                   <Button
                     type="button"
                     variant="ghost"
@@ -575,7 +604,7 @@ export function UpdateModelProduct({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Màu sắc</Label>
+                    <Label>Color</Label>
                     <Input
                       value={variant.color}
                       onChange={(e) =>
@@ -585,7 +614,7 @@ export function UpdateModelProduct({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Kích thước</Label>
+                    <Label>Size</Label>
                     <Input
                       value={variant.size}
                       onChange={(e) =>
@@ -595,7 +624,7 @@ export function UpdateModelProduct({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Tồn kho</Label>
+                    <Label>Stock</Label>
                     <Input
                       type="number"
                       value={variant.stock}
@@ -606,12 +635,79 @@ export function UpdateModelProduct({
                     />
                   </div>
                 </div>
+
+                {/* Variant Images Section */}
+                <div className="space-y-2 border-t pt-3 mt-3">
+                  <Label className="text-sm">Variant Images</Label>
+                   
+                   {/* Existing Images Display */}
+                   {variant.images && variant.images.length > 0 && (
+                       <div className="flex flex-wrap gap-2 mb-2">
+                           {variant.images.map((img, imgIdx) => (
+                               <div key={imgIdx} className="relative h-16 w-16 group">
+                                   <Image 
+                                       src={img} 
+                                       alt="Variant" 
+                                       fill 
+                                       className="object-cover rounded border"
+                                   />
+                                   {/* Note: Deleting existing variant images not implemented yet, user can delete entire variant or we add specific handler */}
+                               </div>
+                           ))}
+                       </div>
+                   )}
+
+                   {/* New Images Upload */}
+                   <div className="flex flex-col gap-2">
+                       <input
+                           type="file"
+                           multiple
+                           accept="image/*"
+                           onChange={(e) => handleVariantImageChange(variant._id, e)}
+                           ref={(el) => (variantFileInputRefs.current[variant._id] = el)}
+                           className="hidden"
+                       />
+                       <Button
+                           type="button"
+                           variant="outline"
+                           size="sm"
+                           onClick={() => variantFileInputRefs.current[variant._id]?.click()}
+                           disabled={isLoading}
+                           className="w-fit"
+                       >
+                           <Upload className="h-3 w-3 mr-2" />
+                           Add Images
+                       </Button>
+
+                       {variantImages[variant._id]?.length > 0 && (
+                           <div className="flex flex-wrap gap-2">
+                               {variantImages[variant._id].map((file, fileIdx) => (
+                                   <div key={fileIdx} className="relative h-16 w-16 group">
+                                       <Image
+                                           src={URL.createObjectURL(file)}
+                                           alt="New Variant Ref"
+                                           fill
+                                           className="object-cover rounded border"
+                                       />
+                                       <button
+                                           type="button"
+                                           onClick={() => removeVariantImage(variant._id, fileIdx)}
+                                           className="absolute -top-1 -right-1 bg-destructive text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                       >
+                                           <X className="h-3 w-3" />
+                                       </button>
+                                   </div>
+                               ))}
+                           </div>
+                       )}
+                   </div>
+                </div>
               </div>
             ))}
           </div>
 
           <div className="space-y-2">
-            <Label>Hình ảnh hiện tại</Label>
+            <Label>Existing Images</Label>
             <div className="grid grid-cols-4 gap-4">
               {existingImages.map((image, index) => (
                 <div key={index} className="relative">
@@ -635,7 +731,7 @@ export function UpdateModelProduct({
           </div>
 
           <div className="space-y-2">
-            <Label>Thêm hình ảnh mới</Label>
+            <Label>Add New Images</Label>
             <input
               type="file"
               multiple
@@ -681,14 +777,14 @@ export function UpdateModelProduct({
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Hủy
+              Cancel
             </Button>
             <Button
               type="submit"
               className="bg-primary text-primary-foreground hover:bg-primary/90"
               disabled={isLoading}
             >
-              {isLoading ? "Đang cập nhật..." : "Cập nhật"}
+              {isLoading ? "Updating..." : "Update"}
             </Button>
           </div>
         </form>

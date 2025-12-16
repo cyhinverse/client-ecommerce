@@ -120,9 +120,9 @@ export default function AdminDiscountsPage() {
       dispatch(getDiscountStatistics());
 
       setCreateModalOpen(false);
-      toast.success("Tạo mã giảm giá thành công");
+      toast.success("Discount created successfully");
     } catch (error) {
-      toast.error("Lỗi khi tạo mã giảm giá. Vui lòng thử lại." + error);
+      toast.error("Error creating discount. Please try again." + error);
     } finally {
       setIsCreating(false);
     }
@@ -170,9 +170,9 @@ export default function AdminDiscountsPage() {
       dispatch(getDiscountStatistics());
 
       handleCloseEditModal();
-      toast.success("Cập nhật mã giảm giá thành công");
+      toast.success("Discount updated successfully");
     } catch (error) {
-      toast.error("Cập nhật mã giảm giá thất bại. Vui lòng thử lại." + error);
+      toast.error("Update discount failed. Please try again." + error);
     } finally {
       setIsUpdating(false);
     }
@@ -247,7 +247,7 @@ export default function AdminDiscountsPage() {
   if (discountState?.error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-red-500">Lỗi: {discountState.error}</div>
+        <div className="text-red-500">Error: {discountState.error}</div>
       </div>
     );
   }
@@ -265,9 +265,9 @@ export default function AdminDiscountsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Danh sách mã giảm giá</CardTitle>
+          <CardTitle>Discount List</CardTitle>
           <CardDescription>
-            Quản lý tất cả mã giảm giá trong hệ thống
+            Manage all discount codes in the system
           </CardDescription>
         </CardHeader>
         <CardContent>

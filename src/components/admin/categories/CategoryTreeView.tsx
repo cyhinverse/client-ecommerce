@@ -14,13 +14,13 @@ export const getStatusBadge = (status: boolean) => {
     case true:
       return (
         <Badge className="bg-success text-success-foreground hover:bg-success/90">
-          Đang hoạt động
+          Active
         </Badge>
       );
     case false:
-      return <Badge variant="secondary">Không hoạt động</Badge>;
+      return <Badge variant="secondary">Inactive</Badge>;
     default:
-      return <Badge variant="outline">Không xác định</Badge>;
+      return <Badge variant="outline">Unknown</Badge>;
   }
 };
 
@@ -42,10 +42,10 @@ export function CategoryTreeView({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Cây danh mục</CardTitle>
+        <CardTitle>Category Tree</CardTitle>
         <CardDescription>
-          Xem cấu trúc phân cấp của các danh mục ({rootCategories.length} danh
-          mục gốc)
+          View hierarchical structure of categories ({rootCategories.length} root
+          categories)
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -53,7 +53,7 @@ export function CategoryTreeView({
           <div className="space-y-2">
             {rootCategories.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                Không có danh mục nào
+                No categories found
               </div>
             ) : (
               rootCategories.map((category) => (
@@ -70,7 +70,7 @@ export function CategoryTreeView({
                     </div>
                     <div className="flex items-center gap-4">
                       <Badge variant="outline">
-                        {getProductCount(category)} sản phẩm
+                        {getProductCount(category)} products
                       </Badge>
                       {getStatusBadge(category.isActive)}
                     </div>
@@ -97,7 +97,7 @@ export function CategoryTreeView({
                             </div>
                             <div className="flex items-center gap-4">
                               <Badge variant="outline">
-                                {getProductCount(subCategory)} sản phẩm
+                                {getProductCount(subCategory)} products
                               </Badge>
                               {getStatusBadge(subCategory.isActive)}
                             </div>

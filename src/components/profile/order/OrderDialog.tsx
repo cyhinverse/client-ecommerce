@@ -26,14 +26,14 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
         if (!order) return;
         setIsPaying(true);
         try {
-            toast.loading("Đang chuyển hướng đến VNPay...");
+            toast.loading("Redirecting to VNPay...");
             const result = await dispatch(createPaymentUrl(order._id)).unwrap();
             if (result.paymentUrl) {
                 window.location.href = result.paymentUrl;
             }
         } catch (error) {
             console.error("Payment error:", error);
-            toast.error("Không thể tạo thanh toán. Vui lòng thử lại.");
+            toast.error("Unable to create payment. Please try again.");
         } finally {
             setIsPaying(false);
         }
@@ -65,34 +65,34 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
 
     const getStatusText = (status: Order["status"]) => {
         switch (status) {
-            case "pending": return "Chờ xác nhận";
-            case "confirmed": return "Đã xác nhận";
-            case "processing": return "Đang xử lý";
-            case "shipped": return "Đang giao hàng";
-            case "delivered": return "Đã giao hàng";
-            case "cancelled": return "Đã hủy";
+            case "pending": return "Pending Verification";
+            case "confirmed": return "Confirmed";
+            case "processing": return "Processing";
+            case "shipped": return "Shipping";
+            case "delivered": return "Delivered";
+            case "cancelled": return "Cancelled";
             default: return status;
         }
     };
 
     const getPaymentStatusText = (status: Order["paymentStatus"]) => {
         switch (status) {
-            case "unpaid": return "Chưa thanh toán";
-            case "paid": return "Đã thanh toán";
-            case "refunded": return "Đã hoàn tiền";
+            case "unpaid": return "Unpaid";
+            case "paid": return "Paid";
+            case "refunded": return "Refunded";
             default: return status;
         }
     };
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat("vi-VN", {
+        return new Intl.NumberFormat("en-US", {
             style: "currency",
             currency: "VND",
         }).format(amount);
     };
 
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString("vi-VN", {
+        return new Date(dateString).toLocaleDateString("en-US", {
             day: "2-digit",
             month: "2-digit",
             year: "numeric",
@@ -121,7 +121,7 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
             <DialogContent className="max-w-[95vw] sm:max-w-[95vw] w-[70vw] h-[80vh] overflow-y-auto p-0">
                 <DialogHeader className="p-4 border-b">
                     <DialogTitle className="flex items-center gap-2 text-lg">
-                        Chi tiết đơn hàng
+                        Order Details
                         <Badge className={`${getStatusColor(order.status)} text-xs`}>
                             <span className="flex items-center gap-1">
                                 {getStatusIcon(order.status)}
@@ -139,27 +139,27 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
                             <div className="bg-muted/30 p-4 rounded-lg">
                                 <h3 className="font-semibold text-base mb-3 flex items-center gap-2">
                                     <Package className="h-4 w-4" />
-                                    Thông tin đơn hàng
+                                    Order Information
                                 </h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                                     <div>
-                                        <span className="text-muted-foreground text-xs">Mã đơn hàng:</span>
+                                        <span className="text-muted-foreground text-xs">Order Code:</span>
                                         <p className="font-medium mt-1 text-sm">{order.orderCode || order._id}</p>
                                     </div>
 
                                     <div>
-                                        <span className="text-muted-foreground text-xs">Ngày đặt:</span>
+                                        <span className="text-muted-foreground text-xs">Order Date:</span>
                                         <p className="mt-1 text-sm">{formatDate(order.createdAt)}</p>
                                     </div>
 
                                     <div>
-                                        <span className="text-muted-foreground text-xs">Cập nhật lúc:</span>
+                                        <span className="text-muted-foreground text-xs">Last Updated:</span>
                                         <p className="mt-1 text-sm">{formatDate(order.updatedAt)}</p>
                                     </div>
 
                                     {order.deliveredAt && (
                                         <div>
-                                            <span className="text-muted-foreground text-xs">Ngày giao hàng:</span>
+                                            <span className="text-muted-foreground text-xs">Delivered Date:</span>
                                             <p className="mt-1 text-sm">{formatDate(order.deliveredAt)}</p>
                                         </div>
                                     )}
@@ -168,7 +168,7 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
 
                             {/* Products */}
                             <div>
-                                <h3 className="font-semibold text-base mb-3">Sản phẩm ({order.products.length})</h3>
+                                <h3 className="font-semibold text-base mb-3">Products ({order.products.length})</h3>
                                 <div className="space-y-3">
                                     {order.products.map((product, index) => (
                                         <div key={product.productId + index} className="flex items-start gap-3 p-3 border rounded-lg">
@@ -191,9 +191,9 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
                                                     <p className="text-xs text-muted-foreground">SKU: {product.sku}</p>
                                                 )}
                                                 <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                                                    <span>Số lượng: {product.quantity}</span>
+                                                    <span>Qty: {product.quantity}</span>
                                                     <span>•</span>
-                                                    <span>{formatCurrency(getActualPrice(product))} / sp</span>
+                                                    <span>{formatCurrency(getActualPrice(product))} / item</span>
                                                 </div>
                                             </div>
                                             <div className="text-right flex-shrink-0">
@@ -209,9 +209,9 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
                         <div className="space-y-4">
                             {/* Order Summary */}
                             <div className="bg-muted/30 p-4 rounded-lg">
-                                <h3 className="font-semibold text-base mb-3">Tổng quan đơn hàng</h3>
+                                <h3 className="font-semibold text-base mb-3">Order Summary</h3>
                                     <div className="flex justify-between items-center font-semibold text-base border-t pt-2">
-                                        <span>Tổng cộng:</span>
+                                        <span>Total:</span>
                                         <span>{formatCurrency(order.totalAmount)}</span>
                                     </div>
                                 </div>
@@ -220,22 +220,22 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
                             <div className="bg-muted/30 p-4 rounded-lg">
                                 <h3 className="font-semibold text-base mb-3 flex items-center gap-2">
                                     <CreditCard className="h-4 w-4" />
-                                    Thanh toán
+                                    Payment
                                 </h3>
                                 <div className="space-y-2 text-sm">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-muted-foreground text-xs">Phương thức:</span>
+                                        <span className="text-muted-foreground text-xs">Method:</span>
                                         <span className="font-medium text-sm">{order.paymentMethod === "cod" ? "COD" : "VNPay"}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-muted-foreground text-xs">Trạng thái:</span>
+                                        <span className="text-muted-foreground text-xs">Status:</span>
                                         <Badge variant={order.paymentStatus === "paid" ? "default" : "secondary"} className="text-xs">
                                             {getPaymentStatusText(order.paymentStatus)}
                                         </Badge>
                                     </div>
                                     {order.discountCode && (
                                         <div className="flex justify-between items-center">
-                                            <span className="text-muted-foreground text-xs">Mã giảm giá:</span>
+                                            <span className="text-muted-foreground text-xs">Voucher:</span>
                                             <span className="font-medium text-sm text-primary">{order.discountCode}</span>
                                         </div>
                                     )}
@@ -247,7 +247,7 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
                                             onClick={handlePayment}
                                             disabled={isPaying}
                                         >
-                                            {isPaying ? "Đang xử lý..." : "Thanh toán ngay"}
+                                            {isPaying ? "Processing..." : "Pay Now"}
                                         </Button>
                                     </div>
                                 )}
@@ -257,7 +257,7 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
                             <div className="bg-muted/30 p-4 rounded-lg">
                                 <h3 className="font-semibold text-base mb-3 flex items-center gap-2">
                                     <MapPin className="h-4 w-4" />
-                                    Giao hàng
+                                    Shipping Address
                                 </h3>
                                 <div className="text-sm space-y-1">
                                     <p className="font-semibold text-sm">{order.shippingAddress.fullName}</p>
@@ -272,7 +272,7 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
                                     </p>
                                     {order.shippingAddress.note && (
                                         <div className="mt-2 pt-2 border-t">
-                                            <p className="font-medium text-xs mb-1">Ghi chú:</p>
+                                            <p className="font-medium text-xs mb-1">Note:</p>
                                             <p className="text-muted-foreground text-xs">{order.shippingAddress.note}</p>
                                         </div>
                                     )}

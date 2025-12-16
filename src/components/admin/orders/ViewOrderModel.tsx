@@ -27,12 +27,12 @@ export  function ViewOrderModal({
 
   const getStatusBadge = (status: string) => {
     const statusConfig: { [key: string]: { label: string; variant: "default" | "secondary" | "destructive" | "outline" } } = {
-      pending: { label: "Chờ xác nhận", variant: "secondary" },
-      confirmed: { label: "Đã xác nhận", variant: "outline" },
-      processing: { label: "Đang xử lý", variant: "default" },
-      shipped: { label: "Đang giao", variant: "default" },
-      delivered: { label: "Thành công", variant: "outline" },
-      cancelled: { label: "Đã hủy", variant: "destructive" },
+      pending: { label: "Pending", variant: "secondary" },
+      confirmed: { label: "Confirmed", variant: "outline" },
+      processing: { label: "Processing", variant: "default" },
+      shipped: { label: "Shipped", variant: "default" },
+      delivered: { label: "Delivered", variant: "outline" },
+      cancelled: { label: "Cancelled", variant: "destructive" },
     };
 
     const config = statusConfig[status] || {
@@ -47,9 +47,9 @@ export  function ViewOrderModal({
 
   const getPaymentStatusBadge = (status: string) => {
     const statusConfig: { [key: string]: { label: string; variant: "default" | "secondary" | "destructive" | "outline" } } = {
-      unpaid: { label: "Chưa thanh toán", variant: "secondary" },
-      paid: { label: "Đã thanh toán", variant: "outline" },
-      refunded: { label: "Đã hoàn tiền", variant: "destructive" },
+      unpaid: { label: "Unpaid", variant: "secondary" },
+      paid: { label: "Paid", variant: "outline" },
+      refunded: { label: "Refunded", variant: "destructive" },
     };
 
     const config = statusConfig[status] || {
@@ -70,7 +70,7 @@ export  function ViewOrderModal({
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("vi-VN", {
+    return new Date(dateString).toLocaleDateString("en-US", {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -84,10 +84,10 @@ export  function ViewOrderModal({
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto no-scrollbar">
         <DialogHeader>
           <DialogTitle className="flex justify-between items-center">
-            <span>Chi tiết đơn hàng #{order._id.slice(-8).toUpperCase()}</span>
+            <span>Order Details #{order._id.slice(-8).toUpperCase()}</span>
             <Button onClick={() => onEdit(order)}>
               <Edit className="w-4 h-4 mr-2" />
-              Cập nhật
+              Update
             </Button>
           </DialogTitle>
         </DialogHeader>
@@ -95,26 +95,26 @@ export  function ViewOrderModal({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Thông tin đơn hàng */}
           <div className="space-y-4">
-            <h3 className="font-semibold">Thông tin đơn hàng</h3>
+            <h3 className="font-semibold">Order Information</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Mã đơn hàng:</span>
+                <span className="text-muted-foreground">Order ID:</span>
                 <span className="font-medium">#{order._id.slice(-8).toUpperCase()}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Ngày đặt:</span>
+                <span className="text-muted-foreground">Order Date:</span>
                 <span>{formatDate(order.createdAt)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Trạng thái:</span>
+                <span className="text-muted-foreground">Status:</span>
                 <span>{getStatusBadge(order.status)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Thanh toán:</span>
+                <span className="text-muted-foreground">Payment:</span>
                 <span>{getPaymentStatusBadge(order.paymentStatus)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Phương thức:</span>
+                <span className="text-muted-foreground">Method:</span>
                 <span className="capitalize">{order.paymentMethod}</span>
               </div>
             </div>
@@ -122,14 +122,14 @@ export  function ViewOrderModal({
 
           {/* Thông tin khách hàng */}
           <div className="space-y-4">
-            <h3 className="font-semibold">Thông tin khách hàng</h3>
+            <h3 className="font-semibold">Customer Information</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Tên:</span>
+                <span className="text-muted-foreground">Name:</span>
                 <span>{order.shippingAddress.fullName}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Số điện thoại:</span>
+                <span className="text-muted-foreground">Phone:</span>
                 <span>{order.shippingAddress.phone}</span>
               </div>
             </div>
@@ -137,7 +137,7 @@ export  function ViewOrderModal({
 
           {/* Địa chỉ giao hàng */}
           <div className="space-y-4">
-            <h3 className="font-semibold">Địa chỉ giao hàng</h3>
+            <h3 className="font-semibold">Shipping Address</h3>
             <div className="space-y-2 text-sm">
               <div>
                 <div>{order.shippingAddress.address}</div>
@@ -148,7 +148,7 @@ export  function ViewOrderModal({
               </div>
               {order.shippingAddress.note && (
                 <div className="mt-2">
-                  <span className="text-muted-foreground">Ghi chú: </span>
+                  <span className="text-muted-foreground">Note: </span>
                   {order.shippingAddress.note}
                 </div>
               )}
@@ -158,7 +158,7 @@ export  function ViewOrderModal({
           {/* Tổng quan */}
           <div className="space-y-4">
               <div className="flex justify-between font-semibold text-base border-t pt-2">
-                <span>Tổng cộng:</span>
+                <span>Total:</span>
                 <span>{formatCurrency(order.totalAmount)}</span>
               </div>
             </div>
@@ -167,15 +167,15 @@ export  function ViewOrderModal({
 
         {/* Chi tiết sản phẩm */}
         <div className="space-y-4">
-          <h3 className="font-semibold">Chi tiết sản phẩm</h3>
+          <h3 className="font-semibold">Product Details</h3>
           <div className="border rounded-lg">
             <table className="w-full">
               <thead className="bg-muted">
                 <tr>
-                  <th className="text-left p-3">Sản phẩm</th>
-                  <th className="text-left p-3">Đơn giá</th>
-                  <th className="text-left p-3">Số lượng</th>
-                  <th className="text-left p-3">Thành tiền</th>
+                  <th className="text-left p-3">Product</th>
+                  <th className="text-left p-3">Unit Price</th>
+                  <th className="text-left p-3">Quantity</th>
+                  <th className="text-left p-3">Total</th>
                 </tr>
               </thead>
               <tbody>

@@ -61,7 +61,7 @@ export default function CartPage() {
   const handleClearCart = () => {
     dispatch(clearCart());
     dispatch(clearAppliedDiscount());
-    toast.success("Giỏ hàng đã được xóa thành công");
+    toast.success("Cart cleared successfully");
   };
 
   const handleRemoveItem = (itemId: string) => {
@@ -82,7 +82,7 @@ export default function CartPage() {
 
   const handleCheckout = () => {
     if (selectedItemsCount === 0) {
-      toast.error("Vui lòng chọn ít nhất một sản phẩm để thanh toán");
+      toast.error("Please select at least one item to checkout");
       return;
     }
     dispatch(prepareForCheckout());
@@ -91,12 +91,12 @@ export default function CartPage() {
 
   const handleApplyDiscount = async () => {
     if (!promoCode.trim()) {
-      toast.error("Vui lòng nhập mã giảm giá");
+      toast.error("Please enter a discount code");
       return;
     }
 
     if (!selectedItems || selectedItems.length === 0) {
-      toast.error("Vui lòng chọn sản phẩm để áp dụng mã giảm giá");
+      toast.error("Please select items to apply discount code");
       return;
     }
 
@@ -111,9 +111,9 @@ export default function CartPage() {
           productIds,
         })
       ).unwrap();
-      toast.success("Áp dụng mã giảm giá thành công!");
+      toast.success("Discount code applied successfully!");
     } catch (err: any) {
-      toast.error(err.message || "Không thể áp dụng mã giảm giá");
+      toast.error(err.message || "Failed to apply discount code");
       dispatch(clearAppliedDiscount());
     }
   };
@@ -121,7 +121,7 @@ export default function CartPage() {
   const handleRemoveDiscount = () => {
     dispatch(clearAppliedDiscount());
     setPromoCode("");
-    toast.success("Đã gỡ bỏ mã giảm giá");
+    toast.success("Discount code removed");
   };
 
   const formatPrice = (price: number) => {
@@ -153,7 +153,7 @@ export default function CartPage() {
   const hasSelectedItems = selectedItems && selectedItems.length > 0;
 
   if (error) {
-    toast.error("Đã xảy ra lỗi khi tải giỏ hàng");
+    toast.error("Error loading cart");
   }
 
   // Sửa lỗi: Kiểm tra cartData?.items thay vì cartData.items
@@ -164,15 +164,15 @@ export default function CartPage() {
           <CardContent>
             <ShoppingBag className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
             <h2 className="text-2xl font-semibold text-foreground mb-2">
-              Giỏ hàng trống
+              Cart is empty
             </h2>
             <p className="text-muted-foreground mb-6">
-              Hãy thêm sản phẩm vào giỏ hàng để tiếp tục mua sắm
+              Add products to your cart to continue shopping
             </p>
             <Link href="/products">
               <Button>
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Tiếp tục mua sắm
+                Continue Shopping
               </Button>
             </Link>
           </CardContent>
@@ -190,25 +190,25 @@ export default function CartPage() {
           className="inline-flex items-center text-muted-foreground hover:text-foreground mb-4 transition-colors"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Tiếp tục mua sắm
+          Continue Shopping
         </Link>
         <div className="w-full max-w-[820px] flex justify-between items-center">
           <h1 className="text-xl font-bold text-foreground">
-            Giỏ hàng ({totalItems} sản phẩm)
+            Cart ({totalItems} items)
           </h1>
           <div className="flex items-center gap-4">
             {hasCartItems &&
               (isAllSelected ? (
                 <Button variant="outline" onClick={handleUnselectAll}>
-                  Bỏ chọn tất cả
+                  Unselect All
                 </Button>
               ) : (
                 <Button variant="outline" onClick={handleSelectAll}>
-                  Chọn tất cả
+                  Select All
                 </Button>
               ))}
             <Button onClick={handleClearCart} variant="outline">
-              Xóa tất cả
+              Clear All
             </Button>
           </div>
         </div>
@@ -272,7 +272,7 @@ export default function CartPage() {
                                   {/* Color */}
                                   {item.variant.color && (
                                     <div className="flex items-center gap-2">
-                                      <span className="font-medium">Màu:</span>
+                                      <span className="font-medium">Color:</span>
                                       <div className="flex items-center gap-1">
                                         <div
                                           className="w-4 h-4 border border-border"
@@ -313,14 +313,14 @@ export default function CartPage() {
                                 {/* Stock Information */}
                                 <div className="flex items-center gap-2 text-xs">
                                   <span className="text-muted-foreground">
-                                    Tồn kho: {item.variant.stock}
+                                    Stock: {item.variant.stock}
                                   </span>
                                   {item.quantity > item.variant.stock && (
                                     <Badge
                                       variant="destructive"
                                       className="text-xs"
                                     >
-                                      Vượt quá tồn kho
+                                      Out of Stock
                                     </Badge>
                                   )}
                                 </div>
@@ -368,7 +368,7 @@ export default function CartPage() {
                             {item.price.currentPrice >
                               item.price.discountPrice && (
                               <span className="text-xs text-success mt-1">
-                                Tiết kiệm{" "}
+                                Save{" "}
                                 {formatPrice(
                                   item.price.currentPrice -
                                     item.price.discountPrice
@@ -423,10 +423,10 @@ export default function CartPage() {
           <Card className="sticky top-4">
             <CardHeader>
               <CardTitle className="text-lg">
-                Tóm tắt đơn hàng
+                Order Summary
                 {hasSelectedItems && (
                   <span className="text-sm font-normal text-muted-foreground ml-2">
-                    ({selectedItemsCount} sản phẩm được chọn)
+                    ({selectedItemsCount} items selected)
                   </span>
                 )}
               </CardTitle>
@@ -435,8 +435,8 @@ export default function CartPage() {
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">
-                    {hasSelectedItems ? "Tạm tính" : "Tổng giỏ hàng"}
-                    {hasSelectedItems && ` (${selectedItemsCount} sản phẩm)`}
+                    {hasSelectedItems ? "Subtotal" : "Cart Total"}
+                    {hasSelectedItems && ` (${selectedItemsCount} items)`}
                   </span>
                   <span className="font-medium text-foreground">
                     {formatPrice(
@@ -448,12 +448,12 @@ export default function CartPage() {
                 {appliedDiscount && (
                   <div className="flex justify-between text-sm text-green-600">
                     <span className="flex items-center gap-2">
-                      Giảm giá ({appliedDiscount.code})
+                      Discount ({appliedDiscount.code})
                       <button
                         onClick={handleRemoveDiscount}
                         className="text-xs text-red-500 hover:underline"
                       >
-                        (Xóa)
+                        (Remove)
                       </button>
                     </span>
                     <span className="font-medium">
@@ -464,12 +464,12 @@ export default function CartPage() {
 
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">
-                    Nhập mã giảm giá
+                    Enter Discount Code
                   </span>
                   <div className="flex gap-2">
                     <Input
                       type="text"
-                      placeholder="Mã giảm giá"
+                      placeholder="Discount Code"
                       className="w-32"
                       value={promoCode}
                       onChange={(e) => setPromoCode(e.target.value)}
@@ -481,7 +481,7 @@ export default function CartPage() {
                       onClick={handleApplyDiscount}
                       disabled={!!appliedDiscount || discountLoading}
                     >
-                       {discountLoading ? "..." : "Áp dụng"}
+                       {discountLoading ? "..." : "Apply"}
                     </Button>
                   </div>
                 </div>
@@ -490,7 +490,7 @@ export default function CartPage() {
               <div className="border-t border-border pt-4">
                 <div className="flex justify-between items-center">
                   <span className="font-semibold text-foreground">
-                    Tổng cộng
+                    Total
                   </span>
                   <span className="text-xl font-bold text-foreground">
                     {formatPrice(
@@ -513,16 +513,16 @@ export default function CartPage() {
                 {hasSelectedItems ? (
                   <>
                     <Check className="mr-2 h-4 w-4" />
-                    Thanh toán ({selectedItemsCount})
+                    Checkout ({selectedItemsCount})
                   </>
                 ) : (
-                  "Chọn sản phẩm để thanh toán"
+                  "Select items to checkout"
                 )}
               </Button>
 
               {!hasSelectedItems && (
                 <p className="text-xs text-center text-muted-foreground">
-                  Vui lòng chọn ít nhất một sản phẩm để tiếp tục thanh toán
+                  Please select at least one item to proceed
                 </p>
               )}
             </CardContent>

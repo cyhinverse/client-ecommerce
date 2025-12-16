@@ -139,9 +139,9 @@ export default function AdminProductsPage() {
       await dispatch(createProduct(formData)).unwrap();
       refreshData();
       setCreateModalOpen(false);
-      toast.success("Tạo sản phẩm thành công");
+      toast.success("Product created successfully");
     } catch (error) {
-      toast.error("Lỗi khi tạo sản phẩm. Vui lòng thử lại." + error);
+      toast.error("Error creating product. Please try again." + error);
     } finally {
       setIsCreating(false);
     }
@@ -177,9 +177,9 @@ export default function AdminProductsPage() {
       ).unwrap();
       refreshData();
       handleCloseEditModal();
-      toast.success("Cập nhật sản phẩm thành công");
+      toast.success("Product updated successfully");
     } catch (error) {
-      toast.error("Cập nhật sản phẩm thất bại. Vui lòng thử lại." + error);
+      toast.error("Update failed. Please try again." + error);
     } finally {
       setIsUpdating(false);
     }
@@ -228,7 +228,7 @@ export default function AdminProductsPage() {
     try {
       await dispatch(deleteProduct(product._id)).unwrap();
 
-      toast.success("Xóa sản phẩm thành công");
+      toast.success("Product deleted successfully");
 
       refreshData();
     } catch (error) {
@@ -237,7 +237,7 @@ export default function AdminProductsPage() {
       if (error && typeof error === "string") {
         toast.error(error);
       } else {
-        toast.error("Xóa sản phẩm thất bại. Vui lòng thử lại.");
+        toast.error("Delete failed. Please try again.");
       }
     }
   };
@@ -270,7 +270,7 @@ export default function AdminProductsPage() {
   if (error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-destructive">Lỗi: {error}</div>
+        <div className="text-destructive">Error: {error}</div>
       </div>
     );
   }
@@ -285,9 +285,9 @@ export default function AdminProductsPage() {
         })
       ).unwrap();
       refreshData();
-      toast.success("Xóa biến thể thành công");
+      toast.success("Variant deleted successfully");
     } catch (error) {
-      const msg = typeof error === "string" ? error : "Xóa biến thể thất bại";
+      const msg = typeof error === "string" ? error : "Failed to delete variant";
       toast.error(msg);
       throw error; // Re-throw to prevent UI removal in child
     }
@@ -306,9 +306,9 @@ export default function AdminProductsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Danh sách sản phẩm</CardTitle>
+          <CardTitle>Product List</CardTitle>
           <CardDescription>
-            Quản lý tất cả sản phẩm trong cửa hàng
+            Manage all products in store
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -104,11 +104,11 @@ export default function AdminUsersPage() {
       ).unwrap();
       fetchUsers();
       setCreateModalOpen(false);
-      toast.success("Tạo người dùng thành công");
+      toast.success("User created successfully");
     } catch (error) {
       const err = error as Error;
       console.error("Create user error:", err);
-      toast.error(err?.message || "Lỗi khi tạo người dùng. Vui lòng thử lại.");
+      toast.error(err?.message || "Error creating user. Please try again.");
     } finally {
       setIsCreating(false);
     }
@@ -150,11 +150,11 @@ export default function AdminUsersPage() {
       ).unwrap();
       fetchUsers();
       handleCloseEditModal();
-      toast.success("Cập nhật người dùng thành công");
+      toast.success("User updated successfully");
     } catch (error) {
       const err = error as Error;
       toast.error(
-        err?.message || "Cập nhật người dùng thất bại. Vui lòng thử lại."
+        err?.message || "Failed to update user. Please try again."
       );
     } finally {
       setIsUpdating(false);
@@ -192,9 +192,9 @@ export default function AdminUsersPage() {
     try {
       await dispatch(deleteUser(user._id)).unwrap();
       fetchUsers();
-      toast.success("Xóa người dùng thành công");
+      toast.success("User deleted successfully");
     } catch {
-      toast.error("Xóa người dùng thất bại. Vui lòng thử lại.");
+      toast.error("Failed to delete user. Please try again.");
     }
   };
 
@@ -223,7 +223,7 @@ export default function AdminUsersPage() {
   if (userState.error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-destructive">Lỗi: {userState.error}</div>
+        <div className="text-destructive">Error: {userState.error}</div>
       </div>
     );
   }
@@ -241,9 +241,9 @@ export default function AdminUsersPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Danh sách người dùng</CardTitle>
+          <CardTitle>User List</CardTitle>
           <CardDescription>
-            Quản lý tất cả người dùng trong hệ thống
+            Manage all users in the system
           </CardDescription>
         </CardHeader>
         <CardContent>

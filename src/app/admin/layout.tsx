@@ -37,7 +37,7 @@ export default function AdminLayout({
 
   const handleLogout = () => {
     dispatch(logout());
-    toast.success("Đăng xuất thành công");
+    toast.success("Logged out successfully");
     router.push("/");
   };
 
@@ -149,10 +149,10 @@ export default function AdminLayout({
                     isCollapsed && "justify-center px-2"
                   )}
                   onClick={handleLogout}
-                  title={isCollapsed ? "Đăng xuất" : undefined}
+                  title={isCollapsed ? "Logout" : undefined}
                 >
                   <LogOut className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
-                  {!isCollapsed && "Đăng xuất"}
+                  {!isCollapsed && "Logout"}
                 </Button>
               </li>
             </ul>

@@ -82,12 +82,12 @@ export function OrdersTable({
         variant: "default" | "secondary" | "destructive" | "outline";
       };
     } = {
-      pending: { label: "Chờ xác nhận", variant: "secondary" },
-      confirmed: { label: "Đã xác nhận", variant: "outline" },
-      processing: { label: "Đang xử lý", variant: "default" },
-      shipped: { label: "Đang giao", variant: "default" },
-      delivered: { label: "Thành công", variant: "outline" },
-      cancelled: { label: "Đã hủy", variant: "destructive" },
+      pending: { label: "Pending", variant: "secondary" },
+      confirmed: { label: "Confirmed", variant: "outline" },
+      processing: { label: "Processing", variant: "default" },
+      shipped: { label: "Shipped", variant: "default" },
+      delivered: { label: "Delivered", variant: "outline" },
+      cancelled: { label: "Cancelled", variant: "destructive" },
     };
 
     const config = statusConfig[status] || {
@@ -105,9 +105,9 @@ export function OrdersTable({
         variant: "default" | "secondary" | "destructive" | "outline";
       };
     } = {
-      unpaid: { label: "Chưa thanh toán", variant: "secondary" },
-      paid: { label: "Đã thanh toán", variant: "outline" },
-      refunded: { label: "Đã hoàn tiền", variant: "destructive" },
+      unpaid: { label: "Unpaid", variant: "secondary" },
+      paid: { label: "Paid", variant: "outline" },
+      refunded: { label: "Refunded", variant: "destructive" },
     };
 
     const config = statusConfig[status] || {
@@ -119,7 +119,7 @@ export function OrdersTable({
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("vi-VN");
+    return new Date(dateString).toLocaleDateString("en-US");
   };
 
   const formatCurrency = (amount: number) => {
@@ -136,7 +136,7 @@ export function OrdersTable({
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Tìm kiếm theo mã đơn hàng, tên KH..."
+              placeholder="Search by order ID, customer name..."
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
               className="pl-8 rounded-none border-border focus-visible:ring-0 focus-visible:border-primary"
@@ -147,13 +147,13 @@ export function OrdersTable({
               <SelectValue placeholder="Tất cả trạng thái" />
             </SelectTrigger>
             <SelectContent className="rounded-none border-border">
-              <SelectItem value="all">Tất cả trạng thái</SelectItem>
-              <SelectItem value="pending">Chờ xác nhận</SelectItem>
-              <SelectItem value="confirmed">Đã xác nhận</SelectItem>
-              <SelectItem value="processing">Đang xử lý</SelectItem>
-              <SelectItem value="shipped">Đang giao</SelectItem>
-              <SelectItem value="delivered">Thành công</SelectItem>
-              <SelectItem value="cancelled">Đã hủy</SelectItem>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="confirmed">Confirmed</SelectItem>
+              <SelectItem value="processing">Processing</SelectItem>
+              <SelectItem value="shipped">Shipped</SelectItem>
+              <SelectItem value="delivered">Delivered</SelectItem>
+              <SelectItem value="cancelled">Cancelled</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -162,12 +162,12 @@ export function OrdersTable({
           onValueChange={(value) => onPageSizeChange(Number(value))}
         >
           <SelectTrigger className="w-[120px] rounded-none border-border focus:ring-0 focus:border-primary">
-            <SelectValue placeholder="Hiển thị" />
+            <SelectValue placeholder="Show" />
           </SelectTrigger>
           <SelectContent className="rounded-none border-border">
-            <SelectItem value="10">10 / trang</SelectItem>
-            <SelectItem value="20">20 / trang</SelectItem>
-            <SelectItem value="50">50 / trang</SelectItem>
+            <SelectItem value="10">10 / page</SelectItem>
+            <SelectItem value="20">20 / page</SelectItem>
+            <SelectItem value="50">50 / page</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -176,13 +176,13 @@ export function OrdersTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Mã đơn hàng</TableHead>
-              <TableHead>Khách hàng</TableHead>
-              <TableHead>Ngày đặt</TableHead>
-              <TableHead>Tổng tiền</TableHead>
-              <TableHead>Trạng thái</TableHead>
-              <TableHead>Thanh toán</TableHead>
-              <TableHead className="w-[80px]">Thao tác</TableHead>
+              <TableHead>Order ID</TableHead>
+              <TableHead>Customer</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Total</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Payment</TableHead>
+              <TableHead className="w-[80px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -201,7 +201,7 @@ export function OrdersTable({
                   colSpan={7}
                   className="text-center py-8 text-muted-foreground"
                 >
-                  Không có đơn hàng nào
+                  No orders found
                 </TableCell>
               </TableRow>
             ) : (
@@ -239,18 +239,18 @@ export function OrdersTable({
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => onView(order)}>
                           <Eye className="w-4 h-4 mr-2" />
-                          Xem chi tiết
+                          View Details
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => onEdit(order)}>
                           <Edit className="w-4 h-4 mr-2" />
-                          Cập nhật trạng thái
+                          Update Status
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => onDelete(order)}
                           className="text-destructive"
                         >
                           <Trash2 className="w-4 h-4 mr-2" />
-                          Xóa
+                          Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

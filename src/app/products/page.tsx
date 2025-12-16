@@ -196,10 +196,10 @@ export default function ProductsPage() {
     <div className="container max-w-7xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Tất cả sản phẩm</h1>
+          <h1 className="text-3xl font-bold tracking-tight">All Products</h1>
           <p className="text-muted-foreground mt-1">
-            {filteredAndSortedProducts.length} sản phẩm
-            {products && ` (${products.length} tổng cộng)`}
+            {filteredAndSortedProducts.length} products
+            {products && ` (${products.length} total)`}
           </p>
         </div>
 
@@ -209,7 +209,7 @@ export default function ProductsPage() {
           onClick={() => setIsMobileFilterOpen(true)}
         >
           <SlidersHorizontal className="h-4 w-4 mr-2" />
-          Bộ lọc
+          Filters
         </Button>
       </div>
 
@@ -248,14 +248,14 @@ export default function ProductsPage() {
             ) : (
               <div className="col-span-full text-center py-20">
                 <p className="text-muted-foreground">
-                  Không tìm thấy sản phẩm nào
+                  No products found
                 </p>
                 <Button
                   variant="outline"
                   onClick={handleClearFilters}
                   className="mt-4"
                 >
-                  Xóa tất cả bộ lọc
+                  Clear all filters
                 </Button>
               </div>
             )}

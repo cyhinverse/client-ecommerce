@@ -16,36 +16,36 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6 no-scrollbar">
       <div>
-        <h3 className="text-lg font-medium">Cài đặt</h3>
+        <h3 className="text-lg font-medium">Settings</h3>
         <p className="text-sm text-muted-foreground">
-          Quản lý cài đặt hệ thống và tùy chọn hiển thị.
+          Manage system settings and display preferences.
         </p>
       </div>
       <Tabs defaultValue="general" className="space-y-4">
         <TabsList className="w-full justify-start overflow-x-auto no-scrollbar">
-          <TabsTrigger value="general">Tổng quan</TabsTrigger>
-          <TabsTrigger value="notifications">Thông báo</TabsTrigger>
-          <TabsTrigger value="display">Hiển thị</TabsTrigger>
+          <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsTrigger value="display">Display</TabsTrigger>
         </TabsList>
         <TabsContent value="general" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Thông tin cửa hàng</CardTitle>
+              <CardTitle>Store Information</CardTitle>
               <CardDescription>
-                Cập nhật thông tin cơ bản của cửa hàng.
+                Update basic store information.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-1">
-                <Label htmlFor="name">Tên cửa hàng</Label>
+                <Label htmlFor="name">Store Name</Label>
                 <Input id="name" defaultValue="My E-commerce Store" />
               </div>
               <div className="space-y-1">
-                <Label htmlFor="email">Email liên hệ</Label>
+                <Label htmlFor="email">Contact Email</Label>
                 <Input id="email" defaultValue="contact@example.com" />
               </div>
               <div className="space-y-1">
-                <Label htmlFor="phone">Số điện thoại</Label>
+                <Label htmlFor="phone">Phone Number</Label>
                 <Input id="phone" defaultValue="+84 123 456 789" />
               </div>
             </CardContent>
@@ -54,26 +54,26 @@ export default function SettingsPage() {
         <TabsContent value="notifications" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Cấu hình thông báo</CardTitle>
+              <CardTitle>Notification Configuration</CardTitle>
               <CardDescription>
-                Chọn các sự kiện bạn muốn nhận thông báo.
+                Choose events to receive notifications for.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between space-x-2">
                 <Label htmlFor="new-orders" className="flex flex-col space-y-1">
-                  <span>Đơn hàng mới</span>
+                  <span>New Orders</span>
                   <span className="font-normal text-xs text-muted-foreground">
-                    Nhận thông báo khi có khách đặt hàng mới.
+                    Receive notifications when new orders are placed.
                   </span>
                 </Label>
                 <Switch id="new-orders" defaultChecked />
               </div>
               <div className="flex items-center justify-between space-x-2">
                 <Label htmlFor="low-stock" className="flex flex-col space-y-1">
-                  <span>Sắp hết hàng</span>
+                  <span>Low Stock</span>
                   <span className="font-normal text-xs text-muted-foreground">
-                    Cảnh báo khi sản phẩm sắp hết trong kho.
+                    Alert when products are running low on stock.
                   </span>
                 </Label>
                 <Switch id="low-stock" defaultChecked />
@@ -84,17 +84,17 @@ export default function SettingsPage() {
         <TabsContent value="display" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Giao diện</CardTitle>
+              <CardTitle>Interface</CardTitle>
               <CardDescription>
-                Tùy chỉnh giao diện trang quản trị.
+                Customize admin interface.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between space-x-2">
                 <Label htmlFor="dark-mode" className="flex flex-col space-y-1">
-                  <span>Chế độ tối</span>
+                  <span>Dark Mode</span>
                   <span className="font-normal text-xs text-muted-foreground">
-                    Chuyển đổi giữa giao diện sáng và tối.
+                    Switch between light and dark themes.
                   </span>
                 </Label>
                 <Switch id="dark-mode" />

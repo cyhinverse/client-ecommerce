@@ -56,7 +56,7 @@ export const getStatusBadge = (status: boolean) => {
   return status ? (
     <Badge className="bg-primary text-primary-foreground border-primary">
       <CheckCircle className="h-3 w-3 mr-1" />
-      Đang hoạt động
+      Active
     </Badge>
   ) : (
     <Badge
@@ -64,13 +64,13 @@ export const getStatusBadge = (status: boolean) => {
       className="border-muted-foreground text-muted-foreground"
     >
       <XCircle className="h-3 w-3 mr-1" />
-      Không hoạt động
+      Inactive
     </Badge>
   );
 };
 
 export const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString("vi-VN");
+  return new Date(date).toLocaleDateString("en-US");
 };
 
 const CategoryRow = ({
@@ -159,7 +159,7 @@ const CategoryRow = ({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 p-0 rounded-none">
-                <span className="sr-only">Mở menu</span>
+                <span className="sr-only">Open menu</span>
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -167,14 +167,14 @@ const CategoryRow = ({
               align="end"
               className="rounded-none border-border"
             >
-              <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem onClick={() => onView(category)}>
                 <Eye className="mr-2 h-4 w-4" />
-                Xem chi tiết
+                View Details
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => onEdit(category)}>
                 <Edit className="mr-2 h-4 w-4" />
-                Chỉnh sửa
+                Edit
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -182,7 +182,7 @@ const CategoryRow = ({
                 className="text-destructive focus:text-destructive"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                Xóa danh mục
+                Delete Category
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -245,7 +245,7 @@ export function CategoriesTable({
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Tìm kiếm danh mục..."
+              placeholder="Search categories..."
               value={localSearch}
               onChange={handleSearch}
               className="pl-8 rounded-none border-border focus-visible:ring-0 focus-visible:border-primary"
@@ -269,7 +269,7 @@ export function CategoriesTable({
 
         <div className="flex items-center gap-2">
           <Label htmlFor="pageSize" className="text-muted-foreground">
-            Hiển thị:
+            Show:
           </Label>
           <select
             id="pageSize"
@@ -291,25 +291,25 @@ export function CategoriesTable({
           <TableHeader>
             <TableRow className="border-border hover:bg-muted/50 bg-muted/50">
               <TableHead className="text-foreground font-semibold">
-                Tên danh mục
+                Category Name
               </TableHead>
               <TableHead className="text-foreground font-semibold">
                 Slug
               </TableHead>
               <TableHead className="text-foreground font-semibold">
-                Danh mục cha
+                Parent Category
               </TableHead>
               <TableHead className="text-foreground font-semibold text-center">
-                Sản phẩm
+                Products
               </TableHead>
               <TableHead className="text-foreground font-semibold">
-                Trạng thái
+                Status
               </TableHead>
               <TableHead className="text-foreground font-semibold">
-                Ngày cập nhật
+                Updated At
               </TableHead>
               <TableHead className="text-foreground font-semibold text-right">
-                Thao tác
+                Actions
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -329,7 +329,7 @@ export function CategoriesTable({
                   <div className="flex flex-col items-center justify-center text-muted-foreground">
                     <Package className="h-12 w-12 mb-2 opacity-50" />
                     <div className="text-muted-foreground">
-                      Không có danh mục nào
+                      No categories found
                     </div>
                   </div>
                 </TableCell>

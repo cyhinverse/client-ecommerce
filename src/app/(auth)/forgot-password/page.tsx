@@ -22,7 +22,7 @@ import z from "zod";
 
 // Schema validation với Zod
 const forgotPasswordSchema = z.object({
-  email: z.string().email("Email không hợp lệ"),
+  email: z.string().email("Invalid email"),
 });
 
 type FormData = z.infer<typeof forgotPasswordSchema>;
@@ -44,10 +44,10 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
     try {
       await dispatch(forgotPassword(data.email)).unwrap();
-      toast.success("Liên kết đặt lại mật khẩu đã được gửi đến email của bạn");
+      toast.success("Password reset link sent to your email");
       router.push("/reset-password");
     } catch {
-      toast.error("Gửi liên kết đặt lại mật khẩu thất bại");
+      toast.error("Failed to send password reset link");
     } finally {
       setIsLoading(false);
     }
@@ -62,16 +62,16 @@ export default function ForgotPasswordPage() {
             className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4 transition-colors"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Quay lại đăng nhập
+            Back to login
           </Link>
 
           <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
             <Mail className="h-8 w-8 text-blue-600" />
           </div>
 
-          <CardTitle className="text-2xl font-bold">Quên mật khẩu</CardTitle>
+          <CardTitle className="text-2xl font-bold">Forgot Password</CardTitle>
           <CardDescription className="text-base">
-            Nhập email để nhận mã xác thực
+            Enter email to receive verification code
           </CardDescription>
         </CardHeader>
 
@@ -86,7 +86,7 @@ export default function ForgotPasswordPage() {
                   {...register("email")}
                   id="email"
                   type="email"
-                  placeholder="Nhập email của bạn"
+                  placeholder="Enter your email"
                   className="pl-10"
                   disabled={isLoading}
                 />
@@ -97,13 +97,13 @@ export default function ForgotPasswordPage() {
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Đang gửi..." : "Gửi mã xác thực"}
+              {isLoading ? "Sending..." : "Send Code"}
             </Button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              Chúng tôi sẽ gửi mã xác thực 6 số đến email của bạn
+              We will send a 6-digit code to your email
             </p>
           </div>
         </CardContent>

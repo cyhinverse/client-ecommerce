@@ -114,10 +114,10 @@ export default function OrdersAdminPage() {
   useEffect(() => {
     const fetchStatistics = async () => {
       try {
-        const result = await dispatch(getOrderStatistics()).unwrap();
+        const result = await dispatch(getOrderStatistics({})).unwrap();
         setStatistics(result);
       } catch {
-        toast.error("Không thể tải thống kê đơn hàng");
+        toast.error("Failed to load order statistics");
       }
     };
     fetchStatistics();
@@ -151,7 +151,7 @@ export default function OrdersAdminPage() {
       selectedOrder.status === "cancelled" &&
       orderData.status !== "cancelled"
     ) {
-      toast.error("Không thể thay đổi trạng thái đơn hàng đã hủy");
+      toast.error("Cannot change status of cancelled order");
       return;
     }
 
@@ -160,7 +160,7 @@ export default function OrdersAdminPage() {
       selectedOrder.status === "delivered" &&
       orderData.status === "cancelled"
     ) {
-      toast.error("Không thể hủy đơn hàng đã giao");
+      toast.error("Cannot cancel delivered order");
       return;
     }
 
@@ -182,9 +182,9 @@ export default function OrdersAdminPage() {
       // Refresh danh sách
       refreshData();
       handleCloseEditModal();
-      toast.success("Cập nhật trạng thái đơn hàng thành công");
+      toast.success("Order status updated successfully");
     } catch {
-      toast.error("Cập nhật trạng thái thất bại. Vui lòng thử lại.");
+      toast.error("Failed to update status. Please try again.");
     } finally {
       setIsUpdating(false);
     }
@@ -225,10 +225,10 @@ export default function OrdersAdminPage() {
   };
 
   const handleDeleteOrder = async (order: Order) => {
-    if (confirm(`Bạn có chắc muốn hủy đơn hàng ${order._id}?`)) {
+    if (confirm(`Are you sure you want to cancel order ${order._id}?`)) {
       try {
         await dispatch(cancelOrder(order._id)).unwrap();
-        toast.success("Hủy đơn hàng thành công");
+        toast.success("Order cancelled successfully");
         // Refresh danh sách
         dispatch(
           getAllOrders({
@@ -257,7 +257,7 @@ export default function OrdersAdminPage() {
           })
         );
       } catch {
-        toast.error("Hủy đơn hàng thất bại");
+        toast.error("Failed to cancel order");
       }
     }
   };
@@ -268,7 +268,7 @@ export default function OrdersAdminPage() {
       setSelectedOrder(result);
       setViewModalOpen(true);
     } catch {
-      toast.error("Không thể tải chi tiết đơn hàng");
+      toast.error("Failed to load order details");
     }
   };
 
@@ -299,11 +299,11 @@ export default function OrdersAdminPage() {
           <CardContent className="flex items-center justify-center h-64">
             <div className="text-red-500 text-center">
               <div className="text-lg font-semibold mb-2">
-                Lỗi khi tải đơn hàng
+                Error loading orders
               </div>
               <div>{orderState.error}</div>
               <Button onClick={() => window.location.reload()} className="mt-4">
-                Thử lại
+                Try Again
               </Button>
             </div>
           </CardContent>
@@ -320,9 +320,9 @@ export default function OrdersAdminPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Danh sách đơn hàng</CardTitle>
+          <CardTitle>Order List</CardTitle>
           <CardDescription>
-            Quản lý tất cả đơn hàng trong hệ thống
+            Manage all orders in the system
           </CardDescription>
         </CardHeader>
         <CardContent>

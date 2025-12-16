@@ -22,8 +22,8 @@ import { toast } from "sonner";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 
 const loginSchema = z.object({
-  email: z.string().email("Email không hợp lệ"),
-  password: z.string().min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
+  email: z.string().email("Invalid email"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 export default function LoginPage() {
@@ -56,16 +56,16 @@ export default function LoginPage() {
       const result = await dispatch(login(data));
 
       if (login.fulfilled.match(result)) {
-        toast.success("Đăng nhập thành công!");
+        toast.success("Login successful!");
         router.push("/");
       } else {
         const errorMessage =
           (result.payload as { message: string })?.message ||
-          "Đăng nhập thất bại!";
+          "Login failed!";
         toast.error(errorMessage);
       }
     } catch {
-      toast.error("Có lỗi xảy ra, vui lòng thử lại!");
+      toast.error("An error occurred, please try again!");
     }
   }
 
@@ -77,9 +77,9 @@ export default function LoginPage() {
             <Lock className="h-8 w-8 text-blue-600" />
           </div>
 
-          <CardTitle className="text-2xl font-bold">Đăng nhập</CardTitle>
+          <CardTitle className="text-2xl font-bold">Login</CardTitle>
           <CardDescription className="text-base">
-            Chào mừng bạn quay lại
+            Welcome back
           </CardDescription>
         </CardHeader>
 
@@ -94,7 +94,7 @@ export default function LoginPage() {
                 <Input
                   id="email"
                   {...form.register("email")}
-                  placeholder="Nhập email của bạn"
+                  placeholder="Enter your email"
                   className="pl-10"
                   autoComplete="username"
                 />
@@ -108,14 +108,14 @@ export default function LoginPage() {
 
             {/* Password Field */}
             <div className="space-y-2">
-              <Label htmlFor="password">Mật khẩu</Label>
+              <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   {...form.register("password")}
-                  placeholder="Nhập mật khẩu của bạn"
+                  placeholder="Enter your password"
                   className="pl-10 pr-10"
                   autoComplete="current-password"
                 />
@@ -149,7 +149,7 @@ export default function LoginPage() {
                   onCheckedChange={(checked) => setRememberMe(!!checked)}
                 />
                 <Label htmlFor="remember" className="text-sm">
-                  Ghi nhớ đăng nhập
+                  Remember me
                 </Label>
               </div>
 
@@ -159,7 +159,7 @@ export default function LoginPage() {
                 className="p-0 h-auto text-sm text-primary"
                 onClick={() => router.push("/forgot-password")}
               >
-                Quên mật khẩu?
+                Forgot password?
               </Button>
             </div>
 
@@ -169,7 +169,7 @@ export default function LoginPage() {
               className="w-full"
               disabled={loading}
             >
-              {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+              {loading ? "Logging in..." : "Login"}
             </Button>
           </form>
         </CardContent>
@@ -178,14 +178,14 @@ export default function LoginPage() {
           {/* Di chuyển phần đăng ký ra ngoài form */}
           <div className="text-center">
             <p className="text-sm text-gray-600">
-              Chưa có tài khoản?{" "}
+              Don&apos;t have an account?{" "}
               <Button
                 type="button" // Thêm type="button" để không submit form
                 variant="link"
                 className="p-0 h-auto font-normal text-primary"
                 onClick={() => router.push("/register")}
               >
-                Đăng ký ngay
+                Register now
               </Button>
             </p>
           </div>

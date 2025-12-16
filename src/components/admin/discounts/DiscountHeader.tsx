@@ -9,9 +9,9 @@ export function DiscountsHeader({ onOpenCreate }: DiscountsHeaderProps) {
   return (
     <div className="flex items-center justify-between border-b border-border pb-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground uppercase">Mã giảm giá</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground uppercase">Discounts</h1>
         <p className="text-muted-foreground mt-1">
-          Quản lý và tạo mã giảm giá cho cửa hàng
+          Manage and create discount codes for the store
         </p>
       </div>
       <Button 
@@ -19,7 +19,7 @@ export function DiscountsHeader({ onOpenCreate }: DiscountsHeaderProps) {
         className="flex items-center gap-2 rounded-none bg-primary text-primary-foreground hover:bg-primary/90"
       >
         <Plus className="h-4 w-4" />
-        Tạo mã giảm giá
+        Create Discount
       </Button>
     </div>
   );

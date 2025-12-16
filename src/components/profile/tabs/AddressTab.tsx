@@ -48,12 +48,12 @@ export default function AddressTab({ user }: AddressTabProps) {
       await dispatch(getProfile()).unwrap();
     } catch (error) {
       console.error("Error refreshing profile:", error);
-      toast.error("Không thể cập nhật dữ liệu");
+      toast.error("Unable to update data");
     }
   };
 
   const handleDeleteAddress = async (addressId: string) => {
-    if (!confirm("Bạn có chắc muốn xóa địa chỉ này?")) {
+    if (!confirm("Are you sure you want to delete this address?")) {
       return;
     }
 
@@ -62,13 +62,13 @@ export default function AddressTab({ user }: AddressTabProps) {
     try {
       await dispatch(deleteAddress(addressId)).unwrap();
       await dispatch(getProfile()).unwrap();
-      toast.success("Đã xóa địa chỉ thành công");
+      toast.success("Address deleted successfully");
     } catch (error) {
       console.error("Error deleting address:", error);
       const err = error as { response?: { data?: { message?: string } } };
       const errorMessage =
         err.response?.data?.message ||
-        "Không thể xóa địa chỉ. Vui lòng thử lại.";
+        "Unable to delete address. Please try again.";
       toast.error(errorMessage);
     } finally {
       setIsDeleting(null);
@@ -79,17 +79,17 @@ export default function AddressTab({ user }: AddressTabProps) {
     <div className="text-center py-8 border-2 border-dashed border-border rounded-xl">
       <MapPin className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
       <h3 className="text-base font-semibold text-foreground mb-1">
-        Chưa có địa chỉ
+        No addresses yet
       </h3>
       <p className="text-sm text-muted-foreground mb-4 max-w-sm mx-auto">
-        Thêm địa chỉ giao hàng đầu tiên của bạn
+        Add your first delivery address
       </p>
       <Button
         onClick={openAddDialog}
         className="bg-primary hover:bg-primary/90 text-primary-foreground"
       >
         <Plus className="h-4 w-4 mr-1" />
-        Thêm địa chỉ mới
+        Add New Address
       </Button>
     </div>
   );
@@ -113,7 +113,7 @@ export default function AddressTab({ user }: AddressTabProps) {
               {address.isDefault && (
                 <Badge className="bg-primary text-primary-foreground border-primary hover:bg-primary/90 text-xs">
                   <Star className="h-2.5 w-2.5 mr-1 fill-primary-foreground" />
-                  Mặc định
+                  Default
                 </Badge>
               )}
             </div>
@@ -139,7 +139,7 @@ export default function AddressTab({ user }: AddressTabProps) {
               className="border-primary text-primary hover:bg-primary hover:text-primary-foreground text-xs h-8 px-2"
             >
               <Edit className="h-3 w-3 mr-1" />
-              Sửa
+              Edit
             </Button>
 
             {!address.isDefault && (
@@ -151,7 +151,7 @@ export default function AddressTab({ user }: AddressTabProps) {
                 className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground text-xs h-8 px-2"
               >
                 <Trash2 className="h-3 w-3 mr-1" />
-                {isDeleting === address._id ? "Đang xóa..." : "Xóa"}
+                {isDeleting === address._id ? "Deleting..." : "Delete"}
               </Button>
             )}
           </div>
@@ -171,9 +171,9 @@ export default function AddressTab({ user }: AddressTabProps) {
                 <MapPin className="h-5 w-5 text-foreground" />
               </div>
             </div>
-            <h1 className="text-xl font-bold text-foreground">Sổ địa chỉ</h1>
+            <h1 className="text-xl font-bold text-foreground">Address Book</h1>
             <p className="text-sm text-muted-foreground">
-              Quản lý địa chỉ giao hàng của bạn
+              Manage your delivery addresses
             </p>
           </div>
         )}
@@ -185,10 +185,10 @@ export default function AddressTab({ user }: AddressTabProps) {
             <div className="flex justify-between items-center mb-3">
               <div>
                 <h2 className="text-base font-semibold text-foreground">
-                  Địa chỉ của bạn ({addresses.length})
+                  Your Addresses ({addresses.length})
                 </h2>
                 <p className="text-xs text-muted-foreground">
-                  Quản lý và chỉnh sửa địa chỉ giao hàng
+                  Manage and edit delivery addresses
                 </p>
               </div>
               <Button
@@ -196,7 +196,7 @@ export default function AddressTab({ user }: AddressTabProps) {
                 className="bg-primary hover:bg-primary/90 text-primary-foreground text-sm"
               >
                 <Plus className="h-3 w-3 mr-1" />
-                Thêm địa chỉ
+                Add Address
               </Button>
             </div>
 

@@ -23,15 +23,15 @@ import Link from "next/link";
 
 const registerSchema = z
   .object({
-    username: z.string().min(3, "Tên đăng nhập phải có ít nhất 3 ký tự"),
-    email: z.string().email("Email không hợp lệ"),
-    password: z.string().min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
+    username: z.string().min(3, "Username must be at least 3 characters"),
+    email: z.string().email("Invalid email"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z
       .string()
-      .min(6, "Mật khẩu xác nhận phải có ít nhất 6 ký tự"),
+      .min(6, "Password confirmation must be at least 6 characters"),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Mật khẩu xác nhận không khớp",
+    message: "Passwords do not match",
     path: ["confirmPassword"],
   });
 
@@ -56,16 +56,16 @@ export default function RegisterPage() {
     try {
       const result = await dispatch(register(data));
       if (register.fulfilled.match(result)) {
-        toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
+        toast.success("Registration successful! Please login.");
         router.push("/send-code");
       } else {
         const errorMessage =
           (result.payload as { message: string })?.message ||
-          "Đăng ký thất bại, vui lòng thử lại!";
+          "Registration failed, please try again!";
         toast.error(errorMessage);
       }
     } catch {
-      toast.error("Có lỗi xảy ra, vui lòng thử lại!");
+      toast.error("An error occurred, please try again!");
     }
   }
 
@@ -78,7 +78,7 @@ export default function RegisterPage() {
             className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4 transition-colors"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Quay lại đăng nhập
+            Back to login
           </Link>
 
           <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
@@ -86,10 +86,10 @@ export default function RegisterPage() {
           </div>
 
           <CardTitle className="text-2xl font-bold">
-            Đăng ký tài khoản
+            Create an account
           </CardTitle>
           <CardDescription className="text-base">
-            Tạo tài khoản mới để bắt đầu mua sắm
+            Create a new account to start shopping
           </CardDescription>
         </CardHeader>
 
@@ -97,13 +97,13 @@ export default function RegisterPage() {
           <form className="space-y-4">
             {/* Username Field */}
             <div className="space-y-2">
-              <Label htmlFor="username">Tên đăng nhập</Label>
+              <Label htmlFor="username">Username</Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
                 <Input
                   id="username"
                   {...form.register("username")}
-                  placeholder="Nhập tên đăng nhập"
+                  placeholder="Enter username"
                   className="pl-10"
                   autoComplete="username"
                 />
@@ -123,7 +123,7 @@ export default function RegisterPage() {
                 <Input
                   id="email"
                   {...form.register("email")}
-                  placeholder="Nhập email của bạn"
+                  placeholder="Enter your email"
                   className="pl-10"
                   autoComplete="email"
                 />
@@ -137,14 +137,14 @@ export default function RegisterPage() {
 
             {/* Password Field */}
             <div className="space-y-2">
-              <Label htmlFor="password">Mật khẩu</Label>
+              <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   {...form.register("password")}
-                  placeholder="Nhập mật khẩu"
+                  placeholder="Enter password"
                   className="pl-10 pr-10"
                   autoComplete="new-password"
                 />
@@ -171,14 +171,14 @@ export default function RegisterPage() {
 
             {/* Confirm Password Field */}
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Xác nhận mật khẩu</Label>
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
                 <Input
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   {...form.register("confirmPassword")}
-                  placeholder="Nhập lại mật khẩu"
+                  placeholder="Re-enter password"
                   className="pl-10 pr-10"
                   autoComplete="new-password"
                 />
@@ -212,18 +212,18 @@ export default function RegisterPage() {
             onClick={form.handleSubmit(onSubmit)}
             disabled={loading}
           >
-            {loading ? "Đang đăng ký..." : "Đăng ký"}
+            {loading ? "Registering..." : "Register"}
           </Button>
 
           <div className="text-center">
             <p className="text-sm text-gray-600">
-              Đã có tài khoản?{" "}
+              Already have an account?{" "}
               <Button
                 variant="link"
                 className="p-0 h-auto font-normal text-primary"
                 onClick={() => router.push("/login")}
               >
-                Đăng nhập ngay
+                Login now
               </Button>
             </p>
           </div>

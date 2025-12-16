@@ -121,10 +121,10 @@ export function CreateModelProduct({
       <DialogContent className="bg-background border-border text-foreground max-w-4xl max-h-[90vh] overflow-y-auto rounded-none p-0 gap-0 no-scrollbar">
         <DialogHeader className="p-6 border-b border-border">
           <DialogTitle className="text-xl font-bold uppercase tracking-tight">
-            Tạo sản phẩm mới
+            Create New Product
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            Thêm sản phẩm mới vào cửa hàng của bạn
+            Add a new product to your store
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="p-6 space-y-8">
@@ -132,7 +132,7 @@ export function CreateModelProduct({
             {/* Thông tin cơ bản */}
             <div className="space-y-6">
               <h3 className="text-sm font-bold uppercase tracking-wider text-foreground border-b border-border pb-2">
-                Thông tin cơ bản
+                Basic Info
               </h3>
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -140,7 +140,7 @@ export function CreateModelProduct({
                     htmlFor="name"
                     className="text-xs font-bold uppercase text-muted-foreground"
                   >
-                    Tên sản phẩm *
+                    Product Name *
                   </Label>
                   <Input
                     id="name"
@@ -178,7 +178,7 @@ export function CreateModelProduct({
                     htmlFor="category"
                     className="text-xs font-bold uppercase text-muted-foreground"
                   >
-                    Danh mục *
+                    Category *
                   </Label>
                   <Input
                     id="category"
@@ -197,7 +197,7 @@ export function CreateModelProduct({
                     htmlFor="brand"
                     className="text-xs font-bold uppercase text-muted-foreground"
                   >
-                    Thương hiệu *
+                    Brand *
                   </Label>
                   <Input
                     id="brand"
@@ -216,7 +216,7 @@ export function CreateModelProduct({
             {/* Giá và trạng thái */}
             <div className="space-y-6">
               <h3 className="text-sm font-bold uppercase tracking-wider text-foreground border-b border-border pb-2">
-                Giá & Trạng thái
+                Price & Status
               </h3>
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -224,7 +224,7 @@ export function CreateModelProduct({
                     htmlFor="currentPrice"
                     className="text-xs font-bold uppercase text-muted-foreground"
                   >
-                    Giá hiện tại *
+                    Current Price *
                   </Label>
                   <Input
                     id="currentPrice"
@@ -250,7 +250,7 @@ export function CreateModelProduct({
                     htmlFor="discountPrice"
                     className="text-xs font-bold uppercase text-muted-foreground"
                   >
-                    Giá khuyến mãi
+                    Discount Price
                   </Label>
                   <Input
                     id="discountPrice"
@@ -273,7 +273,7 @@ export function CreateModelProduct({
                 <div className="space-y-3 pt-2">
                   <div className="flex items-center justify-between border p-3 border-border">
                     <Label htmlFor="isActive" className="text-sm font-medium">
-                      Đang hoạt động
+                      Active
                     </Label>
                     <Switch
                       checked={formData.isActive}
@@ -289,7 +289,7 @@ export function CreateModelProduct({
                       htmlFor="isNewArrival"
                       className="text-sm font-medium"
                     >
-                      Sản phẩm mới
+                      New Arrival
                     </Label>
                     <Switch
                       checked={formData.isNewArrival}
@@ -302,7 +302,7 @@ export function CreateModelProduct({
 
                   <div className="flex items-center justify-between border p-3 border-border">
                     <Label htmlFor="isFeatured" className="text-sm font-medium">
-                      Nổi bật
+                      Featured
                     </Label>
                     <Switch
                       checked={formData.isFeatured}
@@ -315,7 +315,7 @@ export function CreateModelProduct({
 
                   <div className="flex items-center justify-between border p-3 border-border">
                     <Label htmlFor="onSale" className="text-sm font-medium">
-                      Đang giảm giá
+                      On Sale
                     </Label>
                     <Switch
                       checked={formData.onSale}
@@ -336,7 +336,7 @@ export function CreateModelProduct({
               htmlFor="description"
               className="text-xs font-bold uppercase text-muted-foreground"
             >
-              Mô tả sản phẩm
+              Product Description
             </Label>
             <Textarea
               id="description"
@@ -362,7 +362,7 @@ export function CreateModelProduct({
               <Input
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
-                placeholder="Thêm tag..."
+                placeholder="Add tag..."
                 disabled={isLoading}
                 onKeyPress={(e) => {
                   if (e.key === "Enter") {
@@ -378,7 +378,7 @@ export function CreateModelProduct({
                 disabled={isLoading}
                 className="rounded-none bg-primary text-primary-foreground hover:bg-primary/90"
               >
-                Thêm
+                Add
               </Button>
             </div>
             <div className="flex flex-wrap gap-2 mt-2">
@@ -403,7 +403,7 @@ export function CreateModelProduct({
           {/* Hình ảnh */}
           <div className="space-y-2">
             <Label className="text-xs font-bold uppercase text-muted-foreground">
-              Hình ảnh sản phẩm
+              Product Images
             </Label>
             <input
               type="file"
@@ -421,7 +421,7 @@ export function CreateModelProduct({
               className="flex items-center gap-2 rounded-none border-border hover:bg-muted w-full h-24 border-dashed"
             >
               <Upload className="h-4 w-4" />
-              Chọn hình ảnh
+              Choose Images
             </Button>
             <div className="grid grid-cols-4 gap-4 mt-4">
               {images.map((file, index) => (
@@ -453,14 +453,14 @@ export function CreateModelProduct({
               disabled={isLoading}
               className="rounded-none border-border hover:bg-muted"
             >
-              Hủy
+              Cancel
             </Button>
             <Button
               type="submit"
               className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-none min-w-[120px]"
               disabled={isLoading}
             >
-              {isLoading ? "Đang tạo..." : "Tạo sản phẩm"}
+              {isLoading ? "Creating..." : "Create Product"}
             </Button>
           </div>
         </form>

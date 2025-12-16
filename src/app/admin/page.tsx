@@ -15,7 +15,7 @@ export default function AdminPage() {
     <div className="flex items-center justify-center h-screen">
       <div className="text-center">
         <SpinnerLoading />
-        <p className="text-muted-foreground mt-4">Đang chuyển hướng...</p>
+        <p className="text-muted-foreground mt-4">Redirecting...</p>
       </div>
     </div>
   );

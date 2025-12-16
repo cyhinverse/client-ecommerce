@@ -28,12 +28,12 @@ export default function VerifyEmailPage() {
     try {
       const result = await dispatch(sendCode({ email })).unwrap();
       if (result) {
-        toast.success("Mã xác thực đã được gửi đến email của bạn");
+        toast.success("Verification code sent to your email");
         router.push("/verify-code");
       }
     } catch (error) {
       toast.error(
-        (error as { message?: string })?.message || "Gửi mã xác thực thất bại"
+        (error as { message?: string })?.message || "Failed to send verification code"
       );
     } finally {
       setIsLoading(false);
@@ -45,9 +45,9 @@ export default function VerifyEmailPage() {
       <Card className="w-full max-w-md gap-1">
         <CardHeader className="text-center space-y-2">
           <CardTitle className="text-xl font-semibold">
-            Xác thực email
+            Verify Email
           </CardTitle>
-          <CardDescription>Nhập email để nhận mã xác thực</CardDescription>
+          <CardDescription>Enter email to receive verification code</CardDescription>
         </CardHeader>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -58,7 +58,7 @@ export default function VerifyEmailPage() {
                 id="email"
                 name="email"
                 type="email"
-                placeholder="Nhập email của bạn"
+                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -74,7 +74,7 @@ export default function VerifyEmailPage() {
               className="w-full"
               disabled={isLoading || !email}
             >
-              {isLoading ? "Đang gửi mã..." : "Gửi mã xác thực"}
+              {isLoading ? "Sending code..." : "Send Verification Code"}
             </Button>
           </CardFooter>
         </form>

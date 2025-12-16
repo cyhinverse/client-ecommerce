@@ -127,9 +127,9 @@ export function CreateModelDiscount({
     <Dialog open={open} onOpenChange={handleOpenChangeWrapper}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Tạo mã giảm giá mới</DialogTitle>
+          <DialogTitle>Create New Discount</DialogTitle>
           <DialogDescription>
-            Điền thông tin để tạo mã giảm giá mới cho cửa hàng.
+            Enter information to create a new discount for the store.
           </DialogDescription>
         </DialogHeader>
 
@@ -137,18 +137,18 @@ export function CreateModelDiscount({
           <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto px-2">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="code">Mã giảm giá *</Label>
+                <Label htmlFor="code">Discount Code *</Label>
                 <Input
                   id="code"
                   value={formData.code}
                   onChange={(e) => handleChange("code", e.target.value)}
-                  placeholder="VD: SALE2024"
+                  placeholder="Ex: SALE2024"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="discountType">Loại giảm giá *</Label>
+                <Label htmlFor="discountType">Discount Type *</Label>
                 <Select
                   value={formData.discountType}
                   onValueChange={(value) => handleChange("discountType", value)}
@@ -157,28 +157,28 @@ export function CreateModelDiscount({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="percent">Phần trăm (%)</SelectItem>
-                    <SelectItem value="fixed">Số tiền cố định</SelectItem>
+                    <SelectItem value="percent">Percentage (%)</SelectItem>
+                    <SelectItem value="fixed">Fixed Amount</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Mô tả</Label>
+              <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => handleChange("description", e.target.value)}
-                placeholder="Mô tả về mã giảm giá..."
+                placeholder="Discount description..."
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="discountValue">
-                  Giá trị giảm *{" "}
-                  {formData.discountType === "percent" ? "(%)" : "(VNĐ)"}
+                  Discount Value *{" "}
+                  {formData.discountType === "percent" ? "(%)" : "(VND)"}
                 </Label>
                 <Input
                   id="discountValue"
@@ -197,7 +197,7 @@ export function CreateModelDiscount({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="usageLimit">Giới hạn lượt dùng *</Label>
+                <Label htmlFor="usageLimit">Usage Limit *</Label>
                 <Input
                   id="usageLimit"
                   type="number"
@@ -212,7 +212,7 @@ export function CreateModelDiscount({
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="startDate">Ngày bắt đầu *</Label>
+                <Label htmlFor="startDate">Start Date *</Label>
                 <Input
                   id="startDate"
                   type="datetime-local"
@@ -223,7 +223,7 @@ export function CreateModelDiscount({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="endDate">Ngày kết thúc *</Label>
+                <Label htmlFor="endDate">End Date *</Label>
                 <Input
                   id="endDate"
                   type="datetime-local"
@@ -236,7 +236,7 @@ export function CreateModelDiscount({
 
             <div className="space-y-2">
               <Label htmlFor="minOrderValue">
-                Giá trị đơn hàng tối thiểu (VNĐ)
+                Minimum Order Value (VND)
               </Label>
               <Input
                 id="minOrderValue"
@@ -249,12 +249,12 @@ export function CreateModelDiscount({
             </div>
 
             <div className="space-y-2">
-              <Label>Sản phẩm áp dụng (Để trống = Áp dụng tất cả)</Label>
+              <Label>Applicable Products (Empty = Apply to All)</Label>
               <div className="border rounded-md p-4 space-y-4">
                 <div className="relative">
                      <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                      <Input 
-                        placeholder="Tìm kiếm sản phẩm..." 
+                        placeholder="Search products..." 
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-8"
@@ -265,7 +265,7 @@ export function CreateModelDiscount({
                      <div className="space-y-2">
                         {filteredProducts.length === 0 ? (
                            <div className="text-center text-sm text-muted-foreground py-4">
-                              Không tìm thấy sản phẩm
+                              No products found
                            </div>
                         ) : (
                            filteredProducts.map((product) => (
@@ -281,7 +281,7 @@ export function CreateModelDiscount({
                                  >
                                     <span>{product.name}</span>
                                     <span className="text-muted-foreground font-normal">
-                                       {new Intl.NumberFormat("vi-VN", {
+                                       {new Intl.NumberFormat("en-US", {
                                           style: "currency",
                                           currency: "VND",
                                        }).format(product.price?.discountPrice || product.price?.currentPrice || 0)}
@@ -295,7 +295,7 @@ export function CreateModelDiscount({
                   
                   {selectedProducts.length > 0 && (
                      <div className="flex flex-wrap gap-2 pt-2 border-t">
-                        <span className="text-xs text-muted-foreground w-full">Đã chọn {selectedProducts.length} sản phẩm:</span>
+                        <span className="text-xs text-muted-foreground w-full">Selected {selectedProducts.length} products:</span>
                         {selectedProducts.map(id => {
                            const product = products.find(p => p._id === id);
                            return product ? (
@@ -324,7 +324,7 @@ export function CreateModelDiscount({
                 checked={formData.isActive}
                 onCheckedChange={(checked) => handleChange("isActive", checked)}
               />
-              <Label htmlFor="isActive">Kích hoạt mã giảm giá</Label>
+              <Label htmlFor="isActive">Activate discount code</Label>
             </div>
           </div>
 
@@ -335,11 +335,11 @@ export function CreateModelDiscount({
               onClick={() => handleOpenChangeWrapper(false)}
               disabled={isLoading}
             >
-              Hủy
+              Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Tạo mã giảm giá
+              Create Discount
             </Button>
           </DialogFooter>
         </form>

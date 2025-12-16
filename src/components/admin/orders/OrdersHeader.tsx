@@ -3,10 +3,10 @@ export function OrdersHeader() {
     <div className="flex items-center justify-between border-b border-border pb-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground uppercase">
-          Quản lý Đơn hàng
+          Order Management
         </h1>
         <p className="text-muted-foreground mt-1">
-          Quản lý và theo dõi tất cả đơn hàng trong hệ thống
+          Manage and track all orders in the system
         </p>
       </div>
       {/* Có thể thêm nút tạo đơn hàng mới nếu cần */}

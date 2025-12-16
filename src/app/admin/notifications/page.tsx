@@ -73,35 +73,35 @@ const getTypeBadge = (type: string) => {
       return (
         <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
           <Bell className="h-3 w-3 mr-1" />
-          Đơn hàng
+          Orders
         </Badge>
       );
     case "promotion":
       return (
         <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
           <Send className="h-3 w-3 mr-1" />
-          Khuyến mãi
+          Promotions
         </Badge>
       );
     case "system":
       return (
         <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">
           <AlertTriangle className="h-3 w-3 mr-1" />
-          Hệ thống
+          System
         </Badge>
       );
     case "welcome":
       return (
         <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100">
           <Users className="h-3 w-3 mr-1" />
-          Chào mừng
+          Welcome
         </Badge>
       );
     case "announcement":
       return (
         <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">
           <MessageSquare className="h-3 w-3 mr-1" />
-          Thông báo
+          Announcements
         </Badge>
       );
     default:
@@ -111,7 +111,7 @@ const getTypeBadge = (type: string) => {
 
 const formatDateTime = (dateTime: string) => {
   if (!dateTime) return "-";
-  return new Date(dateTime).toLocaleString("vi-VN");
+  return new Date(dateTime).toLocaleString("en-US");
 };
 
 export default function NotificationAdminPage() {
@@ -161,7 +161,7 @@ export default function NotificationAdminPage() {
       if (formData.orderId) payload.orderId = formData.orderId;
 
       await dispatch(createNotification(payload)).unwrap();
-      toast.success("Thông báo đã được tạo");
+      toast.success("Notification created successfully");
       // dispatch(getListNotification({ page: 1, limit: 10 })); // Socket handles update
       setFormData({
         title: "",
@@ -171,7 +171,7 @@ export default function NotificationAdminPage() {
         orderId: "",
       });
     } catch {
-      toast.error("Tạo thông báo thất bại");
+      toast.error("Failed to create notification");
     }
   };
 
@@ -189,7 +189,7 @@ export default function NotificationAdminPage() {
       });
       setIsEditDialogOpen(true);
     } catch {
-      toast.error("Không thể lấy chi tiết thông báo");
+      toast.error("Failed to fetch notification details");
     }
   };
 
@@ -199,7 +199,7 @@ export default function NotificationAdminPage() {
       setViewData(res.data);
       setIsViewDialogOpen(true);
     } catch {
-      toast.error("Không thể xem chi tiết");
+      toast.error("Failed to view details");
     }
   };
 
@@ -217,14 +217,14 @@ export default function NotificationAdminPage() {
           },
         })
       ).unwrap();
-      toast.success("Cập nhật thành công");
+      toast.success("Update successful");
       setIsEditDialogOpen(false);
       // Refresh list to show updated data
       dispatch(
         getListNotification({ page: pagination?.currentPage || 1, limit: 10 })
       );
     } catch {
-      toast.error("Cập nhật thất bại");
+      toast.error("Update failed");
     }
   };
 
@@ -240,10 +240,10 @@ export default function NotificationAdminPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            Quản lý thông báo
+            Notification Management
           </h1>
           <p className="text-gray-600 mt-2">
-            Gửi và quản lý thông báo đến người dùng
+            Send and manage user notifications
           </p>
         </div>
       </div>
@@ -252,17 +252,17 @@ export default function NotificationAdminPage() {
         {/* Create Notification Form */}
         <Card className="lg:col-span-1 h-fit sticky top-20">
           <CardHeader>
-            <CardTitle>Tạo thông báo mới</CardTitle>
+            <CardTitle>Create New Notification</CardTitle>
             <CardDescription>
-              Gửi thông báo (Hiện tại: Gửi cho chính mình để test)
+              Send notification (Currently: Send to self for testing)
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="title">Tiêu đề</Label>
+              <Label htmlFor="title">Title</Label>
               <Input
                 id="title"
-                placeholder="Nhập tiêu đề thông báo"
+                placeholder="Enter notification title"
                 value={formData.title}
                 onChange={(e) =>
                   setFormData({ ...formData, title: e.target.value })
@@ -271,10 +271,10 @@ export default function NotificationAdminPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="message">Nội dung</Label>
+              <Label htmlFor="message">Content</Label>
               <Textarea
                 id="message"
-                placeholder="Nhập nội dung thông báo"
+                placeholder="Enter notification content"
                 rows={4}
                 value={formData.message}
                 onChange={(e) =>
@@ -284,26 +284,26 @@ export default function NotificationAdminPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="type">Loại thông báo</Label>
+              <Label htmlFor="type">Notification Type</Label>
               <Select
                 value={formData.type}
                 onValueChange={(val) => setFormData({ ...formData, type: val })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Chọn loại thông báo" />
+                  <SelectValue placeholder="Select notification type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="system">Hệ thống</SelectItem>
+                  <SelectItem value="system">System</SelectItem>
                   <SelectItem value="order_status">
-                    Trạng thái đơn hàng
+                    Order Status
                   </SelectItem>
-                  <SelectItem value="promotion">Khuyến mãi</SelectItem>
+                  <SelectItem value="promotion">Promotion</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="link">Link (Tuỳ chọn)</Label>
+              <Label htmlFor="link">Link (Optional)</Label>
               <Input
                 id="link"
                 placeholder="https://..."
@@ -316,10 +316,10 @@ export default function NotificationAdminPage() {
 
             {formData.type === "order_status" && (
               <div className="space-y-2">
-                <Label htmlFor="orderId">Mã đơn hàng (Order ID)</Label>
+                <Label htmlFor="orderId">Order ID</Label>
                 <Input
                   id="orderId"
-                  placeholder="24 ký tự hex..."
+                  placeholder="24 hex characters..."
                   value={formData.orderId}
                   onChange={(e) =>
                     setFormData({ ...formData, orderId: e.target.value })
@@ -334,7 +334,7 @@ export default function NotificationAdminPage() {
               disabled={loading}
             >
               <Send className="h-4 w-4 mr-2" />
-              {loading ? "Đang gửi..." : "Gửi thông báo"}
+              {loading ? "Sending..." : "Send Notification"}
             </Button>
           </CardContent>
         </Card>
@@ -344,8 +344,8 @@ export default function NotificationAdminPage() {
           <CardHeader>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <CardTitle>Lịch sử thông báo (Inbox của Admin)</CardTitle>
-                <CardDescription>Danh sách thông báo nhận được</CardDescription>
+                <CardTitle>Notification History (Admin Inbox)</CardTitle>
+                <CardDescription>List of received notifications</CardDescription>
               </div>
               <div className="flex items-center gap-2">
                 <Button
@@ -364,10 +364,10 @@ export default function NotificationAdminPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Thông báo</TableHead>
-                  <TableHead>Loại</TableHead>
-                  <TableHead>Thời gian</TableHead>
-                  <TableHead className="text-right">Thao tác</TableHead>
+                  <TableHead>Notification</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Time</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -412,7 +412,7 @@ export default function NotificationAdminPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 onClick={() =>
@@ -420,7 +420,7 @@ export default function NotificationAdminPage() {
                                 }
                               >
                                 <Eye className="h-4 w-4 mr-2" />
-                                Xem chi tiết
+                                View Details
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() =>
@@ -428,7 +428,7 @@ export default function NotificationAdminPage() {
                                 }
                               >
                                 <Edit className="h-4 w-4 mr-2" />
-                                Chỉnh sửa
+                                Edit
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -438,7 +438,7 @@ export default function NotificationAdminPage() {
                   ) : (
                     <TableRow>
                       <TableCell colSpan={4} className="text-center py-4">
-                        Chưa có thông báo nào
+                        No notifications found
                       </TableCell>
                     </TableRow>
                   )}
@@ -449,13 +449,13 @@ export default function NotificationAdminPage() {
             {pagination && (
               <div className="flex items-center justify-between mt-6">
                 <div className="text-sm text-gray-600">
-                  Hiển thị{" "}
-                  {(pagination.currentPage - 1) * pagination.pageSize + 1} đến{" "}
+                  Showing{" "}
+                  {(pagination.currentPage - 1) * pagination.pageSize + 1} to{" "}
                   {Math.min(
                     pagination.currentPage * pagination.pageSize,
                     pagination.totalItems
                   )}{" "}
-                  của {pagination.totalItems} thông báo
+                  of {pagination.totalItems} notifications
                 </div>
                 <div className="flex items-center space-x-2">
                   <Button
@@ -464,10 +464,10 @@ export default function NotificationAdminPage() {
                     disabled={pagination.currentPage === 1}
                     onClick={() => handlePageChange(pagination.currentPage - 1)}
                   >
-                    Trước
+                    Prev
                   </Button>
                   <span className="text-sm font-medium mx-2">
-                    Trang {pagination.currentPage} / {pagination.totalPages}
+                    Page {pagination.currentPage} / {pagination.totalPages}
                   </span>
                   <Button
                     variant="outline"
@@ -475,7 +475,7 @@ export default function NotificationAdminPage() {
                     disabled={pagination.currentPage >= pagination.totalPages}
                     onClick={() => handlePageChange(pagination.currentPage + 1)}
                   >
-                    Sau
+                    Next
                   </Button>
                 </div>
               </div>
@@ -488,11 +488,11 @@ export default function NotificationAdminPage() {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Chỉnh sửa thông báo</DialogTitle>
+            <DialogTitle>Edit Notification</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-title">Tiêu đề</Label>
+              <Label htmlFor="edit-title">Title</Label>
               <Input
                 id="edit-title"
                 value={editFormData.title}
@@ -502,7 +502,7 @@ export default function NotificationAdminPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-message">Nội dung</Label>
+              <Label htmlFor="edit-message">Content</Label>
               <Textarea
                 id="edit-message"
                 rows={4}
@@ -513,7 +513,7 @@ export default function NotificationAdminPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-type">Loại thông báo</Label>
+              <Label htmlFor="edit-type">Notification Type</Label>
               <Select
                 value={editFormData.type}
                 onValueChange={(val) =>
@@ -521,14 +521,14 @@ export default function NotificationAdminPage() {
                 }
               >
                 <SelectTrigger id="edit-type">
-                  <SelectValue placeholder="Chọn loại thông báo" />
+                  <SelectValue placeholder="Select notification type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="system">Hệ thống</SelectItem>
+                  <SelectItem value="system">System</SelectItem>
                   <SelectItem value="order_status">
-                    Trạng thái đơn hàng
+                    Order Status
                   </SelectItem>
-                  <SelectItem value="promotion">Khuyến mãi</SelectItem>
+                  <SelectItem value="promotion">Promotion</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -544,7 +544,7 @@ export default function NotificationAdminPage() {
             </div>
             {editFormData.type === "order_status" && (
               <div className="space-y-2">
-                <Label htmlFor="edit-orderId">Mã đơn hàng</Label>
+                <Label htmlFor="edit-orderId">Order ID</Label>
                 <Input
                   id="edit-orderId"
                   value={editFormData.orderId}
@@ -563,9 +563,9 @@ export default function NotificationAdminPage() {
               variant="outline"
               onClick={() => setIsEditDialogOpen(false)}
             >
-              Hủy
+              Cancel
             </Button>
-            <Button onClick={handleUpdate}>Cập nhật</Button>
+            <Button onClick={handleUpdate}>Update</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -574,20 +574,20 @@ export default function NotificationAdminPage() {
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Chi tiết thông báo</DialogTitle>
+            <DialogTitle>Notification Details</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             {viewData && (
               <>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label className="text-right font-medium text-gray-500">
-                    Tiêu đề
+                    Title
                   </Label>
                   <div className="col-span-3 font-medium">{viewData.title}</div>
                 </div>
                 <div className="grid grid-cols-4 items-start gap-4">
                   <Label className="text-right font-medium text-gray-500 mt-1">
-                    Nội dung
+                    Content
                   </Label>
                   <div className="col-span-3 text-sm text-gray-700 bg-gray-50 p-3 rounded-md">
                     {viewData.message}
@@ -595,7 +595,7 @@ export default function NotificationAdminPage() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label className="text-right font-medium text-gray-500">
-                    Loại
+                    Type
                   </Label>
                   <div className="col-span-3">
                     {getTypeBadge(viewData.type)}
@@ -603,7 +603,7 @@ export default function NotificationAdminPage() {
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label className="text-right font-medium text-gray-500">
-                    Thời gian
+                    Time
                   </Label>
                   <div className="col-span-3 text-sm text-gray-600">
                     {formatDateTime(viewData.createdAt)}
@@ -623,7 +623,7 @@ export default function NotificationAdminPage() {
             )}
           </div>
           <DialogFooter>
-            <Button onClick={() => setIsViewDialogOpen(false)}>Đóng</Button>
+            <Button onClick={() => setIsViewDialogOpen(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

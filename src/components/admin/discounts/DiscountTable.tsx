@@ -76,7 +76,7 @@ export function DiscountsTable({
   }, [debouncedSearch]);
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("vi-VN");
+    return new Date(dateString).toLocaleDateString("en-US");
   };
 
   const isExpired = (endDate: string) => {
@@ -85,19 +85,19 @@ export function DiscountsTable({
 
   const getStatusBadge = (discount: Discount) => {
     if (!discount.isActive) {
-      return <Badge variant="secondary">Đã tắt</Badge>;
+      return <Badge variant="secondary">Inactive</Badge>;
     }
     if (isExpired(discount.endDate)) {
-      return <Badge variant="destructive">Hết hạn</Badge>;
+      return <Badge variant="destructive">Expired</Badge>;
     }
     if (discount.usedCount >= discount.usageLimit) {
-      return <Badge variant="destructive">Hết lượt</Badge>;
+      return <Badge variant="destructive">Limit Reached</Badge>;
     }
-    return <Badge variant="default">Đang hoạt động</Badge>;
+    return <Badge variant="default">Active</Badge>;
   };
 
   const getDiscountTypeText = (type: string) => {
-    return type === "percent" ? "Phần trăm" : "Số tiền";
+    return type === "percent" ? "Percentage" : "Fixed Amount";
   };
 
   const getDiscountValueText = (discount: Discount) => {
@@ -114,7 +114,7 @@ export function DiscountsTable({
           <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Tìm kiếm theo mã..."
+                placeholder="Search by code..."
                 value={localSearch}
                 onChange={(e) => setLocalSearch(e.target.value)}
                 className="pl-8 rounded-none border-border focus-visible:ring-0 focus-visible:border-primary"
@@ -126,13 +126,13 @@ export function DiscountsTable({
             onValueChange={onDiscountTypeFilterChange}
           >
             <SelectTrigger className="w-[180px] rounded-none border-border focus:ring-0 focus:border-primary">
-              <SelectValue placeholder="Loại giảm giá" />
+              <SelectValue placeholder="Discount Type" />
             </SelectTrigger>
             <SelectContent className="rounded-none border-border">
-              {/* Sử dụng "all" thay vì chuỗi rỗng */}
-              <SelectItem value="all">Tất cả loại</SelectItem>
-              <SelectItem value="percent">Phần trăm</SelectItem>
-              <SelectItem value="fixed">Số tiền</SelectItem>
+              {/* Using "all" instead of empty string */}
+              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="percent">Percentage</SelectItem>
+              <SelectItem value="fixed">Fixed Amount</SelectItem>
             </SelectContent>
           </Select>
 
@@ -145,13 +145,13 @@ export function DiscountsTable({
             }
           >
             <SelectTrigger className="w-[180px] rounded-none border-border focus:ring-0 focus:border-primary">
-              <SelectValue placeholder="Trạng thái" />
+              <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent className="rounded-none border-border">
-              {/* Sử dụng "all" thay vì chuỗi rỗng */}
-              <SelectItem value="all">Tất cả trạng thái</SelectItem>
-              <SelectItem value="true">Đang hoạt động</SelectItem>
-              <SelectItem value="false">Đã tắt</SelectItem>
+              {/* Using "all" instead of empty string */}
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="true">Active</SelectItem>
+              <SelectItem value="false">Inactive</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -161,12 +161,12 @@ export function DiscountsTable({
           onValueChange={(value) => onPageSizeChange(Number(value))}
         >
           <SelectTrigger className="w-[130px] rounded-none border-border focus:ring-0 focus:border-primary">
-            <SelectValue placeholder="Hiển thị" />
+            <SelectValue placeholder="Show" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="10">10 / trang</SelectItem>
-            <SelectItem value="20">20 / trang</SelectItem>
-            <SelectItem value="50">50 / trang</SelectItem>
+            <SelectItem value="10">10 / page</SelectItem>
+            <SelectItem value="20">20 / page</SelectItem>
+            <SelectItem value="50">50 / page</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -176,14 +176,14 @@ export function DiscountsTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Mã</TableHead>
-              <TableHead>Loại</TableHead>
-              <TableHead>Giá trị</TableHead>
-              <TableHead>Ngày bắt đầu</TableHead>
-              <TableHead>Ngày kết thúc</TableHead>
-              <TableHead>Đã sử dụng</TableHead>
-              <TableHead>Trạng thái</TableHead>
-              <TableHead className="w-[80px]">Thao tác</TableHead>
+              <TableHead>Code</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Value</TableHead>
+              <TableHead>Start Date</TableHead>
+              <TableHead>End Date</TableHead>
+              <TableHead>Used</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="w-[80px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -199,7 +199,7 @@ export function DiscountsTable({
             {!isLoading && discounts.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} className="text-center h-24">
-                  Không tìm thấy mã giảm giá nào.
+                  No discount codes found.
                 </TableCell>
               </TableRow>
             ) : (
@@ -237,14 +237,14 @@ export function DiscountsTable({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem onClick={() => onView(discount)}>
                           <Eye className="h-4 w-4 mr-2" />
-                          Xem chi tiết
+                          View Details
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => onEdit(discount)}>
                           <Edit className="h-4 w-4 mr-2" />
-                          Chỉnh sửa
+                          Edit
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
@@ -252,7 +252,7 @@ export function DiscountsTable({
                           className="text-destructive focus:text-destructive focus:bg-destructive/10"
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
-                          Xóa
+                          Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

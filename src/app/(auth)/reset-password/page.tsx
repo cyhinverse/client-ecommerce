@@ -22,21 +22,21 @@ import { toast } from "sonner";
 // Schema validation với Zod
 const resetPasswordSchema = z
   .object({
-    email: z.string().email("Email không hợp lệ"),
-    code: z.string().length(6, "Mã xác thực phải có 6 ký tự"),
+    email: z.string().email("Invalid email"),
+    code: z.string().length(6, "Verification code must be 6 characters"),
     newPassword: z
       .string()
-      .min(8, "Mật khẩu phải có ít nhất 8 ký tự")
+      .min(8, "Password must be at least 8 characters")
       .regex(
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-        "Mật khẩu phải bao gồm chữ hoa, chữ thường và số"
+        "Password must contain uppercase, lowercase letters and numbers"
       ),
     confirmPassword: z
       .string()
-      .min(8, "Mật khẩu xác nhận phải có ít nhất 8 ký tự"),
+      .min(8, "Confirm password must be at least 8 characters"),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Mật khẩu xác nhận không khớp",
+    message: "Passwords do not match",
     path: ["confirmPassword"],
   });
 
@@ -78,16 +78,16 @@ export default function ResetPasswordPage() {
       );
 
       if (resetPassword.fulfilled.match(result)) {
-        toast.success("Đặt lại mật khẩu thành công!");
+        toast.success("Password reset successfully!");
         router.push("/login");
       } else {
-        const errorMessage = "Đặt lại mật khẩu thất bại";
+        const errorMessage = "Failed to reset password";
         toast.error(errorMessage);
       }
     } catch (error) {
       console.error("Reset password error:", error);
       const errorMessage =
-        (error as Error)?.message || "Đặt lại mật khẩu thất bại";
+        (error as Error)?.message || "Failed to reset password";
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -104,9 +104,9 @@ export default function ResetPasswordPage() {
             <Lock className="h-8 w-8 text-success" />
           </div>
 
-          <CardTitle className="text-2xl font-bold">Đặt lại mật khẩu</CardTitle>
+          <CardTitle className="text-2xl font-bold">Reset Password</CardTitle>
           <CardDescription className="text-base">
-            Nhập mã xác thực và mật khẩu mới
+            Enter verification code and new password
           </CardDescription>
         </CardHeader>
 
@@ -121,7 +121,7 @@ export default function ResetPasswordPage() {
                   {...register("email")}
                   id="email"
                   type="email"
-                  placeholder="Nhập email của bạn"
+                  placeholder="Enter your email"
                   className="w-full pl-10"
                   disabled={isLoading}
                 />
@@ -135,14 +135,14 @@ export default function ResetPasswordPage() {
 
             {/* Code Field */}
             <div className="space-y-2">
-              <Label htmlFor="code">Mã xác thực</Label>
+              <Label htmlFor="code">Verification Code</Label>
               <div className="relative">
                 <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   {...register("code")}
                   id="code"
                   type="text"
-                  placeholder="Nhập mã xác thực 6 số"
+                  placeholder="Enter 6-digit code"
                   className="w-full pl-10"
                   maxLength={6}
                   disabled={isLoading}
@@ -157,14 +157,14 @@ export default function ResetPasswordPage() {
 
             {/* New Password Field */}
             <div className="space-y-2">
-              <Label htmlFor="newPassword">Mật khẩu mới</Label>
+              <Label htmlFor="newPassword">New Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   {...register("newPassword")}
                   id="newPassword"
                   type={showNewPassword ? "text" : "password"}
-                  placeholder="Nhập mật khẩu mới"
+                  placeholder="Enter new password"
                   className="w-full pl-10 pr-10"
                   disabled={isLoading}
                 />
@@ -192,14 +192,14 @@ export default function ResetPasswordPage() {
 
             {/* Confirm Password Field */}
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Xác nhận mật khẩu</Label>
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
                 <Input
                   {...register("confirmPassword")}
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Nhập lại mật khẩu mới"
+                  placeholder="Confirm new password"
                   className="w-full pl-10 pr-10"
                   disabled={isLoading}
                 />
@@ -226,14 +226,13 @@ export default function ResetPasswordPage() {
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Đang xử lý..." : "Đặt lại mật khẩu"}
+              {isLoading ? "Processing..." : "Reset Password"}
             </Button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và
-              số
+              Password must be at least 8 characters, including uppercase, lowercase letters and numbers
             </p>
             {newPassword && (
               <div className="mt-2 space-y-1">
@@ -242,7 +241,7 @@ export default function ResetPasswordPage() {
                     newPassword.length >= 8 ? "text-green-600" : "text-red-600"
                   }`}
                 >
-                  ✓ Ít nhất 8 ký tự: {newPassword.length}/8
+                  ✓ At least 8 chars: {newPassword.length}/8
                 </p>
                 <p
                   className={`text-xs ${
@@ -251,7 +250,7 @@ export default function ResetPasswordPage() {
                       : "text-red-600"
                   }`}
                 >
-                  ✓ Chữ thường
+                  ✓ Lowercase
                 </p>
                 <p
                   className={`text-xs ${
@@ -260,14 +259,14 @@ export default function ResetPasswordPage() {
                       : "text-red-600"
                   }`}
                 >
-                  ✓ Chữ hoa
+                  ✓ Uppercase
                 </p>
                 <p
                   className={`text-xs ${
                     /\d/.test(newPassword) ? "text-green-600" : "text-red-600"
                   }`}
                 >
-                  ✓ Số
+                  ✓ Number
                 </p>
               </div>
             )}

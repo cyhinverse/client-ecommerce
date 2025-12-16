@@ -145,11 +145,11 @@ export default function CheckoutPage() {
             }
           } catch (paymentError) {
             console.error("Payment error:", paymentError);
-            toast.error("Không thể tạo thanh toán VNPay. Vui lòng thanh toán lại trong lịch sử đơn hàng.");
+            toast.error("Could not create VNPay payment. Please pay again in order history.");
             router.push("/");
           }
         } else {
-          toast.success("Đặt hàng thành công!");
+          toast.success("Order placed successfully!");
           router.push(`/`);
         }
       }
@@ -188,7 +188,7 @@ export default function CheckoutPage() {
   const handleRemoveDiscount = () => {
     dispatch(clearAppliedDiscount());
     setPromoCode("");
-    toast.success("Đã gỡ bỏ mã giảm giá");
+    toast.success("Discount code removed");
   };
 
   const formatPrice = (price: number) => {
@@ -203,7 +203,7 @@ export default function CheckoutPage() {
       <div className="w-full min-h-screen bg-muted/30 py-8">
         <div className="container max-w-6xl mx-auto px-4">
           <div className="text-center py-16">
-            <p className="text-lg text-muted-foreground">Đang tải thông tin đơn hàng...</p>
+            <p className="text-lg text-muted-foreground">Loading order information...</p>
           </div>
         </div>
       </div>
@@ -213,21 +213,21 @@ export default function CheckoutPage() {
   return (
     <div className="w-full min-h-screen bg-muted/30 py-8">
       <div className="container max-w-6xl mx-auto px-4">
-        <h1 className="text-2xl font-bold mb-8">Thanh toán</h1>
+        <h1 className="text-2xl font-bold mb-8">Checkout</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Thông tin thanh toán */}
           <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Thông tin giao hàng</CardTitle>
+                <CardTitle className="text-lg">Shipping Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="fullName">Họ và tên *</Label>
+                  <Label htmlFor="fullName">Full Name *</Label>
                   <Input
                     id="fullName"
-                    placeholder="Nhập họ và tên"
+                    placeholder="Enter full name"
                     value={formData.fullName}
                     onChange={handleInputChange}
                     required
@@ -247,7 +247,7 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Số điện thoại *</Label>
+                  <Label htmlFor="phone">Phone Number *</Label>
                   <Input
                     id="phone"
                     placeholder="0123 456 789"
@@ -258,10 +258,10 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="address">Địa chỉ *</Label>
+                  <Label htmlFor="address">Address *</Label>
                   <Input
                     id="address"
-                    placeholder="Nhập địa chỉ giao hàng"
+                    placeholder="Enter shipping address"
                     value={formData.address}
                     onChange={handleInputChange}
                     required
@@ -270,13 +270,13 @@ export default function CheckoutPage() {
 
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="city">Thành phố *</Label>
+                    <Label htmlFor="city">City *</Label>
                     <Select
                       value={formData.city}
                       onValueChange={(value) => handleSelectChange(value, "city")}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Chọn thành phố" />
+                        <SelectValue placeholder="Select City" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="hanoi">Hà Nội</SelectItem>
@@ -286,32 +286,31 @@ export default function CheckoutPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="district">Quận/Huyện *</Label>
+                    <Label htmlFor="district">District *</Label>
                     <Input
                       id="district"
-                      placeholder="Nhập quận/huyện"
+                      placeholder="Enter district"
                       value={formData.district}
                       onChange={handleInputChange}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="ward">Phường/Xã *</Label>
+                    <Label htmlFor="ward">Ward *</Label>
                     <Input
                       id="ward"
-                      placeholder="Nhập phường/xã"
+                      placeholder="Enter ward"
                       value={formData.ward}
                       onChange={handleInputChange}
                       required
                     />
                   </div>
                 </div>
-
                 <div className="space-y-2">
-                  <Label htmlFor="note">Ghi chú (tuỳ chọn)</Label>
+                  <Label htmlFor="note">Note (optional)</Label>
                   <Input
                     id="note"
-                    placeholder="Ghi chú về đơn hàng..."
+                    placeholder="Order notes..."
                     value={formData.note}
                     onChange={handleInputChange}
                   />
@@ -321,7 +320,7 @@ export default function CheckoutPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Phương thức thanh toán</CardTitle>
+                <CardTitle className="text-lg">Payment Method</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -332,7 +331,7 @@ export default function CheckoutPage() {
                       onCheckedChange={() => handlePaymentMethodChange("cod")}
                     />
                     <Label htmlFor="cod" className="cursor-pointer">
-                      Thanh toán khi nhận hàng (COD)
+                      Cash on Delivery (COD)
                     </Label>
                   </div>
                 </div>
@@ -345,7 +344,7 @@ export default function CheckoutPage() {
                       onCheckedChange={() => handlePaymentMethodChange("vnpay")}
                     />
                     <Label htmlFor="vnpay" className="cursor-pointer">
-                      Thanh toán qua VNPay
+                      Pay via VNPay
                     </Label>
                   </div>
                 </div>
@@ -357,7 +356,7 @@ export default function CheckoutPage() {
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Đơn hàng của bạn</CardTitle>
+                <CardTitle className="text-lg">Your Order</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3 max-h-96 overflow-y-auto">
@@ -404,7 +403,7 @@ export default function CheckoutPage() {
                         )}
                         <div className="flex justify-between items-center mt-1">
                           <span className="text-xs text-muted-foreground">
-                            Số lượng: {item.quantity}
+                            Quantity: {item.quantity}
                           </span>
                           <span className="font-medium text-sm">
                             {formatPrice(item.price.discountPrice * item.quantity)}
@@ -418,7 +417,7 @@ export default function CheckoutPage() {
                 <div className="space-y-2 pt-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">
-                      Tạm tính ({cartItems.length} sản phẩm)
+                      Subtotal ({cartItems.length} items)
                     </span>
                     <span className="font-medium text-foreground">
                       {formatPrice(checkoutTotal || 0)}
@@ -427,7 +426,7 @@ export default function CheckoutPage() {
 
                   {discount > 0 && (
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Giảm giá</span>
+                      <span className="text-muted-foreground">Discount</span>
                       <span className="text-success font-medium">
                         -{formatPrice(discount)}
                       </span>
@@ -436,7 +435,7 @@ export default function CheckoutPage() {
 
                   <hr />
                   <div className="flex justify-between text-lg font-bold">
-                    <span>Tổng cộng</span>
+                    <span>Total</span>
                     <span>{formatPrice(finalTotal)}</span>
                   </div>
                 </div>
@@ -448,11 +447,11 @@ export default function CheckoutPage() {
                 <form onSubmit={handleSubmit}>
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="promoCode">Mã giảm giá</Label>
+                      <Label htmlFor="promoCode">Discount Code</Label>
                       {appliedDiscount && (
                         <div className="text-sm text-green-600 mb-2 flex justify-between items-center">
                           <span>
-                            Đang dùng: <strong>{appliedDiscount.code}</strong> (-
+                            Applied: <strong>{appliedDiscount.code}</strong> (-
                             {formatPrice(appliedDiscount.discountAmount)})
                           </span>
                           <button
@@ -460,14 +459,14 @@ export default function CheckoutPage() {
                             onClick={handleRemoveDiscount}
                             className="text-red-500 hover:underline"
                           >
-                            Gỡ bỏ
+                            Remove
                           </button>
                         </div>
                       )}
                       <div className="flex gap-2">
                         <Input
                           id="promoCode"
-                          placeholder="Nhập mã giảm giá"
+                          placeholder="Enter discount code"
                           value={promoCode}
                           onChange={(e) => setPromoCode(e.target.value)}
                           disabled={!!appliedDiscount}
@@ -478,16 +477,16 @@ export default function CheckoutPage() {
                           onClick={handleApplyDiscount}
                           disabled={!!appliedDiscount || discountLoading}
                         >
-                          {discountLoading ? "..." : "Áp dụng"}
+                          {discountLoading ? "..." : "Apply"}
                         </Button>
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="orderNote">Ghi chú đơn hàng</Label>
+                      <Label htmlFor="orderNote">Order Note</Label>
                       <Input
                         id="orderNote"
-                        placeholder="Ghi chú thêm cho đơn hàng..."
+                        placeholder="Additional notes..."
                         value={note}
                         onChange={(e) => setNote(e.target.value)}
                       />
@@ -499,7 +498,7 @@ export default function CheckoutPage() {
                       disabled={isLoading}
                       size="lg"
                     >
-                      {isLoading ? "Đang xử lý..." : `Đặt hàng - ${formatPrice(finalTotal)}`}
+                      {isLoading ? "Processing..." : `Place Order - ${formatPrice(finalTotal)}`}
                     </Button>
                   </div>
                 </form>

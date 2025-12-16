@@ -66,7 +66,7 @@ export default function UpdateUserProfile({
                 <FormItem>
                   <FormLabel>Username</FormLabel>
                   <FormControl>
-                    <Input placeholder="shadcn" {...field} />
+                    <Input placeholder="username" {...field} />
                   </FormControl>
                   <FormDescription>
                     This is your public display name.

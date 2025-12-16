@@ -26,19 +26,19 @@ interface SearchModalProps {
 }
 
 const POPULAR_SEARCHES = [
-  "Áo thun",
-  "Quần jeans",
-  "Váy đầm",
-  "Giày sneaker",
-  "Túi xách",
-  "Đồng hồ",
+  "T-shirt",
+  "Jeans",
+  "Dress",
+  "Sneakers",
+  "Handbag",
+  "Watch",
 ];
 
 const TRENDING_CATEGORIES = [
-  { name: "Thời trang nam", href: "/categories/thoi-trang-nam" },
-  { name: "Thời trang nữ", href: "/categories/thoi-trang-nu" },
-  { name: "Phụ kiện", href: "/categories/phu-kien" },
-  { name: "Giày dép", href: "/categories/giay-dep" },
+  { name: "Men's Fashion", href: "/categories/thoi-trang-nam" },
+  { name: "Women's Fashion", href: "/categories/thoi-trang-nu" },
+  { name: "Accessories", href: "/categories/phu-kien" },
+  { name: "Footwear", href: "/categories/giay-dep" },
 ];
 
 export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
@@ -147,7 +147,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   // Format price in VND
   const formatPrice = (price: price | null) => {
     const actualPrice = price?.discountPrice || price?.currentPrice || 0;
-    return new Intl.NumberFormat("vi-VN", {
+    return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "VND",
     }).format(actualPrice);
@@ -170,7 +170,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
           <form onSubmit={(e) => handleSearchSubmit(e)} className="flex-1">
             <Input
               ref={inputRef}
-              placeholder="Tìm kiếm sản phẩm, thương hiệu..."
+              placeholder="Search products, brands..."
               value={searchQuery}
               onChange={(e) => handleInputChange(e.target.value)}
               className="border-0 focus-visible:ring-0 text-lg px-0 shadow-none h-11"
@@ -201,7 +201,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                     <div className="flex items-center justify-between text-sm text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4" />
-                        <span className="font-medium">Tìm kiếm gần đây</span>
+                        <span className="font-medium">Recent Searches</span>
                       </div>
                       <Button
                         variant="ghost"
@@ -212,7 +212,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                           localStorage.removeItem("recentSearches");
                         }}
                       >
-                        Xóa lịch sử
+                        Clear History
                       </Button>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -237,7 +237,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <TrendingUp className="h-4 w-4" />
-                    <span className="font-medium">Tìm kiếm phổ biến</span>
+                    <span className="font-medium">Popular Searches</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {POPULAR_SEARCHES.map((term) => (
@@ -256,7 +256,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 {/* Trending Categories */}
                 <div className="space-y-3">
                   <span className="text-sm font-medium text-muted-foreground">
-                    Danh mục nổi bật
+                    Trending Categories
                   </span>
                   <div className="grid grid-cols-2 gap-2">
                     {TRENDING_CATEGORIES.map((category) => (
@@ -285,12 +285,12 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 {isSearching ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
-                    Đang tìm kiếm...
+                    Searching...
                   </div>
                 ) : searchResults.length > 0 ? (
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground mb-3">
-                      Kết quả cho &quot;
+                      Results for &quot;
                       <span className="font-medium text-foreground">
                         {searchQuery}
                       </span>
@@ -338,7 +338,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                       className="w-full mt-4 text-primary hover:text-primary hover:bg-primary/5"
                       onClick={(e) => handleSearchSubmit(e)}
                     >
-                      Xem tất cả kết quả
+                      View all results
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </div>
@@ -348,7 +348,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                       <Search className="h-6 w-6 text-muted-foreground" />
                     </div>
                     <p className="text-muted-foreground">
-                      Không tìm thấy sản phẩm nào cho &quot;{searchQuery}&quot;
+                      No products found for &quot;{searchQuery}&quot;
                     </p>
                   </div>
                 )}

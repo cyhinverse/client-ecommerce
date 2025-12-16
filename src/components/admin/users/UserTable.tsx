@@ -60,7 +60,7 @@ export const getVerifiedBadge = (isVerified: boolean) => {
   return isVerified ? (
     <Badge className="bg-primary text-primary-foreground border-primary">
       <CheckCircle className="h-3 w-3 mr-1" />
-      Đã xác thực
+      Verified
     </Badge>
   ) : (
     <Badge
@@ -68,7 +68,7 @@ export const getVerifiedBadge = (isVerified: boolean) => {
       className="border-muted-foreground text-muted-foreground"
     >
       <XCircle className="h-3 w-3 mr-1" />
-      Chưa xác thực
+      Unverified
     </Badge>
   );
 };
@@ -80,8 +80,8 @@ export const getRoleBadge = (roles: string) => {
   };
 
   const roleNames: { [key: string]: string } = {
-    admin: "Quản trị viên",
-    user: "Người dùng",
+    admin: "Admin",
+    user: "User",
   };
 
   return (
@@ -95,7 +95,7 @@ export const getRoleBadge = (roles: string) => {
 };
 
 export const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString("vi-VN");
+  return new Date(date).toLocaleDateString("en-US");
 };
 
 export function UsersTable({
@@ -140,7 +140,7 @@ export function UsersTable({
   };
 
   const getPrimaryAddress = (addresses: Address[]) => {
-    if (!addresses || addresses.length === 0) return "Chưa có địa chỉ";
+    if (!addresses || addresses.length === 0) return "No address";
     return addresses[0].address;
   };
 
@@ -152,7 +152,7 @@ export function UsersTable({
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Tìm kiếm người dùng..."
+              placeholder="Search users..."
               value={localSearch}
               onChange={handleSearch}
               className="pl-8 rounded-none border-border focus-visible:ring-0 focus-visible:border-primary"
@@ -168,24 +168,24 @@ export function UsersTable({
               >
                 <Shield className="h-4 w-4 mr-2 text-muted-foreground" />
                 {selectedRole === "admin"
-                  ? "Quản trị viên"
+                  ? "Admin"
                   : selectedRole === "user"
-                  ? "Người dùng"
-                  : "Tất cả vai trò"}
+                  ? "User"
+                  : "All Roles"}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="rounded-none border-border bg-background text-foreground shadow-lg">
               <DropdownMenuLabel className="text-foreground font-semibold uppercase text-xs tracking-wider">
-                Lọc theo vai trò
+                Filter by Role
               </DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-border" />
               <DropdownMenuItem
-                onClick={() => handleRoleFilter("")}
+                action={handleRoleFilter}
                 className={`text-muted-foreground hover:bg-muted ${
                   !selectedRole ? "bg-muted font-medium" : ""
                 }`}
               >
-                Tất cả vai trò
+                All Roles
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleRoleFilter("admin")}
@@ -193,7 +193,7 @@ export function UsersTable({
                   selectedRole === "admin" ? "bg-muted font-medium" : ""
                 }`}
               >
-                Quản trị viên
+                Admin
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleRoleFilter("user")}
@@ -201,7 +201,7 @@ export function UsersTable({
                   selectedRole === "user" ? "bg-muted font-medium" : ""
                 }`}
               >
-                Người dùng
+                User
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -215,15 +215,15 @@ export function UsersTable({
               >
                 <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
                 {selectedVerified === true
-                  ? "Đã xác thực"
+                  ? "Verified"
                   : selectedVerified === false
-                  ? "Chưa xác thực"
-                  : "Trạng thái email"}
+                  ? "Unverified"
+                  : "Email Status"}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="rounded-none border-border bg-background text-foreground shadow-lg">
               <DropdownMenuLabel className="text-foreground font-semibold uppercase text-xs tracking-wider">
-                Lọc theo xác thực email
+                Filter by Email Verification
               </DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-border" />
               <DropdownMenuItem
@@ -232,7 +232,7 @@ export function UsersTable({
                   selectedVerified === null ? "bg-muted font-medium" : ""
                 }`}
               >
-                Tất cả trạng thái
+                All Status
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleVerifiedFilter(true)}
@@ -240,7 +240,7 @@ export function UsersTable({
                   selectedVerified === true ? "bg-muted font-medium" : ""
                 }`}
               >
-                Đã xác thực
+                Verified
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleVerifiedFilter(false)}
@@ -248,7 +248,7 @@ export function UsersTable({
                   selectedVerified === false ? "bg-muted font-medium" : ""
                 }`}
               >
-                Chưa xác thực
+                Unverified
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -266,7 +266,7 @@ export function UsersTable({
 
         <div className="flex items-center gap-2">
           <Label htmlFor="pageSize" className="text-muted-foreground">
-            Hiển thị:
+            Show:
           </Label>
           <select
             id="pageSize"
@@ -288,22 +288,22 @@ export function UsersTable({
           <TableHeader>
             <TableRow className="border-border hover:bg-muted/50 bg-muted/50">
               <TableHead className="text-foreground font-semibold">
-                Người dùng
+                User
               </TableHead>
               <TableHead className="text-foreground font-semibold">
-                Vai trò
+                Role
               </TableHead>
               <TableHead className="text-foreground font-semibold">
-                Địa chỉ
+                Address
               </TableHead>
               <TableHead className="text-foreground font-semibold">
-                Xác thực Email
+                Email Verified
               </TableHead>
               <TableHead className="text-foreground font-semibold">
-                Ngày tạo
+                Created At
               </TableHead>
               <TableHead className="text-foreground font-semibold text-right">
-                Thao tác
+                Actions
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -323,7 +323,7 @@ export function UsersTable({
                   <div className="flex flex-col items-center justify-center text-muted-foreground">
                     <UserIcon className="h-12 w-12 mb-2 opacity-50" />
                     <div className="text-muted-foreground">
-                      Không có người dùng nào
+                      No users found
                     </div>
                   </div>
                 </TableCell>
@@ -399,7 +399,7 @@ export function UsersTable({
                         className="bg-background border-border text-foreground shadow-lg"
                       >
                         <DropdownMenuLabel className="text-foreground font-semibold">
-                          Thao tác
+                          Actions
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator className="bg-border" />
                         <DropdownMenuItem
@@ -407,14 +407,14 @@ export function UsersTable({
                           className="text-muted-foreground hover:bg-muted hover:text-foreground"
                         >
                           <Eye className="h-4 w-4 mr-2 text-muted-foreground" />
-                          Xem chi tiết
+                          View Details
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => onEdit(user)}
                           className="text-muted-foreground hover:bg-muted hover:text-foreground"
                         >
                           <Edit className="h-4 w-4 mr-2 text-muted-foreground" />
-                          Chỉnh sửa
+                          Edit
                         </DropdownMenuItem>
                         <DropdownMenuSeparator className="bg-border" />
                         <DropdownMenuItem
@@ -422,7 +422,7 @@ export function UsersTable({
                           onClick={() => onDelete(user)}
                         >
                           <Trash2 className="h-4 w-4 mr-2 text-muted-foreground" />
-                          Xóa người dùng
+                          Delete User
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

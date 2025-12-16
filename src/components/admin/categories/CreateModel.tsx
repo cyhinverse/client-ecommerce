@@ -33,7 +33,6 @@ import {
   Folder,
   ChevronDown,
   Upload,
-  Image as ImageIcon,
   Trash2,
 } from "lucide-react";
 import { Category } from "@/types/category";
@@ -41,12 +40,12 @@ import Image from "next/image";
 
 // Zod validation schema
 const createFormSchema = z.object({
-  name: z.string().min(1, { message: "Tên danh mục là bắt buộc" }),
+  name: z.string().min(1, { message: "Category name is required" }),
   slug: z
     .string()
-    .min(1, { message: "Slug là bắt buộc" })
+    .min(1, { message: "Slug is required" })
     .regex(/^[a-z0-9-]+$/, {
-      message: "Slug chỉ được chứa chữ thường, số và dấu gạch ngang",
+      message: "Slug must contain only lowercase letters, numbers, and hyphens",
     }),
   description: z.string().default(""),
   isActive: z.boolean().default(true),
@@ -220,10 +219,10 @@ export function CreateCategoryModal({
         <DialogHeader className="shrink-0 pb-4">
           <DialogTitle className="flex items-center gap-2">
             <Plus className="h-5 w-5 text-black-600" />
-            Tạo danh mục mới
+            Create New Category
           </DialogTitle>
           <DialogDescription>
-            Thêm danh mục sản phẩm mới vào hệ thống
+            Add new product category to the system
           </DialogDescription>
         </DialogHeader>
 
@@ -241,11 +240,11 @@ export function CreateCategoryModal({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium">
-                      Tên danh mục <span className="text-destructive">*</span>
+                      Category Name <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Nhập tên danh mục"
+                        placeholder="Enter category name"
                         {...field}
                         onChange={(e) => {
                           field.onChange(e);
@@ -279,10 +278,10 @@ export function CreateCategoryModal({
                       />
                     </FormControl>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>Đường dẫn SEO: /danh-muc/{field.value}</span>
+                      <span>SEO URL: /categories/{field.value}</span>
                       {!isSlugManuallyEdited && (
                         <Badge variant="outline" className="text-xs">
-                          Tự động
+                          Auto
                         </Badge>
                       )}
                     </div>
@@ -298,7 +297,7 @@ export function CreateCategoryModal({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium">
-                      Danh mục cha
+                      Parent Category
                     </FormLabel>
                     <FormControl>
                       <div className="relative" ref={dropdownRef}>
@@ -316,7 +315,7 @@ export function CreateCategoryModal({
                           >
                             {selectedCategory
                               ? selectedCategory.name
-                              : "Không có danh mục cha"}
+                              : "No parent category"}
                           </span>
                           <ChevronDown
                             className={`h-4 w-4 opacity-50 transition-transform ${
@@ -336,7 +335,7 @@ export function CreateCategoryModal({
                             >
                               <div className="flex items-center gap-2 text-sm">
                                 <Folder className="h-4 w-4" />
-                                <span>Không có danh mục cha</span>
+                                <span>No parent category</span>
                               </div>
                             </div>
 
@@ -359,7 +358,7 @@ export function CreateCategoryModal({
                                       variant="outline"
                                       className="text-xs"
                                     >
-                                      Con
+                                      Child
                                     </Badge>
                                   )}
                                 </div>
@@ -380,10 +379,10 @@ export function CreateCategoryModal({
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium">Mô tả</FormLabel>
+                    <FormLabel className="text-sm font-medium">Description</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Nhập mô tả cho danh mục"
+                        placeholder="Enter category description"
                         rows={3}
                         {...field}
                         value={field.value || ""}
@@ -401,7 +400,7 @@ export function CreateCategoryModal({
                 render={({}) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium">
-                      Hình ảnh
+                      Images
                     </FormLabel>
                     <FormControl>
                       <div className="space-y-3">
@@ -421,8 +420,8 @@ export function CreateCategoryModal({
                           <Upload className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
                           <p className="text-sm text-muted-foreground">
                             {isUploading
-                              ? "Đang tải lên..."
-                              : "Nhấn để tải ảnh lên"}
+                              ? "Uploading..."
+                              : "Click to upload image"}
                           </p>
                           <p className="text-xs text-muted-foreground mt-1">
                             PNG, JPG, JPEG
@@ -456,8 +455,8 @@ export function CreateCategoryModal({
                     </FormControl>
                     <div className="text-sm text-muted-foreground">
                       {currentImages.length > 0
-                        ? `${currentImages.length} ảnh đã tải lên`
-                        : "Tải lên hình ảnh cho danh mục"}
+                        ? `${currentImages.length} images uploaded`
+                        : "Upload images for category"}
                     </div>
                     <FormMessage />
                   </FormItem>
@@ -471,10 +470,10 @@ export function CreateCategoryModal({
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
                     <div className="space-y-0.5">
-                      <FormLabel className="text-base">Trạng thái</FormLabel>
+                      <FormLabel className="text-base">Status</FormLabel>
                       <div className="flex items-center gap-2">
                         <Badge variant={field.value ? "default" : "secondary"}>
-                          {field.value ? "Đang hoạt động" : "Không hoạt động"}
+                          {field.value ? "Active" : "Inactive"}
                         </Badge>
                       </div>
                     </div>
@@ -499,7 +498,7 @@ export function CreateCategoryModal({
                 className="flex-1 sm:flex-none"
               >
                 <X className="h-4 w-4 mr-2" />
-                Hủy
+                Cancel
               </Button>
               <Button
                 type="submit"
@@ -511,7 +510,7 @@ export function CreateCategoryModal({
                 ) : (
                   <Save className="h-4 w-4 mr-2" />
                 )}
-                {isLoading ? "Đang tạo..." : "Tạo danh mục"}
+                {isLoading ? "Creating..." : "Create Category"}
               </Button>
             </DialogFooter>
           </form>

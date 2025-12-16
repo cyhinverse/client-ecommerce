@@ -19,19 +19,19 @@ export default function PaymentResultPage() {
                 return (
                     <div className="flex flex-col items-center text-center space-y-4">
                         <CheckCircle className="w-16 h-16 text-success" />
-                        <h2 className="text-2xl font-bold text-success">Thanh toán thành công!</h2>
+                        <h2 className="text-2xl font-bold text-success">Payment Successful!</h2>
                         <p className="text-muted-foreground">
-                            Cảm ơn bạn đã mua hàng. Đơn hàng của bạn đã được thanh toán thành công.
+                            Thank you for your purchase. Your order has been paid successfully.
                         </p>
                         {orderId && (
-                            <p className="text-sm text-muted-foreground">Mã đơn hàng: {orderId}</p>
+                            <p className="text-sm text-muted-foreground">Order ID: {orderId}</p>
                         )}
                         <div className="flex gap-4 mt-6">
                             <Button onClick={() => router.push("/")} variant="outline">
-                                Về trang chủ
+                                Back to Home
                             </Button>
                             <Button onClick={() => router.push("/profile")}>
-                                Xem đơn hàng
+                                View Order
                             </Button>
                         </div>
                     </div>
@@ -41,16 +41,16 @@ export default function PaymentResultPage() {
                 return (
                     <div className="flex flex-col items-center text-center space-y-4">
                         <XCircle className="w-16 h-16 text-destructive" />
-                        <h2 className="text-2xl font-bold text-destructive">Thanh toán thất bại</h2>
+                        <h2 className="text-2xl font-bold text-destructive">Payment Failed</h2>
                         <p className="text-muted-foreground">
-                            Giao dịch thanh toán của bạn không thành công hoặc đã bị hủy.
+                            Your payment transaction was unsuccessful or cancelled.
                         </p>
                         <div className="flex gap-4 mt-6">
                             <Button onClick={() => router.push("/")} variant="outline">
-                                Về trang chủ
+                                Back to Home
                             </Button>
                             <Button onClick={() => router.push("/cart")}>
-                                Về giỏ hàng
+                                Back to Cart
                             </Button>
                         </div>
                     </div>
@@ -61,13 +61,13 @@ export default function PaymentResultPage() {
                 return (
                     <div className="flex flex-col items-center text-center space-y-4">
                         <AlertCircle className="w-16 h-16 text-warning" />
-                        <h2 className="text-2xl font-bold text-warning">Có lỗi xảy ra</h2>
+                        <h2 className="text-2xl font-bold text-warning">An Error Occurred</h2>
                         <p className="text-muted-foreground">
-                            Có lỗi xảy ra trong quá trình xử lý thanh toán. Vui lòng liên hệ bộ phận hỗ trợ.
+                            An error occurred during payment processing. Please contact support.
                         </p>
                         <div className="flex gap-4 mt-6">
                             <Button onClick={() => router.push("/")}>
-                                Về trang chủ
+                                Back to Home
                             </Button>
                         </div>
                     </div>

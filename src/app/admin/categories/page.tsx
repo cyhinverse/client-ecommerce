@@ -106,9 +106,9 @@ export default function CategoriesAdminPage() {
       dispatch(getAllCategories(params));
 
       setCreateModalOpen(false);
-      toast.success("Tạo danh mục thành công");
+      toast.success("Category created successfully");
     } catch {
-      toast.error("Lỗi khi tạo danh mục. Vui lòng thử lại.");
+      toast.error("Error creating category. Please try again.");
     } finally {
       setIsCreating(false);
     }
@@ -159,9 +159,9 @@ export default function CategoriesAdminPage() {
 
       handleCloseEditModal();
 
-      toast.success("Cập nhật danh mục thành công");
+      toast.success("Category updated successfully");
     } catch {
-      toast.error("Cập nhật danh mục thất bại. Vui lòng thử lại.");
+      toast.error("Failed to update category. Please try again.");
     } finally {
       setIsUpdating(false);
     }
@@ -224,7 +224,7 @@ export default function CategoriesAdminPage() {
   if (categoryState.error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-red-500">Lỗi: {categoryState.error}</div>
+        <div className="text-red-500">Error: {categoryState.error}</div>
       </div>
     );
   }
@@ -242,8 +242,8 @@ export default function CategoriesAdminPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Danh sách danh mục</CardTitle>
-          <CardDescription>Quản lý tất cả danh mục sản phẩm</CardDescription>
+          <CardTitle>Category List</CardTitle>
+          <CardDescription>Manage all product categories</CardDescription>
         </CardHeader>
         <CardContent>
           <CategoriesTable
