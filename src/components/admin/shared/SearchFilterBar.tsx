@@ -5,7 +5,8 @@ import {
   Filter,
   Download,
 } from "lucide-react";
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
 
 interface SearchFilterBarProps {
   title?: string;
@@ -36,6 +37,13 @@ const SearchFilterBar: React.FC<SearchFilterBarProps> = ({
   actionButton,
   className = ""
 }) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm);
+
+  useEffect(() => {
+    onSearchChange?.(debouncedSearch);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch]);
   return (
     <div className={`space-y-4 ${className}`}>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -59,7 +67,8 @@ const SearchFilterBar: React.FC<SearchFilterBarProps> = ({
               <Input
                 placeholder={searchPlaceholder}
                 className="pl-9 w-full"
-                onChange={(e) => onSearchChange?.(e.target.value)}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </>
           )}

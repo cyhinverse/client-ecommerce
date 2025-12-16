@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -61,11 +62,18 @@ export function DiscountsTable({
   isLoading = false,
 }: DiscountsTableProps) {
   const [localSearch, setLocalSearch] = useState(searchTerm);
+  const debouncedSearch = useDebounce(localSearch);
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSearch(localSearch);
-  };
+  useEffect(() => {
+    setLocalSearch(searchTerm);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    if (debouncedSearch !== searchTerm) {
+       onSearch(debouncedSearch);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("vi-VN");
@@ -103,8 +111,7 @@ export function DiscountsTable({
       {/* Filters and Search */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-1 items-center space-x-2">
-          <form onSubmit={handleSearchSubmit} className="flex-1 max-w-sm">
-            <div className="relative">
+          <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Tìm kiếm theo mã..."
@@ -112,8 +119,7 @@ export function DiscountsTable({
                 onChange={(e) => setLocalSearch(e.target.value)}
                 className="pl-8 rounded-none border-border focus-visible:ring-0 focus-visible:border-primary"
               />
-            </div>
-          </form>
+          </div>
 
           <Select
             value={selectedDiscountType}

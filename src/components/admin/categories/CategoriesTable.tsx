@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
 import {
   Table,
   TableBody,
@@ -35,6 +36,7 @@ import {
 import { Category } from "@/types/category";
 import { Badge } from "@/components/ui/badge";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
+import Image from "next/image";
 
 interface CategoriesTableProps {
   categories: Category[];
@@ -123,9 +125,11 @@ const CategoryRow = ({
               <div className="w-8" />
             )}
             {category.images && category.images.length > 0 ? (
-              <img
+              <Image
                 src={category.images[0]}
-                alt={category.name}
+                alt={category.name as string}
+                width={32}
+                height={32}
                 className="w-8 h-8 mr-2 object-cover border border-border"
               />
             ) : (
@@ -215,8 +219,22 @@ export function CategoriesTable({
   getProductCount,
   isLoading = false,
 }: CategoriesTableProps) {
+  const [localSearch, setLocalSearch] = useState(searchTerm);
+  const debouncedSearch = useDebounce(localSearch);
+
+  useEffect(() => {
+    setLocalSearch(searchTerm);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    if (debouncedSearch !== searchTerm) {
+       onSearch(debouncedSearch);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch]);
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onSearch(e.target.value);
+    setLocalSearch(e.target.value);
   };
 
   return (
@@ -228,7 +246,7 @@ export function CategoriesTable({
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Tìm kiếm danh mục..."
-              value={searchTerm}
+              value={localSearch}
               onChange={handleSearch}
               className="pl-8 rounded-none border-border focus-visible:ring-0 focus-visible:border-primary"
             />

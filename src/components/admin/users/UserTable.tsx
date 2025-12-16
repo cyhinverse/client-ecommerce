@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
 import {
   Table,
   TableBody,
@@ -111,8 +113,22 @@ export function UsersTable({
   selectedRole = "",
   selectedVerified = null,
 }: UsersTableProps) {
+  const [localSearch, setLocalSearch] = useState(searchTerm);
+  const debouncedSearch = useDebounce(localSearch);
+
+  useEffect(() => {
+    setLocalSearch(searchTerm);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    if (debouncedSearch !== searchTerm) {
+       onSearch(debouncedSearch);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch]);
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onSearch(e.target.value);
+    setLocalSearch(e.target.value);
   };
 
   const handleRoleFilter = (role: string) => {
@@ -137,7 +153,7 @@ export function UsersTable({
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Tìm kiếm người dùng..."
-              value={searchTerm}
+              value={localSearch}
               onChange={handleSearch}
               className="pl-8 rounded-none border-border focus-visible:ring-0 focus-visible:border-primary"
             />

@@ -21,10 +21,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { UpdateDiscountData, Discount } from "@/types/discount";
 import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/store/store";
+import { AppDispatch } from "@/store/configStore";
 import { getAllProducts } from "@/features/product/productAction";
 import { Product } from "@/types/product";
-import { Check, X, Search, Loader2 } from "lucide-react";
+import { X, Search, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -46,7 +46,7 @@ export function UpdateModelDiscount({
 }: UpdateModelDiscountProps) {
   const dispatch = useDispatch<AppDispatch>();
   const [products, setProducts] = useState<Product[]>([]);
-  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+
   const [searchTerm, setSearchTerm] = useState("");
 
   const initialFormData = useMemo(
@@ -55,8 +55,8 @@ export function UpdateModelDiscount({
       description: discount?.description || "",
       discountType: discount?.discountType || "percent",
       discountValue: discount?.discountValue?.toString() || "",
-      startDate: discount?.startDate?.split("T")[0] || "",
-      endDate: discount?.endDate?.split("T")[0] || "",
+      startDate: discount?.startDate ? discount.startDate.split("T")[0] : "",
+      endDate: discount?.endDate ? discount.endDate.split("T")[0] : "",
       minOrderValue: discount?.minOrderValue?.toString() || "",
       usageLimit: discount?.usageLimit?.toString() || "1",
       isActive: discount?.isActive ?? true,
@@ -65,6 +65,15 @@ export function UpdateModelDiscount({
   );
 
   const [formData, setFormData] = useState(initialFormData);
+
+  // Initialize selected products from prop directly
+  const [selectedProducts, setSelectedProducts] = useState<string[]>(() => {
+    if (discount?.applicableProducts && discount.applicableProducts.length > 0) {
+       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       return discount.applicableProducts.map((p: any) => typeof p === 'object' ? p._id : p);
+    }
+    return [];
+  });
 
   useEffect(() => {
     // Fetch products for selection
@@ -76,32 +85,6 @@ export function UpdateModelDiscount({
         }
       });
   }, [dispatch]);
-
-  useEffect(() => {
-    if (discount) {
-      setFormData({
-        code: discount.code,
-        description: discount.description || "",
-        discountType: discount.discountType,
-        discountValue: discount.discountValue.toString(),
-        startDate: discount.startDate.split("T")[0],
-        endDate: discount.endDate.split("T")[0],
-        minOrderValue: discount.minOrderValue?.toString() || "",
-        usageLimit: discount.usageLimit?.toString() || "",
-        isActive: discount.isActive,
-      });
-      // Initialize selected products
-      if (discount.applicableProducts && discount.applicableProducts.length > 0) {
-         // Assuming applicableProducts is array of IDs or Objects with _id
-         // Need to check backend simple population. Based on logic it might be strings or objects.
-         // If it is array of objects, map to IDs. 
-         const productIds = discount.applicableProducts.map((p: any) => typeof p === 'object' ? p._id : p);
-         setSelectedProducts(productIds);
-      } else {
-         setSelectedProducts([]);
-      }
-    }
-  }, [discount]);
 
   const filteredProducts = products.filter(product => 
       product.name.toLowerCase().includes(searchTerm.toLowerCase())

@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
 import { Order } from "@/types/order";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,6 +62,19 @@ export function OrdersTable({
   onView,
   isLoading = false,
 }: OrdersTableProps) {
+  const [localSearch, setLocalSearch] = useState(searchTerm);
+  const debouncedSearch = useDebounce(localSearch);
+
+  useEffect(() => {
+    setLocalSearch(searchTerm);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    if (debouncedSearch !== searchTerm) {
+       onSearch(debouncedSearch);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch]);
   const getStatusBadge = (status: string) => {
     const statusConfig: {
       [key: string]: {
@@ -122,8 +137,8 @@ export function OrdersTable({
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Tìm kiếm theo mã đơn hàng, tên KH..."
-              value={searchTerm}
-              onChange={(e) => onSearch(e.target.value)}
+              value={localSearch}
+              onChange={(e) => setLocalSearch(e.target.value)}
               className="pl-8 rounded-none border-border focus-visible:ring-0 focus-visible:border-primary"
             />
           </div>

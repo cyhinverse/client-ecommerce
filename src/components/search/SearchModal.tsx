@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
 import {
   Search,
   X,
@@ -81,17 +82,14 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   };
 
   // Debounce search to avoid excessive API calls
+  const debouncedSearchQuery = useDebounce(searchQuery);
+
   useEffect(() => {
-    if (searchQuery.trim() === "") {
+    if (debouncedSearchQuery.trim() === "") {
       return;
     }
-
-    const debounceTimer = setTimeout(() => {
-      dispatch(searchProducts({ keyword: searchQuery, limit: 5 }));
-    }, 300);
-
-    return () => clearTimeout(debounceTimer);
-  }, [searchQuery, dispatch]);
+    dispatch(searchProducts({ keyword: debouncedSearchQuery, limit: 5 }));
+  }, [debouncedSearchQuery, dispatch]);
 
   // Focus input when modal opens
   useEffect(() => {

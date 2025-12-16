@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
 import {
   Table,
   TableBody,
@@ -88,6 +89,20 @@ export function ProductsTable({
     selectedMaxPrice?.toString() || ""
   );
 
+  const [localSearch, setLocalSearch] = useState(searchTerm);
+  const debouncedSearch = useDebounce(localSearch, 500);
+
+  useEffect(() => {
+    setLocalSearch(searchTerm);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    if (debouncedSearch !== searchTerm) {
+       onSearch(debouncedSearch);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch]);
+
   const handlePriceFilterApply = () => {
     const min = localMinPrice ? Number(localMinPrice) : undefined;
     const max = localMaxPrice ? Number(localMaxPrice) : undefined;
@@ -164,8 +179,8 @@ export function ProductsTable({
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Tìm kiếm sản phẩm..."
-              value={searchTerm}
-              onChange={(e) => onSearch(e.target.value)}
+              value={localSearch}
+              onChange={(e) => setLocalSearch(e.target.value)}
               className="pl-8 rounded-none border-border focus-visible:ring-0 focus-visible:border-primary"
             />
           </div>

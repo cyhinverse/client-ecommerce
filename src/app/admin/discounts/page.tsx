@@ -310,6 +310,7 @@ export default function AdminDiscountsPage() {
           />
 
           <UpdateModelDiscount
+            key={selectedDiscount?._id || "update-discount"}
             open={updateModalOpen}
             onOpenChange={handleCloseEditModal}
             discount={selectedDiscount}
