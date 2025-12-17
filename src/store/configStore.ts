@@ -12,6 +12,8 @@ import { paymentSlice } from "@/features/payment/paymentSlice";
 import { notificationSlice } from "@/features/notification/notificationSlice";
 import { reviewSlice } from "@/features/reviews/reviewSlice";
 
+import { statisticsSlice } from "@/features/statistics/statisticsSlice";
+
 const createNoopStorage = () => {
   return {
     getItem(_key: string): Promise<null> {
@@ -42,6 +44,7 @@ export const rootReducer = combineReducers({
   payment: paymentSlice.reducer,
   notification: notificationSlice.reducer,
   reviews: reviewSlice.reducer,
+  statistics: statisticsSlice.reducer,
 });
 
 const persistConfig = {

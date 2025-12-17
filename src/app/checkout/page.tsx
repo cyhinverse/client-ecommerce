@@ -155,7 +155,8 @@ export default function CheckoutPage() {
       }
 
     } catch (error) {
-      toast.error(error as string);
+      const errorMessage = (error as any)?.message || "An unknown error occurred";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

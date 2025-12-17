@@ -7,8 +7,17 @@ export const handleNotificationEvents = (socket: Socket, dispatch: AppDispatch) 
   if (!socket) return;
 
   socket.on("new_notification", (notification) => {
-    toast.message(notification.title, {
-      description: notification.message,
+    // Defensive check: Ensure title/message are strings
+    const title = typeof notification.title === "string" ? notification.title : "Notification";
+    const message = typeof notification.message === "string" ? notification.message : "";
+
+    // Debug if we receive weird data
+    if (typeof notification.title !== "string" || typeof notification.message !== "string") {
+        console.error("Invalid notification format received:", notification);
+    }
+
+    toast.message(title, {
+      description: message,
     });
     dispatch(addNotification(notification));
   });

@@ -79,7 +79,6 @@ export function UpdateModelProduct({
         }));
       }
     } else {
-      // It's a temp variant, just remove from state
       setFormData((prev) => ({
         ...prev,
         variants: prev.variants.filter((_, i) => i !== index),
@@ -664,7 +663,7 @@ export function UpdateModelProduct({
                            multiple
                            accept="image/*"
                            onChange={(e) => handleVariantImageChange(variant._id, e)}
-                           ref={(el) => (variantFileInputRefs.current[variant._id] = el)}
+                           ref={(el) => { variantFileInputRefs.current[variant._id] = el; }}
                            className="hidden"
                        />
                        <Button
@@ -753,9 +752,10 @@ export function UpdateModelProduct({
             <div className="grid grid-cols-4 gap-4 mt-2">
               {images.map((file, index) => (
                 <div key={index} className="relative">
-                  <img
+                  <Image
                     src={URL.createObjectURL(file)}
                     alt={`Preview ${index}`}
+                    fill
                     className="h-20 w-20 object-cover rounded"
                   />
                   <button

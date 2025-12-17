@@ -27,7 +27,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     if (!isAuthenticated || !token) return;
 
     // Create socket connection
-    const socketInstance = io(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000", {
+    const socketUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    console.log("Socket connecting to:", socketUrl);
+    const socketInstance = io(socketUrl, {
       auth: { token },
       transports: ["websocket"],
     });
