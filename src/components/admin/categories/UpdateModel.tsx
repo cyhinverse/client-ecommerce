@@ -129,7 +129,7 @@ export function EditCategoryModal({
                 Edit Category
                 <Badge variant="outline" className="text-sm rounded-lg bg-white/50 border-border/50">
                    {/* {category._id.slice(-8)} */}
-                   ID: {category._id.slice(-4)}
+                   ID: {category._id?.slice(-4)}
                 </Badge>
               </DialogTitle>
               <DialogDescription className="text-muted-foreground">

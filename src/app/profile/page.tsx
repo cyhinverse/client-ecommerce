@@ -95,7 +95,7 @@ export default function ProfilePage() {
                 {/* User Snapshot (Mobile/Desktop consistent) */}
                 <div className="flex items-center gap-4 px-2">
                      <Avatar className="h-14 w-14 border border-border/50">
-                        <AvatarImage src={currentUser?.avatar} className="object-cover" />
+                        <AvatarImage src={currentUser?.avatar ?? undefined} className="object-cover" />
                         <AvatarFallback className="text-lg bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
                              {currentUser?.username?.charAt(0).toUpperCase() || "U"}
                         </AvatarFallback>
