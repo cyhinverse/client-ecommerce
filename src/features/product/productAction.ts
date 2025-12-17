@@ -25,6 +25,9 @@ export const getAllProducts = createAsyncThunk(
     tags?: string[];
     search?: string;
     isActive?: boolean;
+    rating?: string;
+    colors?: string;
+    sizes?: string;
   }) => {
     const {
       page,
@@ -37,6 +40,9 @@ export const getAllProducts = createAsyncThunk(
       tags,
       search,
       isActive,
+      rating,
+      colors,
+      sizes,
     } = params;
 
     // Lọc bỏ các giá trị undefined/null/empty
@@ -54,6 +60,9 @@ export const getAllProducts = createAsyncThunk(
     if (tags && tags.length > 0) queryParams.tags = tags.join(",");
     if (search) queryParams.search = search;
     if (isActive !== undefined) queryParams.isActive = isActive;
+    if (rating) queryParams.rating = rating;
+    if (colors) queryParams.colors = colors;
+    if (sizes) queryParams.sizes = sizes;
 
     console.log("Final query params:", queryParams);
 

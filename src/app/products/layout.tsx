@@ -4,7 +4,7 @@
 
 export default function ProductsLayout({children}: {children: React.ReactNode}) {
     return (
-        <main className="w-full max-w-7xl mx-auto flex h-full flex-col m-5">
+        <main className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 py-8 md:py-12 min-h-screen">
             {children}
         </main>
     )

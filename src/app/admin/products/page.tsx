@@ -1,15 +1,15 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { toast } from "sonner";
+import {
+  getAllProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+} from "@/features/product/productAction";
+import { Product, AdminProductFilters } from "@/types/product";
 import { ProductsHeader } from "@/components/admin/products/ProductHeader";
 import { ProductsStats } from "@/components/admin/products/ProductStats";
 import { ProductsTable } from "@/components/admin/products/ProductTable";
@@ -17,52 +17,36 @@ import { ProductPagination } from "@/components/admin/products/ProductPagination
 import { CreateModelProduct } from "@/components/admin/products/CreateModelProduct";
 import { UpdateModelProduct } from "@/components/admin/products/UpdateModelProduct";
 import { ViewModelProduct } from "@/components/admin/products/ViewModelProduct";
-import {
-  getAllProducts,
-  deleteProduct,
-  updateProduct,
-  createProduct,
-  deleteVariantByVariantId,
-} from "@/features/product/productAction";
-import { Product, AdminProductFilters } from "@/types/product";
 
 export default function AdminProductsPage() {
   const dispatch = useAppDispatch();
-  const {
-    all: products,
-    pagination,
-    isLoading,
-    error,
-  } = useAppSelector((state) => state.product);
+  const productState = useAppSelector((state) => state.product);
 
-  // Use URL filters hook
-  const { filters, updateFilter, updateFilters } =
-    useUrlFilters<AdminProductFilters>({
-      defaultFilters: {
-        page: 1,
-        limit: 10,
-        search: "",
-        category: "",
-        brand: "",
-        minPrice: null,
-        maxPrice: null,
-        isActive: null,
-      },
-      basePath: "/admin/products",
-    });
+  const defaultFilters = useMemo(() => ({
+    page: 1,
+    limit: 10,
+    search: "",
+    category: "",
+    brand: "",
+    minPrice: null,
+    maxPrice: null,
+    isActive: null,
+  }), []);
 
-  // Extract filter values
-  const currentPage = Number(filters.page);
-  const pageSize = Number(filters.limit);
-  const searchTerm = filters.search as string;
-  const selectedCategory = filters.category as string;
-  const selectedBrand = filters.brand as string;
-  const selectedMinPrice = filters.minPrice as number | undefined;
-  const selectedMaxPrice = filters.maxPrice as number | undefined;
-  const selectedStatus = filters.isActive as boolean | null;
+  const { filters, updateFilter, updateFilters } = useUrlFilters<AdminProductFilters>({
+    defaultFilters,
+    basePath: "/admin/products",
+  });
 
-  // SỬA: Đảm bảo products luôn là array (đã có từ selector)
-  const productList: Product[] = Array.isArray(products) ? products : [];
+  const currentPage = Number(filters.page) || 1;
+  const pageSize = Number(filters.limit) || 10;
+
+  const searchTerm = filters.search as string || "";
+  const selectedCategory = filters.category as string || "";
+
+  // Correcting state access: 'all' instead of 'products'
+  const products: Product[] = productState.all || []; 
+  const pagination = productState.pagination;
 
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
@@ -71,19 +55,14 @@ export default function AdminProductsPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  type Params = {
-    page: number;
-    limit: number;
-    search?: string;
-    category?: string;
-    brand?: string;
-    minPrice?: number;
-    maxPrice?: number;
-    isActive?: boolean;
-  };
+  const selectedBrand = filters.brand as string || "";
+  const selectedMinPrice = filters.minPrice as number | null;
+  const selectedMaxPrice = filters.maxPrice as number | null;
+  const selectedStatus = filters.isActive as boolean | null;
 
   useEffect(() => {
-    const params: Params = {
+    // Construct params matching the getAllProducts expected input
+    const params: Record<string, string | number | boolean> = {
       page: currentPage,
       limit: pageSize,
     };
@@ -91,59 +70,69 @@ export default function AdminProductsPage() {
     if (searchTerm) params.search = searchTerm;
     if (selectedCategory) params.category = selectedCategory;
     if (selectedBrand) params.brand = selectedBrand;
-    if (selectedMinPrice !== undefined && selectedMinPrice !== null)
-      params.minPrice = selectedMinPrice;
-    if (selectedMaxPrice !== undefined && selectedMaxPrice !== null)
-      params.maxPrice = selectedMaxPrice;
+    if (selectedMinPrice !== null) params.minPrice = selectedMinPrice;
+    if (selectedMaxPrice !== null) params.maxPrice = selectedMaxPrice;
     if (selectedStatus !== null) params.isActive = selectedStatus;
 
-    dispatch(getAllProducts(params));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    dispatch(getAllProducts(params as any));
   }, [
-    dispatch,
-    currentPage,
-    pageSize,
-    searchTerm,
-    selectedCategory,
-    selectedBrand,
-    selectedMinPrice,
-    selectedMaxPrice,
-    selectedStatus,
+    dispatch, 
+    currentPage, 
+    pageSize, 
+    searchTerm, 
+    selectedCategory, 
+    selectedBrand, 
+    selectedMinPrice, 
+    selectedMaxPrice, 
+    selectedStatus
   ]);
 
-  const refreshData = () => {
-    const params: Params = {
-      page: currentPage,
-      limit: pageSize,
-    };
+  const handleOpenCreateModal = () => setCreateModalOpen(true);
 
-    if (searchTerm) params.search = searchTerm;
-    if (selectedCategory) params.category = selectedCategory;
-    if (selectedBrand) params.brand = selectedBrand;
-    if (selectedMinPrice !== undefined && selectedMinPrice !== null)
-      params.minPrice = selectedMinPrice;
-    if (selectedMaxPrice !== undefined && selectedMaxPrice !== null)
-      params.maxPrice = selectedMaxPrice;
-    if (selectedStatus !== null) params.isActive = selectedStatus;
-
-    dispatch(getAllProducts(params));
-  };
-
-  // Event handlers
-  const handleOpenCreateModal = () => {
-    setCreateModalOpen(true);
-  };
-
-  const handleCreateProduct = async (formData: FormData) => {
+  const handleCreateProduct = async (productData: FormData) => {
     setIsCreating(true);
     try {
-      await dispatch(createProduct(formData)).unwrap();
-      refreshData();
+      await dispatch(createProduct(productData)).unwrap();
+      const params = { page: currentPage, limit: pageSize };
+      dispatch(getAllProducts(params));
       setCreateModalOpen(false);
       toast.success("Product created successfully");
-    } catch (error) {
-      toast.error("Error creating product. Please try again." + error);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error.message || "Failed to create product");
     } finally {
       setIsCreating(false);
+    }
+  };
+
+  const handleUpdateProduct = async (id: string, productData: FormData) => {
+    setIsUpdating(true);
+    try {
+      await dispatch(updateProduct({ productId: id, updateData: productData })).unwrap();
+      const params = { page: currentPage, limit: pageSize };
+      dispatch(getAllProducts(params));
+      setUpdateModalOpen(false);
+      setSelectedProduct(null);
+      toast.success("Product updated successfully");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update product");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleDeleteProduct = async (product: Product) => {
+    if (!confirm("Are you sure you want to delete this product?")) return;
+    try {
+      await dispatch(deleteProduct(product._id)).unwrap();
+      const params = { page: currentPage, limit: pageSize };
+      dispatch(getAllProducts(params));
+      toast.success("Product deleted successfully");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete product");
     }
   };
 
@@ -152,219 +141,117 @@ export default function AdminProductsPage() {
     setUpdateModalOpen(true);
   };
 
+  const handleViewProduct = (product: Product) => {
+    setSelectedProduct(product);
+    setViewModalOpen(true);
+  };
+
   const handleEditFromView = (product: Product) => {
     setSelectedProduct(product);
     setViewModalOpen(false);
     setUpdateModalOpen(true);
   };
 
-  const handleCloseEditModal = () => {
-    setUpdateModalOpen(false);
-    setSelectedProduct(null);
-    setIsUpdating(false);
-  };
+  const handleCloseModals = () => {
+     setUpdateModalOpen(false);
+     setViewModalOpen(false);
+     setSelectedProduct(null);
+  }
 
-  const handleUpdateProduct = async (formData: FormData) => {
-    if (!selectedProduct) return;
+  const totalProducts = pagination?.totalItems || 0;
+  // Calculate stats based on current loaded products (or better, fetch from stats API if available)
+  const activeProducts = products.filter(p => p.isActive).length; 
+  // Note: These client-side stats are only for the current page. ideally we want backend stats.
+  // Passing these mostly as placeholders/for immediate visual feedback.
+  
+  // Calculate total categories and on sale products for the stats component
+  const totalCategories = new Set(products.map(p => typeof p.category === 'object' ? p.category?._id : p.category)).size;
+  const productsOnSale = products.filter(p => p.onSale).length;
 
-    setIsUpdating(true);
-    try {
-      await dispatch(
-        updateProduct({
-          productId: selectedProduct._id,
-          updateData: formData,
-        })
-      ).unwrap();
-      refreshData();
-      handleCloseEditModal();
-      toast.success("Product updated successfully");
-    } catch (error) {
-      toast.error("Update failed. Please try again." + error);
-    } finally {
-      setIsUpdating(false);
-    }
-  };
 
-  const handlePageChange = (page: number) => {
-    updateFilter("page", page);
-  };
-
-  const handlePageSizeChange = (size: number) => {
-    updateFilters({ limit: size, page: 1 });
-  };
-
-  const handleSearch = (value: string) => {
-    updateFilters({ search: value, page: 1 });
-  };
-
+  // Handlers for table filters
   const handleCategoryFilterChange = (category: string) => {
-    const newCategory = category === "all" ? "" : category;
-    updateFilters({ category: newCategory, page: 1 });
+    updateFilter("category", category === 'all' ? '' : category);
   };
 
   const handleBrandFilterChange = (brand: string) => {
-    const newBrand = brand === "all" ? "" : brand;
-    updateFilters({ brand: newBrand, page: 1 });
+     updateFilters({ brand: brand === 'all' ? '' : brand, page: 1 });
   };
 
-  const handlePriceFilterChange = (
-    min: number | undefined,
-    max: number | undefined
-  ) => {
-    updateFilters({ minPrice: min, maxPrice: max, page: 1 });
+  const handlePriceFilterChange = (min: number | undefined, max: number | undefined) => {
+      updateFilters({ minPrice: min || null, maxPrice: max || null, page: 1 });
+  };
+  
+  const handleStatusFilterChange = (status: boolean | null) => {
+      updateFilters({ isActive: status, page: 1 });
   };
 
-  const handleStatusFilterChange = (isActive: boolean | null) => {
-    updateFilters({ isActive: isActive, page: 1 });
-  };
-
-  const handleCloseModals = () => {
-    setViewModalOpen(false);
-    setUpdateModalOpen(false);
-    setSelectedProduct(null);
-  };
-
-  const handleDeleteProduct = async (product: Product) => {
-    try {
-      await dispatch(deleteProduct(product._id)).unwrap();
-
-      toast.success("Product deleted successfully");
-
-      refreshData();
-    } catch (error) {
-      console.error("Delete product error:", error);
-
-      if (error && typeof error === "string") {
-        toast.error(error);
-      } else {
-        toast.error("Delete failed. Please try again.");
-      }
-    }
-  };
-
-  const handleViewProduct = (product: Product) => {
-    setSelectedProduct(product);
-    setViewModalOpen(true);
-  };
-
-  // Tính toán thống kê - SỬA: sử dụng productList thay vì products
-  const totalProducts = pagination?.totalItems || productList.length;
-  const activeProducts = productList.filter(
-    (product) => product.isActive
-  ).length;
-  const productsOnSale = productList.filter((product) => product.onSale).length;
-
-  // Lấy tổng số danh mục unique
-  const categories = Array.from(
-    new Set(
-      productList
-        .map((p) =>
-          typeof p.category === "string" ? p.category : p.category?.name
-        )
-        .filter(Boolean)
-    )
-  );
-  const totalCategories = categories.length;
-
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-destructive">Error: {error}</div>
-      </div>
-    );
-  }
-
-  const handleDeleteVariant = async (variantId: string) => {
-    if (!selectedProduct) return;
-    try {
-      await dispatch(
-        deleteVariantByVariantId({
-          productId: selectedProduct._id,
-          variantId,
-        })
-      ).unwrap();
-      refreshData();
-      toast.success("Variant deleted successfully");
-    } catch (error) {
-      const msg = typeof error === "string" ? error : "Failed to delete variant";
-      toast.error(msg);
-      throw error; // Re-throw to prevent UI removal in child
-    }
-  };
 
   return (
-    <div className="space-y-6 no-scrollbar">
+    <div className="space-y-8 p-1">
       <ProductsHeader onOpenCreate={handleOpenCreateModal} />
 
-      <ProductsStats
-        totalProducts={totalProducts}
-        activeProducts={activeProducts}
-        productsOnSale={productsOnSale}
-        totalCategories={totalCategories}
+      <ProductsStats 
+         totalProducts={totalProducts}
+         activeProducts={activeProducts}
+         productsOnSale={productsOnSale}
+         totalCategories={totalCategories}
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Product List</CardTitle>
-          <CardDescription>
-            Manage all products in store
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ProductsTable
-            products={productList} 
-            searchTerm={searchTerm}
-            pageSize={pageSize}
-            isLoading={isLoading}
-            onSearch={handleSearch}
-            onPageSizeChange={handlePageSizeChange}
-            onEdit={handleEditProduct}
-            onDelete={handleDeleteProduct}
-            onView={handleViewProduct}
-            onCategoryFilterChange={handleCategoryFilterChange}
-            onBrandFilterChange={handleBrandFilterChange}
-            onPriceFilterChange={handlePriceFilterChange}
-            onStatusFilterChange={handleStatusFilterChange}
-            selectedCategory={selectedCategory}
-            selectedBrand={selectedBrand}
-            selectedMinPrice={selectedMinPrice}
-            selectedMaxPrice={selectedMaxPrice}
-            selectedStatus={selectedStatus}
-          />
+      <div className="space-y-6">
+        <ProductsTable
+          products={products}
+          isLoading={productState.isLoading}
+          searchTerm={searchTerm}
+          pageSize={pageSize}
+          onSearch={(val) => updateFilters({ search: val, page: 1 })}
+          onPageSizeChange={(size) => updateFilters({ limit: size, page: 1 })}
+          onEdit={handleEditProduct}
+          onDelete={handleDeleteProduct}
+          onView={handleViewProduct}
+          onCategoryFilterChange={handleCategoryFilterChange}
+          onBrandFilterChange={handleBrandFilterChange}
+          onPriceFilterChange={handlePriceFilterChange}
+          onStatusFilterChange={handleStatusFilterChange}
+          selectedCategory={selectedCategory}
+          selectedBrand={filters.brand as string || ""}
+          selectedMinPrice={filters.minPrice as number | undefined}
+          selectedMaxPrice={filters.maxPrice as number | undefined}
+          selectedStatus={filters.isActive as boolean | null}
+        />
 
+        <div className="mt-6 flex justify-center">
           <ProductPagination
             currentPage={currentPage}
             totalPages={pagination?.totalPages || 1}
             totalItems={pagination?.totalItems}
             pageSize={pageSize}
-            onPageChange={handlePageChange}
+            onPageChange={(page) => updateFilter("page", page)}
           />
+        </div>
+      </div>
 
-          <CreateModelProduct
-            open={createModalOpen}
-            onOpenChange={setCreateModalOpen}
-            onCreate={handleCreateProduct}
-            isLoading={isCreating}
-          />
+      <CreateModelProduct
+        open={createModalOpen}
+        onOpenChange={setCreateModalOpen}
+        onCreate={handleCreateProduct}
+        isLoading={isCreating}
+      />
 
-          <ViewModelProduct
-            open={viewModalOpen}
-            onOpenChange={handleCloseModals}
-            product={selectedProduct}
-            onEdit={handleEditFromView}
-          />
+      <UpdateModelProduct
+        open={updateModalOpen}
+        onOpenChange={handleCloseModals}
+        product={selectedProduct}
+        onUpdate={(formData) => selectedProduct && handleUpdateProduct(selectedProduct._id, formData)}
+        isLoading={isUpdating}
+      />
 
-          <UpdateModelProduct
-            open={updateModalOpen}
-            onOpenChange={handleCloseEditModal}
-            product={selectedProduct}
-            onUpdate={handleUpdateProduct}
-            onDeleteVariant={handleDeleteVariant}
-            isLoading={isUpdating}
-          />
-        </CardContent>
-      </Card>
+      <ViewModelProduct
+        open={viewModalOpen}
+        onOpenChange={handleCloseModals}
+        product={selectedProduct}
+        onEdit={handleEditFromView}
+      />
     </div>
   );
 }

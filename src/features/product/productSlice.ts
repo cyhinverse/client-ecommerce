@@ -260,15 +260,12 @@ export const productSlice = createSlice({
 
     // =========================== RELATED PRODUCTS ===========================
     builder.addCase(getRelatedProducts.pending, (state) => {
-      state.isLoading = true;
       state.error = null;
     });
     builder.addCase(getRelatedProducts.fulfilled, (state, action) => {
-      state.isLoading = false;
       state.related = action.payload || [];
     });
     builder.addCase(getRelatedProducts.rejected, (state, action) => {
-      state.isLoading = false;
       state.error = action.error.message || "Failed to load related products";
     });
   },

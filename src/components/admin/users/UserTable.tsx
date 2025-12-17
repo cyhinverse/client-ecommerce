@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Address } from "@/types/address";
 import {
   Search,
@@ -34,6 +33,7 @@ import {
   CheckCircle,
   XCircle,
   Shield,
+  Filter,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { User } from "@/types/user";
@@ -58,14 +58,14 @@ interface UsersTableProps {
 
 export const getVerifiedBadge = (isVerified: boolean) => {
   return isVerified ? (
-    <Badge className="bg-primary text-primary-foreground border-primary">
+    <Badge className="bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-500/10 dark:text-green-400 border-0 rounded-lg px-2.5 py-0.5 shadow-none">
       <CheckCircle className="h-3 w-3 mr-1" />
       Verified
     </Badge>
   ) : (
     <Badge
       variant="outline"
-      className="border-muted-foreground text-muted-foreground"
+      className="bg-gray-100 text-gray-600 border-0 rounded-lg px-2.5 py-0.5 shadow-none"
     >
       <XCircle className="h-3 w-3 mr-1" />
       Unverified
@@ -75,8 +75,8 @@ export const getVerifiedBadge = (isVerified: boolean) => {
 
 export const getRoleBadge = (roles: string) => {
   const colors: { [key: string]: string } = {
-    admin: "bg-primary text-primary-foreground border-primary",
-    user: "bg-muted text-foreground border-border",
+    admin: "bg-purple-100 text-purple-700 hover:bg-purple-100 border-0",
+    user: "bg-gray-100 text-gray-700 hover:bg-gray-100 border-0",
   };
 
   const roleNames: { [key: string]: string } = {
@@ -86,8 +86,8 @@ export const getRoleBadge = (roles: string) => {
 
   return (
     <Badge
-      variant="outline"
-      className={colors[roles] || "bg-muted text-foreground border-border"}
+      variant="secondary"
+      className={`rounded-lg px-2.5 py-0.5 shadow-none ${colors[roles] || "bg-gray-100 text-gray-700 border-0"}`}
     >
       {roleNames[roles] || roles}
     </Badge>
@@ -147,15 +147,15 @@ export function UsersTable({
   return (
     <div className="space-y-4">
       {/* Search and Filters */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-white/50 dark:bg-white/5 p-4 rounded-[1.5rem] backdrop-blur-xl border border-border/50">
         <div className="flex flex-1 items-center space-x-2">
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search users..."
               value={localSearch}
               onChange={handleSearch}
-              className="pl-8 rounded-none border-border focus-visible:ring-0 focus-visible:border-primary"
+              className="pl-9 rounded-xl border-gray-200 bg-white/80 focus-visible:ring-0 focus-visible:border-primary transition-all shadow-sm"
             />
           </div>
 
@@ -164,7 +164,7 @@ export function UsersTable({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="rounded-none border-border hover:bg-muted text-foreground hover:text-foreground"
+                className="rounded-xl border-gray-200 bg-white/80 hover:bg-gray-50 shadow-sm"
               >
                 <Shield className="h-4 w-4 mr-2 text-muted-foreground" />
                 {selectedRole === "admin"
@@ -174,32 +174,26 @@ export function UsersTable({
                   : "All Roles"}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="rounded-none border-border bg-background text-foreground shadow-lg">
-              <DropdownMenuLabel className="text-foreground font-semibold uppercase text-xs tracking-wider">
+            <DropdownMenuContent className="rounded-xl border-border/50 shadow-lg p-1">
+              <DropdownMenuLabel className="text-muted-foreground text-xs uppercase tracking-wider px-2 py-1.5">
                 Filter by Role
               </DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-border" />
+              <DropdownMenuSeparator className="bg-border/50" />
               <DropdownMenuItem
-                action={handleRoleFilter}
-                className={`text-muted-foreground hover:bg-muted ${
-                  !selectedRole ? "bg-muted font-medium" : ""
-                }`}
+                onClick={() => handleRoleFilter("")}
+                 className={`cursor-pointer rounded-lg ${!selectedRole ? "bg-gray-100 font-medium" : ""}`}
               >
                 All Roles
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleRoleFilter("admin")}
-                className={`text-muted-foreground hover:bg-muted ${
-                  selectedRole === "admin" ? "bg-muted font-medium" : ""
-                }`}
+                className={`cursor-pointer rounded-lg ${selectedRole === "admin" ? "bg-gray-100 font-medium" : ""}`}
               >
                 Admin
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleRoleFilter("user")}
-                className={`text-muted-foreground hover:bg-muted ${
-                  selectedRole === "user" ? "bg-muted font-medium" : ""
-                }`}
+                 className={`cursor-pointer rounded-lg ${selectedRole === "user" ? "bg-gray-100 font-medium" : ""}`}
               >
                 User
               </DropdownMenuItem>
@@ -211,68 +205,60 @@ export function UsersTable({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="rounded-none border-border hover:bg-muted text-foreground hover:text-foreground"
+                className="rounded-xl border-gray-200 bg-white/80 hover:bg-gray-50 shadow-sm"
               >
-                <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
+                <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
                 {selectedVerified === true
                   ? "Verified"
                   : selectedVerified === false
                   ? "Unverified"
-                  : "Email Status"}
+                  : "Status"}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="rounded-none border-border bg-background text-foreground shadow-lg">
-              <DropdownMenuLabel className="text-foreground font-semibold uppercase text-xs tracking-wider">
-                Filter by Email Verification
+            <DropdownMenuContent className="rounded-xl border-border/50 shadow-lg p-1">
+              <DropdownMenuLabel className="text-muted-foreground text-xs uppercase tracking-wider px-2 py-1.5">
+                Filter by Verification
               </DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-border" />
+              <DropdownMenuSeparator className="bg-border/50" />
               <DropdownMenuItem
                 onClick={() => handleVerifiedFilter(null)}
-                className={`text-muted-foreground hover:bg-muted ${
-                  selectedVerified === null ? "bg-muted font-medium" : ""
-                }`}
+                className={`cursor-pointer rounded-lg ${selectedVerified === null ? "bg-gray-100 font-medium" : ""}`}
               >
                 All Status
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleVerifiedFilter(true)}
-                className={`text-muted-foreground hover:bg-muted ${
-                  selectedVerified === true ? "bg-muted font-medium" : ""
-                }`}
+                 className={`cursor-pointer rounded-lg ${selectedVerified === true ? "bg-gray-100 font-medium" : ""}`}
               >
                 Verified
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleVerifiedFilter(false)}
-                className={`text-muted-foreground hover:bg-muted ${
-                  selectedVerified === false ? "bg-muted font-medium" : ""
-                }`}
+                 className={`cursor-pointer rounded-lg ${selectedVerified === false ? "bg-gray-100 font-medium" : ""}`}
               >
                 Unverified
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          
+           <Button
+             variant="outline"
+             size="icon"
+             className="rounded-xl border-gray-200 bg-white/80 hover:bg-gray-50 shadow-sm w-9 h-9"
+           >
+             <Download className="h-4 w-4" />
+           </Button>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            className="rounded-none border-border"
-          >
-            <Download className="h-4 w-4" />
-          </Button>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Label htmlFor="pageSize" className="text-muted-foreground">
+          <span className="text-sm font-medium text-muted-foreground">
             Show:
-          </Label>
+          </span>
           <select
             id="pageSize"
             value={pageSize}
             onChange={(e) => onPageSizeChange(Number(e.target.value))}
-            className="border border-border rounded px-2 py-1 text-sm bg-background text-foreground focus:border-primary focus:ring-primary"
+            className="h-9 rounded-lg border border-gray-200 bg-white/80 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 dark:bg-black/20 dark:border-white/10"
           >
             <option value="5">5</option>
             <option value="10">10</option>
@@ -283,155 +269,146 @@ export function UsersTable({
       </div>
 
       {/* Table */}
-      <div className="rounded-md border border-border bg-background shadow-sm overflow-x-auto no-scrollbar">
-        <Table>
-          <TableHeader>
-            <TableRow className="border-border hover:bg-muted/50 bg-muted/50">
-              <TableHead className="text-foreground font-semibold">
-                User
-              </TableHead>
-              <TableHead className="text-foreground font-semibold">
-                Role
-              </TableHead>
-              <TableHead className="text-foreground font-semibold">
-                Address
-              </TableHead>
-              <TableHead className="text-foreground font-semibold">
-                Email Verified
-              </TableHead>
-              <TableHead className="text-foreground font-semibold">
-                Created At
-              </TableHead>
-              <TableHead className="text-foreground font-semibold text-right">
-                Actions
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading && (
-              <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
-                  <div className="flex justify-center items-center">
-                    <SpinnerLoading />
-                  </div>
-                </TableCell>
-              </TableRow>
-            )}
-            {!isLoading && users.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-8">
-                  <div className="flex flex-col items-center justify-center text-muted-foreground">
-                    <UserIcon className="h-12 w-12 mb-2 opacity-50" />
-                    <div className="text-muted-foreground">
-                      No users found
-                    </div>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : (
-              users.map((user) => (
-                <TableRow
-                  key={user._id}
-                  className={`border-border hover:bg-muted/50 ${
-                    isLoading ? "opacity-50 pointer-events-none" : ""
-                  }`}
-                >
-                  <TableCell>
-                    <div>
-                      <div className="flex items-center gap-3">
-                        {user.avatar ? (
-                          <div className="relative w-8 h-8 rounded-full overflow-hidden">
-                            <Image
-                              alt={user?.username as string}
-                              src={user?.avatar as string}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-                            <UserIcon className="h-5 w-5 text-muted-foreground" />
-                          </div>
-                        )}
-                        <div>
-                          <p className="font-medium text-foreground">
-                            {user.username}
-                          </p>
-                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                            <Mail className="h-3 w-3" />
-                            <span>{user.email}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{getRoleBadge(user.roles || "user")}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <MapPin className="h-3 w-3" />
-                      <span className="line-clamp-1">
-                        {getPrimaryAddress(user.addresses)}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {getVerifiedBadge(user.isVerifiedEmail)}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                      <Calendar className="h-3 w-3" />
-                      <span>{formatDate(user.createdAt)}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="hover:bg-muted text-muted-foreground hover:text-foreground"
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent
-                        align="end"
-                        className="bg-background border-border text-foreground shadow-lg"
-                      >
-                        <DropdownMenuLabel className="text-foreground font-semibold">
-                          Actions
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator className="bg-border" />
-                        <DropdownMenuItem
-                          onClick={() => onView(user)}
-                          className="text-muted-foreground hover:bg-muted hover:text-foreground"
-                        >
-                          <Eye className="h-4 w-4 mr-2 text-muted-foreground" />
-                          View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => onEdit(user)}
-                          className="text-muted-foreground hover:bg-muted hover:text-foreground"
-                        >
-                          <Edit className="h-4 w-4 mr-2 text-muted-foreground" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-border" />
-                        <DropdownMenuItem
-                          className="text-muted-foreground hover:bg-muted hover:text-foreground"
-                          onClick={() => onDelete(user)}
-                        >
-                          <Trash2 className="h-4 w-4 mr-2 text-muted-foreground" />
-                          Delete User
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+      <div className="rounded-[2rem] border border-border/50 bg-white/60 dark:bg-[#1C1C1E]/60 backdrop-blur-xl shadow-sm overflow-hidden">
+        <div className="overflow-x-auto no-scrollbar">
+            <Table>
+            <TableHeader className="bg-gray-50/50">
+                <TableRow className="border-border/50 hover:bg-transparent">
+                <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground pl-6">
+                    User
+                </TableHead>
+                <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
+                    Role
+                </TableHead>
+                <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
+                    Address
+                </TableHead>
+                <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
+                    Email Verified
+                </TableHead>
+                <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
+                    Created At
+                </TableHead>
+                <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground text-right pr-6">
+                    Actions
+                </TableHead>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+                {isLoading && (
+                <TableRow>
+                    <TableCell colSpan={6} className="h-32 text-center">
+                    <div className="flex justify-center items-center">
+                        <SpinnerLoading />
+                    </div>
+                    </TableCell>
+                </TableRow>
+                )}
+                {!isLoading && users.length === 0 ? (
+                <TableRow>
+                    <TableCell colSpan={6} className="text-center py-12">
+                    <div className="flex flex-col items-center justify-center text-muted-foreground">
+                        <UserIcon className="h-12 w-12 mb-3 opacity-20" />
+                        <div className="text-muted-foreground">
+                        No users found
+                        </div>
+                    </div>
+                    </TableCell>
+                </TableRow>
+                ) : (
+                users.map((user) => (
+                    <TableRow
+                    key={user._id}
+                     className="border-border/50 hover:bg-gray-50/50 transition-colors"
+                    >
+                    <TableCell className="pl-6 font-medium">
+                        <div className="flex items-center gap-3">
+                            <div className="relative w-10 h-10 rounded-full overflow-hidden border border-border/50 bg-gray-100">
+                                {user.avatar ? (
+                                <Image
+                                    alt={user?.username as string}
+                                    src={user?.avatar as string}
+                                    fill
+                                    className="object-cover"
+                                />
+                                ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                    <UserIcon className="h-5 w-5 text-muted-foreground/50" />
+                                </div>
+                                )}
+                            </div>
+                            <div>
+                            <p className="font-semibold text-foreground text-sm">
+                                {user.username}
+                            </p>
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Mail className="h-3 w-3" />
+                                <span>{user.email}</span>
+                            </div>
+                            </div>
+                        </div>
+                    </TableCell>
+                    <TableCell>{getRoleBadge(user.roles || "user")}</TableCell>
+                    <TableCell>
+                        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                        <MapPin className="h-3 w-3 shrink-0" />
+                        <span className="line-clamp-1 max-w-[200px]">
+                            {getPrimaryAddress(user.addresses)}
+                        </span>
+                        </div>
+                    </TableCell>
+                    <TableCell>
+                        {getVerifiedBadge(user.isVerifiedEmail)}
+                    </TableCell>
+                    <TableCell>
+                        <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+                        <Calendar className="h-3 w-3" />
+                        <span>{formatDate(user.createdAt)}</span>
+                        </div>
+                    </TableCell>
+                    <TableCell className="text-right pr-6">
+                        <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                             <Button variant="ghost" className="h-8 w-8 p-0 rounded-lg hover:bg-gray-100">
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                            align="end"
+                            className="rounded-xl border-border/50 shadow-lg p-1"
+                        >
+                            <DropdownMenuLabel className="text-xs font-normal text-muted-foreground px-2 py-1.5">Actions</DropdownMenuLabel>
+                            <DropdownMenuItem
+                            onClick={() => onView(user)}
+                             className="cursor-pointer rounded-lg gap-2"
+                            >
+                            <Eye className="h-4 w-4" />
+                            View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                            onClick={() => onEdit(user)}
+                             className="cursor-pointer rounded-lg gap-2"
+                            >
+                            <Edit className="h-4 w-4" />
+                            Edit User
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="bg-border/50 my-1" />
+                            <DropdownMenuItem
+                             className="cursor-pointer rounded-lg gap-2 text-destructive focus:text-destructive focus:bg-destructive/10"
+                            onClick={() => onDelete(user)}
+                            >
+                            <Trash2 className="h-4 w-4" />
+                            Delete User
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                        </DropdownMenu>
+                    </TableCell>
+                    </TableRow>
+                ))
+                )}
+            </TableBody>
+            </Table>
+        </div>
       </div>
     </div>
   );

@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { variants } from "@/types/product";
 import { Switch } from "@/components/ui/switch";
-import { X, Upload } from "lucide-react";
+import { X, Upload, Plus } from "lucide-react";
 import Image from "next/image";
 
 interface CreateModelProductProps {
@@ -118,30 +118,25 @@ export function CreateModelProduct({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-background border-border text-foreground max-w-4xl max-h-[90vh] overflow-y-auto rounded-none p-0 gap-0 no-scrollbar">
-        <DialogHeader className="p-6 border-b border-border">
-          <DialogTitle className="text-xl font-bold uppercase tracking-tight">
-            Create New Product
+      <DialogContent className="rounded-[2rem] border-border/50 bg-white/80 dark:bg-[#1C1C1E]/80 backdrop-blur-xl shadow-2xl p-6 max-w-4xl max-h-[90vh] overflow-y-auto no-scrollbar">
+        <DialogHeader className="border-b border-border/50 pb-6">
+          <DialogTitle className="text-2xl font-bold tracking-tight">
+            Create Product
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            Add a new product to your store
+            Add a new product to your inventory
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="p-6 space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-8 pt-6">
           <div className="grid grid-cols-2 gap-8">
             {/* Thông tin cơ bản */}
             <div className="space-y-6">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-foreground border-b border-border pb-2">
-                Basic Info
+              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                Basic Information
               </h3>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="name"
-                    className="text-xs font-bold uppercase text-muted-foreground"
-                  >
-                    Product Name *
-                  </Label>
+                  <Label htmlFor="name" className="text-sm font-medium">Product Name</Label>
                   <Input
                     id="name"
                     value={formData.name}
@@ -150,17 +145,12 @@ export function CreateModelProduct({
                     }
                     required
                     disabled={isLoading}
-                    className="rounded-none border-border focus-visible:ring-0 focus-visible:border-primary"
+                    className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all shadow-sm"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="slug"
-                    className="text-xs font-bold uppercase text-muted-foreground"
-                  >
-                    Slug *
-                  </Label>
+                  <Label htmlFor="slug" className="text-sm font-medium">Slug</Label>
                   <Input
                     id="slug"
                     value={formData.slug}
@@ -169,113 +159,95 @@ export function CreateModelProduct({
                     }
                     required
                     disabled={isLoading}
-                    className="rounded-none border-border focus-visible:ring-0 focus-visible:border-primary"
+                    className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all shadow-sm"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="category"
-                    className="text-xs font-bold uppercase text-muted-foreground"
-                  >
-                    Category *
-                  </Label>
-                  <Input
-                    id="category"
-                    value={formData.category}
-                    onChange={(e) =>
-                      setFormData({ ...formData, category: e.target.value })
-                    }
-                    required
-                    disabled={isLoading}
-                    className="rounded-none border-border focus-visible:ring-0 focus-visible:border-primary"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="brand"
-                    className="text-xs font-bold uppercase text-muted-foreground"
-                  >
-                    Brand *
-                  </Label>
-                  <Input
-                    id="brand"
-                    value={formData.brand}
-                    onChange={(e) =>
-                      setFormData({ ...formData, brand: e.target.value })
-                    }
-                    required
-                    disabled={isLoading}
-                    className="rounded-none border-border focus-visible:ring-0 focus-visible:border-primary"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="category" className="text-sm font-medium">Category</Label>
+                    <Input
+                      id="category"
+                      value={formData.category}
+                      onChange={(e) =>
+                        setFormData({ ...formData, category: e.target.value })
+                      }
+                      required
+                      disabled={isLoading}
+                      className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all shadow-sm"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="brand" className="text-sm font-medium">Brand</Label>
+                    <Input
+                      id="brand"
+                      value={formData.brand}
+                      onChange={(e) =>
+                        setFormData({ ...formData, brand: e.target.value })
+                      }
+                      required
+                      disabled={isLoading}
+                      className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all shadow-sm"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Giá và trạng thái */}
             <div className="space-y-6">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-foreground border-b border-border pb-2">
-                Price & Status
+              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                Pricing & Status
               </h3>
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="currentPrice"
-                    className="text-xs font-bold uppercase text-muted-foreground"
-                  >
-                    Current Price *
-                  </Label>
-                  <Input
-                    id="currentPrice"
-                    type="number"
-                    value={formData.price.currentPrice}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        price: {
-                          ...formData.price,
-                          currentPrice: Number(e.target.value),
-                        },
-                      })
-                    }
-                    required
-                    disabled={isLoading}
-                    className="rounded-none border-border focus-visible:ring-0 focus-visible:border-primary"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                   <div className="space-y-2">
+                      <Label htmlFor="currentPrice" className="text-sm font-medium">Current Price</Label>
+                      <Input
+                        id="currentPrice"
+                        type="number"
+                        value={formData.price.currentPrice}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            price: {
+                              ...formData.price,
+                              currentPrice: Number(e.target.value),
+                            },
+                          })
+                        }
+                        required
+                        disabled={isLoading}
+                        className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all shadow-sm"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="discountPrice" className="text-sm font-medium">Discount Price</Label>
+                      <Input
+                        id="discountPrice"
+                        type="number"
+                        value={formData.price.discountPrice}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            price: {
+                              ...formData.price,
+                              discountPrice: Number(e.target.value),
+                            },
+                          })
+                        }
+                        disabled={isLoading}
+                        className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all shadow-sm"
+                      />
+                    </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="discountPrice"
-                    className="text-xs font-bold uppercase text-muted-foreground"
-                  >
-                    Discount Price
-                  </Label>
-                  <Input
-                    id="discountPrice"
-                    type="number"
-                    value={formData.price.discountPrice}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        price: {
-                          ...formData.price,
-                          discountPrice: Number(e.target.value),
-                        },
-                      })
-                    }
-                    disabled={isLoading}
-                    className="rounded-none border-border focus-visible:ring-0 focus-visible:border-primary"
-                  />
-                </div>
-
-                <div className="space-y-3 pt-2">
-                  <div className="flex items-center justify-between border p-3 border-border">
-                    <Label htmlFor="isActive" className="text-sm font-medium">
-                      Active
-                    </Label>
+                <div className="p-4 bg-gray-50/50 rounded-xl border border-border/50 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="isActive" className="text-sm font-medium cursor-pointer">Active Status</Label>
                     <Switch
+                      id="isActive"
                       checked={formData.isActive}
                       onCheckedChange={(checked) =>
                         setFormData({ ...formData, isActive: checked })
@@ -283,15 +255,10 @@ export function CreateModelProduct({
                       disabled={isLoading}
                     />
                   </div>
-
-                  <div className="flex items-center justify-between border p-3 border-border">
-                    <Label
-                      htmlFor="isNewArrival"
-                      className="text-sm font-medium"
-                    >
-                      New Arrival
-                    </Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="isNewArrival" className="text-sm font-medium cursor-pointer">New Arrival</Label>
                     <Switch
+                      id="isNewArrival"
                       checked={formData.isNewArrival}
                       onCheckedChange={(checked) =>
                         setFormData({ ...formData, isNewArrival: checked })
@@ -299,12 +266,10 @@ export function CreateModelProduct({
                       disabled={isLoading}
                     />
                   </div>
-
-                  <div className="flex items-center justify-between border p-3 border-border">
-                    <Label htmlFor="isFeatured" className="text-sm font-medium">
-                      Featured
-                    </Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="isFeatured" className="text-sm font-medium cursor-pointer">Featured Product</Label>
                     <Switch
+                      id="isFeatured"
                       checked={formData.isFeatured}
                       onCheckedChange={(checked) =>
                         setFormData({ ...formData, isFeatured: checked })
@@ -312,12 +277,10 @@ export function CreateModelProduct({
                       disabled={isLoading}
                     />
                   </div>
-
-                  <div className="flex items-center justify-between border p-3 border-border">
-                    <Label htmlFor="onSale" className="text-sm font-medium">
-                      On Sale
-                    </Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="onSale" className="text-sm font-medium cursor-pointer">On Sale</Label>
                     <Switch
+                      id="onSale"
                       checked={formData.onSale}
                       onCheckedChange={(checked) =>
                         setFormData({ ...formData, onSale: checked })
@@ -331,134 +294,132 @@ export function CreateModelProduct({
           </div>
 
           {/* Mô tả */}
-          <div className="space-y-2">
-            <Label
-              htmlFor="description"
-              className="text-xs font-bold uppercase text-muted-foreground"
-            >
-              Product Description
-            </Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-              rows={4}
-              disabled={isLoading}
-              className="rounded-none border-border focus-visible:ring-0 focus-visible:border-primary resize-none"
-            />
-          </div>
-
-          {/* Tags */}
-          <div className="space-y-2">
-            <Label
-              htmlFor="tags"
-              className="text-xs font-bold uppercase text-muted-foreground"
-            >
-              Tags
-            </Label>
-            <div className="flex gap-2">
-              <Input
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-                placeholder="Add tag..."
+          <div className="space-y-4">
+             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                Details
+              </h3>
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-sm font-medium">Description</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+                rows={4}
                 disabled={isLoading}
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    addTag();
-                  }
-                }}
-                className="rounded-none border-border focus-visible:ring-0 focus-visible:border-primary"
+                className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all shadow-sm resize-none"
+              />
+            </div>
+
+            {/* Tags */}
+            <div className="space-y-2">
+              <Label htmlFor="tags" className="text-sm font-medium">Tags</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  placeholder="Add a tag..."
+                  disabled={isLoading}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addTag();
+                    }
+                  }}
+                  className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all shadow-sm"
+                />
+                <Button
+                  type="button"
+                  onClick={addTag}
+                  disabled={isLoading}
+                  className="rounded-xl bg-black text-white hover:bg-black/90 dark:bg-[#0071e3]"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {formData.tags.map((tag, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-lg text-sm text-foreground"
+                  >
+                    <span>{tag}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeTag(tag)}
+                      className="text-muted-foreground hover:text-foreground ml-1"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Hình ảnh */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Product Images</Label>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImageChange}
+                ref={fileInputRef}
+                className="hidden"
               />
               <Button
                 type="button"
-                onClick={addTag}
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
                 disabled={isLoading}
-                className="rounded-none bg-primary text-primary-foreground hover:bg-primary/90"
+                className="w-full h-32 flex flex-col items-center justify-center border-dashed border-2 border-border/50 rounded-xl hover:bg-gray-50/50 hover:border-primary/50 transition-all"
               >
-                Add
+                <div className="bg-gray-100 p-3 rounded-full mb-2">
+                    <Upload className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <span className="text-sm text-muted-foreground font-medium">Click to upload images</span>
               </Button>
-            </div>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {formData.tags.map((tag, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-1 bg-muted px-2 py-1 text-xs font-medium uppercase tracking-wide"
-                >
-                  <span>{tag}</span>
-                  <button
-                    type="button"
-                    onClick={() => removeTag(tag)}
-                    className="text-muted-foreground hover:text-foreground ml-1"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
+              
+              {images.length > 0 && (
+                <div className="grid grid-cols-5 gap-4 mt-4">
+                  {images.map((file, index) => (
+                    <div key={index} className="relative aspect-square group rounded-xl overflow-hidden border border-border/50">
+                      <Image
+                        src={URL.createObjectURL(file)}
+                        alt={`Preview ${index}`}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100px, 150px"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/80"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
           </div>
 
-          {/* Hình ảnh */}
-          <div className="space-y-2">
-            <Label className="text-xs font-bold uppercase text-muted-foreground">
-              Product Images
-            </Label>
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={handleImageChange}
-              ref={fileInputRef}
-              className="hidden"
-            />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isLoading}
-              className="flex items-center gap-2 rounded-none border-border hover:bg-muted w-full h-24 border-dashed"
-            >
-              <Upload className="h-4 w-4" />
-              Choose Images
-            </Button>
-            <div className="grid grid-cols-4 gap-4 mt-4">
-              {images.map((file, index) => (
-                <div key={index} className="relative h-24 group">
-                  <Image
-                    src={URL.createObjectURL(file)}
-                    alt={`Preview ${index}`}
-                    fill
-                    className="object-cover border border-border"
-                    sizes="25vw"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(index)}
-                    className="absolute -top-2 -right-2 bg-primary text-primary-foreground p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-6 border-t border-border">
+          <div className="flex justify-end gap-3 pt-6 border-t border-border/50">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
-              className="rounded-none border-border hover:bg-muted"
+              className="rounded-xl h-11 px-6 border-gray-200"
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-none min-w-[120px]"
               disabled={isLoading}
+              className="rounded-xl h-11 px-8 bg-black text-white hover:bg-black/90 dark:bg-[#0071e3] shadow-sm"
             >
               {isLoading ? "Creating..." : "Create Product"}
             </Button>

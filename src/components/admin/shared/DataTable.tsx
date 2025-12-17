@@ -16,7 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
 import SearchFilterBar from "./SearchFilterBar";
 import React from "react";
 
@@ -62,7 +62,7 @@ const DataTable: React.FC<DataTableProps> = ({
   data,
   actions = [],
   enableSearch = true,
-  searchPlaceholder = "Tìm kiếm...",
+  searchPlaceholder = "Search...",
   enableFilter = true,
   enableExport = false,
   pagination,
@@ -85,23 +85,22 @@ const DataTable: React.FC<DataTableProps> = ({
         enableExport={enableExport}
         onSearchChange={onSearchChange}
         onExport={onExport}
+        className="bg-white/50 p-4 rounded-[1.5rem] backdrop-blur-xl border border-border/50"
       />
 
       {/* Table */}
-      <Card>
-        <div className="p-4">
-          <div className="border rounded-lg mt-4 overflow-x-auto no-scrollbar">
-            <div className="p-4">
+      <div className="rounded-[2rem] border border-border/50 bg-white/60 dark:bg-[#1C1C1E]/60 backdrop-blur-xl shadow-sm overflow-hidden">
+        <div className="overflow-x-auto no-scrollbar">
               <Table>
-                <TableHeader>
-                  <TableRow>
+                <TableHeader className="bg-gray-50/50">
+                  <TableRow className="border-border/50 hover:bg-transparent">
                     {columns.map((column) => (
-                      <TableHead key={column.key} className={column.className}>
+                      <TableHead key={column.key} className={`uppercase text-xs font-bold tracking-wider text-muted-foreground ${column.className || ""}`}>
                         {column.title}
                       </TableHead>
                     ))}
                     {actions.length > 0 && (
-                      <TableHead className="text-right">Thao tác</TableHead>
+                      <TableHead className="text-right uppercase text-xs font-bold tracking-wider text-muted-foreground pr-6">Actions</TableHead>
                     )}
                   </TableRow>
                 </TableHeader>
@@ -109,10 +108,10 @@ const DataTable: React.FC<DataTableProps> = ({
                   {data.length > 0 ? (
                     data.map((item, index) => (
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      <TableRow key={(item as any).id || index}>
+                      <TableRow key={(item as any).id || index} className="border-border/50 hover:bg-gray-50/50 transition-colors">
                         {columns.map((column) => (
                           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          <TableCell key={`${(item as any).id || index}-${column.key}`}>
+                          <TableCell key={`${(item as any).id || index}-${column.key}`} className="py-4">
                             {column.render
                               ? column.render(item)
                               : // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -120,28 +119,28 @@ const DataTable: React.FC<DataTableProps> = ({
                           </TableCell>
                         ))}
                         {actions.length > 0 && (
-                          <TableCell className="text-right">
+                          <TableCell className="text-right pr-6">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon">
+                                <Button variant="ghost" className="h-8 w-8 p-0 rounded-lg hover:bg-gray-100">
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
+                              <DropdownMenuContent align="end" className="rounded-xl border-border/50 shadow-lg p-1">
+                                <DropdownMenuLabel className="text-xs font-normal text-muted-foreground px-2 py-1.5">Actions</DropdownMenuLabel>
+                                <DropdownMenuSeparator className="bg-border/50 my-1" />
                                 {actions.map((action, idx) => (
                                   <DropdownMenuItem
                                     key={idx}
                                     onClick={() => handleAction(action, item)}
-                                    className={
+                                    className={`cursor-pointer rounded-lg gap-2 ${
                                       action.variant === "destructive"
-                                        ? "text-destructive"
+                                        ? "text-destructive focus:text-destructive focus:bg-destructive/10"
                                         : ""
-                                    }
+                                    }`}
                                   >
                                     {action.icon && (
-                                      <span className="mr-2">
+                                      <span className="h-4 w-4 flex items-center justify-center">
                                         {action.icon}
                                       </span>
                                     )}
@@ -158,77 +157,49 @@ const DataTable: React.FC<DataTableProps> = ({
                     <TableRow>
                       <TableCell
                         colSpan={columns.length + (actions.length > 0 ? 1 : 0)}
-                        className="text-center py-8"
+                        className="text-center py-12 text-muted-foreground"
                       >
-                        Không có dữ liệu
+                        No data available
                       </TableCell>
                     </TableRow>
                   )}
                 </TableBody>
               </Table>
-
-              {/* Pagination */}
-              {pagination && (
-                <div className="flex items-center justify-between mt-6">
-                  <div className="text-sm text-muted-foreground">
-                    Hiển thị{" "}
-                    {(pagination.currentPage - 1) *
-                      (pagination.itemsPerPage || 10) +
-                      1}{" "}
-                    đến{" "}
-                    {Math.min(
-                      pagination.currentPage * (pagination.itemsPerPage || 10),
-                      pagination.totalItems
-                    )}{" "}
-                    của {pagination.totalItems} mục
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={pagination.currentPage === 1}
-                      onClick={() => onPageChange?.(pagination.currentPage - 1)}
-                    >
-                      Trước
-                    </Button>
-                    {Array.from(
-                      { length: Math.min(5, pagination.totalPages) },
-                      (_, i) => {
-                        const pageNum = i + 1;
-                        return (
-                          <Button
-                            key={pageNum}
-                            variant="outline"
-                            size="sm"
-                            className={
-                              pagination.currentPage === pageNum
-                                ? "bg-muted"
-                                : ""
-                            }
-                            onClick={() => onPageChange?.(pageNum)}
-                          >
-                            {pageNum}
-                          </Button>
-                        );
-                      }
-                    )}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={
-                        pagination.currentPage === pagination.totalPages
-                      }
-                      onClick={() => onPageChange?.(pagination.currentPage + 1)}
-                    >
-                      Sau
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
-      </Card>
+      </div>
+
+       {/* Pagination */}
+       {pagination && (
+        <div className="flex items-center justify-between px-2 w-full mt-4">
+            <div className="text-sm text-muted-foreground">
+            Showing <span className="font-medium text-foreground">{(pagination.currentPage - 1) * (pagination.itemsPerPage || 10) + 1}</span> to <span className="font-medium text-foreground">{Math.min(pagination.currentPage * (pagination.itemsPerPage || 10), pagination.totalItems)}</span> of <span className="font-medium text-foreground">{pagination.totalItems}</span> entries
+            </div>
+            <div className="flex items-center space-x-2">
+                <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8 rounded-lg border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50"
+                    disabled={pagination.currentPage === 1}
+                    onClick={() => onPageChange?.(pagination.currentPage - 1)}
+                >
+                    <ChevronLeft className="h-4 w-4" />
+                </Button>
+                {/* Simplified pagination numbers for cleaner look, mirroring other components */}
+                <span className="text-sm font-medium text-foreground min-w-[3rem] text-center">
+                    {pagination.currentPage} / {pagination.totalPages}
+                </span>
+                <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8 rounded-lg border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50"
+                    disabled={pagination.currentPage === pagination.totalPages}
+                    onClick={() => onPageChange?.(pagination.currentPage + 1)}
+                >
+                    <ChevronRight className="h-4 w-4" />
+                </Button>
+            </div>
+        </div>
+        )}
     </div>
   );
 };

@@ -1,13 +1,10 @@
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { Card, CardContent } from "../ui/card";
+import { ProductCard } from "./ProductCard";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { toast } from "sonner";
 import { useEffect } from "react";
 import { getOnSaleProducts } from "@/features/product/productAction";
-import Image from "next/image";
 import Link from "next/link";
-
-import { Badge } from "../ui/badge";
 import { motion } from "framer-motion";
 
 export default function OnSaleProduct() {
@@ -67,65 +64,13 @@ export default function OnSaleProduct() {
             className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
           >
             {saleProducts.length > 0 ? (
-              saleProducts.map((p) => {
-                if (!p.price?.currentPrice || !p.price?.discountPrice)
-                  return null;
-
-
-
-                return (
-                  <motion.div key={p._id} variants={item}>
-                    <Link href={`/products/${p.slug}`} className="group block">
-                      <Card className="overflow-hidden border-0 shadow-none bg-transparent">
-                        <CardContent className="p-0">
-                          <div className="relative aspect-[3/4] overflow-hidden bg-muted mb-3">
-                            {p.images && p.images.length > 0 ? (
-                              <Image
-                                src={p.images[0]}
-                                alt={p.name}
-                                fill
-                                className="object-cover group-hover:scale-105 transition-transform duration-500"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-muted">
-                                <span className="text-muted-foreground text-xs">
-                                  No Image
-                                </span>
-                              </div>
-                            )}
-
-                            <Badge className="absolute top-2 left-2 bg-black text-white border-0 text-[10px] h-5 px-2">
-                              SALE
-                            </Badge>
-                          </div>
-
-                          <div className="space-y-1">
-                            <h3 className="font-medium text-sm line-clamp-1 group-hover:underline">
-                              {p.name}
-                            </h3>
-                            <p className="text-xs text-muted-foreground">
-                              {p.brand}
-                            </p>
-                            <div className="flex items-baseline gap-2 pt-1">
-                              <span className="font-semibold text-sm">
-                                {new Intl.NumberFormat("vi-VN", {
-                                  style: "currency",
-                                  currency: "VND",
-                                }).format(p.price.discountPrice)}
-                              </span>
-                              <span className="text-xs text-muted-foreground line-through">
-                                {new Intl.NumberFormat("vi-VN", {
-                                  style: "currency",
-                                  currency: "VND",
-                                }).format(p.price.currentPrice)}
-                              </span>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  </motion.div>
-                );
+              saleProducts.slice(0, 8).map((p) => {
+                 if (!p.price?.currentPrice || !p.price?.discountPrice) return null;
+                 return (
+                   <motion.div key={p._id} variants={item}>
+                     <ProductCard product={p} />
+                   </motion.div>
+                 );
               })
             ) : (
               <div className="col-span-full text-center py-20">

@@ -150,7 +150,7 @@ export function ProductsTable({
 
     return (
       <div className="flex flex-col">
-        <span className="font-medium">{currentPrice.toLocaleString()}₫</span>
+        <span className="font-medium text-foreground">{currentPrice.toLocaleString()}₫</span>
         {discountPrice > 0 && discountPrice !== currentPrice && (
           <span className="text-xs text-muted-foreground line-through">
             {discountPrice.toLocaleString()}₫
@@ -173,15 +173,15 @@ export function ProductsTable({
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-1 items-center space-x-2">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-white/50 dark:bg-white/5 p-4 rounded-[1.5rem] backdrop-blur-xl border border-border/50">
+        <div className="flex flex-1 items-center space-x-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar">
+          <div className="relative flex-1 min-w-[200px] max-w-sm">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search products..."
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
-              className="pl-8 rounded-none border-border focus-visible:ring-0 focus-visible:border-primary"
+              className="pl-9 rounded-xl border-gray-200 bg-white/80 focus-visible:ring-0 focus-visible:border-primary transition-all shadow-sm"
             />
           </div>
 
@@ -190,10 +190,10 @@ export function ProductsTable({
             value={selectedCategory}
             onValueChange={onCategoryFilterChange}
           >
-            <SelectTrigger className="w-[180px] rounded-none border-border focus:ring-0 focus:border-primary">
+            <SelectTrigger className="w-[160px] rounded-xl border-gray-200 bg-white/80 focus:ring-0 shadow-sm">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
-            <SelectContent className="rounded-none border-border">
+            <SelectContent className="rounded-xl border-border/50">
               <SelectItem value="all">All Categories</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category.id} value={category.id}>
@@ -205,10 +205,10 @@ export function ProductsTable({
 
           {/* Brand Filter */}
           <Select value={selectedBrand} onValueChange={onBrandFilterChange}>
-            <SelectTrigger className="w-[180px] rounded-none border-border focus:ring-0 focus:border-primary">
+            <SelectTrigger className="w-[140px] rounded-xl border-gray-200 bg-white/80 focus:ring-0 shadow-sm">
               <SelectValue placeholder="Brand" />
             </SelectTrigger>
-            <SelectContent className="rounded-none border-border">
+            <SelectContent className="rounded-xl border-border/50">
               <SelectItem value="all">All Brands</SelectItem>
               {brands.map((brand) => (
                 <SelectItem key={brand} value={brand}>
@@ -222,36 +222,36 @@ export function ProductsTable({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="flex items-center gap-2 rounded-none border-border hover:bg-muted"
+                className="flex items-center gap-2 rounded-xl border-gray-200 bg-white/80 hover:bg-gray-50 shadow-sm"
               >
                 <Filter className="h-4 w-4" />
                 Price
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-80 p-4 rounded-none border-border">
+            <DropdownMenuContent className="w-80 p-4 rounded-xl border-border/50">
               <DropdownMenuLabel className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
                 Filter by price
               </DropdownMenuLabel>
               <div className="space-y-3 mt-2">
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Min Price"
+                    placeholder="Min"
                     value={localMinPrice}
                     onChange={(e) => setLocalMinPrice(e.target.value)}
                     type="number"
-                    className="rounded-none border-border focus-visible:ring-0 focus-visible:border-primary"
+                    className="rounded-lg"
                   />
                   <Input
-                    placeholder="Max Price"
+                    placeholder="Max"
                     value={localMaxPrice}
                     onChange={(e) => setLocalMaxPrice(e.target.value)}
                     type="number"
-                    className="rounded-none border-border focus-visible:ring-0 focus-visible:border-primary"
+                    className="rounded-lg"
                   />
                 </div>
                 <Button
                   onClick={handlePriceFilterApply}
-                  className="w-full rounded-none bg-primary text-primary-foreground hover:bg-primary/90"
+                  className="w-full rounded-lg bg-black text-white hover:bg-black/90 dark:bg-[#0071e3]"
                 >
                   Apply
                 </Button>
@@ -270,10 +270,10 @@ export function ProductsTable({
               }
             }}
           >
-            <SelectTrigger className="w-[180px] rounded-none border-border focus:ring-0 focus:border-primary">
+            <SelectTrigger className="w-[140px] rounded-xl border-gray-200 bg-white/80 focus:ring-0 shadow-sm">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
-            <SelectContent className="rounded-none border-border">
+            <SelectContent className="rounded-xl border-border/50">
               <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="true">Active</SelectItem>
               <SelectItem value="false">Inactive</SelectItem>
@@ -286,50 +286,50 @@ export function ProductsTable({
           value={pageSize.toString()}
           onValueChange={(value) => onPageSizeChange(Number(value))}
         >
-          <SelectTrigger className="w-[180px] rounded-none border-border focus:ring-0 focus:border-primary">
+          <SelectTrigger className="w-[120px] rounded-xl border-gray-200 bg-white/80 focus:ring-0 shadow-sm">
             <SelectValue placeholder="Show" />
           </SelectTrigger>
-          <SelectContent className="rounded-none border-border">
-            <SelectItem value="10">10 products</SelectItem>
-            <SelectItem value="20">20 products</SelectItem>
-            <SelectItem value="50">50 products</SelectItem>
+          <SelectContent className="rounded-xl border-border/50">
+            <SelectItem value="10">10 / page</SelectItem>
+            <SelectItem value="20">20 / page</SelectItem>
+            <SelectItem value="50">50 / page</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       {/* Table */}
-      <div className="rounded-none border border-border overflow-x-auto no-scrollbar">
+      <div className="rounded-[2rem] border border-border/50 bg-white/60 dark:bg-[#1C1C1E]/60 backdrop-blur-xl overflow-hidden shadow-sm">
         <Table>
-          <TableHeader>
-            <TableRow className="bg-muted/50 hover:bg-muted/50 border-border">
-              <TableHead className="w-[50px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
+          <TableHeader className="bg-gray-50/50">
+            <TableRow className="border-border/50 hover:bg-transparent">
+              <TableHead className="w-[70px] uppercase text-xs font-bold tracking-wider text-muted-foreground pl-6">
                 Image
               </TableHead>
               <TableHead className="w-[250px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
                 Product Name
               </TableHead>
-              <TableHead className="w-[120px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
+              <TableHead className="w-[140px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
                 Category
               </TableHead>
-              <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
+              <TableHead className="w-[120px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
                 Brand
               </TableHead>
-              <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
+              <TableHead className="w-[120px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
                 Price
               </TableHead>
-              <TableHead className="w-[80px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
+              <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
                 Stock
               </TableHead>
-              <TableHead className="w-[80px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
+              <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
                 Sold
               </TableHead>
               <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
                 Status
               </TableHead>
-              <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
+              <TableHead className="w-[120px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
                 Created At
               </TableHead>
-              <TableHead className="w-[50px] uppercase text-xs font-bold tracking-wider text-muted-foreground text-right">
+              <TableHead className="w-[50px] uppercase text-xs font-bold tracking-wider text-muted-foreground text-right pr-6">
                 Actions
               </TableHead>
             </TableRow>
@@ -337,7 +337,7 @@ export function ProductsTable({
           <TableBody>
             {isLoading && (
               <TableRow>
-                <TableCell colSpan={10} className="h-24 text-center">
+                <TableCell colSpan={10} className="h-32 text-center">
                   <div className="flex justify-center items-center">
                     <SpinnerLoading />
                   </div>
@@ -346,7 +346,7 @@ export function ProductsTable({
             )}
             {!isLoading && products.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={10} className="h-24 text-center">
+                <TableCell colSpan={10} className="h-32 text-center text-muted-foreground">
                   No products found.
                 </TableCell>
               </TableRow>
@@ -354,20 +354,22 @@ export function ProductsTable({
               products.map((product) => (
                 <TableRow
                   key={product._id}
-                  className={`border-border hover:bg-muted/50 ${
+                  className={`border-border/50 hover:bg-gray-50/50 transition-colors ${
                     isLoading ? "opacity-50 pointer-events-none" : ""
                   }`}
                 >
-                  <TableCell>
+                  <TableCell className="pl-6">
                     {product.images && product.images.length > 0 ? (
-                      <img
-                        src={product.images[0]}
-                        alt={product.name}
-                        className="h-10 w-10 object-cover border border-border"
-                      />
+                      <div className="relative h-12 w-12 rounded-xl overflow-hidden shadow-sm border border-border/50">
+                         <img
+                           src={product.images[0]}
+                           alt={product.name}
+                           className="h-full w-full object-cover"
+                         />
+                      </div>
                     ) : (
-                      <div className="h-10 w-10 bg-muted flex items-center justify-center border border-border">
-                        <Package className="h-4 w-4 text-muted-foreground" />
+                      <div className="h-12 w-12 rounded-xl bg-gray-100 flex items-center justify-center border border-border/50">
+                        <Package className="h-5 w-5 text-muted-foreground" />
                       </div>
                     )}
                   </TableCell>
@@ -375,7 +377,7 @@ export function ProductsTable({
                     <div className="max-w-[250px]">
                       <div className="flex items-center gap-2">
                         <div
-                          className="text-foreground truncate font-medium"
+                          className="text-foreground truncate font-medium text-sm"
                           title={product.name}
                         >
                           {product.name}
@@ -384,7 +386,7 @@ export function ProductsTable({
                           {product.isNewArrival && (
                             <Badge
                               variant="secondary"
-                              className="h-4 px-1 text-[9px] rounded-sm bg-info/10 text-info border-info/20"
+                              className="h-5 px-1.5 text-[10px] rounded-md bg-blue-50 text-blue-600 border border-blue-100 dark:bg-blue-500/10 dark:text-blue-400"
                             >
                               New
                             </Badge>
@@ -392,7 +394,7 @@ export function ProductsTable({
                           {product.isFeatured && (
                             <Badge
                               variant="secondary"
-                              className="h-4 px-1 text-[9px] rounded-sm bg-primary/10 text-primary border-primary/20"
+                              className="h-5 px-1.5 text-[10px] rounded-md bg-purple-50 text-purple-600 border border-purple-100 dark:bg-purple-500/10 dark:text-purple-400"
                             >
                               Hot
                             </Badge>
@@ -400,7 +402,7 @@ export function ProductsTable({
                           {product.onSale && (
                             <Badge
                               variant="secondary"
-                              className="h-4 px-1 text-[9px] rounded-sm bg-destructive/10 text-destructive border-destructive/20"
+                              className="h-5 px-1.5 text-[10px] rounded-md bg-red-50 text-red-600 border border-red-100 dark:bg-red-500/10 dark:text-red-400"
                             >
                               Sale
                             </Badge>
@@ -408,24 +410,24 @@ export function ProductsTable({
                         </div>
                       </div>
                       <div
-                        className="text-xs text-muted-foreground font-normal truncate"
+                        className="text-xs text-muted-foreground font-normal truncate mt-0.5"
                         title={product.slug}
                       >
                         {product.slug}
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
+                  <TableCell className="text-muted-foreground text-sm">
                     <div
-                      className="max-w-[120px] truncate"
+                      className="max-w-[140px] truncate"
                       title={getCategoryName(product.category)}
                     >
                       {getCategoryName(product.category)}
                     </div>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
+                  <TableCell className="text-muted-foreground text-sm">
                     <div
-                      className="max-w-[100px] truncate"
+                      className="max-w-[120px] truncate"
                       title={product.brand || "None"}
                     >
                       {product.brand || "None"}
@@ -435,7 +437,7 @@ export function ProductsTable({
                   <TableCell>
                     <Badge
                       variant="outline"
-                      className="rounded-none border-border font-normal"
+                      className="rounded-lg border-border/50 font-normal bg-white/50"
                     >
                       {getStockCount(product)}
                     </Badge>
@@ -448,10 +450,10 @@ export function ProductsTable({
                   <TableCell>
                     <Badge
                       variant={product.isActive ? "default" : "secondary"}
-                      className={`rounded-none font-normal whitespace-nowrap ${
+                      className={`rounded-lg font-medium px-2.5 py-0.5 shadow-none border-0 ${
                         product.isActive
-                          ? "bg-success/10 text-success hover:bg-success/20"
-                          : "bg-muted text-muted-foreground hover:bg-muted/80"
+                          ? "bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-500/10 dark:text-green-400"
+                          : "bg-gray-100 text-gray-600 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400"
                       }`}
                     >
                       {product.isActive ? "Active" : "Inactive"}
@@ -460,39 +462,39 @@ export function ProductsTable({
                   <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
                     {new Date(product.createdAt).toLocaleDateString("vi-VN")}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right pr-6">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
-                          className="h-8 w-8 p-0 rounded-none hover:bg-muted"
+                          className="h-8 w-8 p-0 rounded-lg hover:bg-gray-100"
                         >
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent
                         align="end"
-                        className="rounded-none border-border"
+                        className="rounded-xl border-border/50 shadow-lg"
                       >
                         <DropdownMenuItem
                           onClick={() => onView(product)}
-                          className="cursor-pointer"
+                          className="cursor-pointer gap-2"
                         >
-                          <Eye className="h-4 w-4 mr-2" />
+                          <Eye className="h-4 w-4" />
                           View Details
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => onEdit(product)}
-                          className="cursor-pointer"
+                          className="cursor-pointer gap-2"
                         >
-                          <Edit className="h-4 w-4 mr-2" />
+                          <Edit className="h-4 w-4" />
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => onDelete(product)}
-                          className="text-destructive cursor-pointer focus:text-destructive focus:bg-destructive/10"
+                          className="text-destructive cursor-pointer focus:text-destructive focus:bg-destructive/10 gap-2"
                         >
-                          <Trash2 className="h-4 w-4 mr-2" />
+                          <Trash2 className="h-4 w-4" />
                           Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>

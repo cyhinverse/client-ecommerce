@@ -9,13 +9,6 @@ import {
   updateOrderStatus,
   getOrderStatistics,
 } from "@/features/order/orderAction";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { toast } from "sonner";
 import { PaginationControls } from "@/components/admin/categories/PaginationContro";
 import {
@@ -282,11 +275,9 @@ export default function OrdersAdminPage() {
     return (
       <div className="space-y-6">
         <OrdersHeader />
-        <Card>
-          <CardContent className="flex items-center justify-center h-64">
-            <SpinnerLoading />
-          </CardContent>
-        </Card>
+        <div className="flex items-center justify-center h-64 rounded-[2rem] border border-border/40 bg-white/70 dark:bg-[#1C1C1E]/70 shadow-sm backdrop-blur-xl">
+          <SpinnerLoading />
+        </div>
       </div>
     );
   }
@@ -295,38 +286,32 @@ export default function OrdersAdminPage() {
     return (
       <div className="space-y-6">
         <OrdersHeader />
-        <Card>
-          <CardContent className="flex items-center justify-center h-64">
-            <div className="text-red-500 text-center">
-              <div className="text-lg font-semibold mb-2">
-                Error loading orders
-              </div>
-              <div>{orderState.error}</div>
-              <Button onClick={() => window.location.reload()} className="mt-4">
-                Try Again
-              </Button>
+        <div className="flex items-center justify-center h-64 rounded-[2rem] border border-border/40 bg-white/70 dark:bg-[#1C1C1E]/70 shadow-sm backdrop-blur-xl">
+          <div className="text-red-500 text-center">
+            <div className="text-lg font-semibold mb-2">
+              Error loading orders
             </div>
-          </CardContent>
-        </Card>
+            <div>{orderState.error}</div>
+            <Button onClick={() => window.location.reload()} className="mt-4 rounded-xl">
+              Try Again
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 no-scrollbar">
+    <div className="space-y-8 p-1">
+      {/* Header Section */}
       <OrdersHeader />
 
+      {/* Stats Section */}
       {statistics && <OrdersStats {...statistics} />}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Order List</CardTitle>
-          <CardDescription>
-            Manage all orders in the system
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <OrdersTable
+      {/* Main Content Area */}
+      <div className="space-y-6">
+        <OrdersTable
             orders={orders}
             searchTerm={searchTerm}
             statusFilter={statusFilter}
@@ -346,6 +331,13 @@ export default function OrdersAdminPage() {
             onDelete={handleDeleteOrder}
             onView={handleViewOrder}
           />
+          
+          <div className="flex justify-center">
+             <PaginationControls
+              pagination={pagination}
+              onPageChange={handlePageChange}
+             />
+          </div>
 
           <ViewOrderModal
             isOpen={viewModalOpen}
@@ -361,13 +353,7 @@ export default function OrdersAdminPage() {
             order={selectedOrder}
             isLoading={isUpdating}
           />
-
-          <PaginationControls
-            pagination={pagination}
-            onPageChange={handlePageChange}
-          />
-        </CardContent>
-      </Card>
+      </div>
     </div>
   );
 }

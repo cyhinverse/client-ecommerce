@@ -1,6 +1,6 @@
 export function OrdersHeader() {
   return (
-    <div className="flex items-center justify-between border-b border-border pb-6">
+    <div className="flex items-center justify-between border-b border-border/50 pb-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground uppercase">
           Order Management
@@ -9,11 +9,6 @@ export function OrdersHeader() {
           Manage and track all orders in the system
         </p>
       </div>
-      {/* Có thể thêm nút tạo đơn hàng mới nếu cần */}
-      {/* <Button onClick={onAddOrder}>
-        <Plus className="w-4 h-4 mr-2" />
-        Thêm đơn hàng
-      </Button> */}
     </div>
   );
 }

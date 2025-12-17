@@ -7,8 +7,8 @@ import {
   X,
   Loader2,
   Clock,
-  TrendingUp,
   ArrowRight,
+  ShoppingBag,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -157,205 +157,211 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-20 animate-in fade-in duration-200"
+      className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-start justify-center pt-[10vh] sm:pt-[15vh] p-4 animate-in fade-in duration-200"
       onClick={handleClose}
     >
       <div
-        className="bg-background rounded-xl w-full max-w-2xl mx-4 shadow-2xl max-h-[80vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
+        className="w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-5 duration-300 ring-1 ring-black/5"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Search Input */}
-        <div className="flex items-center gap-3 p-4 border-b shrink-0 bg-background/95 backdrop-blur">
-          <Search className="w-5 h-5 text-muted-foreground" />
+        {/* Search Input Area */}
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-border/40">
+          <Search className="w-5 h-5 text-muted-foreground/70" />
           <form onSubmit={(e) => handleSearchSubmit(e)} className="flex-1">
             <Input
               ref={inputRef}
               placeholder="Search products, brands..."
               value={searchQuery}
               onChange={(e) => handleInputChange(e.target.value)}
-              className="border-0 focus-visible:ring-0 text-lg px-0 shadow-none h-11"
+              className="border-0 focus-visible:ring-0 text-lg px-0 shadow-none h-12 bg-transparent placeholder:text-muted-foreground/50"
             />
           </form>
-          {isSearching && (
-            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleClose}
-            className="hover:bg-muted rounded-full"
-          >
-            <X className="w-5 h-5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            {isSearching && (
+              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClose}
+              className="text-xs text-muted-foreground hover:bg-muted/50 rounded-full h-8 px-3"
+            >
+              ESC
+            </Button>
+          </div>
         </div>
 
         {/* Content Area */}
-        <ScrollArea className="flex-1 overflow-y-auto">
-          <div className="p-6">
-            {/* Empty State - Show Recent & Popular */}
-            {!searchQuery && (
-              <div className="space-y-8">
-                {/* Recent Searches */}
-                {recentSearches.length > 0 && (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4" />
-                        <span className="font-medium">Recent Searches</span>
+        <div className="min-h-[300px] max-h-[60vh] overflow-hidden flex flex-col">
+          <ScrollArea className="flex-1">
+            <div className="p-2">
+              {/* Empty State - Show Recent & Popular */}
+              {!searchQuery && (
+                <div className="p-4 space-y-8">
+                  {/* Recent Searches */}
+                  {recentSearches.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider px-2">
+                        <span>Recent Searches</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-auto p-0 text-xs hover:bg-transparent hover:text-destructive font-normal"
+                          onClick={() => {
+                            setRecentSearches([]);
+                            localStorage.removeItem("recentSearches");
+                          }}
+                        >
+                          Clear
+                        </Button>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-auto p-0 text-xs hover:bg-transparent hover:text-destructive"
-                        onClick={() => {
-                          setRecentSearches([]);
-                          localStorage.removeItem("recentSearches");
-                        }}
-                      >
-                        Clear History
-                      </Button>
+                      <div className="grid gap-1">
+                        {recentSearches.map((term) => (
+                          <div
+                            key={term}
+                            className="group flex items-center justify-between px-3 py-2 hover:bg-muted/50 rounded-lg cursor-pointer transition-colors text-sm"
+                            onClick={() => handleSearchSubmit(undefined, term)}
+                          >
+                            <div className="flex items-center gap-3 text-muted-foreground group-hover:text-foreground">
+                                <Clock className="h-4 w-4" />
+                                <span>{term}</span>
+                            </div>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 opacity-0 group-hover:opacity-100 hover:bg-muted/80 hover:text-destructive rounded-full"
+                                onClick={(e) => removeRecentSearch(term, e)}
+                            >
+                                <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      {recentSearches.map((term) => (
-                        <div
+                  )}
+
+                  {/* Popular Searches */}
+                  <div className="space-y-3">
+                    <div className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider px-2">
+                        Popular on Store
+                    </div>
+                    <div className="flex flex-wrap gap-2 px-1">
+                      {POPULAR_SEARCHES.map((term) => (
+                        <Badge
                           key={term}
-                          className="group flex items-center gap-2 px-3 py-1.5 bg-muted/50 hover:bg-muted rounded-full text-sm transition-colors cursor-pointer border border-transparent hover:border-border"
+                          variant="secondary"
+                          className="px-3 py-1.5 cursor-pointer bg-muted/30 hover:bg-primary/10 hover:text-primary transition-colors text-sm font-normal border-transparent"
                           onClick={() => handleSearchSubmit(undefined, term)}
                         >
-                          <span>{term}</span>
-                          <X
-                            className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-destructive transition-opacity"
-                            onClick={(e) => removeRecentSearch(term, e)}
-                          />
+                          {term}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Trending Categories */}
+                  <div className="space-y-3">
+                    <div className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider px-2">
+                        Browse Categories
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {TRENDING_CATEGORIES.map((category) => (
+                        <div
+                          key={category.href}
+                          className="flex items-center gap-3 p-3 rounded-xl border border-border/40 bg-card/50 hover:bg-accent hover:border-accent transition-all cursor-pointer group"
+                          onClick={() => {
+                            router.push(category.href);
+                            handleClose();
+                          }}
+                        >
+                           <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center group-hover:bg-background transition-colors">
+                                <ShoppingBag className="h-4 w-4 text-muted-foreground" />
+                           </div>
+                          <span className="text-sm font-medium">
+                            {category.name}
+                          </span>
                         </div>
                       ))}
                     </div>
                   </div>
-                )}
-
-                {/* Popular Searches */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <TrendingUp className="h-4 w-4" />
-                    <span className="font-medium">Popular Searches</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {POPULAR_SEARCHES.map((term) => (
-                      <Badge
-                        key={term}
-                        variant="secondary"
-                        className="px-3 py-1.5 cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors text-sm font-normal"
-                        onClick={() => handleSearchSubmit(undefined, term)}
-                      >
-                        {term}
-                      </Badge>
-                    ))}
-                  </div>
                 </div>
+              )}
 
-                {/* Trending Categories */}
-                <div className="space-y-3">
-                  <span className="text-sm font-medium text-muted-foreground">
-                    Trending Categories
-                  </span>
-                  <div className="grid grid-cols-2 gap-2">
-                    {TRENDING_CATEGORIES.map((category) => (
-                      <div
-                        key={category.href}
-                        className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 hover:border-accent transition-all cursor-pointer group"
-                        onClick={() => {
-                          router.push(category.href);
-                          handleClose();
-                        }}
-                      >
-                        <span className="text-sm font-medium">
-                          {category.name}
-                        </span>
-                        <ArrowRight className="h-4 w-4 text-muted-foreground -translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Search Results */}
-            {searchQuery && (
-              <div className="space-y-2">
-                {isSearching ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
-                    Searching...
-                  </div>
-                ) : searchResults.length > 0 ? (
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Results for &quot;
-                      <span className="font-medium text-foreground">
-                        {searchQuery}
-                      </span>
-                      &quot;
-                    </p>
-                    {searchResults.map((product) => (
-                      <div
-                        key={product._id}
-                        className="flex items-center gap-4 p-3 hover:bg-muted/50 rounded-lg cursor-pointer transition-colors group"
-                        onClick={() => handleProductClick(product.slug)}
-                      >
-                        <div className="w-14 h-14 bg-muted rounded-md flex items-center justify-center shrink-0 overflow-hidden border">
-                          {product.images && product.images.length > 0 ? (
-                            <Image
-                              width={56}
-                              height={56}
-                              src={product.images[0]}
-                              alt={product.name}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                            />
-                          ) : (
-                            <span className="text-[10px] text-muted-foreground/70">
-                              No Image
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-sm truncate group-hover:text-primary transition-colors">
-                            {product.name}
-                          </h4>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            {typeof product.category === "string"
-                              ? product.category
-                              : product.category?.name || "Chưa phân loại"}
-                          </p>
-                        </div>
-                        <div className="text-sm font-semibold text-foreground shrink-0">
-                          {formatPrice(product.price)}
-                        </div>
-                      </div>
-                    ))}
-
-                    <Button
-                      variant="ghost"
-                      className="w-full mt-4 text-primary hover:text-primary hover:bg-primary/5"
-                      onClick={(e) => handleSearchSubmit(e)}
-                    >
-                      View all results
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-muted mb-4">
-                      <Search className="h-6 w-6 text-muted-foreground" />
+              {/* Search Results */}
+              {searchQuery && (
+                <div className="py-2">
+                  {isSearching ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground/50">
+                      <Loader2 className="w-8 h-8 animate-spin mb-2" />
+                      <p className="text-sm">Searching...</p>
                     </div>
-                    <p className="text-muted-foreground">
-                      No products found for &quot;{searchQuery}&quot;
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </ScrollArea>
+                  ) : searchResults.length > 0 ? (
+                    <div className="space-y-1">
+                      <div className="px-4 py-2 text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider">
+                        Products
+                      </div>
+                      {searchResults.map((product) => (
+                        <div
+                          key={product._id}
+                          className="flex items-center gap-4 px-3 py-2 mx-2 hover:bg-muted/60 rounded-xl cursor-pointer transition-colors group"
+                          onClick={() => handleProductClick(product.slug)}
+                        >
+                          <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shrink-0 overflow-hidden border border-border/50">
+                            {product.images && product.images.length > 0 ? (
+                              <Image
+                                width={48}
+                                height={48}
+                                src={product.images[0]}
+                                alt={product.name}
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                              />
+                            ) : (
+                              <ShoppingBag className="w-5 h-5 text-muted-foreground/30" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-sm text-foreground/90 truncate">
+                              {product.name}
+                            </h4>
+                            <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                              {typeof product.category === "string"
+                                ? product.category
+                                : product.category?.name || "Uncategorized"}
+                            </p>
+                          </div>
+                          <div className="text-sm font-medium tabular-nums text-foreground/80">
+                            {formatPrice(product.price)}
+                          </div>
+                        </div>
+                      ))}
+
+                      <div className="p-2 mt-2">
+                        <Button
+                            variant="ghost"
+                            className="w-full justify-between group text-primary hover:text-primary hover:bg-primary/5"
+                            onClick={(e) => handleSearchSubmit(e)}
+                        >
+                            <span className="text-sm">View all results for &quot;{searchQuery}&quot;</span>
+                            <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-16 text-center px-4">
+                      <div className="bg-muted/50 p-4 rounded-full mb-4">
+                          <Search className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                      <h3 className="text-base font-semibold">No results found</h3>
+                      <p className="text-sm text-muted-foreground mt-1 max-w-xs">
+                        We couldn&apos;t find anything matching &quot;{searchQuery}&quot;. Try a different keyword.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+        </div>
       </div>
     </div>
   );

@@ -14,11 +14,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Card, CardContent } from "@/components/ui/card";
-import { Star, Send, MessageSquare } from "lucide-react";
+import { Star, MessageSquare } from "lucide-react";
 import { useAppDispatch } from "@/hooks/hooks";
 import { createReview } from "@/features/reviews/reviewAction";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 const reviewSchema = z.object({
   rating: z.number().min(1, "Please select a rating").max(5),
@@ -106,93 +106,83 @@ export default function ReviewDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2">
+        <Button variant="outline" className="flex items-center gap-2 rounded-full">
           <MessageSquare className="h-4 w-4" />
           Write a Review
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Write a Review</DialogTitle>
+      <DialogContent className="sm:max-w-md rounded-2xl">
+        <DialogHeader className="text-center">
+          <DialogTitle className="text-xl font-bold tracking-tight">Write a Review</DialogTitle>
           <DialogDescription>
-            Share your experience about this product
+            Share your experience with this product
           </DialogDescription>
         </DialogHeader>
 
-        <Card className="border-0 shadow-none">
-          <CardContent className="p-0">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              {/* Rating Stars */}
-              <div className="space-y-2">
-                <Label>Your Rating</Label>
-                <div className="flex items-center space-x-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      className="p-1 focus:outline-none transition-transform hover:scale-110"
-                      onClick={() => handleRatingClick(star)}
-                      onMouseEnter={() => setHoverRating(star)}
-                      onMouseLeave={() => setHoverRating(0)}
-                      disabled={isSubmitting}
-                    >
-                      <Star
-                        className={`h-7 w-7 ${
-                          star <= (hoverRating || rating)
-                            ? "fill-warning text-warning"
-                            : "text-muted"
-                        } transition-colors`}
-                      />
-                    </button>
-                  ))}
-                  <span className="ml-2 text-sm text-muted-foreground">
-                    {rating > 0 ? `${rating} stars` : "Select stars"}
-                  </span>
-                </div>
-                {errors.rating && (
-                  <p className="text-sm text-destructive">
-                    {errors.rating.message}
-                  </p>
-                )}
-              </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pt-2">
+          {/* Rating Stars */}
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                    key={star}
+                    type="button"
+                    className="p-1 focus:outline-none transition-transform hover:scale-110 active:scale-95"
+                    onClick={() => handleRatingClick(star)}
+                    onMouseEnter={() => setHoverRating(star)}
+                    onMouseLeave={() => setHoverRating(0)}
+                    disabled={isSubmitting}
+                >
+                    <Star
+                    className={cn(
+                        "h-8 w-8 transition-colors duration-200",
+                        star <= (hoverRating || rating)
+                        ? "fill-amber-400 text-amber-400"
+                        : "text-muted-foreground/20 fill-muted-foreground/5"
+                    )}
+                    />
+                </button>
+                ))}
+            </div>
+            <span className="text-sm font-medium text-muted-foreground h-5">
+                {rating > 0 ? (
+                    rating === 5 ? "Excellent!" :
+                    rating === 4 ? "Good" :
+                    rating === 3 ? "Average" :
+                    rating === 2 ? "Poor" : "Terrible"
+                ) : "Select a rating"}
+            </span>
+            {errors.rating && (
+                <p className="text-xs text-destructive font-medium animate-in slide-in-from-top-1">
+                {errors.rating.message}
+                </p>
+            )}
+          </div>
 
-              {/* Comment */}
-              <div className="space-y-2">
-                <Label htmlFor="comment">Comment</Label>
-                <Textarea
-                  {...register("comment")}
-                  id="comment"
-                  placeholder="Share your experience about the product..."
-                  className="min-h-[100px] resize-none"
-                  disabled={isSubmitting}
-                />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{errors.comment?.message}</span>
-                  <span>{comment.length}/500</span>
-                </div>
-              </div>
+          {/* Comment */}
+          <div className="space-y-2">
+            <Label htmlFor="comment" className="sr-only">Comment</Label>
+            <Textarea
+                {...register("comment")}
+                id="comment"
+                placeholder="What did you like or dislike? What did you use this product for?"
+                className="min-h-[120px] resize-none border-border/50 bg-muted/30 focus:bg-background transition-colors"
+                disabled={isSubmitting}
+            />
+            <div className="flex justify-between text-xs text-muted-foreground px-1">
+                <span className="text-destructive font-medium">{errors.comment?.message}</span>
+                <span>{comment.length}/500</span>
+            </div>
+          </div>
 
-              {/* Submit Button */}
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isSubmitting || rating === 0 || !comment.trim()}
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2" />
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <Send className="h-4 w-4 mr-2" />
-                    Submit Review
-                  </>
-                )}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+          <Button
+            type="submit"
+            className="w-full rounded-full"
+            disabled={isSubmitting || rating === 0 || !comment.trim()}
+          >
+            {isSubmitting ? "Submitting..." : "Submit Review"}
+          </Button>
+        </form>
       </DialogContent>
     </Dialog>
   );

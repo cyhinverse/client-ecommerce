@@ -86,6 +86,9 @@ export interface ProductState {
     minPrice?: number;
     maxPrice?: number
     sortBy?: string;
+    rating?: string;
+    colors?: string;
+    sizes?: string;
   };
 
 

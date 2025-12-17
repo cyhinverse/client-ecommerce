@@ -6,8 +6,8 @@ export default function LayoutCategories({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col justify-center items-center w-full">
+    <main className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 py-8 md:py-12 min-h-screen">
       {children}
-    </div>
+    </main>
   );
 }

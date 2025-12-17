@@ -14,13 +14,6 @@ import { CategoriesStats } from "@/components/admin/categories/CategoriesStats";
 import { CategoriesTable } from "@/components/admin/categories/CategoriesTable";
 import { PaginationControls } from "@/components/admin/categories/PaginationContro";
 import { CategoryTreeView } from "@/components/admin/categories/CategoryTreeView";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { EditCategoryModal } from "@/components/admin/categories/UpdateModel";
 import { ViewCategoryModal } from "@/components/admin/categories/ViewModal";
 import { CreateCategoryModal } from "@/components/admin/categories/CreateModel";
@@ -230,9 +223,11 @@ export default function CategoriesAdminPage() {
   }
 
   return (
-    <div className="space-y-6 no-scrollbar">
+    <div className="space-y-8 p-1">
+      {/* Header Section */}
       <CategoriesHeader onAddCategory={handleOpenCreateModal} />
 
+      {/* Stats Section */}
       <CategoriesStats
         totalCategories={totalCategories}
         activeCategories={activeCategories}
@@ -240,61 +235,65 @@ export default function CategoriesAdminPage() {
         totalProducts={totalProducts}
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Category List</CardTitle>
-          <CardDescription>Manage all product categories</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <CategoriesTable
-            categories={categories}
-            searchTerm={searchTerm}
-            pageSize={pageSize}
-            isLoading={categoryState.isLoading}
-            onSearch={handleSearch}
-            onPageSizeChange={handlePageSizeChange}
-            onEdit={handleEditCategory}
-            onDelete={handleDeleteCategory}
-            onView={handleViewCategory}
-            getParentName={getParentName}
-            getProductCount={getProductCount}
-          />
+      {/* Main Content Area */}
+      <div className="space-y-6">
+        <CategoriesTable
+          categories={categories}
+          searchTerm={searchTerm}
+          pageSize={pageSize}
+          isLoading={categoryState.isLoading}
+          onSearch={handleSearch}
+          onPageSizeChange={handlePageSizeChange}
+          onEdit={handleEditCategory}
+          onDelete={handleDeleteCategory}
+          onView={handleViewCategory}
+          getParentName={getParentName}
+          getProductCount={getProductCount}
+        />
 
-          <CreateCategoryModal
-            isOpen={createModalOpen}
-            onClose={() => setCreateModalOpen(false)}
-            onCreate={handleCreateCategory}
-            categories={categories}
-            isLoading={isCreating}
-          />
-
-          <ViewCategoryModal
-            isOpen={viewModalOpen}
-            onClose={handleCloseModals}
-            onEdit={handleEditFromView}
-            category={selectedCategory}
-          />
-
-          <EditCategoryModal
-            isOpen={editModalOpen}
-            onClose={handleCloseEditModal}
-            onSave={handleSaveCategory}
-            category={selectedCategory}
-            isLoading={isUpdating}
-          />
-
+        <div className="mt-6 flex justify-center">
           <PaginationControls
-            pagination={pagination}
-            onPageChange={handlePageChange}
+             pagination={pagination}
+             onPageChange={handlePageChange}
           />
-        </CardContent>
-      </Card>
+        </div>
 
-      <CategoryTreeView
-        categories={categories}
-        getChildCategories={getChildCategories}
-        getProductCount={getProductCount}
-      />
+        <CreateCategoryModal
+          isOpen={createModalOpen}
+          onClose={() => setCreateModalOpen(false)}
+          onCreate={handleCreateCategory}
+          categories={categories}
+          isLoading={isCreating}
+        />
+
+        <ViewCategoryModal
+          isOpen={viewModalOpen}
+          onClose={handleCloseModals}
+          onEdit={handleEditFromView}
+          category={selectedCategory}
+        />
+
+        <EditCategoryModal
+          isOpen={editModalOpen}
+          onClose={handleCloseEditModal}
+          onSave={handleSaveCategory}
+          category={selectedCategory}
+          isLoading={isUpdating}
+        />
+      </div>
+
+      {/* Tree View Section */}
+      <div className="rounded-[2rem] border border-border/40 bg-white/70 dark:bg-[#1C1C1E]/70 p-6 shadow-sm backdrop-blur-xl">
+         <div className="mb-6">
+            <h2 className="text-xl font-semibold tracking-tight text-foreground">Structure View</h2>
+            <p className="text-sm text-muted-foreground mt-1">Hierarchical view of categories</p>
+         </div>
+         <CategoryTreeView
+          categories={categories}
+          getChildCategories={getChildCategories}
+          getProductCount={getProductCount}
+        />
+      </div>
     </div>
   );
 }

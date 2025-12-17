@@ -1,15 +1,16 @@
 "use client";
 
+import Link from "next/link";
+
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { Card, CardContent } from "../ui/card";
+import { ProductCard } from "./ProductCard";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { toast } from "sonner";
 import { useEffect, useMemo } from "react";
 import { getNewArrivals } from "@/features/product/productAction";
-import Image from "next/image";
-import Link from "next/link";
-import { Badge } from "../ui/badge";
+
 import { motion } from "framer-motion";
+
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -32,7 +33,7 @@ export default function NewArrivals() {
 
   useEffect(() => {
     dispatch(getNewArrivals());
-  }, []);
+  }, [dispatch]);
   useEffect(() => {
     if (error) toast.error(error);
   }, [error]);
@@ -67,81 +68,7 @@ export default function NewArrivals() {
             {newArrivalProducts.length > 0 ? (
               newArrivalProducts.slice(0, 8).map((p) => (
                 <motion.div key={p._id} variants={itemVariants}>
-                  <Link
-                    href={`/products/${p.slug}`}
-                    className="group block h-full"
-                  >
-                    <Card className="h-full overflow-hidden border-0 shadow-none bg-transparent">
-                      <CardContent className="p-0 h-full flex flex-col">
-                        <div className="relative aspect-[3/4] overflow-hidden bg-muted mb-3 rounded-lg">
-                          {p.images && p.images.length > 0 ? (
-                            <Image
-                              src={p.images[0]}
-                              alt={p.name}
-                              fill
-                              className="object-cover group-hover:scale-105 transition-transform duration-500"
-                              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-muted">
-                              <span className="text-muted-foreground text-xs">
-                                No Image
-                              </span>
-                            </div>
-                          )}
-
-                          {p.onSale && (
-                             <Badge className="absolute top-2 right-2 bg-black text-white border-0 text-[10px] h-5 px-2">
-                               SALE
-                             </Badge>
-                           )}
-                          {p.isNewArrival && (
-                            <Badge
-                              variant="secondary"
-                              className="absolute top-2 left-2 text-[10px] h-5 px-2 backdrop-blur-sm bg-white/80"
-                            >
-                              NEW
-                            </Badge>
-                          )}
-                        </div>
-
-                        <div className="space-y-1 flex-1 flex flex-col">
-                          <h3 className="font-medium text-sm line-clamp-2 group-hover:underline min-h-[40px]">
-                            {p.name}
-                          </h3>
-                          <p className="text-xs text-muted-foreground line-clamp-1">
-                            {p.brand}
-                          </p>
-                          <div className="flex items-baseline gap-2 pt-1 mt-auto">
-                            {p.price?.discountPrice &&
-                            p.price.discountPrice < p.price.currentPrice ? (
-                              <>
-                                <span className="font-semibold text-base">
-                                  {new Intl.NumberFormat("vi-VN", {
-                                    style: "currency",
-                                    currency: "VND",
-                                  }).format(p.price.discountPrice)}
-                                </span>
-                                <span className="text-xs text-muted-foreground line-through">
-                                  {new Intl.NumberFormat("vi-VN", {
-                                    style: "currency",
-                                    currency: "VND",
-                                  }).format(p.price.currentPrice)}
-                                </span>
-                              </>
-                            ) : (
-                              <span className="font-semibold text-base">
-                                {new Intl.NumberFormat("vi-VN", {
-                                  style: "currency",
-                                  currency: "VND",
-                                }).format(p.price?.currentPrice || 0)}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
+                  <ProductCard product={p} />
                 </motion.div>
               ))
             ) : (

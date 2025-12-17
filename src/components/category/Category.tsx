@@ -6,9 +6,9 @@ import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { toast } from "sonner";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
-import { Category as CategoryType } from "@/types/category";
+
 
 export default function Category() {
   const dispatch = useAppDispatch();
@@ -53,15 +53,15 @@ export default function Category() {
           </div>
         ) : (
           <section className="w-full py-8">
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="text-3xl font-bold tracking-tight">
+            <div className="flex justify-between items-center mb-12">
+              <h2 className="text-4xl font-semibold tracking-tight">
                 Shop by Category
               </h2>
               <Link
                 href="/categories"
-                className="text-primary hover:underline flex items-center gap-1"
+                className="text-primary hover:opacity-80 flex items-center gap-1 font-medium"
               >
-                View All <ArrowRight className="h-4 w-4" />
+                View all <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
 
@@ -69,59 +69,27 @@ export default function Category() {
               variants={container}
               initial="hidden"
               animate="show"
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+              className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[300px]"
             >
-              {categories.map((cat) => (
+              {categories.map((cat, i) => (
                 <motion.div
                   key={cat._id}
                   variants={item}
-                  whileHover={{ y: -5 }}
-                  transition={{ duration: 0.2 }}
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  className={`${i === 0 || i === 3 ? "md:col-span-2" : "md:col-span-1"}`}
                 >
-                  <Card className="h-full hover:shadow-md transition-shadow duration-300">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-xl">
-                        <Link
-                          href={`/categories/${cat.slug}`}
-                          className="hover:text-primary transition-colors"
-                        >
-                          {cat.name}
-                        </Link>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {cat.subcategories && cat.subcategories.length > 0 ? (
-                        <ul className="space-y-2">
-                          {cat.subcategories
-                            .slice(0, 5)
-                            .map((sub: CategoryType) => (
-                              <li key={sub._id}>
-                                <Link
-                                  href={`/categories/${sub.slug}`}
-                                  className="text-sm text-muted-foreground hover:text-primary transition-colors block"
-                                >
-                                  {sub.name}
-                                </Link>
-                              </li>
-                            ))}
-                          {cat.subcategories.length > 5 && (
-                            <li>
-                              <Link
-                                href={`/categories/${cat.slug}`}
-                                className="text-sm font-medium text-primary hover:underline flex items-center gap-1 mt-2"
-                              >
-                                View {cat.subcategories.length - 5} more
-                              </Link>
-                            </li>
-                          )}
-                        </ul>
-                      ) : (
-                        <p className="text-sm text-muted-foreground italic">
-                          Explore {cat.name}
-                        </p>
-                      )}
-                    </CardContent>
-                  </Card>
+                  <Link href={`/categories/${cat.slug}`} className="block h-full">
+                    <Card className="h-full hover:shadow-lg transition-all duration-300 relative overflow-hidden border-none bg-white dark:bg-[#1C1C1E]">
+                        <div className="absolute inset-0 bg-gradient-to-br from-black/5 to-transparent dark:from-white/5 pointer-events-none" />
+                        <CardHeader className="relative z-10 flex flex-col justify-end h-full pb-8">
+                            <p className="text-sm font-medium text-muted-foreground uppercase tracking-widest mb-2">Collection</p>
+                            <CardTitle className="text-3xl md:text-4xl font-semibold tracking-tight">
+                                {cat.name}
+                            </CardTitle>
+                        </CardHeader>
+                    </Card>
+                  </Link>
                 </motion.div>
               ))}
             </motion.div>

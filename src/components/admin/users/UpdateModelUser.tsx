@@ -50,7 +50,6 @@ export function UpdateModelUser({
 
   useLayoutEffect(() => {
     if (user) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         username: user.username || "",
         email: user.email || "",
@@ -74,105 +73,110 @@ export function UpdateModelUser({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-background border-border text-foreground sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>User Details</DialogTitle>
-          <DialogDescription>
-            Detailed information about user in the system
+      <DialogContent className="rounded-[2rem] border-border/50 bg-white/80 dark:bg-[#1C1C1E]/80 backdrop-blur-xl shadow-2xl p-6 max-w-md max-h-[90vh] overflow-y-auto no-scrollbar">
+        <DialogHeader className="border-b border-border/50 pb-6">
+          <DialogTitle className="text-2xl font-bold tracking-tight">Edit User</DialogTitle>
+          <DialogDescription className="text-muted-foreground">
+            Update user account information
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="username" className="text-muted-foreground">
-              Username
-            </Label>
-            <Input
-              id="username"
-              value={formData.username}
-              onChange={(e) =>
-                setFormData({ ...formData, username: e.target.value })
-              }
-              className="bg-background border-border text-foreground"
-              required
-              disabled={isLoading}
-            />
+        <form onSubmit={handleSubmit} className="space-y-5 pt-6">
+           <div className="space-y-4">
+            <div className="space-y-2">
+                <Label htmlFor="username" className="text-sm font-medium">
+                Username
+                </Label>
+                <Input
+                id="username"
+                value={formData.username}
+                onChange={(e) =>
+                    setFormData({ ...formData, username: e.target.value })
+                }
+                className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all shadow-sm"
+                required
+                disabled={isLoading}
+                />
+            </div>
+
+            <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-medium">
+                Email
+                </Label>
+                <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                }
+                className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all shadow-sm"
+                required
+                disabled={isLoading}
+                />
+            </div>
+
+             <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="roles" className="text-sm font-medium">
+                    Role
+                    </Label>
+                    <Select
+                    value={formData.roles}
+                    onValueChange={(value) =>
+                        setFormData({ ...formData, roles: value })
+                    }
+                    disabled={isLoading}
+                    >
+                    <SelectTrigger className="rounded-xl border-gray-200 bg-gray-50/50 focus:ring-0 shadow-sm h-10">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-border/50 shadow-lg">
+                        <SelectItem value="user">User</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="moderator">Moderator</SelectItem>
+                    </SelectContent>
+                    </Select>
+                </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="isVerifiedEmail" className="text-sm font-medium">
+                    Verification
+                    </Label>
+                    <Select
+                    value={formData.isVerifiedEmail.toString()}
+                    onValueChange={(value) =>
+                        setFormData({ ...formData, isVerifiedEmail: value === "true" })
+                    }
+                    disabled={isLoading}
+                    >
+                    <SelectTrigger className="rounded-xl border-gray-200 bg-gray-50/50 focus:ring-0 shadow-sm h-10">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-border/50 shadow-lg">
+                        <SelectItem value="true">Verified</SelectItem>
+                        <SelectItem value="false">Unverified</SelectItem>
+                    </SelectContent>
+                    </Select>
+                </div>
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-muted-foreground">
-              Email
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              className="bg-background border-border text-foreground"
-              required
-              disabled={isLoading}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="roles" className="text-muted-foreground">
-              Role
-            </Label>
-            <Select
-              value={formData.roles}
-              onValueChange={(value) =>
-                setFormData({ ...formData, roles: value })
-              }
-              disabled={isLoading}
-            >
-              <SelectTrigger className="bg-background border-border text-foreground">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-background border-border text-foreground">
-                <SelectItem value="user">User</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="moderator">Moderator</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="isVerifiedEmail" className="text-muted-foreground">
-              Email Verification
-            </Label>
-            <Select
-              value={formData.isVerifiedEmail.toString()}
-              onValueChange={(value) =>
-                setFormData({ ...formData, isVerifiedEmail: value === "true" })
-              }
-              disabled={isLoading}
-            >
-              <SelectTrigger className="bg-background border-border text-foreground">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-background border-border text-foreground">
-                <SelectItem value="true">Verified</SelectItem>
-                <SelectItem value="false">Unverified</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex justify-end gap-3 pt-6 border-t border-border/50">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
+              className="rounded-xl h-10 px-5 border-gray-200"
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
+              className="rounded-xl h-10 px-6 bg-black text-white hover:bg-black/90 dark:bg-[#0071e3] shadow-sm"
               disabled={isLoading}
             >
-              {isLoading ? "Updating..." : "Update"}
+              {isLoading ? "Updating..." : "Update User"}
             </Button>
           </div>
         </form>

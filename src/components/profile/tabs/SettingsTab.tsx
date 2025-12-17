@@ -7,22 +7,15 @@ import {
   verifyTwoFactor,
 } from "@/features/user/userAction";
 import { useAppDispatch } from "@/hooks/hooks";
-import { Shield, MailCheck, Key, Lock, Eye, EyeOff, Check } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Shield, Key, Eye, EyeOff, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { User } from "@/types/user";
+import { cn } from "@/lib/utils";
 
 interface SettingsTabProps {
   user: User;
@@ -51,7 +44,6 @@ export default function SettingsTab({ user }: SettingsTabProps) {
     e.preventDefault();
     setIsChangingPassword(true);
 
-    // Validation
     if (
       !passwordData.currentPassword ||
       !passwordData.newPassword ||
@@ -167,276 +159,177 @@ export default function SettingsTab({ user }: SettingsTabProps) {
     }));
   };
 
-  return (
-    <div className="space-y-6">
-      {/* Security Settings Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
-            Account Security
-          </CardTitle>
-          <CardDescription>
-            Manage password and security settings
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Change Password Section */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Key className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <Label className="font-medium">Change Password</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Update your account password
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <form onSubmit={handlePasswordChange} className="space-y-4">
-              <div className="grid gap-4">
-                {/* Current Password */}
-                <div className="space-y-2">
-                  <Label htmlFor="currentPassword">Current Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="currentPassword"
-                      type={showPasswords.current ? "text" : "password"}
-                      value={passwordData.currentPassword}
-                      onChange={(e) =>
-                        setPasswordData({
-                          ...passwordData,
-                          currentPassword: e.target.value,
-                        })
-                      }
-                      placeholder="Enter current password"
-                      required
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => togglePasswordVisibility("current")}
-                    >
-                      {showPasswords.current ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-
-                {/* New Password */}
-                <div className="space-y-2">
-                  <Label htmlFor="newPassword">New Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="newPassword"
-                      type={showPasswords.new ? "text" : "password"}
-                      value={passwordData.newPassword}
-                      onChange={(e) =>
-                        setPasswordData({
-                          ...passwordData,
-                          newPassword: e.target.value,
-                        })
-                      }
-                      placeholder="Enter new password (at least 6 characters)"
-                      required
-                      minLength={6}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => togglePasswordVisibility("new")}
-                    >
-                      {showPasswords.new ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Confirm New Password */}
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="confirmPassword"
-                      type={showPasswords.confirm ? "text" : "password"}
-                      value={passwordData.confirmPassword}
-                      onChange={(e) =>
-                        setPasswordData({
-                          ...passwordData,
-                          confirmPassword: e.target.value,
-                        })
-                      }
-                      placeholder="Re-enter new password"
-                      required
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => togglePasswordVisibility("confirm")}
-                    >
-                      {showPasswords.confirm ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isChangingPassword}
-              >
-                <Lock className="h-4 w-4 mr-2" />
-                {isChangingPassword ? "Processing..." : "Change Password"}
-              </Button>
-            </form>
-          </div>
-
-          <Separator />
-
-          {/* Email Verification Section */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <MailCheck className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <Label className="font-medium">Verify Email</Label>
-                <p className="text-sm text-muted-foreground">
-                  {user?.isVerifiedEmail
-                    ? "Your email has been verified"
-                    : "Verify email to secure your account"}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              {user?.isVerifiedEmail ? (
-                <Badge className="bg-success text-success-foreground hover:bg-success/90">
-                  <Check className="h-3 w-3 mr-1" />
-                  Verified
-                </Badge>
-              ) : (
-                <Button
-                  onClick={handleEmailVerification}
-                  variant="outline"
-                  size="sm"
-                >
-                  Send verification email
-                </Button>
-              )}
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Two-Factor Authentication Section */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Shield className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <Label className="font-medium">Two-Factor Authentication (2FA)</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Add an extra layer of security to your account
-                  </p>
-                </div>
-              </div>
-              <Switch
-                checked={twoFactorEnabled}
-                onCheckedChange={handleTwoFactorToggle}
-              />
-            </div>
-
-            {showVerificationInput && (
-              <div className="space-y-3 p-4 border rounded-lg bg-muted/50">
-                <Label htmlFor="verificationCode">Enter 6-digit verification code</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="verificationCode"
-                    type="text"
-                    placeholder="123456"
-                    value={verificationCode}
-                    onChange={(e) =>
-                      setVerificationCode(
-                        e.target.value.replace(/\D/g, "").slice(0, 6)
-                      )
-                    }
-                    className="flex-1"
-                  />
-                  <Button
-                    onClick={handleVerifyTwoFactor}
-                    disabled={verificationCode.length !== 6}
-                  >
-                    Verify
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Enter code from your authenticator app
-                </p>
-              </div>
-            )}
-
-            {twoFactorEnabled && (
-              <Badge className="bg-success text-success-foreground hover:bg-success/90">
-                <Check className="h-3 w-3 mr-1" />
-                2FA Enabled
-              </Badge>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Account Status Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Account Status</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Email Verification</span>
-              {user?.isVerifiedEmail ? (
-                <Badge className="bg-success text-success-foreground hover:bg-success/90">
-                  Verified
-                </Badge>
-              ) : (
-                <Badge variant="outline">Unverified</Badge>
-              )}
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Two-Factor Authentication</span>
-              {twoFactorEnabled ? (
-                <Badge className="bg-success text-success-foreground hover:bg-success/90">
-                  Enabled
-                </Badge>
-              ) : (
-                <Badge variant="outline">Disabled</Badge>
-              )}
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Account</span>
-              <Badge className="bg-info text-info-foreground hover:bg-info/90">
-                Active
-              </Badge>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+  const SectionHeader = ({ title, description }: { title: string; description: string }) => (
+    <div className="mb-6">
+        <h3 className="text-lg font-semibold tracking-tight">{title}</h3>
+        <p className="text-sm text-muted-foreground">{description}</p>
     </div>
   );
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
+        <p className="text-muted-foreground">Manage your account preferences and security.</p>
+      </div>
+
+      <div className="space-y-12">
+        {/* Account Security */}
+        <div>
+          <SectionHeader 
+              title="Login & Security" 
+              description="Manage your password and security preferences" 
+          />
+          
+          <div className="space-y-6">
+            <div className="bg-muted/30 p-6 rounded-2xl border border-border/50">
+                <div className="flex items-start justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                            <Key className="h-5 w-5" />
+                        </div>
+                        <div>
+                            <h4 className="font-medium">Change Password</h4>
+                            <p className="text-xs text-muted-foreground">Ensure your account is using a long, random password.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <form onSubmit={handlePasswordChange} className="space-y-4">
+                    <div className="grid gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="currentPassword">Current Password</Label>
+                            <div className="relative">
+                                <Input
+                                    id="currentPassword"
+                                    type={showPasswords.current ? "text" : "password"}
+                                    value={passwordData.currentPassword}
+                                    onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                                    className="pr-10"
+                                />
+                                <button
+                                    type="button"
+                                    className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
+                                    onClick={() => togglePasswordVisibility("current")}
+                                >
+                                    {showPasswords.current ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                </button>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="newPassword">New Password</Label>
+                                <div className="relative">
+                                    <Input
+                                        id="newPassword"
+                                        type={showPasswords.new ? "text" : "password"}
+                                        value={passwordData.newPassword}
+                                        onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                                        className="pr-10"
+                                    />
+                                    <button
+                                        type="button"
+                                        className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
+                                        onClick={() => togglePasswordVisibility("new")}
+                                    >
+                                        {showPasswords.new ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                                <div className="relative">
+                                    <Input
+                                        id="confirmPassword"
+                                        type={showPasswords.confirm ? "text" : "password"}
+                                        value={passwordData.confirmPassword}
+                                        onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                                        className="pr-10"
+                                    />
+                                    <button
+                                        type="button"
+                                        className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
+                                        onClick={() => togglePasswordVisibility("confirm")}
+                                    >
+                                        {showPasswords.confirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <Button type="submit" disabled={isChangingPassword} className="mt-2 text-white">
+                        {isChangingPassword ? "Updating..." : "Update Password"}
+                    </Button>
+                </form>
+            </div>
+
+            <div className="bg-muted/30 p-6 rounded-2xl border border-border/50">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className={cn("h-10 w-10 rounded-full flex items-center justify-center transition-colors", twoFactorEnabled ? "bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400" : "bg-muted text-muted-foreground")}>
+                            <Shield className="h-5 w-5" />
+                        </div>
+                        <div>
+                            <h4 className="font-medium">Two-Factor Authentication</h4>
+                            <p className="text-xs text-muted-foreground">Add an extra layer of security to your account.</p>
+                        </div>
+                    </div>
+                    <Switch
+                        checked={twoFactorEnabled}
+                        onCheckedChange={handleTwoFactorToggle}
+                    />
+                </div>
+
+                {showVerificationInput && (
+                    <div className="mt-6 p-4 bg-background rounded-xl border border-border animate-in slide-in-from-top-2">
+                        <Label htmlFor="verificationCode" className="mb-2 block">Enter the 6-digit code from your app</Label>
+                        <div className="flex gap-2">
+                            <Input
+                                id="verificationCode"
+                                type="text"
+                                placeholder="000 000"
+                                value={verificationCode}
+                                onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                                className="font-mono tracking-widest text-center text-lg max-w-[200px]"
+                            />
+                            <Button onClick={handleVerifyTwoFactor} disabled={verificationCode.length !== 6}>
+                                Verify Code
+                            </Button>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            <div className="bg-muted/30 p-6 rounded-2xl border border-border/50">
+                 <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className={cn("h-10 w-10 rounded-full flex items-center justify-center transition-colors", user?.isVerifiedEmail ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400" : "bg-amber-50 dark:bg-amber-900/20 text-amber-600")}>
+                            <Mail className="h-5 w-5" />
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <h4 className="font-medium">Email Verification</h4>
+                                {user?.isVerifiedEmail ? (
+                                    <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400 h-5 px-1.5 text-[10px]">Verified</Badge>
+                                ) : (
+                                    <Badge variant="outline" className="text-amber-600 border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-900/50 h-5 px-1.5 text-[10px]">Unverified</Badge>
+                                )}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                {user?.isVerifiedEmail ? "Your email is verified and secure." : "Please verify your email address."}
+                            </p>
+                        </div>
+                    </div>
+                    {!user?.isVerifiedEmail && (
+                        <Button variant="outline" size="sm" onClick={handleEmailVerification}>
+                            Verify Now
+                        </Button>
+                    )}
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
 }

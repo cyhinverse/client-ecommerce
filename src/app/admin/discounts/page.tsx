@@ -2,13 +2,6 @@
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { toast } from "sonner";
 import {
   getAllDiscounts,
@@ -122,7 +115,8 @@ export default function AdminDiscountsPage() {
       setCreateModalOpen(false);
       toast.success("Discount created successfully");
     } catch (error) {
-      toast.error("Error creating discount. Please try again." + error);
+      const err = error as Error;
+      toast.error("Error creating discount: " + (err.message || "Unknown error"));
     } finally {
       setIsCreating(false);
     }
@@ -172,7 +166,8 @@ export default function AdminDiscountsPage() {
       handleCloseEditModal();
       toast.success("Discount updated successfully");
     } catch (error) {
-      toast.error("Update discount failed. Please try again." + error);
+      const err = error as Error;
+      toast.error("Update discount failed: " + (err.message || "Unknown error"));
     } finally {
       setIsUpdating(false);
     }
@@ -221,9 +216,10 @@ export default function AdminDiscountsPage() {
       dispatch(getAllDiscounts(params));
       dispatch(getDiscountStatistics());
 
-      toast.success("Xóa mã giảm giá thành công");
+      toast.success("Discount deleted successfully");
     } catch (error) {
-      toast.error("Xóa mã giảm giá thất bại. Vui lòng thử lại." + error);
+      const err = error as Error;
+      toast.error("Delete discount failed: " + (err.message || "Unknown error"));
     }
   };
 
@@ -247,15 +243,17 @@ export default function AdminDiscountsPage() {
   if (discountState?.error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-red-500">Error: {discountState.error}</div>
+        <div className="text-destructive">Error: {discountState.error}</div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 no-scrollbar">
+    <div className="space-y-8 p-1">
+      {/* Header Section */}
       <DiscountsHeader onOpenCreate={handleOpenCreateModal} />
 
+      {/* Stats Section */}
       <DiscountsStats
         totalDiscounts={totalDiscounts}
         activeDiscounts={activeDiscounts}
@@ -263,15 +261,8 @@ export default function AdminDiscountsPage() {
         highUsageDiscounts={highUsageDiscounts}
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Discount List</CardTitle>
-          <CardDescription>
-            Manage all discount codes in the system
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <DiscountsTable
+       {/* Main Content Area */}
+        <DiscountsTable
             discounts={discounts}
             searchTerm={searchTerm}
             pageSize={pageSize}
@@ -287,13 +278,15 @@ export default function AdminDiscountsPage() {
             selectedIsActive={selectedIsActive}
           />
 
-          <DiscountPagination
-            currentPage={currentPage}
-            totalPages={pagination?.totalPages || 1}
-            totalItems={pagination?.totalItems}
-            pageSize={pageSize}
-            onPageChange={handlePageChange}
-          />
+          <div className="mt-6">
+            <DiscountPagination
+              currentPage={currentPage}
+              totalPages={pagination?.totalPages || 1}
+              totalItems={pagination?.totalItems}
+              pageSize={pageSize}
+              onPageChange={handlePageChange}
+            />
+          </div>
 
           <CreateModelDiscount
             open={createModalOpen}
@@ -317,8 +310,6 @@ export default function AdminDiscountsPage() {
             onUpdate={handleUpdateDiscount}
             isLoading={isUpdating}
           />
-        </CardContent>
-      </Card>
     </div>
   );
 }

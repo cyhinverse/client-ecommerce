@@ -26,9 +26,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
+import { Search, MoreHorizontal, Eye, Edit, Trash2, Filter } from "lucide-react";
 import { Discount } from "@/types/discount";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
+import { cn } from "@/lib/utils";
 
 interface DiscountsTableProps {
   discounts: Discount[];
@@ -72,8 +73,7 @@ export function DiscountsTable({
     if (debouncedSearch !== searchTerm) {
        onSearch(debouncedSearch);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch]);
+  }, [debouncedSearch, searchTerm, onSearch]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US");
@@ -85,15 +85,15 @@ export function DiscountsTable({
 
   const getStatusBadge = (discount: Discount) => {
     if (!discount.isActive) {
-      return <Badge variant="secondary">Inactive</Badge>;
+      return <Badge className="bg-gray-100 text-gray-600 hover:bg-gray-100 border-0 rounded-lg px-2.5 py-0.5 shadow-none font-medium">Inactive</Badge>;
     }
     if (isExpired(discount.endDate)) {
-      return <Badge variant="destructive">Expired</Badge>;
+      return <Badge className="bg-red-50 text-red-600 hover:bg-red-50 border-red-100 rounded-lg px-2.5 py-0.5 shadow-none font-medium">Expired</Badge>;
     }
     if (discount.usedCount >= discount.usageLimit) {
-      return <Badge variant="destructive">Limit Reached</Badge>;
+      return <Badge className="bg-orange-50 text-orange-600 hover:bg-orange-50 border-orange-100 rounded-lg px-2.5 py-0.5 shadow-none font-medium">Limit Reached</Badge>;
     }
-    return <Badge variant="default">Active</Badge>;
+    return <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-0 rounded-lg px-2.5 py-0.5 shadow-none font-medium">Active</Badge>;
   };
 
   const getDiscountTypeText = (type: string) => {
@@ -108,160 +108,170 @@ export function DiscountsTable({
 
   return (
     <div className="space-y-4">
-      {/* Filters and Search */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-1 items-center space-x-2">
+      {/* Filters and Search Bar */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-white/50 dark:bg-white/5 p-4 rounded-[1.5rem] backdrop-blur-xl border border-border/50">
+        <div className="flex flex-1 items-center gap-3">
           <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search by code..."
                 value={localSearch}
                 onChange={(e) => setLocalSearch(e.target.value)}
-                className="pl-8 rounded-none border-border focus-visible:ring-0 focus-visible:border-primary"
+                className="pl-9 rounded-xl border-gray-200 bg-white/80 focus:bg-white transition-all shadow-sm"
               />
           </div>
 
-          <Select
-            value={selectedDiscountType}
-            onValueChange={onDiscountTypeFilterChange}
-          >
-            <SelectTrigger className="w-[180px] rounded-none border-border focus:ring-0 focus:border-primary">
-              <SelectValue placeholder="Discount Type" />
-            </SelectTrigger>
-            <SelectContent className="rounded-none border-border">
-              {/* Using "all" instead of empty string */}
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="percent">Percentage</SelectItem>
-              <SelectItem value="fixed">Fixed Amount</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-2">
+            <Select
+                value={selectedDiscountType}
+                onValueChange={onDiscountTypeFilterChange}
+            >
+                <SelectTrigger className="w-[160px] rounded-xl border-gray-200 bg-white/80 shadow-sm hover:bg-gray-50 h-10">
+                <SelectValue placeholder="Discount Type" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-border/50 shadow-lg">
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="percent">Percentage</SelectItem>
+                <SelectItem value="fixed">Fixed Amount</SelectItem>
+                </SelectContent>
+            </Select>
 
-          <Select
-            value={
-              selectedIsActive === null ? "all" : selectedIsActive.toString()
-            }
-            onValueChange={(value) =>
-              onActiveFilterChange(value === "all" ? null : value === "true")
-            }
-          >
-            <SelectTrigger className="w-[180px] rounded-none border-border focus:ring-0 focus:border-primary">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent className="rounded-none border-border">
-              {/* Using "all" instead of empty string */}
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="true">Active</SelectItem>
-              <SelectItem value="false">Inactive</SelectItem>
-            </SelectContent>
-          </Select>
+            <Select
+                value={
+                selectedIsActive === null ? "all" : selectedIsActive.toString()
+                }
+                onValueChange={(value) =>
+                onActiveFilterChange(value === "all" ? null : value === "true")
+                }
+            >
+                <SelectTrigger className="w-[140px] rounded-xl border-gray-200 bg-white/80 shadow-sm hover:bg-gray-50 h-10">
+                <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-border/50 shadow-lg">
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="true">Active</SelectItem>
+                <SelectItem value="false">Inactive</SelectItem>
+                </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        <Select
-          value={pageSize.toString()}
-          onValueChange={(value) => onPageSizeChange(Number(value))}
-        >
-          <SelectTrigger className="w-[130px] rounded-none border-border focus:ring-0 focus:border-primary">
-            <SelectValue placeholder="Show" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="10">10 / page</SelectItem>
-            <SelectItem value="20">20 / page</SelectItem>
-            <SelectItem value="50">50 / page</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-muted-foreground">Show:</span>
+            <Select
+            value={pageSize.toString()}
+            onValueChange={(value) => onPageSizeChange(Number(value))}
+            >
+            <SelectTrigger className="w-[100px] h-9 rounded-lg border-gray-200 bg-white/80 shadow-sm">
+                <SelectValue placeholder="Size" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl border-border/50">
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+            </SelectContent>
+            </Select>
+        </div>
       </div>
 
-      {/* Table */}
-      <div className="rounded-md border overflow-x-auto no-scrollbar">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Code</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Value</TableHead>
-              <TableHead>Start Date</TableHead>
-              <TableHead>End Date</TableHead>
-              <TableHead>Used</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="w-[80px]">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading && (
-              <TableRow>
-                <TableCell colSpan={8} className="h-24 text-center">
-                  <div className="flex justify-center items-center">
-                    <SpinnerLoading />
-                  </div>
-                </TableCell>
-              </TableRow>
-            )}
-            {!isLoading && discounts.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={8} className="text-center h-24">
-                  No discount codes found.
-                </TableCell>
-              </TableRow>
-            ) : (
-              discounts.map((discount) => (
-                <TableRow
-                  key={discount._id}
-                  className={isLoading ? "opacity-50 pointer-events-none" : ""}
-                >
-                  <TableCell className="font-medium">
-                    <div className="flex flex-col">
-                      <span className="font-bold">{discount.code}</span>
-                      {discount.description && (
-                        <span className="text-sm text-muted-foreground">
-                          {discount.description}
-                        </span>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {getDiscountTypeText(discount.discountType)}
-                  </TableCell>
-                  <TableCell>{getDiscountValueText(discount)}</TableCell>
-                  <TableCell>{formatDate(discount.startDate)}</TableCell>
-                  <TableCell>{formatDate(discount.endDate)}</TableCell>
-                  <TableCell>
-                    {discount.usedCount} / {discount.usageLimit}
-                  </TableCell>
-                  <TableCell>{getStatusBadge(discount)}</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Mở menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => onView(discount)}>
-                          <Eye className="h-4 w-4 mr-2" />
-                          View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onEdit(discount)}>
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => onDelete(discount)}
-                          className="text-destructive focus:text-destructive focus:bg-destructive/10"
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+      {/* Table Container */}
+      <div className="rounded-[2rem] border border-border/50 bg-white/60 dark:bg-[#1C1C1E]/60 backdrop-blur-xl shadow-sm overflow-hidden">
+        <div className="overflow-x-auto no-scrollbar">
+            <Table>
+            <TableHeader className="bg-gray-50/50">
+                <TableRow className="border-border/50 hover:bg-transparent">
+                <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground pl-6">Code</TableHead>
+                <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Type</TableHead>
+                <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Value</TableHead>
+                <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Start Date</TableHead>
+                <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">End Date</TableHead>
+                <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Used / Limit</TableHead>
+                <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Status</TableHead>
+                <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground text-right pr-6">Actions</TableHead>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+                {isLoading && (
+                <TableRow>
+                    <TableCell colSpan={8} className="h-32 text-center">
+                    <div className="flex justify-center items-center">
+                        <SpinnerLoading />
+                    </div>
+                    </TableCell>
+                </TableRow>
+                )}
+                {!isLoading && discounts.length === 0 ? (
+                <TableRow>
+                    <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
+                        <div className="flex flex-col items-center justify-center">
+                            <span className="bg-gray-100 p-3 rounded-full mb-3">
+                                <Filter className="h-6 w-6 text-gray-400" />
+                            </span>
+                             No discount codes found.
+                        </div>
+                    </TableCell>
+                </TableRow>
+                ) : (
+                discounts.map((discount) => (
+                    <TableRow
+                    key={discount._id}
+                    className={cn("border-border/50 transition-colors hover:bg-gray-50/50", isLoading && "opacity-50 pointer-events-none")}
+                    >
+                    <TableCell className="pl-6 align-top py-4">
+                        <div className="flex flex-col gap-0.5">
+                        <span className="font-semibold text-foreground">{discount.code}</span>
+                        {discount.description && (
+                            <span className="text-xs text-muted-foreground line-clamp-1 max-w-[200px]">
+                            {discount.description}
+                            </span>
+                        )}
+                        </div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground font-medium align-top py-4">
+                        {getDiscountTypeText(discount.discountType)}
+                    </TableCell>
+                    <TableCell className="text-foreground font-bold align-top py-4">{getDiscountValueText(discount)}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm align-top py-4">{formatDate(discount.startDate)}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm align-top py-4">{formatDate(discount.endDate)}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm align-top py-4">
+                        <span className="font-medium text-foreground">{discount.usedCount}</span> / {discount.usageLimit}
+                    </TableCell>
+                    <TableCell className="align-top py-4">{getStatusBadge(discount)}</TableCell>
+                    <TableCell className="text-right pr-6 align-top py-4">
+                        <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0 rounded-lg hover:bg-gray-100">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="rounded-xl border-border/50 shadow-lg p-1 bg-white/95 backdrop-blur-xl">
+                            <DropdownMenuLabel className="text-xs font-normal text-muted-foreground px-2 py-1.5">Actions</DropdownMenuLabel>
+                            <DropdownMenuItem onClick={() => onView(discount)} className="focus:bg-gray-100 rounded-lg cursor-pointer gap-2">
+                            <Eye className="h-4 w-4" />
+                            View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => onEdit(discount)} className="focus:bg-gray-100 rounded-lg cursor-pointer gap-2">
+                            <Edit className="h-4 w-4" />
+                            Edit Discount
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="bg-border/50 my-1" />
+                            <DropdownMenuItem
+                            onClick={() => onDelete(discount)}
+                            className="text-red-600 focus:text-red-700 focus:bg-red-50 rounded-lg cursor-pointer gap-2"
+                            >
+                            <Trash2 className="h-4 w-4" />
+                            Delete
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                        </DropdownMenu>
+                    </TableCell>
+                    </TableRow>
+                ))
+                )}
+            </TableBody>
+            </Table>
+        </div>
       </div>
     </div>
   );

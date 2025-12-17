@@ -4,7 +4,6 @@ import { useAppDispatch } from "@/hooks/hooks";
 import { useState } from "react";
 import Image from "next/image";
 import { Plus, User, Mail, MapPin, Check } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -44,117 +43,102 @@ export default function ProfileTab({ user }: ProfileTabProps) {
   if (!user) return null;
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-2xl mx-auto space-y-10 py-4">
       {/* Avatar Section */}
-      <div className="flex flex-col items-center gap-4 text-center">
-        <div className="relative">
-          <div className="w-[120px] h-[120px] rounded-full border-4 border-background shadow-lg overflow-hidden">
+      <div className="flex flex-col items-center gap-6 text-center">
+        <div className="relative group">
+          <div className="w-32 h-32 rounded-full ring-4 ring-white dark:ring-zinc-900 shadow-2xl overflow-hidden transition-transform duration-300 group-hover:scale-105 relative">
             <Image
               src={user.avatar || "/placeholder-avatar.jpg"}
               alt={user.username}
-              width={120}
-              height={120}
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover rounded-full"
             />
           </div>
           <Button
             size="icon"
-            className="absolute bottom-2 right-2 h-8 w-8 rounded-full"
+            className="absolute bottom-1 right-1 h-9 w-9 rounded-full shadow-lg bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black transition-transform hover:scale-110"
             onClick={handleUploadAvatar}
             disabled={isUploadingAvatar}
           >
             {isUploadingAvatar ? (
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
             ) : (
-              <Plus className="h-4 w-4" />
+              <Plus className="h-5 w-5" />
             )}
           </Button>
         </div>
-        <div>
-          <h3 className="text-xl font-semibold">{user.username}</h3>
-          <p className="text-muted-foreground">
+        <div className="space-y-1">
+          <h2 className="text-3xl font-bold tracking-tight">{user.username}</h2>
+          <p className="text-muted-foreground text-sm font-medium">
             Member since {new Date(user.createdAt).getFullYear()}
           </p>
         </div>
       </div>
 
       {/* Info Grid */}
-      <div className="grid gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <User className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="font-medium">Username</p>
-                  <p className="text-sm text-muted-foreground">
-                    Your display name
-                  </p>
-                </div>
-              </div>
-              <p className="font-medium">{user.username}</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Mail className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="font-medium">Email Address</p>
-                  <p className="text-sm text-muted-foreground">
-                    Your contact email
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <p className="font-medium">{user.email}</p>
-                {user.isVerifiedEmail ? (
-                  <Badge className="bg-success text-success-foreground hover:bg-success/90">
-                    <Check className="h-3 w-3 mr-1" />
-                    Verified
-                  </Badge>
+      <div className="space-y-4">
+        <InfoRow 
+            icon={User} 
+            label="Username" 
+            value={user.username} 
+            sublabel="Your display name visible to other users"
+        />
+        
+        <InfoRow 
+            icon={Mail} 
+            label="Email Address" 
+            value={user.email}
+            sublabel="Used for sign in and notifications"
+            action={
+                user.isVerifiedEmail ? (
+                    <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400 gap-1 px-2 py-0.5 h-5 text-[10px]">
+                        <Check className="h-3 w-3" />
+                        Verified
+                    </Badge>
                 ) : (
-                  <Badge variant="outline">Unverified</Badge>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                    <Badge variant="outline" className="text-[10px] h-5 px-2">Unverified</Badge>
+                )
+            }
+        />
 
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <MapPin className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="font-medium">Address</p>
-                  <p className="text-sm text-muted-foreground">
-                    Default delivery address
-                  </p>
-                </div>
-              </div>
-              <div className="text-right">
-                {user.addresses && user.addresses.length > 0 ? (
-                  <p className="text-sm font-medium">
-                    {user.addresses.find((addr: Address) => addr.isDefault)
-                      ?.district || user.addresses[0]?.district}
-                    ,{" "}
-                    {user.addresses.find((addr: Address) => addr.isDefault)
-                      ?.city || user.addresses[0]?.city}
-                  </p>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    No address added
-                  </p>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <InfoRow 
+            icon={MapPin} 
+            label="Default Address" 
+            value={
+                user.addresses && user.addresses.length > 0
+                  ? `${user.addresses.find((addr: Address) => addr.isDefault)?.district || user.addresses[0]?.district}, ${user.addresses.find((addr: Address) => addr.isDefault)?.city || user.addresses[0]?.city}`
+                  : "No address set"
+            }
+            sublabel={user.addresses && user.addresses.length > 0 ? "Primary delivery location" : "Add an address to speed up checkout"}
+        />
       </div>
     </div>
   );
 }
+
+interface InfoRowProps {
+  icon: React.ElementType;
+  label: string;
+  value: string | number;
+  sublabel?: string;
+  action?: React.ReactNode;
+}
+
+const InfoRow = ({ icon: Icon, label, value, sublabel, action }: InfoRowProps) => (
+  <div className="flex items-center justify-between p-4 bg-muted/30 rounded-2xl group transition-all hover:bg-muted/50">
+      <div className="flex items-center gap-4">
+          <div className="h-10 w-10 rounded-full bg-white dark:bg-zinc-800 flex items-center justify-center shadow-sm text-muted-foreground group-hover:text-primary transition-colors">
+              <Icon className="h-5 w-5" />
+          </div>
+          <div>
+              <p className="text-sm font-medium text-muted-foreground">{label}</p>
+              <div className="flex items-center gap-2">
+                  <p className="font-semibold text-foreground">{value}</p>
+                  {action}
+              </div>
+              {sublabel && <p className="text-xs text-muted-foreground mt-0.5">{sublabel}</p>}
+          </div>
+      </div>
+  </div>
+);

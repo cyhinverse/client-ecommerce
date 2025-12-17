@@ -7,7 +7,6 @@ import React, {
   useState,
 } from "react";
 import Image from "next/image";
-import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type BannerItem = {
@@ -28,26 +27,26 @@ export default function Banner() {
       {
         id: 1,
         imageUrl: "/images/CyBer.jpg",
-        title: "SUMMER COLLECTION",
-        subtitle: "Discover the latest trends.",
+        title: "Summer Collection",
+        subtitle: "Pro. Beyond.",
       },
       {
         id: 2,
         imageUrl: "/images/lading.jpg",
-        title: "WINTER ESSENTIALS",
-        subtitle: "Stay warm in style.",
+        title: "Winter Essentials",
+        subtitle: "Titanium. So strong. So light.",
       },
       {
         id: 3,
         imageUrl: "/images/online.jpg",
-        title: "NEW ARRIVALS",
-        subtitle: "Be the first to wear it.",
+        title: "New Arrivals",
+        subtitle: "Lovable. Drawable. Magical.",
       },
       {
         id: 4,
         imageUrl: "/images/shopping.jpg",
-        title: "FALL FASHION",
-        subtitle: "Upgrade your wardrobe.",
+        title: "Fall Fashion",
+        subtitle: "Wonder awaits.",
       },
     ],
     []
@@ -67,13 +66,7 @@ export default function Banner() {
     [length]
   );
 
-  const handleNext = useCallback(() => {
-    setCurrentIndex((prev) => (prev === length - 1 ? 0 : prev + 1));
-  }, [length]);
 
-  const handlePrev = useCallback(() => {
-    setCurrentIndex((prev) => (prev === 0 ? length - 1 : prev - 1));
-  }, [length]);
 
   // Autoplay with pause on hover/focus
   useEffect(() => {
@@ -83,7 +76,7 @@ export default function Banner() {
         if (!isHoveringRef.current) {
           setCurrentIndex((prev) => (prev === length - 1 ? 0 : prev + 1));
         }
-      }, 5000);
+      }, 6000);
     };
 
     const stopAutoplay = () => {
@@ -113,7 +106,7 @@ export default function Banner() {
 
   return (
     <section
-      className="relative w-full h-[80vh] min-h-[480px] overflow-hidden bg-muted"
+      className="relative w-full h-[calc(100vh-48px)] overflow-hidden bg-black"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onFocus={handleFocus}
@@ -121,7 +114,7 @@ export default function Banner() {
     >
       {/* Slides wrapper uses transform for sliding (GPU) */}
       <div
-        className="flex h-full w-full transition-transform duration-700 ease-in-out"
+        className="flex h-full w-full transition-transform duration-1000 ease-[cubic-bezier(0.32,0.72,0,1)]"
         style={{
           transform: `translateX(-${currentIndex * 100}%)`,
           willChange: "transform",
@@ -137,64 +130,51 @@ export default function Banner() {
             <Image
               src={banner.imageUrl}
               alt={banner.title}
-              // Provide natural sizes to avoid reflow
               width={1920}
               height={1080}
-              className="object-cover w-full h-full"
-              // Only first image get priority; others lazy load
+              className="object-cover w-full h-full opacity-80"
               priority={index === 0}
               loading={index === 0 ? "eager" : "lazy"}
               sizes="100vw"
             />
 
-            {/* Overlay */}
-            <div className="absolute inset-0 bg-black/25 pointer-events-none" />
-
-            {/* Content (lightweight animations only on text, not whole slide) */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white p-4 pointer-events-auto">
-              <h2 className="text-4xl md:text-6xl font-bold tracking-tighter mb-3 transform-gpu transition-opacity duration-400">
+            {/* Content */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white pb-32 pointer-events-none">
+              <h2 className="text-5xl md:text-7xl font-semibold tracking-tight mb-4 drop-shadow-2xl">
                 {banner.title}
               </h2>
-              <p className="text-lg md:text-xl font-light tracking-wide mb-6 transform-gpu transition-opacity duration-400">
+              <p className="text-xl md:text-3xl font-normal tracking-wide mb-8 drop-shadow-lg opacity-90">
                 {banner.subtitle}
               </p>
-              <Button
-                size="lg"
-                className="bg-white text-black hover:bg-white/90 rounded-none px-6 py-2"
-                aria-label={`Shop now for ${banner.title}`}
-              >
-                SHOP NOW
-              </Button>
+              <div className="pointer-events-auto flex gap-4">
+                 <Button
+                  size="lg"
+                  className="bg-white text-black hover:bg-white/90 rounded-full px-8 py-6 text-base font-medium transition-transform hover:scale-105"
+                >
+                  Learn More
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white text-white hover:bg-white/10 hover:text-white rounded-full px-8 py-6 text-base font-medium transition-transform hover:scale-105 bg-transparent backdrop-blur-md"
+                >
+                  Buy
+                </Button>
+              </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Controls */}
-      <button
-        onClick={handlePrev}
-        aria-label="Previous slide"
-        className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 hover:bg-black/40 text-white backdrop-blur-sm transition"
-      >
-        <ArrowLeft className="w-6 h-6" />
-      </button>
-      <button
-        onClick={handleNext}
-        aria-label="Next slide"
-        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 hover:bg-black/40 text-white backdrop-blur-sm transition"
-      >
-        <ArrowRight className="w-6 h-6" />
-      </button>
-
       {/* Indicators */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-3 z-20">
         {banners.map((_, idx) => (
           <button
             key={idx}
             onClick={() => goTo(idx)}
             aria-label={`Go to slide ${idx + 1}`}
-            className={`h-2 rounded-full transition-all duration-300 ${
-              idx === currentIndex ? "w-8 bg-white" : "w-2 bg-white/50"
+            className={`h-2 rounded-full transition-all duration-500 ease-out backdrop-blur-md ${
+              idx === currentIndex ? "w-8 bg-white" : "w-2 bg-white/40 hover:bg-white/60"
             }`}
           />
         ))}

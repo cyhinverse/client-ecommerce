@@ -10,11 +10,18 @@ import ProductFilter from "@/components/product/ProductFilter";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { Params, ProductFilters, ProductUrlFilters } from "@/types/product";
 import { ProductCard } from "@/components/product/ProductCard";
-import { isColorMatch } from "@/lib/color-mapping";
+import { 
+    Sheet, 
+    SheetContent, 
+    SheetHeader, 
+    SheetTitle, 
+    SheetTrigger 
+} from "@/components/ui/sheet";
 
 export default function ProductsPage() {
   const dispatch = useAppDispatch();
   const { all: products, isLoading } = useAppSelector((state) => state.product);
+  
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   const {
@@ -34,7 +41,6 @@ export default function ProductsPage() {
     basePath: "/products",
   });
 
-  // Convert URL filters to component filters
   const filters: ProductFilters = useMemo(
     () => ({
       search: urlFilters.search as string,
@@ -64,18 +70,15 @@ export default function ProductsPage() {
       if (filters.minPrice > 0) params.minPrice = filters.minPrice;
       if (filters.maxPrice < 10000000) params.maxPrice = filters.maxPrice;
       if (filters.sortBy !== "newest") params.sortBy = filters.sortBy;
+      if (filters.rating.length > 0) params.rating = filters.rating.join(",");
+      if (filters.colors.length > 0) params.colors = filters.colors.join(",");
+      if (filters.sizes.length > 0) params.sizes = filters.sizes.join(",");
 
       dispatch(getAllProducts(params));
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [
-    dispatch,
-    filters.search,
-    filters.minPrice,
-    filters.maxPrice,
-    filters.sortBy,
-  ]);
+  }, [dispatch, filters]);
 
   const handleFilterChange = useCallback(
     (newFilters: Partial<ProductFilters>) => {
@@ -103,165 +106,90 @@ export default function ProductsPage() {
     resetFilters();
   }, [resetFilters]);
 
-  const filteredAndSortedProducts = useMemo(() => {
-    if (!products || !Array.isArray(products)) return [];
-
-    const filtered = products.filter((product) => {
-      // Search filter
-      if (
-        filters.search &&
-        !product.name?.toLowerCase().includes(filters.search.toLowerCase())
-      ) {
-        return false;
-      }
-
-      // Price filter
-      const price =
-        product.price?.discountPrice || product.price?.currentPrice || 0;
-      if (price < filters.minPrice || price > filters.maxPrice) {
-        return false;
-      }
-
-      // Rating filter
-      if (filters.rating.length > 0) {
-        const productRating = Math.floor(product.averageRating || 0);
-        if (!filters.rating.includes(productRating)) {
-          return false;
-        }
-      }
-
-      // Color filter - FIXED: Improved logic
-      if (filters.colors.length > 0) {
-        // Kiểm tra nếu product có variants
-        if (!product.variants || product.variants.length === 0) {
-          return false;
-        }
-
-        // Kiểm tra từng variant của product
-        const hasMatchingColor = product.variants.some((variant) => {
-          if (!variant.color) return false;
-
-          return filters.colors.some((filterColor) =>
-            isColorMatch(filterColor, variant.color)
-          );
-        });
-
-        if (!hasMatchingColor) return false;
-      }
-
-      // Size filter
-      if (filters.sizes.length > 0) {
-        if (!product.variants || product.variants.length === 0) {
-          return false;
-        }
-        const hasMatchingSize = product.variants?.some((variant) =>
-          filters.sizes.some(
-            (size) => variant.size?.toUpperCase() === size.toUpperCase()
-          )
-        );
-        if (!hasMatchingSize) return false;
-      }
-
-      return true;
-    });
-
-    // Sort products
-    const sorted = [...filtered].sort((a, b) => {
-      const priceA = a.price?.discountPrice || a.price?.currentPrice || 0;
-      const priceB = b.price?.discountPrice || b.price?.currentPrice || 0;
-
-      switch (filters.sortBy) {
-        case "price_asc":
-          return priceA - priceB;
-        case "price_desc":
-          return priceB - priceA;
-        case "name_asc":
-          return (a.name || "").localeCompare(b.name || "");
-        case "name_desc":
-          return (b.name || "").localeCompare(a.name || "");
-        case "rating_desc":
-          return (b.averageRating || 0) - (a.averageRating || 0);
-        case "newest":
-        default:
-          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-          return dateB - dateA;
-      }
-    });
-
-    return sorted;
-  }, [products, filters]);
 
   return (
-    <div className="container max-w-7xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">All Products</h1>
-          <p className="text-muted-foreground mt-1">
-            {filteredAndSortedProducts.length} products
-            {products && ` (${products.length} total)`}
-          </p>
-        </div>
-
-        <Button
-          variant="outline"
-          className="lg:hidden"
-          onClick={() => setIsMobileFilterOpen(true)}
-        >
-          <SlidersHorizontal className="h-4 w-4 mr-2" />
-          Filters
-        </Button>
-      </div>
-
-      <div className="flex gap-6">
-        {/* Filter Sidebar */}
-        <aside className="w-80 flex-shrink-0 hidden lg:block">
-          <ProductFilter
-            filters={filters}
-            onFilterChange={handleFilterChange}
-            onClearFilters={handleClearFilters}
-            isMobileOpen={false}
-          />
-        </aside>
-
-        {/* Mobile Filter */}
-        {isMobileFilterOpen && (
-          <ProductFilter
-            filters={filters}
-            onFilterChange={handleFilterChange}
-            onClearFilters={handleClearFilters}
-            isMobileOpen={true}
-            onMobileClose={() => setIsMobileFilterOpen(false)}
-          />
-        )}
-
-        {/* Products Grid */}
-        <div className="flex-1 relative min-h-[400px]">
-          {isLoading && <SpinnerLoading className="absolute inset-0 m-auto" />}
-          <div className={isLoading ? "opacity-50 pointer-events-none" : ""}>
-            {filteredAndSortedProducts.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {filteredAndSortedProducts.map((product, index) => (
-                  <ProductCard key={product._id || index} product={product} />
-                ))}
-              </div>
-            ) : (
-              <div className="col-span-full text-center py-20">
-                <p className="text-muted-foreground">
-                  No products found
+    <div className="w-full relative">
+       {/* Header */}
+       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 lg:mb-8">
+            <div>
+                <h1 className="text-3xl font-bold tracking-tight">All Products</h1>
+                <p className="text-muted-foreground mt-1">
+                    {products?.length || 0} items
                 </p>
-                <Button
-                  variant="outline"
-                  onClick={handleClearFilters}
-                  className="mt-4"
-                >
-                  Clear all filters
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+                {/* Mobile Filter Trigger */}
+                <Sheet open={isMobileFilterOpen} onOpenChange={setIsMobileFilterOpen}>
+                    <SheetTrigger asChild>
+                        <Button variant="outline" className="lg:hidden rounded-full">
+                            <SlidersHorizontal className="w-4 h-4 mr-2" />
+                            Filters
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="w-[300px] overflow-y-auto">
+                        <SheetHeader>
+                            <SheetTitle>Filters</SheetTitle>
+                        </SheetHeader>
+                        <div className="mt-6 space-y-6">
+                             <ProductFilter
+                                filters={filters}
+                                onFilterChange={handleFilterChange}
+                                onClearFilters={handleClearFilters}
+                            />
+                            <Button 
+                                variant="outline" 
+                                className="w-full rounded-full"
+                                onClick={handleClearFilters}
+                            >
+                                Clear All
+                            </Button>
+                        </div>
+                    </SheetContent>
+                </Sheet>
+            </div>
+       </div>
+
+       <div className="flex flex-col lg:flex-row gap-12 align-top">
+            {/* Desktop Sidebar */}
+            <aside className="hidden lg:block w-64 flex-shrink-0 sticky top-24 h-fit">
+                 <ProductFilter
+                    filters={filters}
+                    onFilterChange={handleFilterChange}
+                    onClearFilters={handleClearFilters}
+                />
+                
+            </aside>
+
+            {/* Product Grid */}
+            <div className="flex-1 min-h-[500px] relative">
+                 {isLoading && (
+                    <div className="absolute inset-0 z-10 bg-background/50 backdrop-blur-sm flex items-center justify-center rounded-xl">
+                        <SpinnerLoading />
+                    </div>
+                )}
+                
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-8 sm:gap-x-6 sm:gap-y-10">
+                    {products && products.length > 0 ? (
+                        products.map((product) => (
+                            <ProductCard key={product._id} product={product} />
+                        ))
+                    ) : (
+                        !isLoading && (
+                            <div className="col-span-full py-20 text-center text-muted-foreground">
+                                <p className="text-lg">No products found.</p>
+                                <Button 
+                                    variant="link" 
+                                    onClick={handleClearFilters}
+                                >
+                                    Clear all filters
+                                </Button>
+                            </div>
+                        )
+                    )}
+                </div>
+            </div>
+       </div>
     </div>
   );
 }

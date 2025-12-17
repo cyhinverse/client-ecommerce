@@ -1,13 +1,11 @@
+"use client";
 import {
   MapPin,
   Plus,
   Star,
   Edit,
-  Phone,
-  Navigation,
   Trash2,
 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import AddressDialog from "../address/AddressDialog";
@@ -17,6 +15,7 @@ import { deleteAddress, getProfile } from "@/features/user/userAction";
 import { toast } from "sonner";
 import { Address, AddressTabProps } from "@/types/address";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
+import { cn } from "@/lib/utils";
 
 export default function AddressTab({ user }: AddressTabProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -76,132 +75,112 @@ export default function AddressTab({ user }: AddressTabProps) {
   };
 
   const renderEmptyState = () => (
-    <div className="text-center py-8 border-2 border-dashed border-border rounded-xl">
-      <MapPin className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
-      <h3 className="text-base font-semibold text-foreground mb-1">
-        No addresses yet
+    <div className="flex flex-col items-center justify-center py-20 text-center border-2 border-dashed border-muted rounded-3xl bg-muted/20">
+      <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mb-4">
+        <MapPin className="h-8 w-8 text-muted-foreground" />
+      </div>
+      <h3 className="text-lg font-bold tracking-tight mb-2">
+        No addresses found
       </h3>
-      <p className="text-sm text-muted-foreground mb-4 max-w-sm mx-auto">
-        Add your first delivery address
+      <p className="text-muted-foreground mb-6 max-w-xs text-sm">
+        Add a delivery address to ensure faster checkout.
       </p>
       <Button
         onClick={openAddDialog}
-        className="bg-primary hover:bg-primary/90 text-primary-foreground"
+        className="rounded-full px-6"
       >
-        <Plus className="h-4 w-4 mr-1" />
+        <Plus className="h-4 w-4 mr-2" />
         Add New Address
       </Button>
     </div>
   );
 
   const renderAddressCard = (address: Address) => (
-    <Card
+    <div
       key={address._id}
-      className={`relative transition-all duration-200 hover:shadow-sm ${
+      className={cn(
+        "group relative flex flex-col md:flex-row justify-between p-6 rounded-2xl border transition-all duration-200",
         address.isDefault
-          ? "border-primary border-2 bg-muted/50"
-          : "border-border"
-      }`}
+          ? "border-primary bg-primary/5 dark:bg-primary/10"
+          : "border-border hover:border-foreground/20 hover:shadow-sm bg-card"
+      )}
     >
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between">
-          <div className="flex-1 space-y-2">
-            <div className="flex items-center gap-2 mb-1">
-              <h4 className="font-semibold text-foreground text-base">
-                {address.fullName}
-              </h4>
-              {address.isDefault && (
-                <Badge className="bg-primary text-primary-foreground border-primary hover:bg-primary/90 text-xs">
-                  <Star className="h-2.5 w-2.5 mr-1 fill-primary-foreground" />
-                  Default
-                </Badge>
-              )}
-            </div>
-
-            <div className="flex items-center gap-1 text-muted-foreground text-sm">
-              <Phone className="h-3.5 w-3.5" />
-              <span>{address.phone}</span>
-            </div>
-
-            <div className="flex items-start gap-1.5">
-              <Navigation className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
-              <div className="text-sm">
-                <p className="font-medium text-foreground">{address.address}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1 ml-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => openEditDialog(address)}
-              className="border-primary text-primary hover:bg-primary hover:text-primary-foreground text-xs h-8 px-2"
-            >
-              <Edit className="h-3 w-3 mr-1" />
-              Edit
-            </Button>
-
-            {!address.isDefault && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleDeleteAddress(address._id)}
-                disabled={isDeleting === address._id || isLoading}
-                className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground text-xs h-8 px-2"
-              >
-                <Trash2 className="h-3 w-3 mr-1" />
-                {isDeleting === address._id ? "Deleting..." : "Delete"}
-              </Button>
-            )}
-          </div>
+      <div className="flex-1 space-y-3">
+        <div className="flex items-center gap-3">
+          <h4 className="font-bold text-lg tracking-tight">
+            {address.fullName}
+          </h4>
+          {address.isDefault && (
+            <Badge className="rounded-full bg-primary text-primary-foreground border-0">
+              <Star className="h-3 w-3 mr-1 fill-current" />
+              Default
+            </Badge>
+          )}
         </div>
-      </CardContent>
-    </Card>
+
+        <div className="space-y-1 text-sm text-muted-foreground leading-relaxed">
+          <p className="text-foreground/80 font-medium">{address.phone}</p>
+          <p>{address.address}</p>
+          <p>{address.district}, {address.city}</p>
+        </div>
+      </div>
+
+      <div className="mt-4 md:mt-0 md:ml-6 flex items-start gap-2 pt-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => openEditDialog(address)}
+          className="rounded-full h-8 px-3 text-xs md:opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          <Edit className="h-3.5 w-3.5 mr-1.5" />
+          Edit
+        </Button>
+
+        {!address.isDefault && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleDeleteAddress(address._id)}
+            disabled={isDeleting === address._id || isLoading}
+            className="rounded-full h-8 px-3 text-xs text-red-500 hover:text-red-600 hover:bg-red-50 md:opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            {isDeleting === address._id ? (
+                <span className="animate-pulse">Deleting...</span>
+            ) : (
+                <>
+                    <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                    Delete
+                </>
+            )}
+          </Button>
+        )}
+      </div>
+    </div>
   );
 
   return (
-    <div className="space-y-4 relative min-h-[200px]">
+    <div className="space-y-8 relative min-h-[200px]">
       {isLoading && <SpinnerLoading className="absolute inset-0 m-auto" />}
       <div className={isLoading ? "opacity-50 pointer-events-none" : ""}>
-        {addresses.length === 0 && (
-          <div className="text-center space-y-1">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <div className="p-2 bg-muted rounded-full">
-                <MapPin className="h-5 w-5 text-foreground" />
-              </div>
+        <div className="flex justify-between items-center">
+            <div>
+                <h2 className="text-2xl font-bold tracking-tight">Address Book</h2>
+                <p className="text-muted-foreground text-sm">Manage your shipping destinations</p>
             </div>
-            <h1 className="text-xl font-bold text-foreground">Address Book</h1>
-            <p className="text-sm text-muted-foreground">
-              Manage your delivery addresses
-            </p>
-          </div>
-        )}
+            {addresses.length > 0 && (
+                <Button onClick={openAddDialog} className="rounded-full shadow-sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Address
+                </Button>
+            )}
+        </div>
 
         {addresses.length === 0 ? (
           renderEmptyState()
         ) : (
-          <>
-            <div className="flex justify-between items-center mb-3">
-              <div>
-                <h2 className="text-base font-semibold text-foreground">
-                  Your Addresses ({addresses.length})
-                </h2>
-                <p className="text-xs text-muted-foreground">
-                  Manage and edit delivery addresses
-                </p>
-              </div>
-              <Button
-                onClick={openAddDialog}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground text-sm"
-              >
-                <Plus className="h-3 w-3 mr-1" />
-                Add Address
-              </Button>
-            </div>
-
-            <div className="grid gap-3">{addresses.map(renderAddressCard)}</div>
-          </>
+          <div className="grid gap-4 mt-6">
+            {addresses.map(renderAddressCard)}
+          </div>
         )}
 
         <AddressDialog

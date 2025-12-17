@@ -1,41 +1,34 @@
 "use client";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
-import { Card, CardHeader } from "@/components/ui/card";
 import { getTreeCategories } from "@/features/category/categoryAction";
 import { getProductsBySlugOfCategory } from "@/features/product/productAction";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { toast } from "sonner";
+import { ProductCard } from "@/components/product/ProductCard";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default function CategoriesPage() {
   const dispatch = useAppDispatch();
   const path = usePathname();
-  const [currentIndex, setIndex] = useState(0);
-  const { isLoading, categories, error } = useAppSelector(
+  const slug = path.split("/")[2]; // Get slug from path
+  const { isLoading: isCategoryLoading, categories, error } = useAppSelector(
     (state) => state.category
   );
-  const { byCategory } = useAppSelector((state) => state.product);
+  const { byCategory, isLoading: isProductLoading } = useAppSelector((state) => state.product);
 
   useEffect(() => {
     dispatch(getTreeCategories());
   }, [dispatch]);
 
   useEffect(() => {
-    dispatch(getProductsBySlugOfCategory(path.split("/")[2]));
-  }, [dispatch, path]);
-
-  useEffect(() => {
-    if (!categories || categories.length === 0) return;
-
-    const interval = setInterval(() => {
-      setIndex((prev) => (prev + 1) % categories.length);
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [categories?.length]);
+    if (slug) {
+        dispatch(getProductsBySlugOfCategory(slug));
+    }
+  }, [dispatch, slug]);
 
   useEffect(() => {
     if (error) {
@@ -43,118 +36,57 @@ export default function CategoriesPage() {
     }
   }, [error]);
 
-  const handleMove = (index: number) => {
-    setIndex(index);
-  };
+  const currentCategoryName = categories?.find(c => c.slug === slug)?.name || "Category";
 
   return (
-    <main className="w-full min-h-screen p-4 mx-auto max-w-7xl mb-20">
-      <section className="m-10">
-        <h1 className="text-4xl font-bold mb-8 text-center tracking-tight">
-          Product Categories
-        </h1>
-        {categories && categories.length > 0 ? (
-          <div className="flex gap-4 flex-wrap items-center justify-center m-5 ">
-            {categories.map((category, index) => (
-              <div
-                key={category._id}
-                className={`p-4 border border-border transition-all duration-300 cursor-pointer hover:bg-muted/50 ${
-                  currentIndex === index ? "bg-muted" : ""
-                }`}
-                onMouseOver={() => handleMove(index)}
-              >
-                <Link
-                  href={`/categories/${category.slug}`}
-                  className="text-lg font-medium text-muted-foreground hover:text-foreground  transition-colors duration-300"
-                >
-                  {category.name}
-                </Link>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p>No categories found</p>
-        )}
-      </section>
+    <div className="w-full relative">
+       {/* Category Navigation Pills */}
+       <div className="mb-12">
+            <h1 className="text-4xl font-bold tracking-tight text-center mb-8">{currentCategoryName}</h1>
+            
+            {categories && categories.length > 0 && (
+                <div className="flex flex-wrap gap-2 justify-center">
+                    {categories.map((category) => {
+                        const isActive = category.slug === slug;
+                        return (
+                            <Link key={category._id} href={`/categories/${category.slug}`}>
+                                <div className={cn(
+                                    "px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border",
+                                    isActive 
+                                        ? "bg-foreground text-background border-foreground shadow-md transform scale-105" 
+                                        : "bg-background text-muted-foreground border-border/50 hover:border-foreground/50 hover:text-foreground"
+                                )}>
+                                    {category.name}
+                                </div>
+                            </Link>
+                        )
+                    })}
+                </div>
+            )}
+       </div>
 
-      {isLoading && <SpinnerLoading />}
-      <div className={isLoading ? "opacity-50 pointer-events-none" : ""}>
-        <section className="mb-20">
-          <h1 className="text-3xl font-bold mb-8 text-center tracking-tight">
-            Products
-          </h1>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 m-10">
+      {(isCategoryLoading || isProductLoading) && <SpinnerLoading className="fixed inset-0 m-auto" />}
+      
+      <div className={cn("transition-opacity", (isCategoryLoading || isProductLoading) ? "opacity-50" : "")}>
+           
+           {/* Products Grid */}
+           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-8 sm:gap-x-6 sm:gap-y-10">
             {byCategory && byCategory.length > 0 ? (
               byCategory.map((p) => (
-                <Link
-                  key={p._id}
-                  href={`/products/${p.slug}`}
-                  className="group block"
-                >
-                  <Card className="overflow-hidden border-0 shadow-none bg-transparent">
-                    {/* Product Image - 3:4 Aspect Ratio */}
-                    <div className="relative aspect-[3/4] bg-muted mb-3">
-                      {p.images && p.images.length > 0 ? (
-                        <Image
-                          src={p.images[0]}
-                          alt={p.name}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full text-muted-foreground text-xs">
-                          No Image
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Product Info */}
-                    <CardHeader className="p-0 space-y-1">
-                      <h3 className="font-medium text-sm line-clamp-1 group-hover:underline">
-                        {p.name}
-                      </h3>
-
-                      {/* Price */}
-                      <div className="flex items-baseline gap-2 pt-1">
-                        {p.price?.discountPrice &&
-                        p.price?.currentPrice !== p.price?.discountPrice ? (
-                          <>
-                            <span className="font-semibold text-sm">
-                              {new Intl.NumberFormat("en-US", {
-                                style: "currency",
-                                currency: "VND",
-                              }).format(p.price.discountPrice)}
-                            </span>
-                            <span className="text-xs text-muted-foreground line-through">
-                              {new Intl.NumberFormat("en-US", {
-                                style: "currency",
-                                currency: "VND",
-                              }).format(p.price.currentPrice)}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="font-semibold text-sm">
-                            {new Intl.NumberFormat("en-US", {
-                              style: "currency",
-                              currency: "VND",
-                            }).format(p.price?.currentPrice || 0)}
-                          </span>
-                        )}
-                      </div>
-                    </CardHeader>
-                  </Card>
-                </Link>
+                <ProductCard key={p._id} product={p} />
               ))
             ) : (
-              <div className="col-span-full">
-                <p className="text-muted-foreground text-center py-10">
-                  No products found for this category
-                </p>
-              </div>
+                !(isCategoryLoading || isProductLoading) && (
+                  <div className="col-span-full text-center py-20 text-muted-foreground">
+                    <p className="text-lg">No products found in this category</p>
+                    <Button variant="link" asChild className="mt-2">
+                        <Link href="/products">View all products</Link>
+                    </Button>
+                  </div>
+                )
             )}
           </div>
-        </section>
       </div>
-    </main>
+    </div>
   );
 }

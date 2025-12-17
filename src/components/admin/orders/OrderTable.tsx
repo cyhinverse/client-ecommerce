@@ -32,14 +32,14 @@ export interface OrdersTableProps {
   orders: Order[];
   searchTerm: string;
   statusFilter: string;
-  paymentStatusFilter: string; // Đổi từ function thành string
+  paymentStatusFilter: string;
   paymentMethodFilter: string;
   userIdFilter: string;
   pageSize: number;
   isLoading?: boolean;
   onSearch: (value: string) => void;
   onStatusFilter: (status: string) => void;
-  onPaymentStatusFilter: (status: string) => void; // Giữ nguyên function cho handler
+  onPaymentStatusFilter: (status: string) => void;
   onPaymentMethodFilter: (method: string) => void;
   onUserIdFilter: (userId: string) => void;
   onResetFilters: () => void;
@@ -63,7 +63,7 @@ export function OrdersTable({
   isLoading = false,
 }: OrdersTableProps) {
   const [localSearch, setLocalSearch] = useState(searchTerm);
-  const debouncedSearch = useDebounce(localSearch);
+  const debouncedSearch = useDebounce(localSearch, 500);
 
   useEffect(() => {
     setLocalSearch(searchTerm);
@@ -80,22 +80,24 @@ export function OrdersTable({
       [key: string]: {
         label: string;
         variant: "default" | "secondary" | "destructive" | "outline";
+        className?: string;
       };
     } = {
-      pending: { label: "Pending", variant: "secondary" },
-      confirmed: { label: "Confirmed", variant: "outline" },
-      processing: { label: "Processing", variant: "default" },
-      shipped: { label: "Shipped", variant: "default" },
-      delivered: { label: "Delivered", variant: "outline" },
-      cancelled: { label: "Cancelled", variant: "destructive" },
+      pending: { label: "Pending", variant: "secondary", className: "bg-gray-100 text-gray-700 hover:bg-gray-100" },
+      confirmed: { label: "Confirmed", variant: "outline", className: "bg-blue-50 text-blue-700 border-blue-200" },
+      processing: { label: "Processing", variant: "default", className: "bg-indigo-100 text-indigo-700 hover:bg-indigo-100" },
+      shipped: { label: "Shipped", variant: "default", className: "bg-purple-100 text-purple-700 hover:bg-purple-100" },
+      delivered: { label: "Delivered", variant: "outline", className: "bg-green-50 text-green-700 border-green-200" },
+      cancelled: { label: "Cancelled", variant: "destructive", className: "bg-red-50 text-red-700 border-red-200 hover:bg-red-50" },
     };
 
     const config = statusConfig[status] || {
       label: status,
       variant: "secondary",
+      className: "bg-gray-100 text-gray-700"
     };
 
-    return <Badge variant={config.variant}>{config.label}</Badge>;
+    return <Badge variant={config.variant} className={`rounded-lg font-medium px-2.5 py-0.5 border-0 shadow-none ${config.className}`}>{config.label}</Badge>;
   };
 
   const getPaymentStatusBadge = (status: string) => {
@@ -103,10 +105,11 @@ export function OrdersTable({
       [key: string]: {
         label: string;
         variant: "default" | "secondary" | "destructive" | "outline";
+        className?: string; // Add className property
       };
     } = {
-      unpaid: { label: "Unpaid", variant: "secondary" },
-      paid: { label: "Paid", variant: "outline" },
+      unpaid: { label: "Unpaid", variant: "secondary", className: "bg-yellow-50 text-yellow-700 border border-yellow-200" },
+      paid: { label: "Paid", variant: "outline", className: "bg-green-50 text-green-700 border border-green-200" },
       refunded: { label: "Refunded", variant: "destructive" },
     };
 
@@ -115,7 +118,7 @@ export function OrdersTable({
       variant: "secondary",
     };
 
-    return <Badge variant={config.variant}>{config.label}</Badge>;
+    return <Badge variant={config.variant} className={`rounded-lg font-medium px-2.5 py-0.5 border-0 shadow-none ${config.className}`}>{config.label}</Badge>;
   };
 
   const formatDate = (dateString: string) => {
@@ -131,22 +134,22 @@ export function OrdersTable({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-white/50 dark:bg-white/5 p-4 rounded-[1.5rem] backdrop-blur-xl border border-border/50">
         <div className="flex flex-1 items-center space-x-2">
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search by order ID, customer name..."
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
-              className="pl-8 rounded-none border-border focus-visible:ring-0 focus-visible:border-primary"
+              className="pl-9 rounded-xl border-gray-200 bg-white/80 focus-visible:ring-0 focus-visible:border-primary transition-all shadow-sm"
             />
           </div>
           <Select value={statusFilter} onValueChange={onStatusFilter}>
-            <SelectTrigger className="w-[180px] rounded-none border-border focus:ring-0 focus:border-primary">
-              <SelectValue placeholder="Tất cả trạng thái" />
+            <SelectTrigger className="w-[180px] rounded-xl border-gray-200 bg-white/80 focus:ring-0 shadow-sm">
+              <SelectValue placeholder="All Status" />
             </SelectTrigger>
-            <SelectContent className="rounded-none border-border">
+            <SelectContent className="rounded-xl border-border/50">
               <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="confirmed">Confirmed</SelectItem>
@@ -161,10 +164,10 @@ export function OrdersTable({
           value={pageSize.toString()}
           onValueChange={(value) => onPageSizeChange(Number(value))}
         >
-          <SelectTrigger className="w-[120px] rounded-none border-border focus:ring-0 focus:border-primary">
+          <SelectTrigger className="w-[120px] rounded-xl border-gray-200 bg-white/80 focus:ring-0 shadow-sm">
             <SelectValue placeholder="Show" />
           </SelectTrigger>
-          <SelectContent className="rounded-none border-border">
+          <SelectContent className="rounded-xl border-border/50">
             <SelectItem value="10">10 / page</SelectItem>
             <SelectItem value="20">20 / page</SelectItem>
             <SelectItem value="50">50 / page</SelectItem>
@@ -172,23 +175,23 @@ export function OrdersTable({
         </Select>
       </div>
 
-      <div className="rounded-md border overflow-x-auto no-scrollbar">
+      <div className="rounded-[2rem] border border-border/50 bg-white/60 dark:bg-[#1C1C1E]/60 backdrop-blur-xl overflow-hidden shadow-sm">
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Order ID</TableHead>
-              <TableHead>Customer</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Total</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Payment</TableHead>
-              <TableHead className="w-[80px]">Actions</TableHead>
+          <TableHeader className="bg-gray-50/50">
+            <TableRow className="border-border/50 hover:bg-transparent">
+              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground pl-6">Order ID</TableHead>
+              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Customer</TableHead>
+              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Date</TableHead>
+              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Total</TableHead>
+              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Status</TableHead>
+              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Payment</TableHead>
+              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground w-[80px] text-right pr-6">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading && (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
+                <TableCell colSpan={7} className="h-32 text-center">
                   <div className="flex justify-center items-center">
                     <SpinnerLoading />
                   </div>
@@ -199,7 +202,7 @@ export function OrdersTable({
               <TableRow>
                 <TableCell
                   colSpan={7}
-                  className="text-center py-8 text-muted-foreground"
+                  className="text-center py-12 text-muted-foreground"
                 >
                   No orders found
                 </TableCell>
@@ -208,48 +211,48 @@ export function OrdersTable({
               orders.map((order) => (
                 <TableRow
                   key={order._id}
-                  className={isLoading ? "opacity-50 pointer-events-none" : ""}
+                  className={`border-border/50 hover:bg-gray-50/50 transition-colors ${isLoading ? "opacity-50 pointer-events-none" : ""}`}
                 >
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium pl-6 text-sm">
                     #{order._id.slice(-8).toUpperCase()}
                   </TableCell>
                   <TableCell>
-                    <div>
-                      <div className="font-medium">
+                    <div className="flex flex-col">
+                      <span className="font-medium text-sm text-foreground">
                         {order.shippingAddress.fullName}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
+                      </span>
+                      <span className="text-xs text-muted-foreground">
                         {order.shippingAddress.phone}
-                      </div>
+                      </span>
                     </div>
                   </TableCell>
-                  <TableCell>{formatDate(order.createdAt)}</TableCell>
-                  <TableCell>{formatCurrency(order.totalAmount)}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{formatDate(order.createdAt)}</TableCell>
+                  <TableCell className="font-medium">{formatCurrency(order.totalAmount)}</TableCell>
                   <TableCell>{getStatusBadge(order.status)}</TableCell>
                   <TableCell>
                     {getPaymentStatusBadge(order.paymentStatus)}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="pr-6 text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
+                        <Button variant="ghost" className="h-8 w-8 p-0 rounded-lg hover:bg-gray-100">
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => onView(order)}>
-                          <Eye className="w-4 h-4 mr-2" />
+                      <DropdownMenuContent align="end" className="rounded-xl border-border/50 shadow-lg">
+                        <DropdownMenuItem onClick={() => onView(order)} className="cursor-pointer gap-2">
+                          <Eye className="w-4 h-4" />
                           View Details
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onEdit(order)}>
-                          <Edit className="w-4 h-4 mr-2" />
+                        <DropdownMenuItem onClick={() => onEdit(order)} className="cursor-pointer gap-2">
+                          <Edit className="w-4 h-4" />
                           Update Status
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => onDelete(order)}
-                          className="text-destructive"
+                          className="text-destructive cursor-pointer gap-2"
                         >
-                          <Trash2 className="w-4 h-4 mr-2" />
+                          <Trash2 className="w-4 h-4" />
                           Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>

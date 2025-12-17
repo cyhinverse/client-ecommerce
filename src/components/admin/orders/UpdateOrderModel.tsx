@@ -49,19 +49,19 @@ export function EditOrderModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[400px] rounded-[2rem] border-border/50 bg-white/80 dark:bg-[#1C1C1E]/80 backdrop-blur-xl shadow-2xl p-6">
         <DialogHeader>
-          <DialogTitle>Update Order Status</DialogTitle>
+          <DialogTitle className="text-xl font-semibold tracking-tight">Update Order Status</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="status">Order Status</Label>
+            <Label htmlFor="status" className="text-sm font-medium">Order Status</Label>
             <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger>
+              <SelectTrigger className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all">
                 <SelectValue placeholder="Select Status" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="rounded-xl border-border/50">
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="confirmed">Confirmed</SelectItem>
                 <SelectItem value="processing">Processing</SelectItem>
@@ -73,10 +73,19 @@ export function EditOrderModal({
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button 
+               type="button" 
+               variant="outline" 
+               onClick={onClose}
+               className="rounded-xl border-gray-200"
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button 
+               type="submit" 
+               disabled={isLoading}
+               className="rounded-xl bg-black hover:bg-black/90 text-white dark:bg-[#0071e3] dark:hover:bg-[#0077ED]"
+            >
               {isLoading ? "Saving..." : "Save Changes"}
             </Button>
           </div>

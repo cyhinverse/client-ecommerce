@@ -215,13 +215,12 @@ export function CreateCategoryModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px] max-h-[85vh] flex flex-col">
-        <DialogHeader className="shrink-0 pb-4">
-          <DialogTitle className="flex items-center gap-2">
-            <Plus className="h-5 w-5 text-black-600" />
-            Create New Category
+      <DialogContent className="rounded-[2rem] border-border/50 bg-white/80 dark:bg-[#1C1C1E]/80 backdrop-blur-xl shadow-2xl p-6 sm:max-w-[500px] max-h-[90vh] flex flex-col no-scrollbar">
+        <DialogHeader className="shrink-0 pb-6 border-b border-border/50">
+          <DialogTitle className="flex items-center gap-2 text-2xl font-bold tracking-tight">
+            Create Category
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-muted-foreground">
             Add new product category to the system
           </DialogDescription>
         </DialogHeader>
@@ -229,10 +228,10 @@ export function CreateCategoryModal({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col flex-1  min-h-0"
+            className="flex flex-col flex-1 min-h-0 pt-6"
           >
             {/* Scrollable Form Content */}
-            <div className="space-y-4 flex-1 overflow-y-auto p-2 pb-4 no-scrollbar">
+            <div className="space-y-4 flex-1 overflow-y-auto pr-1 no-scrollbar">
               {/* Name Field */}
               <FormField
                 control={form.control}
@@ -240,7 +239,7 @@ export function CreateCategoryModal({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium">
-                      Category Name <span className="text-destructive">*</span>
+                      Category Name
                     </FormLabel>
                     <FormControl>
                       <Input
@@ -251,6 +250,7 @@ export function CreateCategoryModal({
                           handleNameChange(e.target.value);
                         }}
                         autoFocus
+                        className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all shadow-sm"
                       />
                     </FormControl>
                     <FormMessage />
@@ -265,7 +265,7 @@ export function CreateCategoryModal({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium">
-                      Slug <span className="text-destructive">*</span>
+                      Slug
                     </FormLabel>
                     <FormControl>
                       <Input
@@ -275,12 +275,13 @@ export function CreateCategoryModal({
                           field.onChange(e);
                           handleSlugChange(e.target.value);
                         }}
+                        className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all shadow-sm"
                       />
                     </FormControl>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>SEO URL: /categories/{field.value}</span>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1.5 ml-1">
+                      <span>URL: /categories/{field.value}</span>
                       {!isSlugManuallyEdited && (
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-[10px] h-5 rounded-md border-border/50">
                           Auto
                         </Badge>
                       )}
@@ -303,7 +304,7 @@ export function CreateCategoryModal({
                       <div className="relative" ref={dropdownRef}>
                         <button
                           type="button"
-                          className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="flex h-10 w-full items-center justify-between rounded-xl border border-gray-200 bg-gray-50/50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 hover:bg-gray-50 transition-all text-left"
                           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                         >
                           <span
@@ -325,15 +326,15 @@ export function CreateCategoryModal({
                         </button>
 
                         {isDropdownOpen && (
-                          <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-60 overflow-auto">
+                          <div className="absolute z-50 w-full mt-1 bg-white border border-border/50 rounded-xl shadow-xl max-h-60 overflow-y-auto no-scrollbar py-1">
                             <div
-                              className="p-3 hover:bg-accent hover:text-accent-foreground cursor-pointer border-b border-border"
+                              className="px-3 py-2 hover:bg-gray-50 cursor-pointer border-b border-border/50"
                               onClick={() => {
                                 field.onChange("");
                                 setIsDropdownOpen(false);
                               }}
                             >
-                              <div className="flex items-center gap-2 text-sm">
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <Folder className="h-4 w-4" />
                                 <span>No parent category</span>
                               </div>
@@ -342,23 +343,23 @@ export function CreateCategoryModal({
                             {availableParentCategories.map((category) => (
                               <div
                                 key={category._id}
-                                className="p-3 hover:bg-accent hover:text-accent-foreground cursor-pointer border-b border-border last:border-b-0"
+                                className="px-3 py-2 hover:bg-gray-50 cursor-pointer border-b border-border/50 last:border-b-0"
                                 onClick={() => {
                                   field.onChange(category._id);
                                   setIsDropdownOpen(false);
                                 }}
                               >
                                 <div className="flex items-center gap-2 text-sm">
-                                  <Folder className="h-4 w-4" />
-                                  <span className="flex-1">
+                                  <Folder className="h-4 w-4 text-blue-500" />
+                                  <span className="flex-1 font-medium">
                                     {category.name}
                                   </span>
                                   {category.parentCategory && (
                                     <Badge
-                                      variant="outline"
-                                      className="text-xs"
+                                      variant="secondary"
+                                      className="text-[10px] rounded-md h-5"
                                     >
-                                      Child
+                                      Sub
                                     </Badge>
                                   )}
                                 </div>
@@ -386,6 +387,7 @@ export function CreateCategoryModal({
                         rows={3}
                         {...field}
                         value={field.value || ""}
+                        className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all shadow-sm resize-none"
                       />
                     </FormControl>
                     <FormMessage />
@@ -400,13 +402,13 @@ export function CreateCategoryModal({
                 render={({}) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium">
-                      Images
+                      Category Image
                     </FormLabel>
                     <FormControl>
                       <div className="space-y-3">
                         {/* File Upload Input */}
                         <div
-                          className="border-2 border-dashed border-border rounded-lg p-4 text-center cursor-pointer hover:border-primary transition-colors"
+                          className="border-2 border-dashed border-border/50 rounded-xl p-6 text-center cursor-pointer hover:bg-gray-50/50 hover:border-primary/50 transition-all"
                           onClick={() => fileInputRef.current?.click()}
                         >
                           <input
@@ -417,35 +419,37 @@ export function CreateCategoryModal({
                             onChange={handleFileUpload}
                             className="hidden"
                           />
-                          <Upload className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
-                          <p className="text-sm text-muted-foreground">
+                          <div className="bg-gray-100 p-3 rounded-full inline-flex mb-3">
+                            <Upload className="h-5 w-5 text-muted-foreground" />
+                          </div>
+                          <p className="text-sm font-medium text-foreground">
                             {isUploading
                               ? "Uploading..."
                               : "Click to upload image"}
                           </p>
                           <p className="text-xs text-muted-foreground mt-1">
-                            PNG, JPG, JPEG
+                            Recommended sizing: 500x500px
                           </p>
                         </div>
 
                         {/* Image Preview */}
                         {currentImages.length > 0 && (
-                          <div className="grid grid-cols-3 gap-2">
+                          <div className="grid grid-cols-3 gap-3">
                             {currentImages.map((image, index) => (
-                              <div key={index} className="relative h-16 group">
+                              <div key={index} className="relative aspect-square group rounded-xl overflow-hidden border border-border/50">
                                 <Image
                                   src={image}
                                   alt={`Preview ${index + 1}`}
                                   fill
-                                  className="object-cover rounded border"
+                                  className="object-cover"
                                   sizes="33vw"
                                 />
                                 <button
                                   type="button"
                                   onClick={() => removeImage(index)}
-                                  className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                  className="absolute top-1.5 right-1.5 bg-black/50 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-black/70 backdrop-blur-sm"
                                 >
-                                  <Trash2 className="h-2 w-2" />
+                                  <Trash2 className="h-3 w-3" />
                                 </button>
                               </div>
                             ))}
@@ -453,11 +457,6 @@ export function CreateCategoryModal({
                         )}
                       </div>
                     </FormControl>
-                    <div className="text-sm text-muted-foreground">
-                      {currentImages.length > 0
-                        ? `${currentImages.length} images uploaded`
-                        : "Upload images for category"}
-                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -468,13 +467,11 @@ export function CreateCategoryModal({
                 control={form.control}
                 name="isActive"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                  <FormItem className="flex items-center justify-between rounded-xl border border-border/50 bg-gray-50/50 p-4">
                     <div className="space-y-0.5">
-                      <FormLabel className="text-base">Status</FormLabel>
-                      <div className="flex items-center gap-2">
-                        <Badge variant={field.value ? "default" : "secondary"}>
-                          {field.value ? "Active" : "Inactive"}
-                        </Badge>
+                      <FormLabel className="text-sm font-medium block">Active Status</FormLabel>
+                      <div className="text-xs text-muted-foreground">
+                        Set visibility for this category
                       </div>
                     </div>
                     <FormControl>
@@ -488,29 +485,28 @@ export function CreateCategoryModal({
               />
             </div>
 
-            {/* Fixed Footer - LUÔN HIỂN THỊ */}
-            <DialogFooter className="shrink-0 pt-4 border-t bg-background">
+            {/* Footer */}
+            <DialogFooter className="shrink-0 pt-6 border-t border-border/50 gap-3">
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleClose}
                 disabled={isLoading}
-                className="flex-1 sm:flex-none"
+                className="flex-1 rounded-xl h-11 border-gray-200"
               >
-                <X className="h-4 w-4 mr-2" />
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={isLoading || !form.formState.isValid}
-                className="bg-primary text-primary-foreground hover:bg-primary/90 flex-1 sm:flex-none"
+                className="flex-1 rounded-xl h-11 bg-black text-white hover:bg-black/90 dark:bg-[#0071e3] shadow-sm"
               >
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 ) : (
-                  <Save className="h-4 w-4 mr-2" />
+                  <Plus className="h-4 w-4 mr-2" />
                 )}
-                {isLoading ? "Creating..." : "Create Category"}
+                Create
               </Button>
             </DialogFooter>
           </form>

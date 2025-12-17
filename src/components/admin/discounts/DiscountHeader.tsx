@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
@@ -7,16 +8,16 @@ interface DiscountsHeaderProps {
 
 export function DiscountsHeader({ onOpenCreate }: DiscountsHeaderProps) {
   return (
-    <div className="flex items-center justify-between border-b border-border pb-6">
+    <div className="flex items-center justify-between border-b border-border/50 pb-6 mb-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground uppercase">Discounts</h1>
-        <p className="text-muted-foreground mt-1">
+        <p className="text-muted-foreground mt-1 text-sm bg-transparent">
           Manage and create discount codes for the store
         </p>
       </div>
       <Button 
         onClick={onOpenCreate}
-        className="flex items-center gap-2 rounded-none bg-primary text-primary-foreground hover:bg-primary/90"
+        className="rounded-xl h-10 gap-2 text-sm font-medium transition-all shadow-lg hover:shadow-xl bg-black hover:bg-black/90 text-white dark:bg-[#0071e3] dark:hover:bg-[#0077ED] border border-transparent"
       >
         <Plus className="h-4 w-4" />
         Create Discount

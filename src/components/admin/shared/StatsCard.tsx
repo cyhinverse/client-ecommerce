@@ -27,34 +27,36 @@ const StatsCard: React.FC<StatsCardProps> = ({
   className,
 }) => {
   return (
-    <Card className={`border border-border shadow-none rounded-none ${className}`}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">{title}</CardTitle>
-        <Icon className="h-4 w-4 text-muted-foreground" />
-      </CardHeader>
-      <CardContent>
-        <div className="text-3xl font-bold tracking-tight">{value}</div>
+    <div className={`rounded-[2rem] border border-border/50 bg-white/60 dark:bg-[#1C1C1E]/60 p-6 shadow-sm backdrop-blur-xl transition-all hover:shadow-md ${className || ""}`}>
+      <div className="flex items-center justify-between space-y-0 pb-2">
+        <p className="text-sm font-medium text-muted-foreground font-sans uppercase tracking-wider">{title}</p>
+        <div className="rounded-full bg-gray-100/80 p-2 text-foreground dark:bg-white/10">
+             <Icon className="h-4 w-4" />
+        </div>
+      </div>
+      <div className="mt-3">
+        <div className="text-3xl font-bold tracking-tight text-foreground">{value}</div>
         {change && (
           <div className="flex items-center mt-1">
             <span
-              className={`text-xs font-medium px-1.5 py-0.5 ${
+              className={`text-xs font-medium px-1.5 py-0.5 rounded-md ${
                 changeType === "positive"
-                  ? "bg-success/10 text-success"
-                  : "bg-destructive/10 text-destructive"
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700"
               }`}
             >
               {change}
             </span>
             <span className="text-xs text-muted-foreground ml-2">
-              so với tháng trước
+              vs last month
             </span>
           </div>
         )}
         {description && !change && (
           <p className="text-xs text-muted-foreground mt-1">{description}</p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

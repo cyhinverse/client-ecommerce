@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Ticket, Clock, AlertCircle, BarChart3 } from "lucide-react";
 
 interface DiscountsStatsProps {
@@ -17,25 +16,25 @@ export function DiscountsStats({
   const stats = [
     {
       title: "Total Discounts",
-      value: totalDiscounts.toString(),
+      value: totalDiscounts,
       icon: Ticket,
       description: "All discount codes",
     },
     {
       title: "Active",
-      value: activeDiscounts.toString(),
+      value: activeDiscounts,
       icon: BarChart3,
       description: "Active codes",
     },
     {
       title: "Expired",
-      value: expiredDiscounts.toString(),
+      value: expiredDiscounts,
       icon: Clock,
       description: "Expired codes",
     },
     {
       title: "Running Out",
-      value: highUsageDiscounts.toString(),
+      value: highUsageDiscounts,
       icon: AlertCircle,
       description: "Used >80% limit",
     },
@@ -44,16 +43,16 @@ export function DiscountsStats({
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {stats.map((stat, index) => (
-        <Card key={index} className="rounded-none border border-border shadow-none">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">{stat.title}</CardTitle>
+        <div key={index} className="rounded-[2rem] border border-border/50 bg-white/60 dark:bg-[#1C1C1E]/60 p-6 shadow-sm backdrop-blur-xl">
+          <div className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">{stat.title}</h3>
             <stat.icon className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
+          </div>
+          <div>
             <div className="text-2xl font-bold text-foreground">{stat.value}</div>
             <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ))}
     </div>
   );

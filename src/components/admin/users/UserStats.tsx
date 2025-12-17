@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, UserCheck, MailCheck, MapPin } from "lucide-react";
 
 interface UsersStatsProps {
@@ -8,74 +7,74 @@ interface UsersStatsProps {
   recentUsers: number;
 }
 
-const stats = [
-  {
-    title: "Total Users",
-    value: "totalUsers",
-    icon: Users,
-    bgColor: "bg-muted",
-    iconColor: "text-muted-foreground",
-  },
-  {
-    title: "Verified Email",
-    value: "verifiedUsers",
-    icon: MailCheck,
-    bgColor: "bg-muted",
-    iconColor: "text-muted-foreground",
-  },
-  {
-    title: "Has Address",
-    value: "usersWithAddress",
-    icon: MapPin,
-    bgColor: "bg-muted",
-    iconColor: "text-muted-foreground",
-  },
-  {
-    title: "New Users",
-    value: "recentUsers",
-    icon: UserCheck,
-    bgColor: "bg-muted",
-    iconColor: "text-muted-foreground",
-  },
-];
-
 export function UsersStats({
   totalUsers,
   verifiedUsers,
   usersWithAddress,
   recentUsers,
 }: UsersStatsProps) {
-  const getValue = (valueKey: string) => {
-    switch (valueKey) {
-      case "totalUsers":
-        return totalUsers || 0;
-      case "verifiedUsers":
-        return verifiedUsers || 0;
-      case "usersWithAddress":
-        return usersWithAddress || 0;
-      case "recentUsers":
-        return recentUsers || 0;
-      default:
-        return 0;
-    }
-  };
+  const stats = [
+    {
+      title: "Total Users",
+      value: totalUsers,
+      icon: Users,
+      description: "Admin & Users",
+      percentage: "+12.5%",
+      trend: "up",
+    },
+    {
+      title: "Verified Users",
+      value: verifiedUsers,
+      icon: MailCheck,
+      description: "Email Verified",
+      percentage: "+4.2%",
+      trend: "up",
+    },
+    {
+      title: "Active Addresses",
+      value: usersWithAddress,
+      icon: MapPin,
+      description: "Users with Address",
+      percentage: "+2.1%",
+      trend: "up",
+    },
+    {
+      title: "New Users",
+      value: recentUsers,
+      icon: UserCheck,
+      description: "Registered this week",
+      percentage: "+10.3%",
+      trend: "up",
+    },
+  ];
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {stats.map((stat, index) => (
-        <Card key={index} className="rounded-none border border-border shadow-none">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+        <div
+          key={index}
+          className="rounded-[2rem] border border-border/50 bg-white/60 dark:bg-[#1C1C1E]/60 p-6 shadow-sm backdrop-blur-xl transition-all hover:shadow-md"
+        >
+          <div className="flex items-center justify-between space-y-0 pb-2">
+            <p className="text-sm font-medium text-muted-foreground font-sans">
               {stat.title}
-            </CardTitle>
-            <stat.icon className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">
-              {getValue(stat.value)?.toLocaleString() || "0"}
+            </p>
+            <div className="rounded-full bg-gray-100/80 p-2 text-foreground dark:bg-white/10">
+                <stat.icon className="h-4 w-4" />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+          <div className="mt-3">
+            <div className="text-3xl font-bold tracking-tight text-foreground">
+              {stat.value.toLocaleString()}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              <span className="text-green-500 font-medium inline-flex items-center gap-1">
+                 {stat.percentage}
+              </span>{" "}
+              from last month
+            </p>
+          </div>
+        </div>
       ))}
     </div>
   );

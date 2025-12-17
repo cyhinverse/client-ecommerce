@@ -2,13 +2,6 @@
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { toast } from "sonner";
 import { UsersHeader } from "@/components/admin/users/UsersHeader";
 import { UsersStats } from "@/components/admin/users/UserStats";
@@ -229,9 +222,11 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="space-y-6 no-scrollbar">
+    <div className="space-y-8 p-1">
+      {/* Header Section */}
       <UsersHeader onOpenCreate={handleOpenCreateModal} />
 
+      {/* Stats Section */}
       <UsersStats
         totalUsers={totalUsers}
         verifiedUsers={verifiedUsers}
@@ -239,15 +234,8 @@ export default function AdminUsersPage() {
         recentUsers={recentUsers}
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>User List</CardTitle>
-          <CardDescription>
-            Manage all users in the system
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <UsersTable
+       {/* Main Content Area */}
+        <UsersTable
             users={users}
             searchTerm={searchTerm}
             pageSize={pageSize}
@@ -263,13 +251,15 @@ export default function AdminUsersPage() {
             selectedVerified={selectedVerified}
           />
 
-          <UserPagination
-            currentPage={currentPage}
-            totalPages={pagination?.totalPages || 1}
-            totalItems={pagination?.totalItems}
-            pageSize={pageSize}
-            onPageChange={handlePageChange}
-          />
+          <div className="mt-6">
+            <UserPagination
+              currentPage={currentPage}
+              totalPages={pagination?.totalPages || 1}
+              totalItems={pagination?.totalItems}
+              pageSize={pageSize}
+              onPageChange={handlePageChange}
+            />
+          </div>
 
           <CreateModelUser
             open={createModalOpen}
@@ -292,8 +282,6 @@ export default function AdminUsersPage() {
             onUpdate={handleUpdateUser}
             isLoading={isUpdating}
           />
-        </CardContent>
-      </Card>
     </div>
   );
 }

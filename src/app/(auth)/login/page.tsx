@@ -3,14 +3,6 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -19,7 +11,8 @@ import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { login } from "@/features/auth/authAction";
 import { toast } from "sonner";
-import { Eye, EyeOff, Mail, Lock } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, Loader2, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email"),
@@ -44,7 +37,6 @@ export default function LoginPage() {
     },
   });
 
-  // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && token) {
       router.push("/");
@@ -56,141 +48,110 @@ export default function LoginPage() {
       const result = await dispatch(login(data));
 
       if (login.fulfilled.match(result)) {
-        toast.success("Login successful!");
+        toast.success("Welcome back");
         router.push("/");
       } else {
         const errorMessage =
           (result.payload as { message: string })?.message ||
-          "Login failed!";
+          "Login failed";
         toast.error(errorMessage);
       }
     } catch {
-      toast.error("An error occurred, please try again!");
+      toast.error("Something went wrong");
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center space-y-2">
-          <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-            <Lock className="h-8 w-8 text-blue-600" />
+    <div className="min-h-screen w-full flex items-center justify-center bg-[#F5F5F7] dark:bg-[#000000] p-4">
+       <div className="w-full max-w-[400px] flex flex-col gap-6">
+          
+          <div className="text-center space-y-2">
+             <div className="mx-auto w-12 h-12 bg-black dark:bg-white rounded-2xl flex items-center justify-center mb-4 shadow-lg rotate-3 transition-transform hover:rotate-6">
+                <Lock className="h-6 w-6 text-white dark:text-black" />
+             </div>
+             <h1 className="text-2xl font-bold tracking-tight text-foreground">Sign in</h1>
+             <p className="text-sm text-muted-foreground">Welcome back to the store</p>
           </div>
 
-          <CardTitle className="text-2xl font-bold">Login</CardTitle>
-          <CardDescription className="text-base">
-            Welcome back
-          </CardDescription>
-        </CardHeader>
+          <div className="p-8 rounded-[2rem] bg-white/70 dark:bg-[#1C1C1E]/70 backdrop-blur-xl shadow-xl border border-white/20">
+             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                
+                <div className="space-y-2">
+                   <Label className="text-xs font-medium text-muted-foreground ml-1">Email</Label>
+                   <div className="relative group">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50 transition-colors group-focus-within:text-blue-500" />
+                      <Input
+                        {...form.register("email")}
+                        placeholder="name@example.com"
+                        className="pl-12 h-12 rounded-xl bg-gray-50/50 dark:bg-black/20 border-transparent focus:bg-white dark:focus:bg-black/40 focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all"
+                        autoComplete="email"
+                      />
+                   </div>
+                   {form.formState.errors.email && (
+                     <p className="text-xs text-red-500 ml-1">{form.formState.errors.email.message}</p>
+                   )}
+                </div>
 
-        <CardContent>
-          {/* Đặt form.handleSubmit trực tiếp trong thẻ form */}
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* Email Field */}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-                <Input
-                  id="email"
-                  {...form.register("email")}
-                  placeholder="Enter your email"
-                  className="pl-10"
-                  autoComplete="username"
-                />
-              </div>
-              {form.formState.errors.email && (
-                <p className="text-sm text-red-600">
-                  {form.formState.errors.email.message}
-                </p>
-              )}
-            </div>
+                <div className="space-y-2">
+                   <Label className="text-xs font-medium text-muted-foreground ml-1">Password</Label>
+                   <div className="relative group">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50 transition-colors group-focus-within:text-blue-500" />
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        {...form.register("password")}
+                        placeholder="••••••••"
+                        className="pl-12 pr-12 h-12 rounded-xl bg-gray-50/50 dark:bg-black/20 border-transparent focus:bg-white dark:focus:bg-black/40 focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all"
+                        autoComplete="current-password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground transition-colors"
+                      >
+                         {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      </button>
+                   </div>
+                   {form.formState.errors.password && (
+                     <p className="text-xs text-red-500 ml-1">{form.formState.errors.password.message}</p>
+                   )}
+                </div>
 
-            {/* Password Field */}
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  {...form.register("password")}
-                  placeholder="Enter your password"
-                  className="pl-10 pr-10"
-                  autoComplete="current-password"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
+                <div className="flex items-center justify-between pt-1">
+                   <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="remember" 
+                        checked={rememberMe} 
+                        onCheckedChange={(checked) => setRememberMe(!!checked)}
+                        className="rounded-[4px] border-muted-foreground/30 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                      />
+                      <Label htmlFor="remember" className="text-xs text-muted-foreground cursor-pointer select-none">Remember me</Label>
+                   </div>
+                   <Link href="/forgot-password" area-label="Forgot Password" className="text-xs font-medium text-blue-600 hover:text-blue-500 transition-colors">
+                      Forgot password?
+                   </Link>
+                </div>
+
+                <Button 
+                   type="submit" 
+                   disabled={loading}
+                   className="w-full h-12 rounded-full bg-[#0071e3] hover:bg-[#0077ED] text-white font-medium text-base shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:scale-[1.01] active:scale-[0.98] transition-all duration-200"
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-500" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-gray-500" />
-                  )}
+                   {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Sign In"}
+                   {!loading && <ArrowRight className="ml-2 h-5 w-5 opacity-50" />}
                 </Button>
-              </div>
-              {form.formState.errors.password && (
-                <p className="text-sm text-red-600">
-                  {form.formState.errors.password.message}
-                </p>
-              )}
-            </div>
 
-            {/* Remember Me & Forgot Password */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="remember"
-                  checked={rememberMe}
-                  onCheckedChange={(checked) => setRememberMe(!!checked)}
-                />
-                <Label htmlFor="remember" className="text-sm">
-                  Remember me
-                </Label>
-              </div>
-
-              <Button
-                type="button"
-                variant="link"
-                className="p-0 h-auto text-sm text-primary"
-                onClick={() => router.push("/forgot-password")}
-              >
-                Forgot password?
-              </Button>
-            </div>
-
-            {/* Di chuyển nút Submit vào trong form */}
-            <Button
-              type="submit" // Sử dụng type="submit" thay vì onClick
-              className="w-full"
-              disabled={loading}
-            >
-              {loading ? "Logging in..." : "Login"}
-            </Button>
-          </form>
-        </CardContent>
-
-        <CardFooter className="flex flex-col space-y-4">
-          {/* Di chuyển phần đăng ký ra ngoài form */}
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              Don&apos;t have an account?{" "}
-              <Button
-                type="button" // Thêm type="button" để không submit form
-                variant="link"
-                className="p-0 h-auto font-normal text-primary"
-                onClick={() => router.push("/register")}
-              >
-                Register now
-              </Button>
-            </p>
+             </form>
           </div>
-        </CardFooter>
-      </Card>
+
+          <div className="text-center">
+             <p className="text-sm text-muted-foreground">
+                Don&apos;t have an account?{" "}
+                <Link href="/register" className="font-semibold text-[#0071e3] hover:text-[#0077ED] transition-colors">
+                   Create one now
+                </Link>
+             </p>
+          </div>
+       </div>
     </div>
   );
 }

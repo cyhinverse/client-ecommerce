@@ -29,7 +29,7 @@ const SearchFilterBar: React.FC<SearchFilterBarProps> = ({
   title,
   description,
   enableSearch = true,
-  searchPlaceholder = "Tìm kiếm...",
+  searchPlaceholder = "Search...",
   enableFilter = true,
   enableExport = false,
   onSearchChange,
@@ -48,25 +48,25 @@ const SearchFilterBar: React.FC<SearchFilterBarProps> = ({
     <div className={`space-y-4 ${className}`}>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          {title && <h2 className="text-xl font-semibold tracking-tight text-foreground">{title}</h2>}
-          {description && <p className="text-muted-foreground mt-1">{description}</p>}
+          {title && <h2 className="text-xl font-bold tracking-tight text-foreground">{title}</h2>}
+          {description && <p className="text-muted-foreground mt-1 text-sm">{description}</p>}
         </div>
         {actionButton && (
-          <Button onClick={actionButton.onClick}>
+          <Button onClick={actionButton.onClick} className="rounded-xl bg-black text-white hover:bg-black/90 dark:bg-[#0071e3] shadow-sm">
             {actionButton.icon && <span className="mr-2">{actionButton.icon}</span>}
             {actionButton.label}
           </Button>
         )}
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3 bg-white/50 p-1.5 rounded-2xl border border-border/50 backdrop-blur-sm">
         <div className="relative flex-1">
           {enableSearch && (
             <>
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder={searchPlaceholder}
-                className="pl-9 w-full"
+                className="pl-9 w-full rounded-xl border-transparent bg-transparent hover:bg-white/50 focus:bg-white/80 transition-all focus-visible:ring-0"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -74,13 +74,13 @@ const SearchFilterBar: React.FC<SearchFilterBarProps> = ({
           )}
         </div>
         {enableFilter && (
-          <Button variant="outline" size="icon">
-            <Filter className="h-4 w-4" />
+          <Button variant="ghost" size="icon" className="rounded-xl hover:bg-white/50">
+            <Filter className="h-4 w-4 text-muted-foreground" />
           </Button>
         )}
         {enableExport && (
-          <Button variant="outline" size="icon" onClick={onExport}>
-            <Download className="h-4 w-4" />
+          <Button variant="ghost" size="icon" onClick={onExport} className="rounded-xl hover:bg-white/50">
+            <Download className="h-4 w-4 text-muted-foreground" />
           </Button>
         )}
       </div>

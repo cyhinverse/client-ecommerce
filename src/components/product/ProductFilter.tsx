@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Search, SlidersHorizontal, X, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -78,14 +78,10 @@ export default function ProductFilter({
 
   // FIX: Đảm bảo hàm xử lý màu hoạt động đúng
   const handleColorChange = (colorValue: string) => {
-    console.log("Color clicked:", colorValue); // Debug
-    console.log("Current colors:", filters.colors); // Debug
-    
     const newColors = filters.colors.includes(colorValue)
       ? filters.colors.filter((c) => c !== colorValue)
       : [...filters.colors, colorValue];
     
-    console.log("New colors:", newColors); // Debug
     onFilterChange({ colors: newColors });
   };
 
@@ -104,14 +100,14 @@ export default function ProductFilter({
     (filters.minPrice > 0 || filters.maxPrice < 10000000 ? 1 : 0);
 
   const filterContent = (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-border">
+      <div className="flex items-center justify-between pb-2">
         <div className="flex items-center gap-2">
-          <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
-          <h2 className="text-lg font-light tracking-tight">Filters</h2>
+          <SlidersHorizontal className="h-4 w-4" />
+          <h2 className="text-xl font-semibold tracking-tight">Filter by</h2>
           {activeFiltersCount > 0 && (
-            <span className="bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded-full min-w-5 h-5 flex items-center justify-center text-[10px]">
+            <span className="bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full font-medium">
               {activeFiltersCount}
             </span>
           )}
@@ -121,7 +117,7 @@ export default function ProductFilter({
             variant="ghost"
             size="icon"
             onClick={onMobileClose}
-            className="lg:hidden hover:bg-muted rounded-none h-8 w-8"
+            className="lg:hidden rounded-full h-8 w-8 hover:bg-muted"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -129,22 +125,23 @@ export default function ProductFilter({
       </div>
 
       {/* Search */}
-      <div className="space-y-2">
-        <Label className="text-xs font-medium text-foreground tracking-wide uppercase">SEARCH</Label>
+      <div className="space-y-3">
         <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search products..."
+            placeholder="Search..."
             value={filters.search}
             onChange={(e) => onFilterChange({ search: e.target.value })}
-            className="pl-8 rounded-none border-border focus:border-primary focus:ring-primary h-9 text-sm"
+            className="pl-9 rounded-xl bg-muted/50 border-transparent focus:bg-background focus:ring-1 focus:ring-primary h-10 transition-all font-medium"
           />
         </div>
       </div>
 
+      <div className="h-px bg-border/50" />
+
       {/* Price Range */}
-      <div className="space-y-3">
-        <Label className="text-xs font-medium text-foreground tracking-wide uppercase">PRICE RANGE</Label>
+      <div className="space-y-4">
+        <Label className="text-sm font-semibold">Price Range</Label>
         <div className="px-1">
           <Slider
             min={0}
@@ -153,103 +150,96 @@ export default function ProductFilter({
             value={priceRange}
             onValueChange={handlePriceChange}
             onValueCommit={handlePriceCommit}
-            className="my-3"
+            className="my-4"
           />
         </div>
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
           <span>{priceRange[0].toLocaleString("vi-VN")}đ</span>
           <span>{priceRange[1].toLocaleString("vi-VN")}đ</span>
         </div>
       </div>
 
+      <div className="h-px bg-border/50" />
+
       {/* Rating */}
-      <div className="space-y-3">
-        <Label className="text-xs font-medium text-foreground tracking-wide uppercase">RATING</Label>
-        <div className="space-y-2">
+      <div className="space-y-4">
+        <Label className="text-sm font-semibold">Rating</Label>
+        <div className="space-y-2.5">
           {[5, 4, 3, 2, 1].map((rating) => (
-            <div key={rating} className="flex items-center space-x-2">
+            <div key={rating} className="flex items-center space-x-2.5">
               <Checkbox
                 id={`rating-${rating}`}
                 checked={filters.rating.includes(rating)}
                 onCheckedChange={() => handleRatingChange(rating)}
-                className="rounded-none border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary h-4 w-4"
+                className="rounded-[4px] border-muted-foreground/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
               />
               <Label
                 htmlFor={`rating-${rating}`}
-                className="flex items-center gap-1.5 cursor-pointer text-xs text-muted-foreground flex-1"
+                className="flex items-center gap-2 cursor-pointer text-sm text-foreground/80 flex-1 hover:text-foreground transition-colors"
               >
                 <div className="flex">
                   {Array.from({ length: rating }).map((_, i) => (
-                    <span key={i} className="text-warning text-xs">★</span>
+                    <span key={i} className="text-yellow-500 text-xs">★</span>
                   ))}
                   {Array.from({ length: 5 - rating }).map((_, i) => (
                     <span key={i} className="text-muted text-xs">★</span>
                   ))}
                 </div>
-                <span className="text-muted-foreground text-xs">& above</span>
+                <span className="text-muted-foreground text-xs">& Up</span>
               </Label>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Colors - FIXED */}
-      <div className="space-y-3">
-        <Label className="text-xs font-medium text-foreground tracking-wide uppercase">COLORS</Label>
-        <div className="grid grid-cols-4 gap-2">
+      <div className="h-px bg-border/50" />
+
+      {/* Colors - Apple Circles */}
+      <div className="space-y-4">
+        <Label className="text-sm font-semibold">Color</Label>
+        <div className="grid grid-cols-4 gap-3">
           {COLORS.map((color) => (
             <button
               key={color.value}
-              type="button" // FIX: Thêm type="button" để tránh submit form
+              type="button"
               onClick={() => handleColorChange(color.value)}
               className={`
-                relative h-8 w-8 rounded-none border transition-all
+                group relative h-9 w-9 rounded-full border transition-all duration-300 flex items-center justify-center
                 ${
                   filters.colors.includes(color.value)
-                    ? "border-primary scale-105 shadow-sm"
-                    : "border-border hover:border-muted-foreground"
+                    ? "ring-2 ring-primary ring-offset-2 ring-offset-background border-transparent"
+                    : "border-border/50 hover:border-border hover:scale-110"
                 }
               `}
               style={{ backgroundColor: color.hex }}
               title={color.name}
             >
               {filters.colors.includes(color.value) && (
-                <div className="absolute inset-0 flex items-center justify-center bg-primary bg-opacity-20">
-                  <div className={`
-                    font-bold text-sm
-                    ${color.value === "white" || color.value === "beige" ? "text-primary" : "text-primary-foreground"}
-                  `}>
-                    ✓
-                  </div>
-                </div>
+                <Check className={`h-3.5 w-3.5 ${color.value === 'white' || color.value === 'beige' ? 'text-black' : 'text-white'}`} strokeWidth={3} />
               )}
             </button>
           ))}
         </div>
-        {/* Debug info - có thể xóa sau khi test */}
-        {filters.colors.length > 0 && (
-          <div className="text-xs text-muted-foreground">
-            Selected: {filters.colors.join(", ")}
-          </div>
-        )}
       </div>
 
+      <div className="h-px bg-border/50" />
+
       {/* Sizes */}
-      <div className="space-y-3">
-        <Label className="text-xs font-medium text-foreground tracking-wide uppercase">SIZES</Label>
-        <div className="grid grid-cols-3 gap-1.5">
+      <div className="space-y-4">
+        <Label className="text-sm font-semibold">Size</Label>
+        <div className="grid grid-cols-3 gap-2">
           {SIZES.map((size) => (
             <Button
               key={size}
-              type="button" // FIX: Thêm type="button"
+              type="button"
               variant={filters.sizes.includes(size) ? "default" : "outline"}
               size="sm"
               onClick={() => handleSizeChange(size)}
               className={`
-                font-medium rounded-none h-8 text-xs transition-all
+                font-medium rounded-lg h-9 text-xs transition-all
                 ${filters.sizes.includes(size) 
-                  ? "bg-primary text-primary-foreground hover:bg-primary/90 border-primary" 
-                  : "border-border text-muted-foreground hover:border-primary hover:text-primary"
+                  ? "shadow-sm hover:opacity-90" 
+                  : "border-border bg-transparent hover:bg-muted text-muted-foreground hover:text-foreground"
                 }
               `}
             >
@@ -259,22 +249,24 @@ export default function ProductFilter({
         </div>
       </div>
 
+      <div className="h-px bg-border/50" />
+
       {/* Sort */}
-      <div className="space-y-3">
-        <Label className="text-xs font-medium text-foreground tracking-wide uppercase">SORT BY</Label>
+      <div className="space-y-4">
+        <Label className="text-sm font-semibold">Sort By</Label>
         <Select
           value={filters.sortBy}
           onValueChange={(value) => onFilterChange({ sortBy: value })}
         >
-          <SelectTrigger className="rounded-none border-border focus:border-primary focus:ring-primary h-9 text-sm">
-            <SelectValue placeholder="Select sorting" />
+          <SelectTrigger className="rounded-xl border-border/50 bg-muted/30 focus:ring-primary h-10 text-sm font-medium">
+            <SelectValue placeholder="Sort by" />
           </SelectTrigger>
-          <SelectContent className="rounded-none border-border">
+          <SelectContent className="rounded-xl border-border/50 shadow-lg p-1">
             {SORT_OPTIONS.map((option) => (
               <SelectItem 
                 key={option.value} 
                 value={option.value}
-                className="rounded-none focus:bg-muted text-sm"
+                className="rounded-lg text-sm cursor-pointer"
               >
                 {option.label}
               </SelectItem>
@@ -287,11 +279,11 @@ export default function ProductFilter({
       {activeFiltersCount > 0 && (
         <Button
           variant="outline"
-          className="w-full rounded-none border-primary text-primary hover:bg-primary hover:text-primary-foreground h-9 text-sm transition-all duration-300"
+          className="w-full rounded-xl border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive h-10 text-sm font-medium mt-4"
           onClick={onClearFilters}
         >
-          <X className="h-3.5 w-3.5 mr-1.5" />
-          Clear All Filters
+          <X className="h-4 w-4 mr-2" />
+          Clear Filters
         </Button>
       )}
     </div>
@@ -304,12 +296,12 @@ export default function ProductFilter({
         {/* Backdrop */}
         <div
           onClick={onMobileClose}
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
         />
 
         {/* Sidebar */}
-        <div className="fixed left-0 top-0 bottom-0 w-72 bg-background z-50 lg:hidden overflow-y-auto border-r border-border">
-          <div className="p-4">
+        <div className="fixed left-0 top-0 bottom-0 w-[300px] bg-background z-50 lg:hidden overflow-y-auto border-r border-border shadow-2xl">
+          <div className="p-6">
             {filterContent}
           </div>
         </div>
@@ -319,8 +311,8 @@ export default function ProductFilter({
 
   // Desktop version
   return (
-    <div className="hidden lg:block w-64 flex-shrink-0">
-      <div className="sticky top-20 h-fit max-h-[calc(100vh-100px)] overflow-y-auto p-4 border-r border-border">
+    <div className="hidden lg:block w-72 flex-shrink-0">
+      <div className="sticky top-24 h-fit max-h-[calc(100vh-120px)] overflow-y-auto px-4 py-2 custom-scrollbar">
         {filterContent}
       </div>
     </div>

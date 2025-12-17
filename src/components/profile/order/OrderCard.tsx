@@ -1,9 +1,9 @@
 "use client";
-import { Eye, Clock, Truck, CheckCircle, XCircle, RefreshCw, Package } from "lucide-react";
+import { Clock, Truck, CheckCircle, XCircle, RefreshCw, Package, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Order, OrderProduct } from "@/types/order";
+import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 interface OrderCardProps {
     order: Order;
@@ -13,50 +13,20 @@ interface OrderCardProps {
 }
 
 export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancelling }: OrderCardProps) {
-    const getStatusIcon = (status: Order["status"]) => {
+    const getStatusConfig = (status: Order["status"]) => {
         switch (status) {
-            case "pending": return <Clock className="h-4 w-4" />;
-            case "confirmed":
-            case "processing": return <RefreshCw className="h-4 w-4" />;
-            case "shipped": return <Truck className="h-4 w-4" />;
-            case "delivered": return <CheckCircle className="h-4 w-4" />;
-            case "cancelled": return <XCircle className="h-4 w-4" />;
-            default: return <Package className="h-4 w-4" />;
+            case "pending": return { icon: Clock, color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-900/20", label: "Pending" };
+            case "confirmed": return { icon: CheckCircle, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20", label: "Confirmed" };
+            case "processing": return { icon: RefreshCw, color: "text-indigo-500", bg: "bg-indigo-50 dark:bg-indigo-900/20", label: "Processing" };
+            case "shipped": return { icon: Truck, color: "text-purple-500", bg: "bg-purple-50 dark:bg-purple-900/20", label: "On the way" };
+            case "delivered": return { icon: CheckCircle, color: "text-green-500", bg: "bg-green-50 dark:bg-green-900/20", label: "Delivered" };
+            case "cancelled": return { icon: XCircle, color: "text-red-500", bg: "bg-red-50 dark:bg-red-900/20", label: "Cancelled" };
+            default: return { icon: Package, color: "text-gray-500", bg: "bg-gray-50", label: status };
         }
     };
 
-    const getStatusColor = (status: Order["status"]) => {
-        switch (status) {
-            case "pending": return "bg-warning/10 text-warning border-warning/20";
-            case "confirmed":
-            case "processing": return "bg-info/10 text-info border-info/20";
-            case "shipped": return "bg-primary/10 text-primary border-primary/20";
-            case "delivered": return "bg-success/10 text-success border-success/20";
-            case "cancelled": return "bg-destructive/10 text-destructive border-destructive/20";
-            default: return "bg-muted text-muted-foreground border-border";
-        }
-    };
-
-    const getStatusText = (status: Order["status"]) => {
-        switch (status) {
-            case "pending": return "Pending Verification";
-            case "confirmed": return "Confirmed";
-            case "processing": return "Processing";
-            case "shipped": return "Shipping";
-            case "delivered": return "Delivered";
-            case "cancelled": return "Cancelled";
-            default: return status;
-        }
-    };
-
-    const getPaymentStatusText = (status: Order["paymentStatus"]) => {
-        switch (status) {
-            case "unpaid": return "Unpaid";
-            case "paid": return "Paid";
-            case "refunded": return "Refunded";
-            default: return status;
-        }
-    };
+    const statusConfig = getStatusConfig(order.status);
+    const StatusIcon = statusConfig.icon;
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat("en-US", {
@@ -67,185 +37,106 @@ export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancell
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString("en-US", {
-            day: "2-digit",
-            month: "2-digit",
+            day: "numeric",
+            month: "short",
             year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
         });
-    };
-
-    const getProductDisplayName = (product: OrderProduct) => {
-        let name = product.name;
-        if (product.color || product.size) {
-            const attributes = [product.color, product.size].filter(Boolean);
-            if (attributes.length > 0) {
-                name += ` (${attributes.join(" - ")})`;
-            }
-        }
-        return name;
     };
 
     const getProductImage = (product: OrderProduct) => {
         return product.image || "/images/placeholder-product.jpg";
     };
 
-    const getActualPrice = (product: OrderProduct) => {
-        return product.price.discountPrice || product.price.currentPrice;
-    };
-
-    // ✅ SỬA LỖI: Kiểm tra order._id có tồn tại không
-    const getOrderDisplayId = () => {
-        if (order.orderCode) {
-            return `Order #${order.orderCode}`;
-        }
-        if (order._id) {
-            return `Order ${order._id.slice(-8)}`;
-        }
-        return "Order";
-    };
+    const displayId = order.orderCode ? `#${order.orderCode}` : `#${order._id?.slice(-8).toUpperCase()}`;
 
     return (
-        <Card className="hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-                <div className="flex justify-between items-start">
-                    <div>
-                        <CardTitle className="text-lg flex items-center gap-2">
-                            {getOrderDisplayId()} {/* ✅ SỬ DỤNG HÀM MỚI */}
-                            <Badge variant="outline" className={getStatusColor(order.status)}>
-                                <span className="flex items-center gap-1">
-                                    {getStatusIcon(order.status)}
-                                    {getStatusText(order.status)}
-                                </span>
-                            </Badge>
-                        </CardTitle>
-                        <p className="text-sm text-muted-foreground mt-1">
-                            Ordered date: {formatDate(order.createdAt)}
-                        </p>
+        <div className="group relative bg-card rounded-2xl border border-border/50 p-6 transition-all hover:shadow-md hover:border-primary/20">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row justify-between md:items-start gap-4 mb-6">
+                <div>
+                    <div className="flex items-center gap-3 mb-1">
+                        <span className="font-bold text-lg tracking-tight">{displayId}</span>
+                        <div className={cn("flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium", statusConfig.bg, statusConfig.color)}>
+                            <StatusIcon className="h-3.5 w-3.5" />
+                            {statusConfig.label}
+                        </div>
                     </div>
-                    <div className="text-right">
-                        <p className="text-lg font-semibold">{formatCurrency(order.totalAmount)}</p>
-                        <Badge variant="secondary" className="mt-1">
-                            {getPaymentStatusText(order.paymentStatus)}
-                        </Badge>
-                    </div>
-                </div>
-            </CardHeader>
-
-            <CardContent className="pt-0">
-                {/* Order Products */}
-                <div className="border-t pt-3 mb-4">
-                    <h4 className="font-medium mb-2">Products:</h4>
-                    <div className="space-y-3">
-                        {(order.products || []).slice(0, 3).map((product, index) => (
-                            <div key={`${product.productId || index}-${index}`} className="flex justify-between items-center text-sm"> {/* ✅ CẢI THIỆN KEY */}
-                                <div className="flex items-center gap-2">
-                                    <div className="w-8 h-8 bg-muted rounded flex items-center justify-center">
-                                        {product.image ? (
-                                            <img
-                                                src={getProductImage(product)}
-                                                alt={product.name}
-                                                className="w-6 h-6 object-cover rounded"
-                                            />
-                                        ) : (
-                                            <Package className="h-4 w-4 text-muted-foreground" />
-                                        )}
-                                    </div>
-                                    <span className="flex-1">
-                                        {getProductDisplayName(product)}
-                                    </span>
-                                </div>
-                                <div className="text-right">
-                                    <div>{formatCurrency(getActualPrice(product) * product.quantity)}</div>
-                                    <div className="text-xs text-muted-foreground">
-                                        {formatCurrency(getActualPrice(product))} × {product.quantity}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                        {(order.products?.length || 0) > 3 && (
-                            <div className="text-sm text-muted-foreground text-center">
-                                +{(order.products?.length || 0) - 3} more products...
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Order Summary */}
-                <div className="border-t pt-3 mb-4">
-                    <h4 className="font-medium mb-2">Order Summary:</h4>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div className="text-muted-foreground">Subtotal:</div>
-                        <div className="text-right">{formatCurrency(order.subtotal)}</div>
-
-                        {order.discountAmount > 0 && (
-                            <>
-                                <div className="text-muted-foreground">Discount:</div>
-                                <div className="text-right text-success">-{formatCurrency(order.discountAmount)}</div>
-                            </>
-                        )}
-
-                        <div className="font-medium border-t pt-1">Total:</div>
-                        <div className="font-medium text-right border-t pt-1">{formatCurrency(order.totalAmount)}</div>
-                    </div>
-                </div>
-
-                {/* Shipping Address */}
-                <div className="border-t pt-3 mb-4">
-                    <h4 className="font-medium mb-1">Shipping Address:</h4>
-                    <p className="text-sm text-muted-foreground">
-                        {order.shippingAddress?.fullName} - {order.shippingAddress?.phone}
+                    <p className="text-sm text-muted-foreground font-medium">
+                        Ordered on {formatDate(order.createdAt)}
                     </p>
-                    <p className="text-sm text-muted-foreground">
-                        {[
-                            order.shippingAddress?.address,
-                            order.shippingAddress?.ward,
-                            order.shippingAddress?.district,
-                            order.shippingAddress?.city
-                        ].filter(Boolean).join(", ")}
-                    </p>
-                    {order.shippingAddress?.note && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                            <span className="font-medium">Note:</span> {order.shippingAddress?.note}
-                        </p>
-                    )}
                 </div>
+                <div className="text-left md:text-right">
+                    <p className="text-2xl font-bold tracking-tight">{formatCurrency(order.totalAmount)}</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-widest font-semibold mt-1">
+                        {order.paymentStatus}
+                    </p>
+                </div>
+            </div>
 
-                {/* Actions */}
-                <div className="border-t pt-3 flex justify-between items-center">
-                    <div className="text-sm text-muted-foreground">
-                        Method: {order.paymentMethod === "cod" ? "Cash on Delivery" : "VNPay"}
-                        {order.discountCode && ` • Voucher: ${order.discountCode}`}
-                    </div>
-                    <div className="flex gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => onViewOrder(order._id!)}
-                        >
-                            <Eye className="h-4 w-4 mr-1" />
-                            View Details
-                        </Button>
-
-                        {(order.status === "pending" || order.status === "confirmed") && order.paymentStatus !== "paid" && (
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => onCancelOrder(order._id!)}
-                                disabled={isCancelling}
-                                className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground"
-                            >
-                                {isCancelling ? (
-                                    <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
-                                ) : (
-                                    <XCircle className="h-4 w-4 mr-1" />
-                                )}
-                                {isCancelling ? "Cancelling..." : "Cancel Order"}
-                            </Button>
+            {/* Product Preview */}
+            <div className="flex items-center gap-3 mb-6 bg-muted/30 p-3 rounded-xl">
+                {order.products?.slice(0, 3).map((product, i) => (
+                    <div key={i} className="relative h-12 w-12 rounded-lg overflow-hidden border border-border bg-white">
+                        <Image 
+                            src={getProductImage(product)} 
+                            alt={product.name}
+                            fill
+                            className="object-cover"
+                            unoptimized
+                        />
+                        {product.quantity > 1 && (
+                            <span className="absolute bottom-0 right-0 bg-black text-white text-[10px] px-1 rounded-tl-sm">
+                                x{product.quantity}
+                            </span>
                         )}
                     </div>
+                ))}
+                {(order.products?.length || 0) > 3 && (
+                    <div className="h-12 w-12 rounded-lg bg-muted flex items-center justify-center border border-border text-xs font-medium text-muted-foreground">
+                        +{order.products!.length - 3}
+                    </div>
+                )}
+                <div className="ml-2 flex-1">
+                     <p className="text-sm font-medium line-clamp-1">
+                        {order.products?.[0]?.name}
+                     </p>
+                     <p className="text-xs text-muted-foreground">
+                        {(order.products?.length || 0) > 1 ? `and ${order.products!.length - 1} other items` : "x" + (order.products?.[0]?.quantity || 1)}
+                     </p>
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+
+            {/* Address Summary (Collapsed) */}
+            <div className="flex items-start gap-2 text-sm text-muted-foreground mb-6 pl-1">
+                <MapPin className="h-4 w-4 mt-0.5 text-foreground/50" />
+                <p className="line-clamp-1">
+                    <span className="text-foreground font-medium">{order.shippingAddress?.fullName}</span>
+                    <span className="mx-2">•</span>
+                    {order.shippingAddress?.address}, {order.shippingAddress?.city}
+                </p>
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-wrap gap-3 pt-4 border-t border-border/50">
+                <Button 
+                    onClick={() => onViewOrder(order._id!)} 
+                    className="rounded-full flex-1 md:flex-none"
+                    variant="secondary"
+                >
+                   View Details
+                </Button>
+
+                {(order.status === "pending" || order.status === "confirmed") && order.paymentStatus !== "paid" && (
+                    <Button
+                        variant="ghost"
+                        onClick={() => onCancelOrder(order._id!)}
+                        disabled={isCancelling}
+                        className="rounded-full text-red-500 hover:text-red-600 hover:bg-red-50 md:flex-none flex-1"
+                    >
+                        {isCancelling ? "Cancelling..." : "Cancel Order"}
+                    </Button>
+                )}
+            </div>
+        </div>
     );
 }

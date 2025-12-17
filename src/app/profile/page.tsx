@@ -4,17 +4,9 @@ import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { useEffect, useState } from "react";
 import { logout } from "@/features/auth/authAction";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import UpdateUserProfile from "@/components/profile/modals/UpdateUserModal";
 import ProfileTab from "@/components/profile/tabs/ProfileTab";
@@ -27,11 +19,14 @@ import {
   MapPin,
   Settings,
   LogOut,
-  SquarePen,
+  ChevronRight,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function ProfilePage() {
   const dispatch = useAppDispatch();
+  const searchParams = useSearchParams();
   const { loading, isAuthenticated } = useAppSelector((state) => state.auth);
   const { user, isLoading } = useAppSelector((state) => state.user);
 
@@ -45,6 +40,17 @@ export default function ProfilePage() {
     dispatch(getProfile());
   }, [dispatch]);
 
+  // Handle URL query param for tab
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam && ["profile", "orders", "address", "settings"].includes(tabParam)) {
+        if (activeTab !== tabParam) {
+            // eslint-disable-next-line
+            setActiveTab(tabParam);
+        }
+    }
+  }, [searchParams, activeTab]);
+
   const handleLogout = () => {
     dispatch(logout());
     toast.success("Logged out successfully");
@@ -52,125 +58,114 @@ export default function ProfilePage() {
   };
 
   const tabs = [
-    { value: "profile", label: "Profile", icon: User },
-    { value: "orders", label: "Orders", icon: Package },
-    { value: "address", label: "Address", icon: MapPin },
-    { value: "settings", label: "Settings", icon: Settings },
+    { value: "profile", label: "General", icon: User, description: "Personal information" },
+    { value: "orders", label: "Orders", icon: Package, description: "Track & history" },
+    { value: "address", label: "Address", icon: MapPin, description: "Shipping details" },
+    { value: "settings", label: "Settings", icon: Settings, description: "App preferences" },
   ];
 
+  if (!isAuthenticated && !loading) {
+     return (
+        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6 text-center">
+             <div className="w-20 h-20 bg-muted/50 rounded-full flex items-center justify-center">
+                <User className="h-10 w-10 text-muted-foreground" />
+             </div>
+             <div className="space-y-2">
+                 <h2 className="text-2xl font-bold tracking-tight">Sign in required</h2>
+                 <p className="text-muted-foreground">Please login to manage your account</p>
+             </div>
+             <Button onClick={() => router.push("/login")} size="lg" className="rounded-full px-8">
+                 Login now
+             </Button>
+        </div>
+     )
+  }
+
   return (
-    <div className="w-full max-w-7xl mx-auto  h-full m-5 relative">
+    <div className="w-full max-w-6xl mx-auto px-4 py-8 md:py-12">
       {(loading || isLoading) && (
-        <SpinnerLoading className="absolute inset-0 z-50 m-auto" />
+        <SpinnerLoading className="fixed inset-0 z-50 m-auto" />
       )}
-      <div
-        className={loading || isLoading ? "opacity-50 pointer-events-none" : ""}
-      >
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="flex flex-col lg:flex-row gap-6">
-            {/* Sidebar Navigation */}
-            <Card className="lg:w-80 h-fit">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl">Account</CardTitle>
-                <CardDescription>
-                  Manage your account information
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-                <TabsList className="flex flex-col h-auto w-full p-2 bg-transparent gap-1">
-                  {tabs.map((tab) => {
-                    const IconComponent = tab.icon;
-                    return (
-                      <TabsTrigger
-                        key={tab.value}
-                        value={tab.value}
-                        className="w-full justify-start px-4 py-3 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground"
-                      >
-                        <IconComponent className="h-4 w-4 mr-3" />
-                        {tab.label}
-                      </TabsTrigger>
-                    );
-                  })}
-                  <Separator className="my-2" />
-                  <Button
-                    onClick={handleLogout}
-                    variant="ghost"
-                    className="w-full justify-start px-4 py-3 text-destructive hover:text-destructive hover:bg-destructive/10"
-                  >
-                    <LogOut className="h-4 w-4 mr-3" />
-                    Logout
-                  </Button>
-                </TabsList>
-              </CardContent>
-            </Card>
-
-            {/* Main Content */}
-            <Card className="flex-1">
-              <CardHeader className="flex flex-row items-center justify-between pb-4">
-                <div>
-                  <CardTitle className="text-2xl">
-                    {activeTab === "profile" && "Personal Information"}
-                    {activeTab === "orders" && "Order History"}
-                    {activeTab === "address" && "Address Book"}
-                    {activeTab === "settings" && "Account Settings"}
-                  </CardTitle>
-                  <CardDescription>
-                    {activeTab === "profile" &&
-                      "Manage your personal information"}
-                    {activeTab === "orders" && "Track and manage your orders"}
-                    {activeTab === "address" && "Manage shipping addresses"}
-                    {activeTab === "settings" && "Customize account settings"}
-                  </CardDescription>
+      
+      <div className={cn("transition-opacity duration-300", (loading || isLoading) && "opacity-50 pointer-events-none")}>
+        <div className="flex flex-col md:flex-row gap-8 lg:gap-12">
+            
+            {/* Sidebar */}
+            <div className="w-full md:w-64 lg:w-72 flex-shrink-0 space-y-8">
+                {/* User Snapshot (Mobile/Desktop consistent) */}
+                <div className="flex items-center gap-4 px-2">
+                     <Avatar className="h-14 w-14 border border-border/50">
+                        <AvatarImage src={currentUser?.avatar} className="object-cover" />
+                        <AvatarFallback className="text-lg bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
+                             {currentUser?.username?.charAt(0).toUpperCase() || "U"}
+                        </AvatarFallback>
+                     </Avatar>
+                     <div className="min-w-0 flex-1">
+                         <p className="font-semibold truncate">{currentUser?.username || "Welcome"}</p>
+                         <p className="text-xs text-muted-foreground truncate">{currentUser?.email}</p>
+                     </div>
                 </div>
-                {/* CHỈ GIỮ NÚT CHO TAB PROFILE */}
-                {activeTab === "profile" && (
-                  <Button onClick={() => setOpen(true)}>
-                    <SquarePen className="h-4 w-4 mr-2" />
-                    Edit
-                  </Button>
-                )}
-                {/* ĐÃ XÓA NÚT "THÊM ĐỊA CHỈ MỚI" Ở ĐÂY */}
-              </CardHeader>
 
-              <CardContent>
-                {!isAuthenticated ? (
-                  <div className="text-center py-12">
-                    <div className="mx-auto w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-4">
-                      <User className="h-10 w-10 text-muted-foreground" />
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2">
-                      Not logged in
-                    </h3>
-                    <p className="text-muted-foreground mb-4">
-                      Please login to view personal information
-                    </p>
-                    <Button onClick={() => router.push("/login")}>
-                      Login now
-                    </Button>
-                  </div>
-                ) : (
-                  <>
-                    <TabsContent value="profile" className="m-0">
-                      {currentUser && <ProfileTab user={currentUser} />}
-                    </TabsContent>
+                <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="w-full">
+                    <TabsList className="flex flex-col h-auto w-full bg-transparent p-0 space-y-1">
+                        {tabs.map((tab) => {
+                            const Icon = tab.icon;
+                            return (
+                                <TabsTrigger
+                                    key={tab.value}
+                                    value={tab.value}
+                                    className={cn(
+                                        "w-full justify-start px-4 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden text-sm font-medium",
+                                        "hover:bg-muted/50 text-muted-foreground hover:text-foreground",
+                                        "data-[state=active]:bg-[#0071E3] data-[state=active]:text-white data-[state=active]:shadow-md",
+                                        "data-[state=active]:hover:bg-[#0077ED]"
+                                    )}
+                                >
+                                    <Icon className="h-5 w-5 mr-3 flex-shrink-0 transition-colors group-data-[state=active]:text-white text-muted-foreground group-hover:text-foreground" />
+                                    <div className="flex-1 text-left">
+                                        <span className="block transition-colors group-data-[state=active]:text-white text-foreground">
+                                            {tab.label}
+                                        </span>
+                                    </div>
+                                    <ChevronRight className="h-4 w-4 ml-2 transition-colors text-transparent group-data-[state=active]:text-white/70" />
+                                </TabsTrigger>
+                            );
+                        })}
+                    </TabsList>
+                </Tabs>
 
-                    <TabsContent value="orders" className="m-0">
-                      <OrdersTab />
-                    </TabsContent>
+                <div className="px-2">
+                     <Button
+                        onClick={handleLogout}
+                        variant="ghost"
+                        className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl px-4 py-6"
+                     >
+                        <LogOut className="h-5 w-5 mr-3" />
+                        Sign Out
+                     </Button>
+                </div>
+            </div>
 
-                    <TabsContent value="address" className="m-0">
-                      {currentUser && <AddressTab user={currentUser} />}
-                    </TabsContent>
-
-                    <TabsContent value="settings" className="m-0">
-                      {currentUser && <SettingsTab user={currentUser} />}
-                    </TabsContent>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </Tabs>
+            {/* Main Content Area */}
+            <div className="flex-1 min-w-0">
+                <div className="bg-background rounded-3xl min-h-[400px]">
+                     <Tabs value={activeTab} className="w-full">
+                        <TabsContent value="profile" className="mt-0 focus-visible:ring-0">
+                            {currentUser && <ProfileTab user={currentUser} />}
+                        </TabsContent>
+                        <TabsContent value="orders" className="mt-0 focus-visible:ring-0">
+                            <OrdersTab />
+                        </TabsContent>
+                        <TabsContent value="address" className="mt-0 focus-visible:ring-0">
+                            {currentUser && <AddressTab user={currentUser} />}
+                        </TabsContent>
+                        <TabsContent value="settings" className="mt-0 focus-visible:ring-0">
+                            {currentUser && <SettingsTab user={currentUser} />}
+                        </TabsContent>
+                     </Tabs>
+                </div>
+            </div>
+        </div>
       </div>
 
       <UpdateUserProfile open={open} setOpen={setOpen} />

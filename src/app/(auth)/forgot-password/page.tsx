@@ -1,15 +1,8 @@
 "use client";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, ArrowLeft } from "lucide-react";
+import { Mail, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useAppDispatch } from "@/hooks/hooks";
 import { useState } from "react";
@@ -20,7 +13,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 
-// Schema validation với Zod
 const forgotPasswordSchema = z.object({
   email: z.string().email("Invalid email"),
 });
@@ -54,60 +46,58 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center space-y-2">
-          <Link
-            href="/login"
-            className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4 transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to login
-          </Link>
-
-          <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-            <Mail className="h-8 w-8 text-blue-600" />
+    <div className="min-h-screen w-full flex items-center justify-center bg-[#F5F5F7] dark:bg-[#000000] p-4">
+       <div className="w-full max-w-[400px] flex flex-col gap-6">
+          
+          <div className="text-center space-y-2">
+             <Link href="/login" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground mb-4 transition-colors">
+                 <ArrowLeft className="h-4 w-4 mr-1" />
+                 Back to login
+             </Link>
+             <div className="mx-auto w-12 h-12 bg-black dark:bg-white rounded-2xl flex items-center justify-center mb-4 shadow-lg rotate-3 transition-transform hover:rotate-6">
+                <Mail className="h-6 w-6 text-white dark:text-black" />
+             </div>
+             <h1 className="text-2xl font-bold tracking-tight text-foreground">Forgot Password</h1>
+             <p className="text-sm text-muted-foreground">Enter your email to receive a reset code</p>
           </div>
 
-          <CardTitle className="text-2xl font-bold">Forgot Password</CardTitle>
-          <CardDescription className="text-base">
-            Enter email to receive verification code
-          </CardDescription>
-        </CardHeader>
+          <div className="p-8 rounded-[2rem] bg-white/70 dark:bg-[#1C1C1E]/70 backdrop-blur-xl shadow-xl border border-white/20">
+             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                
+                <div className="space-y-2">
+                   <Label className="text-xs font-medium text-muted-foreground ml-1">Email</Label>
+                   <div className="relative group">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/50 transition-colors group-focus-within:text-blue-500" />
+                      <Input
+                        {...register("email")}
+                        type="email"
+                        placeholder="name@example.com"
+                        className="pl-12 h-12 rounded-xl bg-gray-50/50 dark:bg-black/20 border-transparent focus:bg-white dark:focus:bg-black/40 focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all"
+                        disabled={isLoading}
+                      />
+                   </div>
+                   {errors.email && (
+                     <p className="text-xs text-red-500 ml-1">{errors.email.message}</p>
+                   )}
+                </div>
 
-        <CardContent>
-          {/* Sử dụng handleSubmit từ react-hook-form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-                <Input
-                  {...register("email")}
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  className="pl-10"
-                  disabled={isLoading}
-                />
-              </div>
-              {errors.email && (
-                <p className="text-sm text-red-600">{errors.email.message}</p>
-              )}
-            </div>
+                <Button 
+                   type="submit" 
+                   disabled={isLoading}
+                   className="w-full h-12 rounded-full bg-[#0071e3] hover:bg-[#0077ED] text-white font-medium text-base shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:scale-[1.01] active:scale-[0.98] transition-all duration-200"
+                >
+                   {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Send Code"}
+                </Button>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Sending..." : "Send Code"}
-            </Button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              We will send a 6-digit code to your email
-            </p>
+             </form>
           </div>
-        </CardContent>
-      </Card>
+
+          <div className="text-center">
+             <p className="text-xs text-muted-foreground max-w-[280px] mx-auto">
+                We will send a 6-digit verification code to the email address provided above.
+             </p>
+          </div>
+       </div>
     </div>
   );
 }

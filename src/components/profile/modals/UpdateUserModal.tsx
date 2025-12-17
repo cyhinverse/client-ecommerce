@@ -13,7 +13,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 interface UpdateUserProfileProps {
   open: boolean;
@@ -44,21 +44,26 @@ export default function UpdateUserProfile({
       avatar: "",
     },
   });
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
+    // TODO: Connect to backend
   }
+
   return (
-    open && (
-      <div className="fixed inset-0 bg-black/20 bg-opacity-50 flex items-center justify-center z-50">
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Edit Profile</DialogTitle>
+          <DialogDescription>
+            Make changes to your profile here. Click save when you&apos;re done.
+          </DialogDescription>
+        </DialogHeader>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4 bg-white p-6 rounded-lg w-full max-w-md relative"
+            className="space-y-4"
           >
-            <X
-              className="absolute top-4 right-4 cursor-pointer"
-              onClick={() => setOpen && setOpen(false)}
-            />
             <FormField
               control={form.control}
               name="username"
@@ -69,7 +74,7 @@ export default function UpdateUserProfile({
                     <Input placeholder="username" {...field} />
                   </FormControl>
                   <FormDescription>
-                    This is your public display name.
+                     Public display name.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -84,17 +89,17 @@ export default function UpdateUserProfile({
                   <FormControl>
                     <Input placeholder="you@example.com" {...field} />
                   </FormControl>
-
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button onClick={() => form.handleSubmit(onSubmit)} type="submit">
-              Submit
-            </Button>
+            <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setOpen && setOpen(false)}>Cancel</Button>
+                <Button type="submit">Save Changes</Button>
+            </DialogFooter>
           </form>
         </Form>
-      </div>
-    )
+      </DialogContent>
+    </Dialog>
   );
 }

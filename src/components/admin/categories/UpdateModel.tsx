@@ -121,17 +121,18 @@ export function EditCategoryModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] rounded-[2rem] border-border/50 bg-white/80 dark:bg-[#1C1C1E]/80 backdrop-blur-xl shadow-2xl p-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
+              <DialogTitle className="flex items-center gap-2 text-xl font-semibold tracking-tight">
                 Edit Category
-                <Badge variant="outline" className="text-sm">
-                  {/* {category._id.slice(-8)} */}
+                <Badge variant="outline" className="text-sm rounded-lg bg-white/50 border-border/50">
+                   {/* {category._id.slice(-8)} */}
+                   ID: {category._id.slice(-4)}
                 </Badge>
               </DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="text-muted-foreground">
                 Update product category information
               </DialogDescription>
             </DialogHeader>
@@ -153,6 +154,7 @@ export function EditCategoryModal({
                         field.onChange(e);
                         handleNameChange(e.target.value);
                       }}
+                       className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all"
                     />
                   </FormControl>
                   <FormMessage />
@@ -170,7 +172,11 @@ export function EditCategoryModal({
                     Slug <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="category-slug" {...field} />
+                    <Input 
+                      placeholder="category-slug" 
+                      {...field} 
+                      className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all"
+                    />
                   </FormControl>
                   <FormDescription>
                     SEO URL: /categories/{field.value}
@@ -193,6 +199,7 @@ export function EditCategoryModal({
                       rows={3}
                       {...field}
                       value={field.value || ""}
+                      className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all resize-none"
                     />
                   </FormControl>
                   <FormMessage />
@@ -205,13 +212,15 @@ export function EditCategoryModal({
               control={form.control}
               name="isActive"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                <FormItem className="flex flex-row items-center justify-between rounded-xl border border-gray-200 bg-gray-50/50 p-3">
                   <div className="space-y-0.5">
                     <FormLabel className="text-base">Status</FormLabel>
                     <div className="flex items-center gap-2">
-                      <Badge variant={field.value ? "default" : "secondary"}>
-                        {field.value ? "Active" : "Inactive"}
-                      </Badge>
+                       {field.value ? (
+                          <Badge variant="default" className="bg-green-100 text-green-700 hover:bg-green-100 border-none">Active</Badge>
+                       ) : (
+                          <Badge variant="secondary" className="bg-gray-100 text-gray-600">Inactive</Badge>
+                       )}
                     </div>
                   </div>
                   <FormControl>
@@ -225,33 +234,34 @@ export function EditCategoryModal({
             />
 
             {/* Read-only Information */}
-            <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border/50">
               <div>
-                <FormLabel className="text-xs text-muted-foreground">
+                <FormLabel className="text-xs text-muted-foreground uppercase tracking-wider">
                   Created At
                 </FormLabel>
-                <p className="text-sm font-medium">
+                <p className="text-sm font-medium mt-1">
                   {new Date(category.createdAt || "").toLocaleDateString(
                     "en-US"
                   )}
                 </p>
               </div>
               <div>
-                <FormLabel className="text-xs text-muted-foreground">
+                <FormLabel className="text-xs text-muted-foreground uppercase tracking-wider">
                   Product Count
                 </FormLabel>
-                <p className="text-sm font-medium">
+                <p className="text-sm font-medium mt-1">
                   {category.productCount || 0} products
                 </p>
               </div>
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="gap-2 sm:gap-0">
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleClose}
                 disabled={isLoading}
+                className="rounded-xl border-gray-200"
               >
                 <X className="h-4 w-4 mr-2" />
                 Cancel
@@ -259,6 +269,7 @@ export function EditCategoryModal({
               <Button
                 type="submit"
                 disabled={isLoading || !form.formState.isValid}
+                className="rounded-xl bg-black hover:bg-black/90 text-white dark:bg-[#0071e3] dark:hover:bg-[#0077ED]"
               >
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />

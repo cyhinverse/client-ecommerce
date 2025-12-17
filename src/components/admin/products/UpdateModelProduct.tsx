@@ -50,7 +50,7 @@ export function UpdateModelProduct({
     variants: [] as variants[],
     tags: [] as string[],
   });
-// ...
+
   const removeVariant = async (index: number) => {
     const variantToDelete = formData.variants[index];
     
@@ -361,16 +361,16 @@ export function UpdateModelProduct({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-background border-border text-foreground max-w-4xl max-h-[90vh] overflow-y-auto no-scrollbar">
+      <DialogContent className="sm:max-w-[900px] rounded-[2rem] border-border/50 bg-white/80 dark:bg-[#1C1C1E]/80 backdrop-blur-xl shadow-2xl p-6 max-h-[90vh] overflow-y-auto no-scrollbar">
         <DialogHeader>
-          <DialogTitle>Update Product</DialogTitle>
-          <DialogDescription>Edit product information</DialogDescription>
+          <DialogTitle className="text-xl font-semibold tracking-tight">Update Product</DialogTitle>
+          <DialogDescription className="text-muted-foreground">Edit product information</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Product Name *</Label>
+                <Label htmlFor="name" className="text-sm font-medium">Product Name *</Label>
                 <Input
                   id="name"
                   value={formData.name}
@@ -379,11 +379,13 @@ export function UpdateModelProduct({
                   }
                   required
                   disabled={isLoading}
+                  className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all"
+
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="slug">Slug *</Label>
+                <Label htmlFor="slug" className="text-sm font-medium">Slug *</Label>
                 <Input
                   id="slug"
                   value={formData.slug}
@@ -392,11 +394,12 @@ export function UpdateModelProduct({
                   }
                   required
                   disabled={isLoading}
+                  className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="category">Category *</Label>
+                <Label htmlFor="category" className="text-sm font-medium">Category *</Label>
                 <Input
                   id="category"
                   value={formData.category}
@@ -405,11 +408,12 @@ export function UpdateModelProduct({
                   }
                   required
                   disabled={isLoading}
+                  className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="brand">Brand *</Label>
+                <Label htmlFor="brand" className="text-sm font-medium">Brand *</Label>
                 <Input
                   id="brand"
                   value={formData.brand}
@@ -418,13 +422,14 @@ export function UpdateModelProduct({
                   }
                   required
                   disabled={isLoading}
+                   className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all"
                 />
               </div>
             </div>
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="currentPrice">Current Price *</Label>
+                <Label htmlFor="currentPrice" className="text-sm font-medium">Current Price *</Label>
                 <Input
                   id="currentPrice"
                   type="number"
@@ -440,11 +445,12 @@ export function UpdateModelProduct({
                   }
                   required
                   disabled={isLoading}
+                   className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="discountPrice">Discount Price</Label>
+                <Label htmlFor="discountPrice" className="text-sm font-medium">Discount Price</Label>
                 <Input
                   id="discountPrice"
                   type="number"
@@ -459,57 +465,57 @@ export function UpdateModelProduct({
                     })
                   }
                   disabled={isLoading}
+                   className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all"
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <Label htmlFor="isActive">Active</Label>
-                <Switch
-                  checked={formData.isActive}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, isActive: checked })
-                  }
-                  disabled={isLoading}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <Label htmlFor="isNewArrival">New Arrival</Label>
-                <Switch
-                  checked={formData.isNewArrival}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, isNewArrival: checked })
-                  }
-                  disabled={isLoading}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <Label htmlFor="isFeatured">Featured</Label>
-                <Switch
-                  checked={formData.isFeatured}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, isFeatured: checked })
-                  }
-                  disabled={isLoading}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <Label htmlFor="onSale">On Sale</Label>
-                <Switch
-                  checked={formData.onSale}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, onSale: checked })
-                  }
-                  disabled={isLoading}
-                />
+              <div className="space-y-2 p-3 bg-gray-50/50 rounded-xl border border-border/50">
+                 <div className="flex items-center justify-between mb-2">
+                   <Label htmlFor="isActive" className="text-sm font-medium">Active Status</Label>
+                   <Switch
+                     checked={formData.isActive}
+                     onCheckedChange={(checked) =>
+                       setFormData({ ...formData, isActive: checked })
+                     }
+                     disabled={isLoading}
+                   />
+                 </div>
+                 <div className="flex items-center justify-between mb-2">
+                    <Label htmlFor="isNewArrival" className="text-sm font-medium">New Arrival</Label>
+                    <Switch
+                      checked={formData.isNewArrival}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, isNewArrival: checked })
+                      }
+                      disabled={isLoading}
+                    />
+                 </div>
+                 <div className="flex items-center justify-between mb-2">
+                    <Label htmlFor="isFeatured" className="text-sm font-medium">Featured</Label>
+                    <Switch
+                      checked={formData.isFeatured}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, isFeatured: checked })
+                      }
+                      disabled={isLoading}
+                    />
+                 </div>
+                 <div className="flex items-center justify-between">
+                    <Label htmlFor="onSale" className="text-sm font-medium">On Sale</Label>
+                    <Switch
+                      checked={formData.onSale}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, onSale: checked })
+                      }
+                      disabled={isLoading}
+                    />
+                 </div>
               </div>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Product Description</Label>
+            <Label htmlFor="description" className="text-sm font-medium">Product Description</Label>
             <Textarea
               id="description"
               value={formData.description}
@@ -518,11 +524,12 @@ export function UpdateModelProduct({
               }
               rows={4}
               disabled={isLoading}
+               className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all resize-none"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="tags">Tags</Label>
+            <Label htmlFor="tags" className="text-sm font-medium">Tags</Label>
             <div className="flex gap-2">
               <Input
                 value={newTag}
@@ -535,8 +542,9 @@ export function UpdateModelProduct({
                     addTag();
                   }
                 }}
+                 className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all"
               />
-              <Button type="button" onClick={addTag} disabled={isLoading}>
+              <Button type="button" onClick={addTag} disabled={isLoading} className="rounded-xl bg-black hover:bg-black/90 text-white dark:bg-[#0071e3]">
                 Add
               </Button>
             </div>
@@ -544,7 +552,7 @@ export function UpdateModelProduct({
               {formData.tags.map((tag, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-1 bg-muted px-2 py-1 rounded"
+                  className="flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-lg text-sm"
                 >
                   <span className="text-sm">{tag}</span>
                   <button
@@ -561,12 +569,14 @@ export function UpdateModelProduct({
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <Label>Product Variants</Label>
+              <Label className="text-sm font-medium">Product Variants</Label>
               <Button
                 type="button"
+                variant="outline"
+                size="sm"
                 onClick={addVariant}
                 disabled={isLoading}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 rounded-xl"
               >
                 <Plus className="h-4 w-4" />
                 Add Variant
@@ -576,54 +586,58 @@ export function UpdateModelProduct({
             {formData.variants.map((variant, index) => (
               <div
                 key={variant._id}
-                className="border rounded-lg p-4 space-y-3"
+                className="border border-border/50 rounded-xl p-4 space-y-3 bg-gray-50/30"
               >
                 <div className="flex items-center justify-between">
-                  <h4 className="font-medium">Variant #{index + 1}</h4>
+                  <h4 className="font-medium text-sm">Variant #{index + 1}</h4>
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
                     onClick={() => removeVariant(index)}
                     disabled={isLoading}
+                     className="hover:bg-destructive/10 hover:text-destructive rounded-lg"
                   >
-                    <Trash2 className="h-4 w-4 text-destructive" />
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
 
                 <div className="grid grid-cols-4 gap-3">
                   <div className="space-y-2">
-                    <Label>SKU</Label>
+                    <Label className="text-xs">SKU</Label>
                     <Input
                       value={variant.sku}
                       onChange={(e) =>
                         updateVariant(index, "sku", e.target.value)
                       }
                       disabled={isLoading}
+                       className="rounded-lg border-gray-200 bg-white h-9"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Color</Label>
+                    <Label className="text-xs">Color</Label>
                     <Input
                       value={variant.color}
                       onChange={(e) =>
                         updateVariant(index, "color", e.target.value)
                       }
                       disabled={isLoading}
+                      className="rounded-lg border-gray-200 bg-white h-9"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Size</Label>
+                    <Label className="text-xs">Size</Label>
                     <Input
                       value={variant.size}
                       onChange={(e) =>
                         updateVariant(index, "size", e.target.value)
                       }
                       disabled={isLoading}
+                      className="rounded-lg border-gray-200 bg-white h-9"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Stock</Label>
+                    <Label className="text-xs">Stock</Label>
                     <Input
                       type="number"
                       value={variant.stock}
@@ -631,26 +645,26 @@ export function UpdateModelProduct({
                         updateVariant(index, "stock", Number(e.target.value))
                       }
                       disabled={isLoading}
+                      className="rounded-lg border-gray-200 bg-white h-9"
                     />
                   </div>
                 </div>
 
                 {/* Variant Images Section */}
-                <div className="space-y-2 border-t pt-3 mt-3">
-                  <Label className="text-sm">Variant Images</Label>
+                <div className="space-y-2 border-t border-border/50 pt-3 mt-3">
+                  <Label className="text-xs font-medium">Variant Images</Label>
                    
                    {/* Existing Images Display */}
                    {variant.images && variant.images.length > 0 && (
                        <div className="flex flex-wrap gap-2 mb-2">
                            {variant.images.map((img, imgIdx) => (
-                               <div key={imgIdx} className="relative h-16 w-16 group">
+                               <div key={imgIdx} className="relative h-16 w-16 group rounded-lg overflow-hidden border border-border/50">
                                    <Image 
                                        src={img} 
                                        alt="Variant" 
                                        fill 
-                                       className="object-cover rounded border"
+                                       className="object-cover"
                                    />
-                                   {/* Note: Deleting existing variant images not implemented yet, user can delete entire variant or we add specific handler */}
                                </div>
                            ))}
                        </div>
@@ -672,7 +686,7 @@ export function UpdateModelProduct({
                            size="sm"
                            onClick={() => variantFileInputRefs.current[variant._id]?.click()}
                            disabled={isLoading}
-                           className="w-fit"
+                           className="w-fit rounded-lg h-8 text-xs"
                        >
                            <Upload className="h-3 w-3 mr-2" />
                            Add Images
@@ -681,17 +695,17 @@ export function UpdateModelProduct({
                        {variantImages[variant._id]?.length > 0 && (
                            <div className="flex flex-wrap gap-2">
                                {variantImages[variant._id].map((file, fileIdx) => (
-                                   <div key={fileIdx} className="relative h-16 w-16 group">
+                                   <div key={fileIdx} className="relative h-16 w-16 group rounded-lg overflow-hidden border border-border/50">
                                        <Image
                                            src={URL.createObjectURL(file)}
                                            alt="New Variant Ref"
                                            fill
-                                           className="object-cover rounded border"
+                                           className="object-cover"
                                        />
                                        <button
                                            type="button"
                                            onClick={() => removeVariantImage(variant._id, fileIdx)}
-                                           className="absolute -top-1 -right-1 bg-destructive text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                           className="absolute top-1 right-1 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-colors"
                                        >
                                            <X className="h-3 w-3" />
                                        </button>
@@ -706,21 +720,20 @@ export function UpdateModelProduct({
           </div>
 
           <div className="space-y-2">
-            <Label>Existing Images</Label>
-            <div className="grid grid-cols-4 gap-4">
+            <Label className="text-sm font-medium">Existing Images</Label>
+            <div className="grid grid-cols-4 sm:grid-cols-6 gap-4">
               {existingImages.map((image, index) => (
-                <div key={index} className="relative">
+                <div key={index} className="relative aspect-square rounded-xl overflow-hidden border border-border/50 group">
                   <Image
                     src={image}
                     alt={`Existing ${index}`}
-                    width={80}
-                    height={80}
-                    className="h-20 w-20 object-cover rounded"
+                    fill
+                    className="object-cover"
                   />
                   <button
                     type="button"
                     onClick={() => removeExistingImage(index)}
-                    className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1"
+                    className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -730,7 +743,7 @@ export function UpdateModelProduct({
           </div>
 
           <div className="space-y-2">
-            <Label>Add New Images</Label>
+            <Label className="text-sm font-medium">Add New Images</Label>
             <input
               type="file"
               multiple
@@ -744,24 +757,24 @@ export function UpdateModelProduct({
               variant="outline"
               onClick={() => fileInputRef.current?.click()}
               disabled={isLoading}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 rounded-xl"
             >
               <Upload className="h-4 w-4" />
               Thêm hình ảnh
             </Button>
-            <div className="grid grid-cols-4 gap-4 mt-2">
+            <div className="grid grid-cols-4 sm:grid-cols-6 gap-4 mt-2">
               {images.map((file, index) => (
-                <div key={index} className="relative">
+                <div key={index} className="relative aspect-square rounded-xl overflow-hidden border border-border/50 group">
                   <Image
                     src={URL.createObjectURL(file)}
                     alt={`Preview ${index}`}
                     fill
-                    className="h-20 w-20 object-cover rounded"
+                    className="object-cover"
                   />
                   <button
                     type="button"
                     onClick={() => removeNewImage(index)}
-                    className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1"
+                    className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-all"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -770,18 +783,19 @@ export function UpdateModelProduct({
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex justify-end gap-3 pt-4 border-t border-border/50">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
+               className="rounded-xl border-gray-200"
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
+              className="rounded-xl bg-black hover:bg-black/90 text-white dark:bg-[#0071e3] dark:hover:bg-[#0077ED]"
               disabled={isLoading}
             >
               {isLoading ? "Updating..." : "Update"}

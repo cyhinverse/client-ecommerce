@@ -3,22 +3,13 @@
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Eye,
-  X,
   Folder,
   Calendar,
   Package,
@@ -29,13 +20,14 @@ import {
   Layers,
   Image as ImageIcon,
   ZoomIn,
+  X,
 } from "lucide-react";
 import { Category } from "@/types/category";
 import { useState } from "react";
 import Image from "next/image";
 
 const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString("en-US");
+  return new Date(date).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' });
 };
 
 interface ViewCategoryModalProps {
@@ -57,19 +49,18 @@ export function ViewCategoryModal({
 
   const handleEdit = () => {
     onEdit(category);
-    onClose();
   };
 
   const getStatusBadge = (status: boolean) => {
     return status ? (
-      <Badge className="bg-primary text-primary-foreground border-primary">
+      <Badge className="bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-500/10 dark:text-green-400 border-0 rounded-lg px-2.5 py-0.5 shadow-none">
         <CheckCircle className="h-3 w-3 mr-1" />
         Active
       </Badge>
     ) : (
       <Badge
         variant="outline"
-        className="border-muted-foreground text-muted-foreground"
+        className="bg-gray-100 text-gray-600 border-0 rounded-lg px-2.5 py-0.5 shadow-none"
       >
         <XCircle className="h-3 w-3 mr-1" />
         Inactive
@@ -82,365 +73,178 @@ export function ViewCategoryModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto no-scrollbar">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Eye className="h-5 w-5 text-primary" />
-              Category Details
-              <Badge variant="outline" className="text-sm">
-                {/* ID: {category._id.slice(-8)} */}
-              </Badge>
-            </DialogTitle>
-            <DialogDescription>
-              Detailed information about product category
-            </DialogDescription>
+        <DialogContent className="rounded-[2rem] border-border/50 bg-white/80 dark:bg-[#1C1C1E]/80 backdrop-blur-xl shadow-2xl p-6 sm:max-w-[700px] max-h-[90vh] overflow-y-auto no-scrollbar">
+          <DialogHeader className="border-b border-border/50 pb-6">
+            <div className="flex items-center justify-between">
+                <div>
+                    <DialogTitle className="text-2xl font-bold tracking-tight">Category Details</DialogTitle>
+                    <DialogDescription className="text-muted-foreground mt-1">
+                      Information and configuration for this category
+                    </DialogDescription>
+                </div>
+                {getStatusBadge(category.isActive)}
+            </div>
           </DialogHeader>
 
-          <div className="space-y-6">
+          <div className="space-y-6 pt-6">
             {/* Header Info */}
-            <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <Folder className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-xl">{category.name}</CardTitle>
-                      <CardDescription className="flex items-center gap-2 mt-1">
-                        <Link className="h-3 w-3" />
-                        <code className="text-xs bg-muted px-2 py-1 rounded">
-                          {category.slug}
-                        </code>
-                      </CardDescription>
-                    </div>
-                  </div>
-                  {getStatusBadge(category.isActive)}
+            <div className="p-5 rounded-2xl bg-gray-50/50 dark:bg-white/5 border border-border/50 flex items-start gap-4">
+                <div className="h-12 w-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 shrink-0">
+                    <Folder className="h-6 w-6" />
                 </div>
-              </CardHeader>
-              <CardContent>
-                {category.description && (
-                  <p className="text-sm text-muted-foreground">
-                    {category.description}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+                <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-foreground">{category.name}</h3>
+                    <div className="flex items-center gap-2 mt-1">
+                         <Badge variant="outline" className="rounded-md font-mono text-xs text-muted-foreground bg-white/50 border-gray-200">
+                             {category.slug}
+                         </Badge>
+                    </div>
+                    {category.description && (
+                         <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+                             {category.description}
+                         </p>
+                    )}
+                </div>
+            </div>
+
+            {/* Basic Stats Grid */}
+            <div className="grid grid-cols-2 gap-4">
+               <div className="p-4 rounded-2xl bg-white/40 border border-border/50 flex flex-col gap-1">
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Product Count</span>
+                    <div className="flex items-center gap-2">
+                        <Package className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-lg font-semibold">{category.productCount || 0}</span>
+                    </div>
+               </div>
+               <div className="p-4 rounded-2xl bg-white/40 border border-border/50 flex flex-col gap-1">
+                   <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Created Date</span>
+                    <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm font-medium">{formatDate(category.createdAt || "")}</span>
+                    </div>
+               </div>
+            </div>
 
             {/* Images Section */}
-            {images.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <ImageIcon className="h-4 w-4" />
-                    Images ({images.length})
-                  </CardTitle>
-                  <CardDescription>
-                    {images.length > 1
-                      ? `List of category images`
-                      : `Category image`}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {/* All Images Grid */}
-                    <div className="grid grid-cols-3 gap-4">
-                      {images.map((image, index) => (
-                        <div
-                          key={index}
-                          className="relative h-24 group cursor-pointer rounded-lg overflow-hidden border border-border shadow-sm hover:shadow-md transition-all duration-300"
-                          onClick={() => setSelectedImage(image)}
-                        >
-                          <Image
-                            src={image}
-                            alt={`${category.name} - Ảnh ${index + 1}`}
-                            fill
-                            className="object-cover transition-transform duration-300 group-hover:scale-110"
-                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          />
-                          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 flex items-center justify-center">
-                            <div className="bg-background/90 rounded-full p-2 transform scale-0 group-hover:scale-100 transition-transform duration-300">
-                              <ZoomIn className="h-3 w-3 text-foreground" />
+            <div>
+              <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">Images ({images.length})</h4>
+              {images.length > 0 ? (
+                 <div className="grid grid-cols-4 gap-3">
+                   {images.map((image, index) => (
+                      <div
+                        key={index}
+                        className="relative aspect-square rounded-xl overflow-hidden border border-border/50 cursor-zoom-in group bg-gray-50"
+                        onClick={() => setSelectedImage(image)}
+                      >
+                         <Image
+                           src={image}
+                           alt={`${category.name} - ${index}`}
+                           fill
+                           className="object-cover transition-transform duration-500 group-hover:scale-105"
+                           sizes="25vw"
+                         />
+                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                            <ZoomIn className="text-white opacity-0 group-hover:opacity-100 transition-opacity transform scale-75 group-hover:scale-100" />
+                         </div>
+                      </div>
+                   ))}
+                 </div>
+              ) : (
+                <div className="p-8 border-2 border-dashed border-border/50 rounded-2xl flex flex-col items-center justify-center text-muted-foreground bg-gray-50/30">
+                     <ImageIcon className="h-8 w-8 mb-2 opacity-30" />
+                     <p className="text-sm">No images uploaded</p>
+                </div>
+              )}
+            </div>
+
+            {/* Parent Category & Misc */}
+            <div className="space-y-4">
+                 <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Hierarchy & Links</h4>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {category.parentCategory ? (
+                         <div className="p-4 rounded-xl border border-border/50 bg-gray-50/50 flex items-center gap-3">
+                            <div className="p-2 bg-white rounded-lg border border-border/30 shadow-sm">
+                                <Layers className="h-4 w-4 text-blue-500" />
                             </div>
-                          </div>
-                          <Badge
-                            variant="secondary"
-                            className="absolute top-2 right-2 text-xs bg-background/90 border-0"
-                          >
-                            {index + 1}
-                          </Badge>
-                          {index === 0 && (
-                            <Badge className="absolute top-2 left-2 bg-primary border-0 text-xs">
-                              Main
-                            </Badge>
-                          )}
+                            <div>
+                                <p className="text-xs text-muted-foreground uppercase font-bold">Parent Category</p>
+                                <p className="font-medium text-sm">{category.parentCategory.name}</p>
+                            </div>
+                         </div>
+                    ) : (
+                        <div className="p-4 rounded-xl border border-border/50 bg-gray-50/50 flex items-center gap-3 opacity-60">
+                            <div className="p-2 bg-white rounded-lg border border-border/30">
+                                <Layers className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground uppercase font-bold">Category Level</p>
+                                <p className="font-medium text-sm">Root Category</p>
+                            </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* No Images Message */}
-            {images.length === 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <ImageIcon className="h-4 w-4" />
-                    Images
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-12 border-2 border-dashed border-border rounded-xl bg-muted/30">
-                    <ImageIcon className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />
-                    <p className="text-muted-foreground text-sm mb-2 font-medium">
-                      No images available
-                    </p>
-                    <p className="text-muted-foreground/70 text-xs">
-                      Add images when editing category
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Basic Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Folder className="h-4 w-4" />
-                  Basic Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">
-                      Category Name
-                    </label>
-                    <p className="text-sm font-medium mt-1">{category.name}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">
-                      Slug
-                    </label>
-                    <p className="text-sm font-medium mt-1">
-                      <code className="bg-muted px-2 py-1 rounded text-xs">
-                        {category.slug}
-                      </code>
-                    </p>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">
-                    Description
-                  </label>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {category.description || (
-                      <span className="text-muted-foreground italic">
-                        No description
-                      </span>
                     )}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">
-                      Status
-                    </label>
-                    <div className="mt-1">
-                      {getStatusBadge(category.isActive)}
+                    
+                    <div className="p-4 rounded-xl border border-border/50 bg-gray-50/50 flex items-center gap-3">
+                        <div className="p-2 bg-white rounded-lg border border-border/30 shadow-sm">
+                             <Link className="h-4 w-4 text-green-500" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-xs text-muted-foreground uppercase font-bold">Public URL</p>
+                            <p className="font-medium text-sm truncate text-blue-600 hover:underline cursor-pointer">
+                                /categories/{category.slug}
+                            </p>
+                        </div>
                     </div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">
-                      Product Count
-                    </label>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Package className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">
-                        {category.productCount || 0} products
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Images Count */}
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">
-                    Image Count
-                  </label>
-                  <div className="flex items-center gap-2 mt-1">
-                    <ImageIcon className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">
-                      {images.length} images
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Parent Category Information */}
-            {category.parentCategory && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Layers className="h-4 w-4" />
-                    Parent Category
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-3 p-4 bg-muted/30 rounded-lg border">
-                    <Folder className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <p className="font-medium text-sm">
-                        {category.parentCategory.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Slug:{" "}
-                        <code className="bg-muted px-1 py-0.5 rounded">
-                          {category.parentCategory.slug}
-                        </code>
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* System Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  System Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">
-                      Created At
-                    </label>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Calendar className="h-3 w-3 text-muted-foreground" />
-                      <span className="text-sm">
-                        {formatDate(category.createdAt || "")}
-                      </span>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">
-                      Last Updated
-                    </label>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Calendar className="h-3 w-3 text-muted-foreground" />
-                      <span className="text-sm">
-                        {formatDate(category.updatedAt)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* URL Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Link className="h-4 w-4" />
-                  URL
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">
-                      Access URL
-                    </label>
-                    <p className="text-sm text-primary font-medium mt-1">
-                      /categories/{category.slug}
-                    </p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">
-                      Full URL
-                    </label>
-                    <p className="text-sm text-muted-foreground mt-1 break-all bg-muted p-2 rounded border">
-                      {typeof window !== "undefined"
-                        ? `${window.location.origin}/categories/${category.slug}`
-                        : `/categories/${category.slug}`}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                 </div>
+            </div>
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-3 pt-6 border-t">
+          <div className="flex justify-end gap-3 pt-6 border-t border-border/50 mt-2">
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
-              className="flex items-center gap-2"
+              className="rounded-xl h-10 border-gray-200"
             >
-              <X className="h-4 w-4" />
               Close
             </Button>
             <Button
               type="button"
               onClick={handleEdit}
-              className="flex items-center gap-2"
+              className="rounded-xl h-10 bg-black text-white hover:bg-black/90 dark:bg-[#0071e3] gap-2 px-5"
             >
               <Edit className="h-4 w-4" />
-              Edit
+              Edit Category
             </Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Image Modal for Zoom */}
+      {/* Image Zoom Modal */}
       {selectedImage && (
         <Dialog
           open={!!selectedImage}
           onOpenChange={() => setSelectedImage(null)}
         >
-          <DialogContent className="max-w-4xl max-h-[90vh] p-0 bg-black/90 border-0">
-            <DialogHeader className="sr-only">
-              <DialogTitle>View Image</DialogTitle>
-            </DialogHeader>
-            <div className="relative">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute top-4 right-4 z-10 bg-white/20 hover:bg-white/30 text-white rounded-full"
-                onClick={() => setSelectedImage(null)}
-              >
-                <X className="h-5 w-5" />
-              </Button>
-              <div className="relative flex justify-center items-center min-h-[80vh] w-full p-8">
-                <Image
-                  src={selectedImage}
-                  alt="View Image"
-                  fill
-                  className="object-contain rounded-lg shadow-2xl"
-                  sizes="90vw"
-                />
-              </div>
-              <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
-                <Badge
-                  variant="secondary"
-                  className="bg-background/90 text-foreground"
+          <DialogContent className="max-w-screen-lg w-auto bg-transparent border-0 shadow-none p-0 overflow-visible flex items-center justify-center">
+             <div className="relative group">
+                <Button
+                    size="icon"
+                    className="absolute -top-12 right-0 rounded-full bg-white/20 hover:bg-white/40 text-white backdrop-blur-md border-0"
+                    onClick={() => setSelectedImage(null)}
                 >
-                  <ZoomIn className="h-3 w-3 mr-1" />
-                  Click outside to close
-                </Badge>
-              </div>
-            </div>
+                    <X className="h-5 w-5" />
+                </Button>
+                <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                    <Image
+                    src={selectedImage}
+                    alt="Zoomed"
+                    width={1000}
+                    height={1000}
+                    className="max-h-[85vh] w-auto object-contain bg-black/50 backdrop-blur-sm"
+                    />
+                </div>
+             </div>
           </DialogContent>
         </Dialog>
       )}
