@@ -2,8 +2,9 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, ArrowLeft, Loader2 } from "lucide-react";
+import { Mail, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { useAppDispatch } from "@/hooks/hooks";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -86,7 +87,7 @@ export default function ForgotPasswordPage() {
                    disabled={isLoading}
                    className="w-full h-12 rounded-full bg-[#0071e3] hover:bg-[#0077ED] text-white font-medium text-base shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:scale-[1.01] active:scale-[0.98] transition-all duration-200"
                 >
-                   {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Send Code"}
+                   {isLoading ? <SpinnerLoading noWrapper size={20} className="mr-2 text-white" /> : "Send Code"}
                 </Button>
 
              </form>

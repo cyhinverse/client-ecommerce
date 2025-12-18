@@ -13,7 +13,7 @@ import { Product, AdminProductFilters } from "@/types/product";
 import { ProductsHeader } from "@/components/admin/products/ProductHeader";
 import { ProductsStats } from "@/components/admin/products/ProductStats";
 import { ProductsTable } from "@/components/admin/products/ProductTable";
-import { ProductPagination } from "@/components/admin/products/ProductPagination";
+import { PaginationControls } from "@/components/common/Pagination";
 import { CreateModelProduct } from "@/components/admin/products/CreateModelProduct";
 import { UpdateModelProduct } from "@/components/admin/products/UpdateModelProduct";
 import { ViewModelProduct } from "@/components/admin/products/ViewModelProduct";
@@ -221,12 +221,10 @@ export default function AdminProductsPage() {
         />
 
         <div className="mt-6 flex justify-center">
-          <ProductPagination
-            currentPage={currentPage}
-            totalPages={pagination?.totalPages || 1}
-            totalItems={pagination?.totalItems}
-            pageSize={pageSize}
+          <PaginationControls
+            pagination={pagination}
             onPageChange={(page) => updateFilter("page", page)}
+            itemName="products"
           />
         </div>
       </div>

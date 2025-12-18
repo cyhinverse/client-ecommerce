@@ -18,7 +18,7 @@ import {
 import { DiscountsHeader } from "@/components/admin/discounts/DiscountHeader";
 import { DiscountsStats } from "@/components/admin/discounts/DiscountStats";
 import { DiscountsTable } from "@/components/admin/discounts/DiscountTable";
-import { DiscountPagination } from "@/components/admin/discounts/DiscountPaginationControl";
+import { PaginationControls } from "@/components/common/Pagination";
 import { CreateModelDiscount } from "@/components/admin/discounts/CreateModelDiscount";
 import { ViewModelDiscount } from "@/components/admin/discounts/ViewModelDiscount";
 import { UpdateModelDiscount } from "@/components/admin/discounts/UpdateModelDiscount";
@@ -279,12 +279,10 @@ export default function AdminDiscountsPage() {
           />
 
           <div className="mt-6">
-            <DiscountPagination
-              currentPage={currentPage}
-              totalPages={pagination?.totalPages || 1}
-              totalItems={pagination?.totalItems}
-              pageSize={pageSize}
+            <PaginationControls
+              pagination={pagination}
               onPageChange={handlePageChange}
+              itemName="discounts"
             />
           </div>
 

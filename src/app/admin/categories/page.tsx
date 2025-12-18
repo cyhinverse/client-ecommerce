@@ -12,7 +12,7 @@ import { Category, PaginationData, CategoryFilters } from "@/types/category";
 import { CategoriesHeader } from "@/components/admin/categories/CategoriesHeader";
 import { CategoriesStats } from "@/components/admin/categories/CategoriesStats";
 import { CategoriesTable } from "@/components/admin/categories/CategoriesTable";
-import { PaginationControls } from "@/components/admin/categories/PaginationContro";
+import { PaginationControls } from "@/components/common/Pagination";
 import { CategoryTreeView } from "@/components/admin/categories/CategoryTreeView";
 import { EditCategoryModal } from "@/components/admin/categories/UpdateModel";
 import { ViewCategoryModal } from "@/components/admin/categories/ViewModal";
@@ -251,10 +251,11 @@ export default function CategoriesAdminPage() {
           getProductCount={getProductCount}
         />
 
-        <div className="mt-6 flex justify-center">
+        <div className="mt-6">
           <PaginationControls
              pagination={pagination}
              onPageChange={handlePageChange}
+             itemName="categories"
           />
         </div>
 

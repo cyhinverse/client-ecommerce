@@ -10,7 +10,7 @@ import {
   getOrderStatistics,
 } from "@/features/order/orderAction";
 import { toast } from "sonner";
-import { PaginationControls } from "@/components/admin/categories/PaginationContro";
+import { PaginationControls } from "@/components/common/Pagination";
 import {
   Order,
   PaginationData,
@@ -336,6 +336,7 @@ export default function OrdersAdminPage() {
              <PaginationControls
               pagination={pagination}
               onPageChange={handlePageChange}
+              itemName="orders"
              />
           </div>
 

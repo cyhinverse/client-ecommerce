@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { UsersHeader } from "@/components/admin/users/UsersHeader";
 import { UsersStats } from "@/components/admin/users/UserStats";
 import { UsersTable } from "@/components/admin/users/UserTable";
-import { UserPagination } from "@/components/admin/users/UserPaginationControl";
+import { PaginationControls } from "@/components/common/Pagination";
 import { CreateModelUser } from "@/components/admin/users/CreateModelUser";
 import { UpdateModelUser } from "@/components/admin/users/UpdateModelUser";
 import { ViewModelUser } from "@/components/admin/users/ViewModelUser";
@@ -252,12 +252,10 @@ export default function AdminUsersPage() {
           />
 
           <div className="mt-6">
-            <UserPagination
-              currentPage={currentPage}
-              totalPages={pagination?.totalPages || 1}
-              totalItems={pagination?.totalItems}
-              pageSize={pageSize}
+            <PaginationControls
+              pagination={pagination}
               onPageChange={handlePageChange}
+              itemName="users"
             />
           </div>
 

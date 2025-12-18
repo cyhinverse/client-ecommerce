@@ -12,8 +12,9 @@ import { Label } from "@/components/ui/label";
 import { verifyCode } from "@/features/auth/authAction";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { Key, Loader2, ArrowLeft } from "lucide-react";
+import { Key, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 export default function VerifyCodePage() {
   const dispatch = useAppDispatch();
@@ -86,7 +87,7 @@ export default function VerifyCodePage() {
                    disabled={isLoading || otp.length !== 6}
                    className="w-full h-12 rounded-full bg-[#0071e3] hover:bg-[#0077ED] text-white font-medium text-base shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:scale-[1.01] active:scale-[0.98] transition-all duration-200"
                 >
-                   {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Verify Code"}
+                   {isLoading ? <SpinnerLoading noWrapper size={20} className="mr-2 text-white" /> : "Verify Code"}
                 </Button>
 
              </form>

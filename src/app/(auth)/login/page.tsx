@@ -11,8 +11,9 @@ import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { login } from "@/features/auth/authAction";
 import { toast } from "sonner";
-import { Eye, EyeOff, Mail, Lock, Loader2, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email"),
@@ -136,7 +137,7 @@ export default function LoginPage() {
                    disabled={loading}
                    className="w-full h-12 rounded-full bg-[#0071e3] hover:bg-[#0077ED] text-white font-medium text-base shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:scale-[1.01] active:scale-[0.98] transition-all duration-200"
                 >
-                   {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Sign In"}
+                   {loading ? <SpinnerLoading noWrapper size={20} className="mr-2 text-white" /> : "Sign In"}
                    {!loading && <ArrowRight className="ml-2 h-5 w-5 opacity-50" />}
                 </Button>
 

@@ -48,7 +48,7 @@ export default function Banner() {
         if (!isHoveringRef.current) {
           paginate(1);
         }
-      }, 1000);
+      }, 3000);
     };
 
     startAutoplay();

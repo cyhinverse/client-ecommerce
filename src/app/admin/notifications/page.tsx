@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { NotificationsHeader } from "@/components/admin/notifications/NotificationsHeader";
 import { CreateNotificationModal, CreateNotificationForm } from "@/components/admin/notifications/CreateNotificationModal";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 export default function AdminNotificationsPage() {
   const dispatch = useAppDispatch();
@@ -107,7 +108,7 @@ export default function AdminNotificationsPage() {
       <div className="rounded-[2rem] border border-border/40 bg-white/70 dark:bg-[#1C1C1E]/70 shadow-sm backdrop-blur-xl overflow-hidden min-h-[500px] flex flex-col">
          {loading && notifications.length === 0 ? (
              <div className="flex items-center justify-center flex-1">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <SpinnerLoading size={32} />
              </div>
          ) : notifications.length === 0 ? (
              <div className="flex flex-col items-center justify-center flex-1 text-muted-foreground gap-4">

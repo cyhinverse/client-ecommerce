@@ -24,6 +24,7 @@ import { RootState, AppDispatch } from "@/store/configStore";
 import { getDashboardStats } from "@/features/statistics/statisticsAction";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 export default function AdminDashboard() {
   const { socket } = useSocket();
@@ -88,9 +89,7 @@ export default function AdminDashboard() {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="flex flex-col items-center gap-4">
-           <div className="relative w-12 h-12">
-             <div className="absolute inset-0 rounded-full border-[3px] border-black/10 border-t-black animate-spin" />
-           </div>
+           <SpinnerLoading size={48} />
            <p className="text-sm text-gray-500 font-medium">Loading Overview...</p>
         </div>
       </div>
@@ -172,7 +171,7 @@ export default function AdminDashboard() {
             )}
             disabled={loading}
           >
-            <RefreshCcw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
+            {loading ? <SpinnerLoading size={14} className="text-current" /> : <RefreshCcw className="h-3.5 w-3.5" />}
             Refresh
           </Button>
         </div>

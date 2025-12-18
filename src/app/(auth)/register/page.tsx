@@ -10,8 +10,9 @@ import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { register } from "@/features/auth/authAction";
 import { toast } from "sonner";
-import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 const registerSchema = z
   .object({
@@ -157,7 +158,7 @@ export default function RegisterPage() {
                    disabled={loading}
                    className="w-full h-12 rounded-full bg-[#0071e3] hover:bg-[#0077ED] text-white font-medium text-base shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:scale-[1.01] active:scale-[0.98] transition-all duration-200 mt-2"
                 >
-                   {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Create Account"}
+                   {loading ? <SpinnerLoading noWrapper size={20} className="mr-2 text-white" /> : "Create Account"}
                 </Button>
 
              </form>

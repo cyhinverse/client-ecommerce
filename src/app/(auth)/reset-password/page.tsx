@@ -2,7 +2,8 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Lock, Eye, EyeOff, Key, Loader2, ArrowLeft, Check, X } from "lucide-react";
+import { Lock, Eye, EyeOff, Key, ArrowLeft, Check } from "lucide-react";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -200,7 +201,7 @@ export default function ResetPasswordPage() {
                    disabled={isLoading}
                    className="w-full h-12 rounded-full bg-[#0071e3] hover:bg-[#0077ED] text-white font-medium text-base shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:scale-[1.01] active:scale-[0.98] transition-all duration-200 mt-2"
                 >
-                   {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Reset Password"}
+                   {isLoading ? <SpinnerLoading noWrapper size={20} className="mr-2 text-white" /> : "Reset Password"}
                 </Button>
 
              </form>
