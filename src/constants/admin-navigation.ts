@@ -7,6 +7,7 @@ import {
   Album,
   TicketPercent,
   LayoutDashboardIcon,
+  Image as ImageIcon,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -31,6 +32,11 @@ export const ADMIN_NAVIGATION: NavigationItem[] = [
     name: "Orders",
     href: "/admin/orders",
     icon: ShoppingCart,
+  },
+  {
+    name: "Banners",
+    href: "/admin/banners",
+    icon: ImageIcon,
   },
   {
     name: "Users",

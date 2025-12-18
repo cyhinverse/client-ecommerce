@@ -2,7 +2,6 @@
 import React, {
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -11,109 +10,32 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { getBanners } from "@/features/banner/bannerAction";
+import { useRouter } from "next/navigation";
 
-type BannerItem = {
-  id: number;
-  imageUrl: string;
-  title: string;
-  subtitle: string;
-  theme?: "light" | "dark";
-};
 
 export default function Banner() {
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+  const { banners, isLoading } = useAppSelector((state) => state.banner);
+  
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [direction, setDirection] = useState(0);
   const autoplayRef = useRef<number | null>(null);
   const isHoveringRef = useRef(false);
 
-  // Banner data with themes for text contrast
-  const banners: BannerItem[] = useMemo(
-    () => [
-      {
-        id: 1,
-        imageUrl: "/images/1.png",
-        title: "The Future of Fluidity",
-        subtitle: "Experience the ultimate collection designed for the modern era.",
-        theme: "dark",
-      },
-      {
-        id: 2,
-        imageUrl: "/images/2.png",
-        title: "Titanium Strength",
-        subtitle: "Minimalist aesthetic meets uncompromising durability.",
-        theme: "light",
-      },
-      {
-        id: 3,
-        imageUrl: "/images/3.png",
-        title: "Vibrant Expressions",
-        subtitle: "Colors that define your unique style journey.",
-        theme: "light",
-      },
-      {
-        id: 4,
-        imageUrl: "/images/4.png",
-        title: "Autumn Elegance",
-        subtitle: "Layered textures for the season of transitions.",
-        theme: "dark",
-      },
-      {
-        id: 5,
-        imageUrl: "/images/5.png",
-        title: "Urban Utility",
-        subtitle: "Functionality redefined for the city explorer.",
-        theme: "dark",
-      },
-      {
-        id: 6,
-        imageUrl: "/images/6.png",
-        title: "Celestial Glow",
-        subtitle: "Ethereal materials that capture the light.",
-        theme: "light",
-      },
-      {
-        id: 7,
-        imageUrl: "/images/7.png",
-        title: "Pure Comfort",
-        subtitle: "The softest fabrics you've ever experienced.",
-        theme: "light",
-      },
-      {
-        id: 8,
-        imageUrl: "/images/8.png",
-        title: "Precision Edge",
-        subtitle: "Sharp silhouettes for a lasting impression.",
-        theme: "dark",
-      },
-      {
-        id: 9,
-        imageUrl: "/images/9.png",
-        title: "Timeless Classic",
-        subtitle: "Style that transcends trends and generations.",
-        theme: "dark",
-      },
-      {
-        id: 10,
-        imageUrl: "/images/10.png",
-        title: "Bold Frontier",
-        subtitle: "A daring approach to modern sportswear.",
-        theme: "light",
-      },
-      {
-        id: 11,
-        imageUrl: "/images/11.png",
-        title: "Final Horizon",
-        subtitle: "Where technology meets the ultimate craftsmanship.",
-        theme: "dark",
-      },
-    ],
-    []
-  );
+  useEffect(() => {
+    dispatch(getBanners({ isActive: true }));
+  }, [dispatch]);
 
   const length = banners.length;
 
+
+
   const paginate = useCallback(
     (newDirection: number) => {
+      if (length === 0) return;
       setDirection(newDirection);
       setCurrentIndex((prevIndex) => (prevIndex + newDirection + length) % length);
     },
@@ -167,6 +89,15 @@ export default function Banner() {
       },
     }),
   };
+
+
+  if (isLoading || length === 0) {
+    return (
+      <div className="w-full h-[calc(100vh-64px)] bg-neutral-900 animate-pulse flex items-center justify-center">
+            <span className="text-white/20 text-xl font-medium">Loading Experience...</span>
+      </div>
+    );
+  }
 
   return (
     <section
@@ -249,6 +180,12 @@ export default function Banner() {
                  >
                    <Button
                      size="lg"
+                     onClick={() => {
+                       const link = banners[currentIndex].link;
+                       if (link) {
+                         router.push(link);
+                       }
+                     }}
                      className={cn(
                        "rounded-full px-12 py-8 text-lg font-bold transition-all hover:scale-105 active:scale-95 shadow-xl",
                        banners[currentIndex].theme === "light" 
@@ -262,6 +199,12 @@ export default function Banner() {
                    <Button
                      size="lg"
                      variant="outline"
+                     onClick={() => {
+                       const link = banners[currentIndex].link;
+                       if (link) {
+                         router.push(link);
+                       }
+                     }}
                      className={cn(
                        "rounded-full px-12 py-8 text-lg font-bold backdrop-blur-md transition-all hover:scale-105",
                        banners[currentIndex].theme === "light"
@@ -319,7 +262,6 @@ export default function Banner() {
         </div>
       </div>
       
-      {/* Decorative Bloom Overlay */}
       <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-white/5 to-transparent pointer-events-none blur-3xl z-[5]" />
     </section>
   );

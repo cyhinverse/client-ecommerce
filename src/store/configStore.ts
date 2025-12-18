@@ -13,6 +13,8 @@ import { notificationSlice } from "@/features/notification/notificationSlice";
 import { reviewSlice } from "@/features/reviews/reviewSlice";
 
 import { statisticsSlice } from "@/features/statistics/statisticsSlice";
+import { bannerSlice } from "@/features/banner/bannerSlice";
+
 
 const createNoopStorage = () => {
   return {
@@ -45,6 +47,7 @@ export const rootReducer = combineReducers({
   notification: notificationSlice.reducer,
   reviews: reviewSlice.reducer,
   statistics: statisticsSlice.reducer,
+  banner: bannerSlice.reducer,
 });
 
 const persistConfig = {
