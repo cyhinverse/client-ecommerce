@@ -14,32 +14,46 @@ const instance = axios.create({
   },
 });
 
-instance.interceptors.response.use(
-  async (response) => {
-    const originalReq = response.config as CustomAxiosRequestConfig;
-
-    if (response.status === 401 && !originalReq._retry) {
-      originalReq._retry = true;
-      try {
-        const res = await instance.post("/auth/refresh-token");
-        const { accessToken } = res.data;
-        originalReq.headers.Authorization = `Bearer ${accessToken}`;
-
-        return instance(originalReq);
-      } catch (error) {
-        return Promise.reject(error);
-      }
+// Request interceptor: attach token
+instance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    return response;
+    return config;
   },
   (error) => {
-    if (error.response?.status === 401 && !error.config._retry) {
-      error.config._retry = true;
-      return instance.post("/auth/refresh-token").then((res) => {
-        const { accessToken } = res.data;
-        error.config.headers.Authorization = `Bearer ${accessToken}`;
-        return instance(error.config);
-      });
+    return Promise.reject(error);
+  }
+);
+
+instance.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config as CustomAxiosRequestConfig;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      try {
+        const refreshToken = localStorage.getItem("refreshToken");
+        const res = await instance.post("/auth/refresh-token", {
+          refreshToken,
+        });
+        const { accessToken } = res.data.data; // Server format is { data: { accessToken: ... } }
+
+        localStorage.setItem("accessToken", accessToken);
+        instance.defaults.headers.common[
+          "Authorization"
+        ] = `Bearer ${accessToken}`;
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+
+        return instance(originalRequest);
+      } catch (refreshError) {
+        localStorage.removeItem("accessToken");
+        // Optional: redirect to login or clear auth state
+        return Promise.reject(refreshError);
+      }
     }
     return Promise.reject(error);
   }

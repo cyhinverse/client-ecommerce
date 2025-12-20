@@ -48,6 +48,10 @@ export const authSlice = createSlice({
         "accessToken",
         action.payload?.data.accessToken || ""
       );
+      localStorage.setItem(
+        "refreshToken",
+        action.payload?.data.refreshToken || ""
+      );
       state.data = action.payload?.data;
       if (state.data) {
         state.data = {
@@ -83,6 +87,8 @@ export const authSlice = createSlice({
       state.isAuthenticated = false;
       state.token = null;
       state.data = null;
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
     });
     builder.addCase(logout.rejected, (state) => {
       state.loading = false;

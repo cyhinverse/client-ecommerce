@@ -7,7 +7,7 @@ export const useAuthPersistence = () => {
 
   useEffect(() => {
     // Restore token from localStorage on app startup
-    const savedToken = localStorage.getItem("auth-token");
+    const savedToken = localStorage.getItem("accessToken");
     if (savedToken) {
       dispatch(authSlice.actions.setToken(savedToken));
       dispatch(authSlice.actions.setIsAuthenticated(true));
