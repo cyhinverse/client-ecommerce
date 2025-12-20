@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAppSelector, useAppDispatch } from "@/hooks/hooks";
 import { ShoppingCart, Search, Bell, Menu } from "lucide-react";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import NotificationModel from "@/components/notifications/NotificationModel";
 import { countUnreadNotification } from "@/features/notification/notificationAction";
 import SearchModal from "@/components/search/SearchModal";
@@ -35,11 +35,11 @@ const NavLinks = ({ className }: { className?: string }) => (
       </Link>
     ))}
     <Link
-       href="/products"
-       className={cn(
-          "text-sm font-medium transition-colors hover:text-foreground/80 opacity-70 hover:opacity-100",
-          className
-       )}
+      href="/products"
+      className={cn(
+        "text-sm font-medium transition-colors hover:text-foreground/80 opacity-70 hover:opacity-100",
+        className
+      )}
     >
       All Products
     </Link>
@@ -57,6 +57,7 @@ export default function HeaderLayout() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const path = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     if (isAuthenticated && token) {
@@ -64,21 +65,19 @@ export default function HeaderLayout() {
     }
   }, [isAuthenticated, token, dispatch]);
 
-  const cartItemsCount = cartData?.items?.reduce((total, item) => total + item.quantity, 0) || 0;
+  const cartItemsCount =
+    cartData?.items?.reduce((total, item) => total + item.quantity, 0) || 0;
 
   if (loading) {
-    return <SpinnerLoading />;
+    return router.push("/login");
   }
 
   if (pathArray.includes(path)) return null;
-
-
 
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-black/5 dark:border-white/5 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 h-14 flex items-center justify-between">
-          
           {/* Mobile Menu & Logo */}
           <div className="flex items-center gap-4">
             <Sheet>
@@ -90,7 +89,9 @@ export default function HeaderLayout() {
               </SheetTrigger>
               <SheetContent side="left" className="w-[300px] sm:w-[400px]">
                 <SheetHeader>
-                  <SheetTitle className="text-left text-lg font-bold">Store</SheetTitle>
+                  <SheetTitle className="text-left text-lg font-bold">
+                    Store
+                  </SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col gap-4 mt-8">
                   <NavLinks className="text-lg py-2 border-b border-border/50" />
@@ -123,13 +124,17 @@ export default function HeaderLayout() {
             {isAuthenticated && token && (
               <>
                 <Link href="/cart">
-                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground relative">
-                     <ShoppingCart className="h-4 w-4" />
-                     {cartItemsCount > 0 && (
-                        <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-primary text-[10px] font-bold text-primary-foreground flex items-center justify-center">
-                          {cartItemsCount}
-                        </span>
-                     )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground hover:text-foreground relative"
+                  >
+                    <ShoppingCart className="h-4 w-4" />
+                    {cartItemsCount > 0 && (
+                      <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-primary text-[10px] font-bold text-primary-foreground flex items-center justify-center">
+                        {cartItemsCount}
+                      </span>
+                    )}
                   </Button>
                 </Link>
 
@@ -137,7 +142,10 @@ export default function HeaderLayout() {
                   variant="ghost"
                   size="icon"
                   onClick={() => setIsOpen((prev) => !prev)}
-                  className={cn("text-muted-foreground hover:text-foreground relative", isOpen && "text-foreground")}
+                  className={cn(
+                    "text-muted-foreground hover:text-foreground relative",
+                    isOpen && "text-foreground"
+                  )}
                 >
                   <Bell className="h-4 w-4" />
                   {unreadCount > 0 && (
@@ -147,7 +155,10 @@ export default function HeaderLayout() {
               </>
             )}
 
-            <NotificationModel isOpen={isOpen} onClose={() => setIsOpen(false)} />
+            <NotificationModel
+              isOpen={isOpen}
+              onClose={() => setIsOpen(false)}
+            />
 
             {isAuthenticated && token ? (
               <Link href="/profile" className="ml-2">
