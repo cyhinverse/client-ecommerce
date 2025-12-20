@@ -4,8 +4,9 @@ interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
 
+const URL = "https://server-ecommerce-gzqo.onrender.com/api";
 const instance = axios.create({
-  baseURL: "https://server-ecommerce-gzqo.onrender.com/api",
+  baseURL: URL,
   timeout: 10000,
   withCredentials: true,
   headers: {

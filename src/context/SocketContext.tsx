@@ -27,15 +27,16 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     if (!isAuthenticated || !token) return;
 
     // Create socket connection
-    const socketUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-    console.log("Socket connecting to:", socketUrl);
+    const socketUrl =
+      process.env.NEXT_PUBLIC_API_URL ||
+      "https://server-ecommerce-gzqo.onrender.com";
+
     const socketInstance = io(socketUrl, {
       auth: { token },
       transports: ["websocket"],
     });
 
     socketInstance.on("connect", () => {
-      console.log("Socket connected:", socketInstance.id);
       setIsConnected(true);
     });
 
