@@ -48,7 +48,7 @@ const NavLinks = ({ className }: { className?: string }) => (
 
 export default function HeaderLayout() {
   const dispatch = useAppDispatch();
-  const { loading, isAuthenticated, token, data } = useAppSelector(
+  const { isAuthenticated, token, data } = useAppSelector(
     (state) => state.auth
   );
   const { data: cartData } = useAppSelector((state) => state.cart);
@@ -66,10 +66,6 @@ export default function HeaderLayout() {
 
   const cartItemsCount =
     cartData?.items?.reduce((total, item) => total + item.quantity, 0) || 0;
-
-  if (loading) {
-    return null;
-  }
 
   if (pathArray.includes(path)) return null;
 
