@@ -9,7 +9,7 @@ export default function AdminPage() {
   const router = useRouter();
   const { data } = useSelector((state: RootState) => state.auth);
 
-  console.log("check data from admin::" + data);
+  console.log("check data from admin::", JSON.stringify(data));
 
   useEffect(() => {
     router.replace("/admin/dashboard");
