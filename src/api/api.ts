@@ -6,7 +6,7 @@ interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
 
 const URL = "https://server-ecommerce-gzqo.onrender.com/api";
 const instance = axios.create({
-  baseURL: URL,
+  baseURL: URL || "http://localhost:3000/api",
   timeout: 10000,
   withCredentials: true,
   headers: {

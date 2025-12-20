@@ -1,7 +1,7 @@
 // ProductFilter.tsx - Fixed Color Filter
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, SlidersHorizontal, X, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ProductFilters } from "@/types/product";
-
 
 interface ProductFilterProps {
   filters: ProductFilters;
@@ -56,7 +55,10 @@ export default function ProductFilter({
   isMobileOpen = false,
   onMobileClose,
 }: ProductFilterProps) {
-  const [priceRange, setPriceRange] = useState([filters.minPrice, filters.maxPrice]);
+  const [priceRange, setPriceRange] = useState([
+    filters.minPrice,
+    filters.maxPrice,
+  ]);
 
   const handlePriceChange = (values: number[]) => {
     setPriceRange(values);
@@ -81,7 +83,7 @@ export default function ProductFilter({
     const newColors = filters.colors.includes(colorValue)
       ? filters.colors.filter((c) => c !== colorValue)
       : [...filters.colors, colorValue];
-    
+
     onFilterChange({ colors: newColors });
   };
 
@@ -92,12 +94,30 @@ export default function ProductFilter({
     onFilterChange({ sizes: newSizes });
   };
 
-  const activeFiltersCount = 
+  const activeFiltersCount =
     filters.rating.length +
     filters.colors.length +
     filters.sizes.length +
     (filters.search ? 1 : 0) +
     (filters.minPrice > 0 || filters.maxPrice < 10000000 ? 1 : 0);
+
+  // local state for debouncing search input
+  const [searchTerm, setSearchTerm] = useState(filters.search);
+
+  // Sync internal search state when filters.search changes (e.g. on clear)
+  useEffect(() => {
+    setSearchTerm(filters.search);
+  }, [filters.search]);
+
+  // Debounce search update
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (searchTerm !== filters.search) {
+        onFilterChange({ search: searchTerm });
+      }
+    }, 500);
+    return () => clearTimeout(timeout);
+  }, [searchTerm, onFilterChange, filters.search]);
 
   const filterContent = (
     <div className="space-y-8">
@@ -130,8 +150,8 @@ export default function ProductFilter({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search..."
-            value={filters.search}
-            onChange={(e) => onFilterChange({ search: e.target.value })}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9 rounded-xl bg-muted/50 border-transparent focus:bg-background focus:ring-1 focus:ring-primary h-10 transition-all font-medium"
           />
         </div>
@@ -179,10 +199,14 @@ export default function ProductFilter({
               >
                 <div className="flex">
                   {Array.from({ length: rating }).map((_, i) => (
-                    <span key={i} className="text-yellow-500 text-xs">★</span>
+                    <span key={i} className="text-yellow-500 text-xs">
+                      ★
+                    </span>
                   ))}
                   {Array.from({ length: 5 - rating }).map((_, i) => (
-                    <span key={i} className="text-muted text-xs">★</span>
+                    <span key={i} className="text-muted text-xs">
+                      ★
+                    </span>
                   ))}
                 </div>
                 <span className="text-muted-foreground text-xs">& Up</span>
@@ -215,7 +239,14 @@ export default function ProductFilter({
               title={color.name}
             >
               {filters.colors.includes(color.value) && (
-                <Check className={`h-3.5 w-3.5 ${color.value === 'white' || color.value === 'beige' ? 'text-black' : 'text-white'}`} strokeWidth={3} />
+                <Check
+                  className={`h-3.5 w-3.5 ${
+                    color.value === "white" || color.value === "beige"
+                      ? "text-black"
+                      : "text-white"
+                  }`}
+                  strokeWidth={3}
+                />
               )}
             </button>
           ))}
@@ -237,9 +268,10 @@ export default function ProductFilter({
               onClick={() => handleSizeChange(size)}
               className={`
                 font-medium rounded-lg h-9 text-xs transition-all
-                ${filters.sizes.includes(size) 
-                  ? "shadow-sm hover:opacity-90" 
-                  : "border-border bg-transparent hover:bg-muted text-muted-foreground hover:text-foreground"
+                ${
+                  filters.sizes.includes(size)
+                    ? "shadow-sm hover:opacity-90"
+                    : "border-border bg-transparent hover:bg-muted text-muted-foreground hover:text-foreground"
                 }
               `}
             >
@@ -263,8 +295,8 @@ export default function ProductFilter({
           </SelectTrigger>
           <SelectContent className="rounded-xl border-border/50 shadow-lg p-1">
             {SORT_OPTIONS.map((option) => (
-              <SelectItem 
-                key={option.value} 
+              <SelectItem
+                key={option.value}
                 value={option.value}
                 className="rounded-lg text-sm cursor-pointer"
               >
@@ -301,9 +333,7 @@ export default function ProductFilter({
 
         {/* Sidebar */}
         <div className="fixed left-0 top-0 bottom-0 w-[300px] bg-background z-50 lg:hidden overflow-y-auto border-r border-border shadow-2xl">
-          <div className="p-6">
-            {filterContent}
-          </div>
+          <div className="p-6">{filterContent}</div>
         </div>
       </>
     );
