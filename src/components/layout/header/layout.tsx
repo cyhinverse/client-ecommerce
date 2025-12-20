@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAppSelector, useAppDispatch } from "@/hooks/hooks";
 import { ShoppingCart, Search, Bell, Menu } from "lucide-react";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import NotificationModel from "@/components/notifications/NotificationModel";
 import { countUnreadNotification } from "@/features/notification/notificationAction";
 import SearchModal from "@/components/search/SearchModal";
@@ -57,7 +57,6 @@ export default function HeaderLayout() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const path = usePathname();
-  const router = useRouter();
 
   useEffect(() => {
     if (isAuthenticated && token) {
@@ -69,7 +68,7 @@ export default function HeaderLayout() {
     cartData?.items?.reduce((total, item) => total + item.quantity, 0) || 0;
 
   if (loading) {
-    return router.push("/login");
+    return null;
   }
 
   if (pathArray.includes(path)) return null;
