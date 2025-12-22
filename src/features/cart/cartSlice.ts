@@ -8,14 +8,12 @@ import {
 } from "./cartAction";
 import { CartItem, CartState } from "@/types/cart";
 
-
-
 const initialState: CartState = {
   data: null,
   isLoading: false,
   error: null,
-  selectedItems: [], 
-  checkoutTotal: 0, 
+  selectedItems: [],
+  checkoutTotal: 0,
 };
 
 export const cartSlice = createSlice({
@@ -48,10 +46,14 @@ export const cartSlice = createSlice({
         }
 
         // Recalculate total
-        state.data.totalAmount = state.data.items.reduce(
-          (sum, item) => sum + (item.price.currentPrice || 0) * item.quantity,
-          0
-        );
+        state.data.totalAmount = state.data.items.reduce((sum, item) => {
+          const price =
+            item.price.discountPrice > 0 &&
+            item.price.discountPrice < item.price.currentPrice
+              ? item.price.discountPrice
+              : item.price.currentPrice;
+          return sum + (price || 0) * item.quantity;
+        }, 0);
       }
     },
     removeFromCartLocal: (state, action) => {
@@ -63,19 +65,27 @@ export const cartSlice = createSlice({
           state.data.items = state.data.items.filter(
             (item) => item._id !== action.payload
           );
-          state.data.totalAmount = state.data.items.reduce(
-            (sum, item) => sum + (item.price.currentPrice || 0) * item.quantity,
-            0
-          );
+          state.data.totalAmount = state.data.items.reduce((sum, item) => {
+            const price =
+              item.price.discountPrice > 0 &&
+              item.price.discountPrice < item.price.currentPrice
+                ? item.price.discountPrice
+                : item.price.currentPrice;
+            return sum + (price || 0) * item.quantity;
+          }, 0);
 
           // ✅ CẬP NHẬT SELECTED ITEMS NẾU XÓA ITEM ĐANG CHỌN
           state.selectedItems = state.selectedItems.filter(
             (item) => item._id !== action.payload
           );
-          state.checkoutTotal = state.selectedItems.reduce(
-            (sum, item) => sum + (item.price.currentPrice || 0) * item.quantity,
-            0
-          );
+          state.checkoutTotal = state.selectedItems.reduce((sum, item) => {
+            const price =
+              item.price.discountPrice > 0 &&
+              item.price.discountPrice < item.price.currentPrice
+                ? item.price.discountPrice
+                : item.price.currentPrice;
+            return sum + (price || 0) * item.quantity;
+          }, 0);
         }
       }
     },
@@ -96,10 +106,14 @@ export const cartSlice = createSlice({
 
         if (itemIndex > -1) {
           state.data.items[itemIndex].quantity = quantity;
-          state.data.totalAmount = state.data.items.reduce(
-            (sum, item) => sum + (item.price.currentPrice || 0) * item.quantity,
-            0
-          );
+          state.data.totalAmount = state.data.items.reduce((sum, item) => {
+            const price =
+              item.price.discountPrice > 0 &&
+              item.price.discountPrice < item.price.currentPrice
+                ? item.price.discountPrice
+                : item.price.currentPrice;
+            return sum + (price || 0) * item.quantity;
+          }, 0);
 
           // ✅ CẬP NHẬT SELECTED ITEMS NẾU ITEM ĐANG CHỌN
           const selectedItemIndex = state.selectedItems.findIndex(
@@ -107,10 +121,14 @@ export const cartSlice = createSlice({
           );
           if (selectedItemIndex > -1) {
             state.selectedItems[selectedItemIndex].quantity = quantity;
-            state.checkoutTotal = state.selectedItems.reduce(
-              (sum, item) => sum + (item.price.currentPrice || 0) * item.quantity,
-              0
-            );
+            state.checkoutTotal = state.selectedItems.reduce((sum, item) => {
+              const price =
+                item.price.discountPrice > 0 &&
+                item.price.discountPrice < item.price.currentPrice
+                  ? item.price.discountPrice
+                  : item.price.currentPrice;
+              return sum + (price || 0) * item.quantity;
+            }, 0);
           }
         }
       }
@@ -121,7 +139,9 @@ export const cartSlice = createSlice({
       const itemId = action.payload;
       if (!state.data) return;
 
-      const itemIndex = state.data.items.findIndex(item => item._id === itemId);
+      const itemIndex = state.data.items.findIndex(
+        (item) => item._id === itemId
+      );
       if (itemIndex > -1) {
         const item = state.data.items[itemIndex];
         const isSelected = !item.selected;
@@ -132,21 +152,29 @@ export const cartSlice = createSlice({
         // Cập nhật selectedItems
         if (isSelected) {
           // Thêm vào selectedItems nếu chưa có
-          if (!state.selectedItems.find(selectedItem => selectedItem._id === itemId)) {
+          if (
+            !state.selectedItems.find(
+              (selectedItem) => selectedItem._id === itemId
+            )
+          ) {
             state.selectedItems.push(item);
           }
         } else {
           // Xóa khỏi selectedItems
           state.selectedItems = state.selectedItems.filter(
-            selectedItem => selectedItem._id !== itemId
+            (selectedItem) => selectedItem._id !== itemId
           );
         }
 
         // Tính lại checkout total
-        state.checkoutTotal = state.selectedItems.reduce(
-          (sum, item) => sum + (item.price.currentPrice || 0) * item.quantity,
-          0
-        );
+        state.checkoutTotal = state.selectedItems.reduce((sum, item) => {
+          const price =
+            item.price.discountPrice > 0 &&
+            item.price.discountPrice < item.price.currentPrice
+              ? item.price.discountPrice
+              : item.price.currentPrice;
+          return sum + (price || 0) * item.quantity;
+        }, 0);
       }
     },
 
@@ -154,7 +182,7 @@ export const cartSlice = createSlice({
       if (!state.data) return;
 
       // Chọn tất cả items
-      state.data.items.forEach(item => {
+      state.data.items.forEach((item) => {
         item.selected = true;
       });
 
@@ -162,17 +190,21 @@ export const cartSlice = createSlice({
       state.selectedItems = [...state.data.items];
 
       // Tính lại checkout total
-      state.checkoutTotal = state.selectedItems.reduce(
-        (sum, item) => sum + (item.price.currentPrice || 0) * item.quantity,
-        0
-      );
+      state.checkoutTotal = state.selectedItems.reduce((sum, item) => {
+        const price =
+          item.price.discountPrice > 0 &&
+          item.price.discountPrice < item.price.currentPrice
+            ? item.price.discountPrice
+            : item.price.currentPrice;
+        return sum + (price || 0) * item.quantity;
+      }, 0);
     },
 
     unselectAllItems: (state) => {
       if (!state.data) return;
 
       // Bỏ chọn tất cả items
-      state.data.items.forEach(item => {
+      state.data.items.forEach((item) => {
         item.selected = false;
       });
 
@@ -217,7 +249,7 @@ export const cartSlice = createSlice({
       if (cartData && cartData.items) {
         cartData.items = cartData.items.map((item: CartItem) => ({
           ...item,
-          selected: item.selected || false
+          selected: item.selected || false,
         }));
       }
 
@@ -225,11 +257,17 @@ export const cartSlice = createSlice({
 
       // ✅ KHỞI TẠO SELECTED ITEMS TỪ CART DATA
       if (cartData && cartData.items) {
-        state.selectedItems = cartData.items.filter((item: CartItem) => item.selected);
-        state.checkoutTotal = state.selectedItems.reduce(
-          (sum, item) => sum + (item.price.currentPrice || 0) * item.quantity,
-          0
+        state.selectedItems = cartData.items.filter(
+          (item: CartItem) => item.selected
         );
+        state.checkoutTotal = state.selectedItems.reduce((sum, item) => {
+          const price =
+            item.price.discountPrice > 0 &&
+            item.price.discountPrice < item.price.currentPrice
+              ? item.price.discountPrice
+              : item.price.currentPrice;
+          return sum + (price || 0) * item.quantity;
+        }, 0);
       }
     });
     builder.addCase(getCart.rejected, (state, action) => {
@@ -257,7 +295,7 @@ export const cartSlice = createSlice({
       if (cartData && cartData.items) {
         cartData.items = cartData.items.map((item: CartItem) => ({
           ...item,
-          selected: item.selected || false
+          selected: item.selected || false,
         }));
       }
 
@@ -290,7 +328,7 @@ export const cartSlice = createSlice({
       if (cartData && cartData.items) {
         cartData.items = cartData.items.map((item: CartItem) => ({
           ...item,
-          selected: item.selected || false
+          selected: item.selected || false,
         }));
       }
 
@@ -298,11 +336,17 @@ export const cartSlice = createSlice({
 
       // ✅ CẬP NHẬT SELECTED ITEMS
       if (cartData && cartData.items) {
-        state.selectedItems = cartData.items.filter((item: CartItem) => item.selected);
-        state.checkoutTotal = state.selectedItems.reduce(
-          (sum, item) => sum + (item.price.currentPrice || 0) * item.quantity,
-          0
+        state.selectedItems = cartData.items.filter(
+          (item: CartItem) => item.selected
         );
+        state.checkoutTotal = state.selectedItems.reduce((sum, item) => {
+          const price =
+            item.price.discountPrice > 0 &&
+            item.price.discountPrice < item.price.currentPrice
+              ? item.price.discountPrice
+              : item.price.currentPrice;
+          return sum + (price || 0) * item.quantity;
+        }, 0);
       }
     });
     builder.addCase(removeFromCart.rejected, (state, action) => {
@@ -354,16 +398,18 @@ export const cartSlice = createSlice({
       }
 
       if (cartData) {
-        const updatedItems = cartData.items.map((newItem: Record<string,string>) => {
-          const oldItem = oldItemsWithVariants.find(
-            (item) => item._id === newItem._id
-          );
-          return {
-            ...newItem,
-            variant: oldItem?.variant,
-            selected: oldItem?.selected || false // ✅ GIỮ LẠI TRẠNG THÁI SELECTED
-          };
-        });
+        const updatedItems = cartData.items.map(
+          (newItem: Record<string, string>) => {
+            const oldItem = oldItemsWithVariants.find(
+              (item) => item._id === newItem._id
+            );
+            return {
+              ...newItem,
+              variant: oldItem?.variant,
+              selected: oldItem?.selected || false, // ✅ GIỮ LẠI TRẠNG THÁI SELECTED
+            };
+          }
+        );
 
         state.data = {
           ...cartData,
@@ -371,11 +417,17 @@ export const cartSlice = createSlice({
         };
 
         // ✅ CẬP NHẬT SELECTED ITEMS
-        state.selectedItems = updatedItems.filter((item: CartItem) => item.selected);
-        state.checkoutTotal = state.selectedItems.reduce(
-          (sum, item) => sum + (item.price.currentPrice || 0) * item.quantity,
-          0
+        state.selectedItems = updatedItems.filter(
+          (item: CartItem) => item.selected
         );
+        state.checkoutTotal = state.selectedItems.reduce((sum, item) => {
+          const price =
+            item.price.discountPrice > 0 &&
+            item.price.discountPrice < item.price.currentPrice
+              ? item.price.discountPrice
+              : item.price.currentPrice;
+          return sum + (price || 0) * item.quantity;
+        }, 0);
       }
     });
     builder.addCase(updateCartItem.rejected, (state, action) => {
