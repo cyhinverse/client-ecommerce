@@ -13,6 +13,7 @@ import { notificationSlice } from "@/features/notification/notificationSlice";
 import { reviewSlice } from "@/features/reviews/reviewSlice";
 import { statisticsSlice } from "@/features/statistics/statisticsSlice";
 import { bannerSlice } from "@/features/banner/bannerSlice";
+import { injectStore } from "@/api/api";
 
 const createNoopStorage = () => {
   return {
@@ -69,6 +70,8 @@ export const store = configureStore({
       },
     }),
 });
+
+injectStore(store);
 
 export const persistor = persistStore(store);
 

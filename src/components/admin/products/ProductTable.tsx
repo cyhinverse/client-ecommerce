@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import { Product } from "@/types/product";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
+import Image from "next/image";
 
 interface ProductsTableProps {
   products: Product[];
@@ -98,10 +99,9 @@ export function ProductsTable({
 
   useEffect(() => {
     if (debouncedSearch !== searchTerm) {
-       onSearch(debouncedSearch);
+      onSearch(debouncedSearch);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch]);
+  }, [debouncedSearch, searchTerm, onSearch]);
 
   const handlePriceFilterApply = () => {
     const min = localMinPrice ? Number(localMinPrice) : undefined;
@@ -138,9 +138,7 @@ export function ProductsTable({
 
   const getCategoryName = (category: string | category | null): string => {
     if (!category) return "None";
-    return typeof category === "string"
-      ? category
-      : category.name || "None";
+    return typeof category === "string" ? category : category.name || "None";
   };
 
   const getPriceDisplay = (price: price | null) => {
@@ -150,7 +148,9 @@ export function ProductsTable({
 
     return (
       <div className="flex flex-col">
-        <span className="font-medium text-foreground">{currentPrice.toLocaleString()}₫</span>
+        <span className="font-medium text-foreground">
+          {currentPrice.toLocaleString()}₫
+        </span>
         {discountPrice > 0 && discountPrice !== currentPrice && (
           <span className="text-xs text-muted-foreground line-through">
             {discountPrice.toLocaleString()}₫
@@ -346,7 +346,10 @@ export function ProductsTable({
             )}
             {!isLoading && products.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={10} className="h-32 text-center text-muted-foreground">
+                <TableCell
+                  colSpan={10}
+                  className="h-32 text-center text-muted-foreground"
+                >
                   No products found.
                 </TableCell>
               </TableRow>
@@ -361,11 +364,13 @@ export function ProductsTable({
                   <TableCell className="pl-6">
                     {product.images && product.images.length > 0 ? (
                       <div className="relative h-12 w-12 rounded-xl overflow-hidden shadow-sm border border-border/50">
-                         <img
-                           src={product.images[0]}
-                           alt={product.name}
-                           className="h-full w-full object-cover"
-                         />
+                        <Image
+                          src={product.images[0]}
+                          alt={product.name}
+                          width={48}
+                          height={48}
+                          className="h-full w-full object-cover"
+                        />
                       </div>
                     ) : (
                       <div className="h-12 w-12 rounded-xl bg-gray-100 flex items-center justify-center border border-border/50">

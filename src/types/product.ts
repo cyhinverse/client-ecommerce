@@ -10,7 +10,7 @@ export interface price {
   currentPrice: number;
   discountPrice: number;
   currency: string;
-  _id: string;
+  _id?: string;
 }
 
 export interface reviews extends User {
@@ -70,21 +70,19 @@ export interface ProductState {
   related: Product[];
 }
 
+export type Params = {
+  page: number;
+  limit: number;
+  search?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  sortBy?: string;
+  rating?: string;
+  colors?: string;
+  sizes?: string;
+};
 
- export type Params = {
-    page: number;
-    limit: number;
-    search?: string;
-    minPrice?: number;
-    maxPrice?: number
-    sortBy?: string;
-    rating?: string;
-    colors?: string;
-    sizes?: string;
-  };
-
-
-  export interface ProductFilters {
+export interface ProductFilters {
   search: string;
   minPrice: number;
   maxPrice: number;

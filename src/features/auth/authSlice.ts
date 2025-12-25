@@ -34,6 +34,12 @@ export const authSlice = createSlice({
     setUserData: (state, action: PayloadAction<User | null>) => {
       state.data = action.payload;
     },
+    clearAuth: (state) => {
+      state.loading = false;
+      state.isAuthenticated = false;
+      state.token = null;
+      state.data = null;
+    },
   },
   extraReducers: (builder) => {
     // Login actions

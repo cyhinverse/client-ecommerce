@@ -1,13 +1,30 @@
-import axios, { InternalAxiosRequestConfig } from "axios";
+import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
+import { authSlice } from "@/features/auth/authSlice";
 
-interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
-  _retry?: boolean;
-}
+let store: any;
 
-//const URL = "https://server-ecommerce-gzqo.onrender.com/api";
-const Url = "http://localhost:5000/api";
+export const injectStore = (_store: any) => {
+  store = _store;
+};
+
+// Create a queue to hold failed requests while refreshing token
+let isRefreshing = false;
+let failedQueue: any[] = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+
+  failedQueue = [];
+};
+
 const instance = axios.create({
-  baseURL: Url,
+  baseURL: "http://localhost:5000/api",
   timeout: 10000,
   withCredentials: true,
   headers: {
@@ -15,11 +32,14 @@ const instance = axios.create({
   },
 });
 
-// Request interceptor: attach token
+// Request interceptor to add token
 instance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
+  (config: InternalAxiosRequestConfig) => {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("accessToken")
+        : null;
+    if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -29,33 +49,87 @@ instance.interceptors.request.use(
   }
 );
 
+// Response interceptor to handle token expiration
 instance.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config as CustomAxiosRequestConfig;
+  (response) => {
+    return response;
+  },
+  async (error: AxiosError) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // If error is 401 and it's not a retry and not the refresh token call itself
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url?.includes("/auth/refresh-token")
+    ) {
+      if (isRefreshing) {
+        // If already refreshing, add request to queue
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+            }
+            return instance(originalRequest);
+          })
+          .catch((err) => {
+            return Promise.reject(err);
+          });
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
+
       try {
-        const refreshToken = localStorage.getItem("refreshToken");
-        const res = await instance.post("/auth/refresh-token", {
-          refreshToken,
-        });
-        const { accessToken } = res.data.data; // Server format is { data: { accessToken: ... } }
+        const response = await axios.post(
+          `${instance.defaults.baseURL}/auth/refresh-token`,
+          {},
+          { withCredentials: true }
+        );
 
-        localStorage.setItem("accessToken", accessToken);
-        instance.defaults.headers.common[
-          "Authorization"
-        ] = `Bearer ${accessToken}`;
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        const { accessToken } = response.data;
 
+        if (typeof window !== "undefined") {
+          localStorage.setItem("accessToken", accessToken);
+        }
+
+        // Sync with Redux if store is injected
+        if (store) {
+          store.dispatch(authSlice.actions.setToken(accessToken));
+          store.dispatch(authSlice.actions.setIsAuthenticated(true));
+        }
+
+        // Update instance defaults and original request
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        }
+
+        processQueue(null, accessToken);
         return instance(originalRequest);
       } catch (refreshError) {
-        localStorage.removeItem("accessToken");
-        // Optional: redirect to login or clear auth state
+        processQueue(refreshError, null);
+
+        // If refresh fails, clear everything
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          window.dispatchEvent(new Event("auth-logout"));
+        }
+
+        if (store) {
+          store.dispatch(authSlice.actions.clearAuth());
+        }
+
         return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
+
     return Promise.reject(error);
   }
 );

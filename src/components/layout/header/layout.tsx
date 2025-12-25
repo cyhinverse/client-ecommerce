@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useAppSelector, useAppDispatch } from "@/hooks/hooks";
 import { ShoppingCart, Search, Bell, Menu } from "lucide-react";
-import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { usePathname } from "next/navigation";
 import NotificationModel from "@/components/notifications/NotificationModel";
 import { countUnreadNotification } from "@/features/notification/notificationAction";
