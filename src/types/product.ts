@@ -35,7 +35,6 @@ export interface Product {
   slug: string;
   category: category | null;
   brand: string;
-  images: string[];
   price: price | null;
   variants: variants[];
   reviews: reviews[] | null;

@@ -362,10 +362,10 @@ export function ProductsTable({
                   }`}
                 >
                   <TableCell className="pl-6">
-                    {product.images && product.images.length > 0 ? (
+                    {product.variants?.[0]?.images?.[0] ? (
                       <div className="relative h-12 w-12 rounded-xl overflow-hidden shadow-sm border border-border/50">
                         <Image
-                          src={product.images[0]}
+                          src={product.variants[0].images[0]}
                           alt={product.name}
                           width={48}
                           height={48}

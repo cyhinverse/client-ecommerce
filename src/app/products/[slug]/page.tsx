@@ -98,10 +98,7 @@ export default function ProductDetailPage() {
 
   const activePrice = variant ? variant.price : product.price;
 
-  const displayImages =
-    product.variants && product.variants.length > 0
-      ? variant?.images || []
-      : product.images || [];
+  const displayImages = variant?.images || [];
 
   return (
     <div className="bg-white dark:bg-black min-h-screen">

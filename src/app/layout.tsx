@@ -5,6 +5,7 @@ import { ReduxProvider } from "./Provider";
 import HeaderLayout from "@/components/layout/header/layout";
 import FooterLayout from "@/components/layout/footer/page";
 import { SocketProvider } from "@/context/SocketContext";
+import ChatWidgetWrapper from "@/components/chatbot/ChatWidgetWrapper";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -32,6 +33,7 @@ export default function RootLayout({
             <HeaderLayout />
             <main className="flex-1">{children}</main>
             <FooterLayout />
+            <ChatWidgetWrapper />
           </SocketProvider>
         </ReduxProvider>
       </body>

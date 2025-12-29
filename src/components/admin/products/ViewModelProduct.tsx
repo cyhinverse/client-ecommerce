@@ -67,10 +67,10 @@ export function ViewModelProduct({
           <div className="flex gap-6 items-start">
             {/* Main Image */}
             <div className="shrink-0">
-              {product.images && product.images.length > 0 ? (
+              {product.variants?.[0]?.images?.[0] ? (
                 <div className="relative h-32 w-32 rounded-2xl overflow-hidden border border-border/50 shadow-sm">
                   <Image
-                    src={product.images[0]}
+                    src={product.variants[0].images[0]}
                     alt={product.name}
                     fill
                     className="object-cover"
@@ -282,29 +282,6 @@ export function ViewModelProduct({
             </div>
           )}
 
-          {/* Gallery */}
-          {product.images && product.images.length > 0 && (
-            <div className="space-y-3">
-              <h4 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-                Gallery
-              </h4>
-              <div className="grid grid-cols-6 gap-3">
-                {product.images.map((img, i) => (
-                  <div
-                    key={i}
-                    className="relative aspect-square rounded-xl overflow-hidden border border-border/50"
-                  >
-                    <Image
-                      src={img}
-                      alt="Product gallery"
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         <div className="flex justify-end gap-3 pt-6 border-t border-border/50 mt-2">

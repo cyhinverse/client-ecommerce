@@ -509,9 +509,9 @@ export default function AdminDashboard() {
                 >
                   <div className="flex items-center gap-4">
                     <div className="relative h-12 w-12 flex-shrink-0 rounded-xl bg-gray-100 dark:bg-gray-800 overflow-hidden border border-border/50">
-                      {product.images && product.images.length > 0 ? (
+                      {product.variants?.[0]?.images?.[0] ? (
                         <Image
-                          src={product.images[0]}
+                          src={product.variants[0].images[0]}
                           alt={product.name}
                           fill
                           className="object-cover"

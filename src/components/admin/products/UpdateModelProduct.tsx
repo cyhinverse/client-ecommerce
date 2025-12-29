@@ -15,7 +15,6 @@ import { Plus } from "lucide-react";
 import { Product, variants } from "@/types/product";
 import { VariantItem } from "./VariantItem";
 import { TagItem } from "./TagItem";
-import { ImageSection } from "./ImageSection";
 
 interface UpdateModelProductProps {
   open: boolean;
@@ -86,13 +85,10 @@ export function UpdateModelProduct({
     },
     [formData.variants, onDeleteVariant]
   );
-  const [images, setImages] = useState<File[]>([]);
   const [variantImages, setVariantImages] = useState<Record<string, File[]>>(
     {}
   );
-  const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const variantFileInputRefs = useRef<Record<string, HTMLInputElement | null>>(
     {}
   );
@@ -185,8 +181,6 @@ export function UpdateModelProduct({
         variants: safeVariants,
         tags: product.tags || [],
       });
-      setExistingImages(product.images || []);
-      setImages([]);
       setVariantImages({});
     }
   }, [product]);
@@ -290,24 +284,6 @@ export function UpdateModelProduct({
       formDataToSend.append("tags", JSON.stringify(formData.tags));
     }
 
-    // Check if images changed (existing removed or new added)
-    const originalImages = product.images || [];
-    const hasImagesChanged =
-      existingImages.length !== originalImages.length ||
-      existingImages.some((img, index) => img !== originalImages[index]) ||
-      images.length > 0;
-
-    if (hasImagesChanged) {
-      formDataToSend.append("existingImages", JSON.stringify(existingImages));
-
-      // Add new images
-      if (images.length > 0) {
-        images.forEach((file) => {
-          formDataToSend.append("images", file);
-        });
-      }
-    }
-
     // Add new variant images (Process all variants to maintain index alignment)
     formData.variants.forEach((variant, index) => {
       const files = variantImages[variant._id];
@@ -321,24 +297,6 @@ export function UpdateModelProduct({
     console.log("Sending only changed fields to update");
     onUpdate(formDataToSend);
   };
-
-  const handleImageChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files) {
-        const newImages = Array.from(e.target.files);
-        setImages((prev) => [...prev, ...newImages]);
-      }
-    },
-    []
-  );
-
-  const removeNewImage = useCallback((index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
-  }, []);
-
-  const removeExistingImage = useCallback((index: number) => {
-    setExistingImages((prev) => prev.filter((_, i) => i !== index));
-  }, []);
 
   const addTag = useCallback(() => {
     if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
@@ -716,18 +674,6 @@ export function UpdateModelProduct({
               />
             ))}
           </div>
-
-          {formData.variants.length === 0 && (
-            <ImageSection
-              existingImages={existingImages}
-              newImages={images}
-              onRemoveExisting={removeExistingImage}
-              onRemoveNew={removeNewImage}
-              onImageChange={handleImageChange}
-              fileInputRef={fileInputRef}
-              isLoading={isLoading}
-            />
-          )}
 
           <div className="flex justify-end gap-3 pt-4 border-t border-border/50">
             <Button

@@ -12,9 +12,9 @@ export const ProductCard = ({ product }: { product: Product }) => (
     <div className="flex flex-col gap-4">
       {/* Image Container - Apple style: Clean, centered, subtle background */}
       <div className="relative aspect-square overflow-hidden rounded-3xl bg-[#F5F5F7] dark:bg-[#1C1C1E] transition-all duration-500 group-hover:scale-[1.02]">
-        {product.variants?.[0]?.images?.[0] || product.images?.[0] ? (
+        {product.variants?.[0]?.images?.[0] ? (
           <Image
-            src={product.variants?.[0]?.images?.[0] || product.images[0]}
+            src={product.variants[0].images[0]}
             alt={product.name || "Product image"}
             fill
             className="object-cover transition-transform duration-700 group-hover:scale-105"
