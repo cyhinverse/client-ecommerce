@@ -27,8 +27,10 @@ interface DashboardStats {
       discountPrice: number;
     };
     soldCount: number;
-    images: string[];
     slug: string;
+    variants?: {
+      images?: string[];
+    }[];
   }[];
   chartData: {
     month: string;
