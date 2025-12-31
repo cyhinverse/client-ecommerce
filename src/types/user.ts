@@ -1,16 +1,5 @@
 import { Address } from "./address";
 
-export interface Address {
-  _id?: string;
-  fullName: string;
-  phone: string;
-  address: string;
-  city: string;
-  district: string;
-  ward: string;
-  isDefault?: boolean;
-}
-
 export interface User {
   _id: string;
   username: string;
