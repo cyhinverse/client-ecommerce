@@ -1,12 +1,14 @@
 import { Address } from "./address";
 
-export interface address {
+export interface Address {
+  _id?: string;
   fullName: string;
   phone: string;
   address: string;
   city: string;
   district: string;
   ward: string;
+  isDefault?: boolean;
 }
 
 export interface User {
@@ -36,6 +38,9 @@ export interface UserState {
   pagination: PaginationData | null;
   isLoading: boolean;
   error: string | null;
+  isUploadingAvatar: boolean;
+  isChangingPassword: boolean;
+  isUpdatingProfile: boolean;
 }
 
 export interface UserFilters {

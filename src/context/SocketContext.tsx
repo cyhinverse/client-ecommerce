@@ -4,11 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { initSocketEvents } from "@/socket/index";
-
-interface SocketContextType {
-  socket: Socket | null;
-  isConnected: boolean;
-}
+import { SocketContextType } from "@/types/socket";
 
 const SocketContext = createContext<SocketContextType>({
   socket: null,

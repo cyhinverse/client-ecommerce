@@ -15,57 +15,7 @@ import {
   verifyTwoFactor,
   disableTwoFactor,
 } from "./userAction";
-
-export interface Address {
-  _id: string;
-  fullName: string;
-  phone: string;
-  address: string;
-  city: string;
-  district: string;
-  ward: string;
-  isDefault: boolean;
-}
-
-export interface User {
-  _id: string;
-  username: string;
-  email: string;
-  roles: string;
-  permissions: string[];
-  phone: string;
-  avatar: string | null;
-  isVerifiedEmail: boolean;
-  isTwoFactorEnabled?: boolean;
-  provider: string;
-  addresses: Address[];
-  createdAt: string;
-  updatedAt: string;
-  __v: number;
-  codeVerifiEmail?: string;
-  expiresCodeVerifiEmail?: string;
-}
-
-export interface PaginationData {
-  currentPage: number;
-  pageSize: number;
-  totalPages: number;
-  totalItems: number;
-  hasNextPage: boolean;
-  hasPrevPage: boolean;
-  nextPage: number | null;
-  prevPage: number | null;
-}
-
-export interface UserState {
-  user: User[];
-  pagination: PaginationData | null;
-  isLoading: boolean;
-  error: string | null;
-  isUploadingAvatar: boolean;
-  isChangingPassword: boolean;
-  isUpdatingProfile: boolean;
-}
+import { User, UserState } from "@/types/user";
 
 const initialState: UserState = {
   user: [],
@@ -114,7 +64,7 @@ export const userSlice = createSlice({
         state.error = action.error.message || "Failed to fetch user profile";
       });
 
-    // Upload Avatar - FIXED: Cập nhật UI ngay lập tức
+    // Upload Avatar
     builder
       .addCase(uploadAvatar.pending, (state) => {
         state.isUploadingAvatar = true;

@@ -85,7 +85,6 @@ export const cartSlice = createSlice({
             (item) => item._id !== action.payload
           );
 
-          // ✅ CẬP NHẬT SELECTED ITEMS NẾU XÓA ITEM ĐANG CHỌN
           state.selectedItems = state.selectedItems.filter(
             (item) => item._id !== action.payload
           );
@@ -104,7 +103,7 @@ export const cartSlice = createSlice({
         state.data.items = [];
         state.data.totalAmount = 0;
       }
-      state.selectedItems = []; // ✅ XÓA SELECTED ITEMS
+      state.selectedItems = [];
       state.checkoutTotal = 0;
     },
     updateCartLocal: (state, action) => {
@@ -117,7 +116,6 @@ export const cartSlice = createSlice({
         if (itemIndex > -1) {
           state.data.items[itemIndex].quantity = quantity;
 
-          // ✅ CẬP NHẬT SELECTED ITEMS NẾU ITEM ĐANG CHỌN
           const selectedItemIndex = state.selectedItems.findIndex(
             (item) => item._id === itemId
           );
@@ -135,7 +133,6 @@ export const cartSlice = createSlice({
       }
     },
 
-    // ✅ THÊM REDUCERS MỚI CHO VIỆC CHỌN SẢN PHẨM
     toggleSelectItem: (state, action) => {
       const itemId = action.payload;
       if (!state.data) return;
@@ -208,7 +205,6 @@ export const cartSlice = createSlice({
       state.checkoutTotal = 0;
     },
 
-    // ✅ CHUẨN BỊ CHO CHECKOUT - CHỈ GIỮ LẠI SELECTED ITEMS
     prepareForCheckout: (state) => {
       if (!state.data) return;
 
@@ -224,7 +220,6 @@ export const cartSlice = createSlice({
   extraReducers: (builder) => {
     // Get Cart
     builder.addCase(getCart.pending, (state) => {
-      console.log("🔄 getCart.pending");
       state.isLoading = true;
       state.error = null;
     });
@@ -240,7 +235,6 @@ export const cartSlice = createSlice({
         cartData = action.payload;
       }
 
-      // ✅ THÊM TRƯỜNG SELECTED CHO MỖI ITEM KHI LẤY CART
       if (cartData && cartData.items) {
         cartData.items = cartData.items.map((item: CartItem) => ({
           ...item,
@@ -250,7 +244,6 @@ export const cartSlice = createSlice({
 
       state.data = cartData;
 
-      // ✅ KHỞI TẠO SELECTED ITEMS TỪ CART DATA
       if (cartData && cartData.items) {
         state.selectedItems = cartData.items.filter(
           (item: CartItem) => item.selected
@@ -283,7 +276,6 @@ export const cartSlice = createSlice({
         cartData = action.payload;
       }
 
-      // ✅ THÊM TRƯỜNG SELECTED CHO MỖI ITEM
       if (cartData && cartData.items) {
         cartData.items = cartData.items.map((item: CartItem) => ({
           ...item,
@@ -301,7 +293,6 @@ export const cartSlice = createSlice({
 
     // Remove from Cart
     builder.addCase(removeFromCart.pending, (state) => {
-      console.log("🔄 removeFromCart.pending");
       state.isLoading = true;
       state.error = null;
     });
@@ -316,7 +307,6 @@ export const cartSlice = createSlice({
         cartData = action.payload;
       }
 
-      // ✅ THÊM TRƯỜNG SELECTED CHO MỖI ITEM
       if (cartData && cartData.items) {
         cartData.items = cartData.items.map((item: CartItem) => ({
           ...item,
@@ -326,7 +316,6 @@ export const cartSlice = createSlice({
 
       state.data = cartData;
 
-      // ✅ CẬP NHẬT SELECTED ITEMS
       if (cartData && cartData.items) {
         state.selectedItems = cartData.items.filter(
           (item: CartItem) => item.selected
@@ -361,7 +350,7 @@ export const cartSlice = createSlice({
       }
 
       state.data = cartData;
-      state.selectedItems = []; // ✅ XÓA SELECTED ITEMS
+      state.selectedItems = [];
       state.checkoutTotal = 0;
     });
     builder.addCase(clearCart.rejected, (state, action) => {
@@ -398,7 +387,7 @@ export const cartSlice = createSlice({
             return {
               ...newItem,
               variant: oldItem?.variant,
-              selected: oldItem?.selected || false, // ✅ GIỮ LẠI TRẠNG THÁI SELECTED
+              selected: oldItem?.selected || false,
             };
           }
         );
@@ -408,12 +397,11 @@ export const cartSlice = createSlice({
           items: updatedItems,
         };
 
-        // ✅ CẬP NHẬT SELECTED ITEMS
         state.selectedItems = updatedItems.filter(
           (item: CartItem) => item.selected
         );
         const { checkoutTotal } = calculateCartTotals(
-          state.data.items,
+          updatedItems,
           state.selectedItems
         );
         state.checkoutTotal = checkoutTotal;
