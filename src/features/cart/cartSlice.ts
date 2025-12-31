@@ -16,6 +16,28 @@ const initialState: CartState = {
   checkoutTotal: 0,
 };
 
+const calculateCartTotals = (items: CartItem[], selectedItems: CartItem[]) => {
+  const totalAmount = items.reduce((sum, item) => {
+    const price =
+      item.price.discountPrice > 0 &&
+      item.price.discountPrice < item.price.currentPrice
+        ? item.price.discountPrice
+        : item.price.currentPrice;
+    return sum + (price || 0) * item.quantity;
+  }, 0);
+
+  const checkoutTotal = selectedItems.reduce((sum, item) => {
+    const price =
+      item.price.discountPrice > 0 &&
+      item.price.discountPrice < item.price.currentPrice
+        ? item.price.discountPrice
+        : item.price.currentPrice;
+    return sum + (price || 0) * item.quantity;
+  }, 0);
+
+  return { totalAmount, checkoutTotal };
+};
+
 export const cartSlice = createSlice({
   name: "cart",
   initialState,
@@ -46,14 +68,11 @@ export const cartSlice = createSlice({
         }
 
         // Recalculate total
-        state.data.totalAmount = state.data.items.reduce((sum, item) => {
-          const price =
-            item.price.discountPrice > 0 &&
-            item.price.discountPrice < item.price.currentPrice
-              ? item.price.discountPrice
-              : item.price.currentPrice;
-          return sum + (price || 0) * item.quantity;
-        }, 0);
+        const { totalAmount } = calculateCartTotals(
+          state.data.items,
+          state.selectedItems
+        );
+        state.data.totalAmount = totalAmount;
       }
     },
     removeFromCartLocal: (state, action) => {
@@ -65,27 +84,18 @@ export const cartSlice = createSlice({
           state.data.items = state.data.items.filter(
             (item) => item._id !== action.payload
           );
-          state.data.totalAmount = state.data.items.reduce((sum, item) => {
-            const price =
-              item.price.discountPrice > 0 &&
-              item.price.discountPrice < item.price.currentPrice
-                ? item.price.discountPrice
-                : item.price.currentPrice;
-            return sum + (price || 0) * item.quantity;
-          }, 0);
 
           // ✅ CẬP NHẬT SELECTED ITEMS NẾU XÓA ITEM ĐANG CHỌN
           state.selectedItems = state.selectedItems.filter(
             (item) => item._id !== action.payload
           );
-          state.checkoutTotal = state.selectedItems.reduce((sum, item) => {
-            const price =
-              item.price.discountPrice > 0 &&
-              item.price.discountPrice < item.price.currentPrice
-                ? item.price.discountPrice
-                : item.price.currentPrice;
-            return sum + (price || 0) * item.quantity;
-          }, 0);
+
+          const { totalAmount, checkoutTotal } = calculateCartTotals(
+            state.data.items,
+            state.selectedItems
+          );
+          state.data.totalAmount = totalAmount;
+          state.checkoutTotal = checkoutTotal;
         }
       }
     },
@@ -106,14 +116,6 @@ export const cartSlice = createSlice({
 
         if (itemIndex > -1) {
           state.data.items[itemIndex].quantity = quantity;
-          state.data.totalAmount = state.data.items.reduce((sum, item) => {
-            const price =
-              item.price.discountPrice > 0 &&
-              item.price.discountPrice < item.price.currentPrice
-                ? item.price.discountPrice
-                : item.price.currentPrice;
-            return sum + (price || 0) * item.quantity;
-          }, 0);
 
           // ✅ CẬP NHẬT SELECTED ITEMS NẾU ITEM ĐANG CHỌN
           const selectedItemIndex = state.selectedItems.findIndex(
@@ -121,15 +123,14 @@ export const cartSlice = createSlice({
           );
           if (selectedItemIndex > -1) {
             state.selectedItems[selectedItemIndex].quantity = quantity;
-            state.checkoutTotal = state.selectedItems.reduce((sum, item) => {
-              const price =
-                item.price.discountPrice > 0 &&
-                item.price.discountPrice < item.price.currentPrice
-                  ? item.price.discountPrice
-                  : item.price.currentPrice;
-              return sum + (price || 0) * item.quantity;
-            }, 0);
           }
+
+          const { totalAmount, checkoutTotal } = calculateCartTotals(
+            state.data.items,
+            state.selectedItems
+          );
+          state.data.totalAmount = totalAmount;
+          state.checkoutTotal = checkoutTotal;
         }
       }
     },
@@ -167,14 +168,11 @@ export const cartSlice = createSlice({
         }
 
         // Tính lại checkout total
-        state.checkoutTotal = state.selectedItems.reduce((sum, item) => {
-          const price =
-            item.price.discountPrice > 0 &&
-            item.price.discountPrice < item.price.currentPrice
-              ? item.price.discountPrice
-              : item.price.currentPrice;
-          return sum + (price || 0) * item.quantity;
-        }, 0);
+        const { checkoutTotal } = calculateCartTotals(
+          state.data.items,
+          state.selectedItems
+        );
+        state.checkoutTotal = checkoutTotal;
       }
     },
 
@@ -190,14 +188,11 @@ export const cartSlice = createSlice({
       state.selectedItems = [...state.data.items];
 
       // Tính lại checkout total
-      state.checkoutTotal = state.selectedItems.reduce((sum, item) => {
-        const price =
-          item.price.discountPrice > 0 &&
-          item.price.discountPrice < item.price.currentPrice
-            ? item.price.discountPrice
-            : item.price.currentPrice;
-        return sum + (price || 0) * item.quantity;
-      }, 0);
+      const { checkoutTotal } = calculateCartTotals(
+        state.data.items,
+        state.selectedItems
+      );
+      state.checkoutTotal = checkoutTotal;
     },
 
     unselectAllItems: (state) => {
@@ -260,14 +255,11 @@ export const cartSlice = createSlice({
         state.selectedItems = cartData.items.filter(
           (item: CartItem) => item.selected
         );
-        state.checkoutTotal = state.selectedItems.reduce((sum, item) => {
-          const price =
-            item.price.discountPrice > 0 &&
-            item.price.discountPrice < item.price.currentPrice
-              ? item.price.discountPrice
-              : item.price.currentPrice;
-          return sum + (price || 0) * item.quantity;
-        }, 0);
+        const { checkoutTotal } = calculateCartTotals(
+          cartData.items,
+          state.selectedItems
+        );
+        state.checkoutTotal = checkoutTotal;
       }
     });
     builder.addCase(getCart.rejected, (state, action) => {
@@ -339,14 +331,11 @@ export const cartSlice = createSlice({
         state.selectedItems = cartData.items.filter(
           (item: CartItem) => item.selected
         );
-        state.checkoutTotal = state.selectedItems.reduce((sum, item) => {
-          const price =
-            item.price.discountPrice > 0 &&
-            item.price.discountPrice < item.price.currentPrice
-              ? item.price.discountPrice
-              : item.price.currentPrice;
-          return sum + (price || 0) * item.quantity;
-        }, 0);
+        const { checkoutTotal } = calculateCartTotals(
+          cartData.items,
+          state.selectedItems
+        );
+        state.checkoutTotal = checkoutTotal;
       }
     });
     builder.addCase(removeFromCart.rejected, (state, action) => {
@@ -398,11 +387,14 @@ export const cartSlice = createSlice({
       }
 
       if (cartData) {
+        // Optimize: Create map for O(1) lookup instead of O(N) find
+        const oldItemsMap = new Map(
+          oldItemsWithVariants.map((item) => [item._id, item])
+        );
+
         const updatedItems = cartData.items.map(
           (newItem: Record<string, string>) => {
-            const oldItem = oldItemsWithVariants.find(
-              (item) => item._id === newItem._id
-            );
+            const oldItem = oldItemsMap.get(newItem._id);
             return {
               ...newItem,
               variant: oldItem?.variant,
@@ -420,14 +412,11 @@ export const cartSlice = createSlice({
         state.selectedItems = updatedItems.filter(
           (item: CartItem) => item.selected
         );
-        state.checkoutTotal = state.selectedItems.reduce((sum, item) => {
-          const price =
-            item.price.discountPrice > 0 &&
-            item.price.discountPrice < item.price.currentPrice
-              ? item.price.discountPrice
-              : item.price.currentPrice;
-          return sum + (price || 0) * item.quantity;
-        }, 0);
+        const { checkoutTotal } = calculateCartTotals(
+          state.data.items,
+          state.selectedItems
+        );
+        state.checkoutTotal = checkoutTotal;
       }
     });
     builder.addCase(updateCartItem.rejected, (state, action) => {

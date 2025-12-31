@@ -49,15 +49,13 @@ export const authSlice = createSlice({
     builder.addCase(login.fulfilled, (state, action) => {
       state.loading = false;
       state.isAuthenticated = true;
+      // Note: We might not get a token payload here if the server only sets cookies.
+      // If server returns token in body AND cookie, this still sets redux state, which is fine but unnecessary for security.
+      // We keep it for now if other components use useAppSelector(state => state.auth.token).
       state.token = action.payload?.data.accessToken;
-      localStorage.setItem(
-        "accessToken",
-        action.payload?.data.accessToken || ""
-      );
-      localStorage.setItem(
-        "refreshToken",
-        action.payload?.data.refreshToken || ""
-      );
+
+      // Removed localStorage lines
+
       state.data = action.payload?.data;
       if (state.data) {
         state.data = {
@@ -93,8 +91,7 @@ export const authSlice = createSlice({
       state.isAuthenticated = false;
       state.token = null;
       state.data = null;
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
+      // Removed localStorage lines
     });
     builder.addCase(logout.rejected, (state) => {
       state.loading = false;

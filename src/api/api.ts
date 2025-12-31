@@ -32,16 +32,11 @@ const instance = axios.create({
   },
 });
 
-// Request interceptor to add token
+// Request interceptor
 instance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("accessToken")
-        : null;
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    // Client-side cookie based auth - no need to inject header manually
+    // The browser automatically caches certificates and sends cookies with withCredentials: true
     return config;
   },
   (error) => {
@@ -70,10 +65,7 @@ instance.interceptors.response.use(
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
-          .then((token) => {
-            if (originalRequest.headers) {
-              originalRequest.headers.Authorization = `Bearer ${token}`;
-            }
+          .then(() => {
             return instance(originalRequest);
           })
           .catch((err) => {
@@ -85,38 +77,27 @@ instance.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const response = await axios.post(
-          `${instance.defaults.baseURL}/auth/refresh-token`,
-          {},
-          { withCredentials: true }
-        );
+        // Attempt to refresh token via cookie
+        await instance.post("/auth/refresh-token");
 
-        const { accessToken } = response.data;
+        // If successful, the server has set a new access token cookie
+        // We just need to retry the original request
 
-        if (typeof window !== "undefined") {
-          localStorage.setItem("accessToken", accessToken);
-        }
-
-        // Sync with Redux if store is injected
+        // Sync with Redux if store is injected (optional, mostly for IsAuthenticated state)
         if (store) {
-          store.dispatch(authSlice.actions.setToken(accessToken));
+          // We might not have the new token text to put in store because it is HttpOnly
+          // But we can ensure state knows we are authenticated
           store.dispatch(authSlice.actions.setIsAuthenticated(true));
         }
 
-        // Update instance defaults and original request
-        if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-        }
-
-        processQueue(null, accessToken);
+        processQueue(null);
         return instance(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
 
         // If refresh fails, clear everything
         if (typeof window !== "undefined") {
-          localStorage.removeItem("accessToken");
-          localStorage.removeItem("refreshToken");
+          // Send event to let app know to redirect to login
           window.dispatchEvent(new Event("auth-logout"));
         }
 
