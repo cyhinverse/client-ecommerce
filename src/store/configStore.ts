@@ -13,6 +13,7 @@ import { notificationSlice } from "@/features/notification/notificationSlice";
 import { reviewSlice } from "@/features/reviews/reviewSlice";
 import { statisticsSlice } from "@/features/statistics/statisticsSlice";
 import { bannerSlice } from "@/features/banner/bannerSlice";
+import { chatSlice } from "@/features/chat/chatSlice";
 import { injectStore } from "@/api/api";
 
 const createNoopStorage = () => {
@@ -47,6 +48,7 @@ export const rootReducer = combineReducers({
   reviews: reviewSlice.reducer,
   statistics: statisticsSlice.reducer,
   banner: bannerSlice.reducer,
+  chat: chatSlice.reducer,
 });
 
 const persistConfig = {

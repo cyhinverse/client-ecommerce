@@ -4,10 +4,11 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useAppSelector, useAppDispatch } from "@/hooks/hooks";
-import { ShoppingCart, Search, Bell, Menu } from "lucide-react";
+import { ShoppingCart, Search, Bell, Menu, MessageCircle } from "lucide-react";
 import { usePathname } from "next/navigation";
 import NotificationModel from "@/components/notifications/NotificationModel";
 import { countUnreadNotification } from "@/features/notification/notificationAction";
+import { toggleChat } from "@/features/chat/chatSlice";
 import SearchModal from "@/components/search/SearchModal";
 import { pathArray } from "@/constants/PathArray";
 import {
@@ -131,6 +132,15 @@ export default function HeaderLayout() {
                     )}
                   </Button>
                 </Link>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => dispatch(toggleChat())}
+                  className="text-muted-foreground hover:text-foreground relative"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                </Button>
 
                 <Button
                   variant="ghost"

@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
+import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { setChatOpen } from "@/features/chat/chatSlice";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -29,7 +31,8 @@ const SUGGESTIONS = [
 ];
 
 export default function ChatWidget() {
-  const [isOpen, setIsOpen] = useState(false);
+  const dispatch = useAppDispatch();
+  const { isOpen } = useAppSelector((state) => state.chat);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -184,21 +187,6 @@ export default function ChatWidget() {
 
   return (
     <>
-      {/* Floating Chat Button */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className={cn(
-          "fixed bottom-6 right-6 h-14 w-14 rounded-full z-50",
-          "bg-primary hover:bg-primary/90 text-primary-foreground",
-          "shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30",
-          "transition-all duration-300 hover:scale-105 active:scale-95",
-          "flex items-center justify-center",
-          isOpen && "hidden"
-        )}
-      >
-        <MessageCircle className="h-6 w-6" />
-      </button>
-
       {/* Chat Sidebar Overlay */}
       <div
         className={cn(
@@ -207,7 +195,7 @@ export default function ChatWidget() {
             ? "opacity-100 visible"
             : "opacity-0 invisible pointer-events-none"
         )}
-        onClick={() => setIsOpen(false)}
+        onClick={() => dispatch(setChatOpen(false))}
       />
 
       {/* Chat Sidebar */}
@@ -251,7 +239,7 @@ export default function ChatWidget() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setIsOpen(false)}
+                onClick={() => dispatch(setChatOpen(false))}
                 className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted"
                 title="Đóng chat"
               >
