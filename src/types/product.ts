@@ -32,6 +32,7 @@ export interface Product {
   _id: string;
   name: string;
   description: string;
+  images: string[];
   slug: string;
   category: category | null;
   brand: string;

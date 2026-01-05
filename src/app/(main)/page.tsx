@@ -1,22 +1,28 @@
 "use client";
-import Banner from "@/components/home/Banner";
+import React, { useState } from "react";
+import HeroSection from "@/components/home/HeroSection";
 import Category from "@/components/category/Category";
-import ListFeatures from "@/components/home/ListFeatures";
-import NewArrivals from "@/components/product/NewArrivals";
-import OnSaleProduct from "@/components/product/OnSaleProduct";
-import ProductFeatures from "@/components/product/ProductFeatures";
+import HomeProductList from "@/components/home/HomeProductList";
 
 export default function Home() {
+  const [selectedCategorySlug, setSelectedCategorySlug] = useState<
+    string | null
+  >(null);
+
   return (
     <>
-      <main className="w-full min-h-screen">
-        <Banner />
-        <div className="container mx-auto px-4 py-12 space-y-20">
-          <Category />
-          <ListFeatures />
-          <ProductFeatures />
-          <NewArrivals />
-          <OnSaleProduct />
+      <main className="w-full min-h-screen bg-gray-50 dark:bg-background">
+        <HeroSection />
+
+        <div className="container mx-auto px-4 mt-2 mb-8 sticky top-[64px] z-30 bg-gray-50 dark:bg-background py-2">
+          <Category
+            selectedSlug={selectedCategorySlug}
+            onSelectCategory={setSelectedCategorySlug}
+          />
+        </div>
+
+        <div className="container mx-auto px-4 pb-20 min-h-[500px]">
+          <HomeProductList selectedCategorySlug={selectedCategorySlug} />
         </div>
       </main>
     </>

@@ -1,10 +1,5 @@
 "use client";
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -14,12 +9,11 @@ import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { getBanners } from "@/features/banner/bannerAction";
 import { useRouter } from "next/navigation";
 
-
 export default function Banner() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { banners, isLoading } = useAppSelector((state) => state.banner);
-  
+
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [direction, setDirection] = useState(0);
   const autoplayRef = useRef<number | null>(null);
@@ -31,13 +25,13 @@ export default function Banner() {
 
   const length = banners.length;
 
-
-
   const paginate = useCallback(
     (newDirection: number) => {
       if (length === 0) return;
       setDirection(newDirection);
-      setCurrentIndex((prevIndex) => (prevIndex + newDirection + length) % length);
+      setCurrentIndex(
+        (prevIndex) => (prevIndex + newDirection + length) % length
+      );
     },
     [length]
   );
@@ -90,18 +84,19 @@ export default function Banner() {
     }),
   };
 
-
   if (isLoading || length === 0) {
     return (
-      <div className="w-full h-[calc(100vh-64px)] bg-neutral-900 animate-pulse flex items-center justify-center">
-            <span className="text-white/20 text-xl font-medium">Loading Experience...</span>
+      <div className="w-full h-full bg-neutral-900 animate-pulse flex items-center justify-center rounded-sm">
+        <span className="text-white/20 text-xl font-medium">
+          Loading Experience...
+        </span>
       </div>
     );
   }
 
   return (
     <section
-      className="relative w-full h-[calc(100vh-64px)] overflow-hidden bg-black group"
+      className="relative w-full h-full overflow-hidden bg-black group rounded-sm"
       onMouseEnter={() => (isHoveringRef.current = true)}
       onMouseLeave={() => (isHoveringRef.current = false)}
     >
@@ -128,93 +123,78 @@ export default function Banner() {
               className="object-cover w-full h-full select-none"
               priority
             />
-            
+
             {/* Dynamic Vignette & Gradient */}
             <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60 pointer-events-none" />
-            
+
             {/* Content Layer */}
-            <div className="absolute inset-x-0 bottom-0 top-0 flex flex-col items-center justify-center md:pb-20 px-6 text-center z-10">
-              <div className="max-w-4xl space-y-6">
-                 <motion.span
-                   custom={0}
-                   initial="hidden"
-                   animate="visible"
-                   variants={textVariants}
-                   className="inline-block px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-bold tracking-[0.2em] uppercase mb-4"
-                 >
-                   Prime Selection
-                 </motion.span>
-                 
-                 <motion.h2
-                   custom={1}
-                   initial="hidden"
-                   animate="visible"
-                   variants={textVariants}
-                   className={cn(
-                     "text-5xl md:text-8xl lg:text-9xl font-bold tracking-tighter drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)] leading-[0.9]",
-                     banners[currentIndex].theme === "light" ? "text-black drop-shadow-none" : "text-white"
-                   )}
-                 >
-                   {banners[currentIndex].title}
-                 </motion.h2>
-                 
-                 <motion.p
-                   custom={2}
-                   initial="hidden"
-                   animate="visible"
-                   variants={textVariants}
-                   className={cn(
-                     "text-lg md:text-2xl font-medium max-w-2xl mx-auto drop-shadow-lg",
-                     banners[currentIndex].theme === "light" ? "text-black/80 drop-shadow-none" : "text-white/80"
-                   )}
-                 >
-                   {banners[currentIndex].subtitle}
-                 </motion.p>
-                 
-                 <motion.div
-                    custom={3}
-                    initial="hidden"
-                    animate="visible"
-                    variants={textVariants}
-                    className="flex flex-col sm:flex-row gap-4 justify-center pt-8"
-                 >
-                   <Button
-                     size="lg"
-                     onClick={() => {
-                       const link = banners[currentIndex].link;
-                       if (link) {
-                         router.push(link);
-                       }
-                     }}
-                     className={cn(
-                       "rounded-full px-12 py-8 text-lg font-bold transition-all hover:scale-105 active:scale-95 shadow-xl",
-                       banners[currentIndex].theme === "light" 
-                        ? "bg-black text-white hover:bg-black/90 shadow-black/10" 
-                        : "bg-white text-black hover:bg-white/90 shadow-white/10"
-                     )}
-                   >
-                     <ShoppingBag className="mr-2 h-5 w-5" />
-                     Shop the Look
-                   </Button>
-                   <Button
-                     size="lg"
-                     variant="outline"
-                     onClick={() => {
-                       const link = banners[currentIndex].link;
-                       if (link) {
-                         router.push(link);
-                       }
-                     }}
-                     className={cn(
-                       "rounded-full px-12 py-8 text-lg font-bold backdrop-blur-md transition-all hover:scale-105",
-                       banners[currentIndex].theme === "light"
-                        ? "border-black/20 text-black hover:bg-black/5 bg-white/10"
-                        : "border-white/40 text-white hover:bg-white/20 bg-black/10"
-                     )}
-                   >
-                     Explore Collection
-                   </Button>
-                 </motion.div>
+            <div className="absolute inset-x-0 bottom-0 top-0 flex flex-col items-center justify-center px-6 text-center z-10">
+              <div className="max-w-2xl space-y-4">
+                <motion.span
+                  custom={0}
+                  initial="hidden"
+                  animate="visible"
+                  variants={textVariants}
+                  className="inline-block px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-bold tracking-[0.15em] uppercase mb-2"
+                >
+                  Prime Selection
+                </motion.span>
+
+                <motion.h2
+                  custom={1}
+                  initial="hidden"
+                  animate="visible"
+                  variants={textVariants}
+                  className={cn(
+                    "text-xl md:text-2xl lg:text-3xl font-bold tracking-tighter drop-shadow-md leading-tight",
+                    banners[currentIndex].theme === "light"
+                      ? "text-black"
+                      : "text-white"
+                  )}
+                >
+                  {banners[currentIndex].title}
+                </motion.h2>
+
+                <motion.p
+                  custom={2}
+                  initial="hidden"
+                  animate="visible"
+                  variants={textVariants}
+                  className={cn(
+                    "text-xs md:text-sm font-medium max-w-xs mx-auto",
+                    banners[currentIndex].theme === "light"
+                      ? "text-black/80"
+                      : "text-white/80"
+                  )}
+                >
+                  {banners[currentIndex].subtitle}
+                </motion.p>
+
+                <motion.div
+                  custom={3}
+                  initial="hidden"
+                  animate="visible"
+                  variants={textVariants}
+                  className="flex flex-col sm:flex-row gap-2 justify-center pt-2"
+                >
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      const link = banners[currentIndex].link;
+                      if (link) {
+                        router.push(link);
+                      }
+                    }}
+                    className={cn(
+                      "rounded-full px-4 py-1 text-[10px] font-bold transition-all hover:scale-105 active:scale-95",
+                      banners[currentIndex].theme === "light"
+                        ? "bg-black text-white"
+                        : "bg-white text-black"
+                    )}
+                  >
+                    Shop Now
+                  </Button>
+                </motion.div>
               </div>
             </div>
           </div>
@@ -222,23 +202,23 @@ export default function Banner() {
       </AnimatePresence>
 
       {/* Navigation Controls - Hidden on Idle */}
-      <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-6 pointer-events-none z-20">
-         <button
-           onClick={() => paginate(-1)}
-           className="p-4 rounded-full bg-black/10 hover:bg-black/40 text-white/40 hover:text-white backdrop-blur-md border border-white/5 transition-all pointer-events-auto group/nav"
-         >
-           <ChevronLeft className="w-8 h-8 transition-transform group-hover/nav:-translate-x-1" />
-         </button>
-         <button
-           onClick={() => paginate(1)}
-           className="p-4 rounded-full bg-black/10 hover:bg-black/40 text-white/40 hover:text-white backdrop-blur-md border border-white/5 transition-all pointer-events-auto group/nav"
-         >
-           <ChevronRight className="w-8 h-8 transition-transform group-hover/nav:translate-x-1" />
-         </button>
+      <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-4 pointer-events-none z-20">
+        <button
+          onClick={() => paginate(-1)}
+          className="p-2 rounded-full bg-black/10 hover:bg-black/40 text-white/40 hover:text-white backdrop-blur-md border border-white/5 transition-all pointer-events-auto group/nav"
+        >
+          <ChevronLeft className="w-5 h-5 transition-transform group-hover/nav:-translate-x-0.5" />
+        </button>
+        <button
+          onClick={() => paginate(1)}
+          className="p-2 rounded-full bg-black/10 hover:bg-black/40 text-white/40 hover:text-white backdrop-blur-md border border-white/5 transition-all pointer-events-auto group/nav"
+        >
+          <ChevronRight className="w-5 h-5 transition-transform group-hover/nav:translate-x-0.5" />
+        </button>
       </div>
 
       {/* Modern Pagination - Sleek Apple Style Bars */}
-      <div className="absolute bottom-12 left-0 right-0 z-30 flex justify-center px-4">
+      <div className="absolute bottom-6 left-0 right-0 z-30 flex justify-center px-4">
         <div className="flex gap-2.5 max-w-full overflow-x-auto no-scrollbar py-2">
           {banners.map((_, idx) => (
             <button
@@ -261,7 +241,7 @@ export default function Banner() {
           ))}
         </div>
       </div>
-      
+
       <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-white/5 to-transparent pointer-events-none blur-3xl z-[5]" />
     </section>
   );
