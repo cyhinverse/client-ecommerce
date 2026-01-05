@@ -46,14 +46,14 @@ export const getListNotification = createAsyncThunk(
   }
 );
 
-// Note: This endpoint does not appear in the provided notification.controller.js
+// Mark single notification as read - Uses PATCH to update isRead field
 export const markAsReadNotification = createAsyncThunk(
   "notification/markAsReadNotification",
   async (notificationId: string, { rejectWithValue }) => {
     try {
-      const response = await instance.post(
-        `/notifications/${notificationId}/read`,
-        {},
+      const response = await instance.patch(
+        `/notifications/${notificationId}`,
+        { isRead: true },
         {
           withCredentials: true,
         }

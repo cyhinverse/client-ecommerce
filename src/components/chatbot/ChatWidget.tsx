@@ -1,14 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import {
-  MessageCircle,
-  X,
-  Send,
-  Loader2,
-  Sparkles,
-  RotateCcw,
-} from "lucide-react";
+import { X, Send, Loader2, Sparkles, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -149,7 +142,7 @@ export default function ChatWidget() {
                     throw new Error(data.message);
                   }
                 } catch (e) {
-                  // Skip invalid JSON
+                  console.error("Invalid JSON:", e);
                 }
               }
             }

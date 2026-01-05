@@ -192,7 +192,7 @@ export const getOrderStatistics = createAsyncThunk(
   }
 );
 
-// Apply discount code
+// Apply discount code - Uses discount endpoint
 export const applyDiscountCode = createAsyncThunk(
   "order/apply-discount",
   async (payload: {
@@ -200,7 +200,11 @@ export const applyDiscountCode = createAsyncThunk(
     cartItemIds: string[];
     totalAmount: number;
   }) => {
-    const response = await instance.post("/orders/apply-discount", payload);
+    const response = await instance.post("/discounts/apply", {
+      code: payload.discountCode,
+      orderTotal: payload.totalAmount,
+      productIds: payload.cartItemIds,
+    });
     if (!response.data) {
       throw new Error("Failed to apply discount code");
     }
@@ -208,7 +212,8 @@ export const applyDiscountCode = createAsyncThunk(
   }
 );
 
-// Get order by ID for admin
+// Get order by ID for admin - Uses same endpoint as regular getOrderById
+// The backend checks if user is admin and returns full details
 export const getOrderByIdAdmin = createAsyncThunk(
   "order/admin/get-by-id",
   async (orderId: string) => {
@@ -216,7 +221,8 @@ export const getOrderByIdAdmin = createAsyncThunk(
       throw new Error("Invalid order ID format");
     }
 
-    const response = await instance.get(`/orders/admin/${orderId}`);
+    // Use the same endpoint - backend handles admin access
+    const response = await instance.get(`/orders/${orderId}`);
     if (!response.data) {
       throw new Error("Failed to fetch order details");
     }

@@ -29,12 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Loader2,
-  Save,
-  Upload,
-  Trash2,
-} from "lucide-react";
+import { Loader2, Save, Upload, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { BannerItem, UpdateBannerPayload } from "@/types/banner";
 
@@ -91,6 +86,8 @@ export function EditBannerModal({
     setSelectedFile(file);
     const previewUrl = URL.createObjectURL(file);
     form.setValue("imageUrl", previewUrl, { shouldValidate: true });
+    // Reset input value to allow re-uploading the same file
+    event.target.value = "";
   };
 
   const removeImage = () => {
@@ -127,7 +124,9 @@ export function EditBannerModal({
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium">Banner Title</FormLabel>
+                    <FormLabel className="text-sm font-medium">
+                      Banner Title
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="e.g. The Future of Fluidity"
@@ -145,7 +144,9 @@ export function EditBannerModal({
                 name="subtitle"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium">Subtitle</FormLabel>
+                    <FormLabel className="text-sm font-medium">
+                      Subtitle
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="e.g. Experience the ultimate collection..."
@@ -164,7 +165,9 @@ export function EditBannerModal({
                   name="link"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Action Link</FormLabel>
+                      <FormLabel className="text-sm font-medium">
+                        Action Link
+                      </FormLabel>
                       <FormControl>
                         <Input
                           placeholder="/shop"
@@ -182,16 +185,25 @@ export function EditBannerModal({
                   name="theme"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Text Theme</FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
+                      <FormLabel className="text-sm font-medium">
+                        Text Theme
+                      </FormLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
                         <FormControl>
                           <SelectTrigger className="rounded-xl border-gray-200 bg-gray-50/50">
                             <SelectValue placeholder="Select theme" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="rounded-xl">
-                          <SelectItem value="dark">Dark (White Text)</SelectItem>
-                          <SelectItem value="light">Light (Black Text)</SelectItem>
+                          <SelectItem value="dark">
+                            Dark (White Text)
+                          </SelectItem>
+                          <SelectItem value="light">
+                            Light (Black Text)
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -205,7 +217,9 @@ export function EditBannerModal({
                 name="imageUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium">Slide Image</FormLabel>
+                    <FormLabel className="text-sm font-medium">
+                      Slide Image
+                    </FormLabel>
                     <FormControl>
                       <div className="space-y-3">
                         <div
@@ -268,12 +282,16 @@ export function EditBannerModal({
                   name="order"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Display Order</FormLabel>
+                      <FormLabel className="text-sm font-medium">
+                        Display Order
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
                           {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          onChange={(e) =>
+                            field.onChange(parseInt(e.target.value) || 0)
+                          }
                           className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all shadow-sm"
                         />
                       </FormControl>
@@ -288,7 +306,9 @@ export function EditBannerModal({
                   render={({ field }) => (
                     <FormItem className="flex items-center justify-between rounded-xl border border-border/50 bg-gray-50/50 p-4 mt-2">
                       <div className="space-y-0.5">
-                        <FormLabel className="text-sm font-medium block">Active Status</FormLabel>
+                        <FormLabel className="text-sm font-medium block">
+                          Active Status
+                        </FormLabel>
                       </div>
                       <FormControl>
                         <Switch

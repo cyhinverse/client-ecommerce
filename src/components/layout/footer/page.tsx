@@ -12,7 +12,13 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-const FooterSection = ({ title, links }: { title: string, links: { label: string, href: string }[] }) => (
+const FooterSection = ({
+  title,
+  links,
+}: {
+  title: string;
+  links: { label: string; href: string }[];
+}) => (
   <div className="space-y-4">
     <h4 className="font-semibold tracking-wide text-xs uppercase text-foreground/70">
       {title}
@@ -44,12 +50,10 @@ export default function FooterLayout() {
     "/admin/discounts",
     "/admin/settings",
     "/admin/dashboard",
-    "/admin/banners"
+    "/admin/banners",
   ];
 
   if (adminPaths.includes(path)) return null;
-
-
 
   return (
     <footer className="w-full bg-[#FAFAFC] dark:bg-[#1C1C1E] border-t border-border/40">
@@ -61,7 +65,8 @@ export default function FooterLayout() {
               <span className="text-lg font-bold tracking-tight"> STORE</span>
             </Link>
             <p className="text-muted-foreground text-xs leading-relaxed max-w-[280px]">
-              Subscribe to our newsletter for the latest updates, exclusive deals, and more.
+              Subscribe to our newsletter for the latest updates, exclusive
+              deals, and more.
             </p>
             <div className="flex gap-2 max-w-[280px]">
               <Input
@@ -72,7 +77,7 @@ export default function FooterLayout() {
                 <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             </div>
-            
+
             <div className="flex gap-1 pt-2">
               {[Instagram, Facebook, Twitter, Youtube].map((Icon, i) => (
                 <Button
@@ -87,48 +92,61 @@ export default function FooterLayout() {
             </div>
           </div>
 
-          <FooterSection 
-            title="Shop" 
+          <FooterSection
+            title="Shop"
             links={[
               { label: "Mac", href: "/products?category=mac" },
               { label: "iPad", href: "/products?category=ipad" },
               { label: "iPhone", href: "/products?category=iphone" },
               { label: "Watch", href: "/products?category=watch" },
               { label: "Accessories", href: "/products?category=accessories" },
-            ]} 
+            ]}
           />
 
-          <FooterSection 
-            title="Account" 
+          <FooterSection
+            title="Account"
             links={[
               { label: "Manage Account", href: "/profile" },
               { label: "Orders", href: "/profile?tab=orders" },
               { label: "Returns", href: "/returns" },
               { label: "Wishlist", href: "/wishlist" },
-            ]} 
+            ]}
           />
 
-          <FooterSection 
-            title="Policy" 
+          <FooterSection
+            title="Policy"
             links={[
               { label: "Terms of Use", href: "/terms" },
               { label: "Privacy Policy", href: "/privacy" },
               { label: "Cookie Policy", href: "/cookies" },
               { label: "Shipping Policy", href: "/shipping" },
-            ]} 
+            ]}
           />
         </div>
 
         <Separator className="bg-border/40" />
 
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-[11px] text-muted-foreground pt-8">
-          <p>&copy; {new Date().getFullYear()} Apple Store Inc. All rights reserved.</p>
+          <p>
+            &copy; {new Date().getFullYear()} Apple Store Inc. All rights
+            reserved.
+          </p>
           <div className="flex gap-6">
-            <Link href="/privacy" className="hover:underline">Privacy Policy</Link>
-            <Link href="/terms" className="hover:underline">Terms of Use</Link>
-            <Link href="/sales" className="hover:underline">Sales and Refunds</Link>
-            <Link href="/legal" className="hover:underline">Legal</Link>
-            <Link href="/sitemap" className="hover:underline">Site Map</Link>
+            <Link href="/privacy" className="hover:underline">
+              Privacy Policy
+            </Link>
+            <Link href="/terms" className="hover:underline">
+              Terms of Use
+            </Link>
+            <Link href="/sales" className="hover:underline">
+              Sales and Refunds
+            </Link>
+            <Link href="/legal" className="hover:underline">
+              Legal
+            </Link>
+            <Link href="/sitemap" className="hover:underline">
+              Site Map
+            </Link>
           </div>
         </div>
       </div>

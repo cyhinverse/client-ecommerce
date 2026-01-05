@@ -221,7 +221,7 @@ export const deleteProduct = createAsyncThunk(
 export const deleteVariantByVariantId = createAsyncThunk(
   "variant/delete/:variantId",
   async ({ productId, variantId }: { productId: string; variantId: string }) => {
-    const res = await instance.delete(`/products/${productId}/variant/${variantId}`);
+    const res = await instance.delete(`/products/${productId}/variants/${variantId}`);
     if (!res) {
       throw new Error("Failed to delete variant");
     }
@@ -230,11 +230,11 @@ export const deleteVariantByVariantId = createAsyncThunk(
 );
 
 export const updateVariant = createAsyncThunk(
-  "variant/delete",
+  "variant/update",
   async (data: { productId: string; variantId: string }) => {
     const { productId, variantId } = data;
     const response = await instance.put(
-      `/products/${productId}/variant/${variantId}`
+      `/products/${productId}/variants/${variantId}`
     );
     if (!response) {
       throw new Error("Failed to update variant");

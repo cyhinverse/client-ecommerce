@@ -102,6 +102,8 @@ export function UpdateModelProduct({
           [variantId]: [...(prev[variantId] || []), ...newFiles],
         }));
       }
+      // Reset input value to allow re-uploading the same file
+      e.target.value = "";
     },
     []
   );
@@ -112,6 +114,11 @@ export function UpdateModelProduct({
         ...prev,
         [variantId]: prev[variantId].filter((_, i) => i !== imageIndex),
       }));
+      // Reset input value to allow re-uploading the same file
+      const inputRef = variantFileInputRefs.current[variantId];
+      if (inputRef) {
+        inputRef.value = "";
+      }
     },
     []
   );
@@ -250,6 +257,12 @@ export function UpdateModelProduct({
 
     // Kiểm tra variants có thay đổi không - CHỈ GỬI NẾU CÓ THAY ĐỔI
     const originalVariants = product.variants || [];
+
+    // Check if there are new images to upload
+    const hasNewVariantImages = Object.values(variantImages).some(
+      (files) => files && files.length > 0
+    );
+
     const hasVariantsChanged =
       formData.variants.length !== originalVariants.length ||
       formData.variants.some((variant, index) => {
@@ -270,7 +283,8 @@ export function UpdateModelProduct({
         );
       });
 
-    if (hasVariantsChanged) {
+    // ALWAYS send variants if there are new images OR if variants changed
+    if (hasVariantsChanged || hasNewVariantImages) {
       formDataToSend.append("variants", JSON.stringify(formData.variants));
     }
 
@@ -294,7 +308,18 @@ export function UpdateModelProduct({
       }
     });
 
-    console.log("Sending only changed fields to update");
+    // Debug logging
+    console.log("hasVariantsChanged:", hasVariantsChanged);
+    console.log("hasNewVariantImages:", hasNewVariantImages);
+    console.log("variantImages state:", variantImages);
+    console.log("FormData entries:");
+    for (const [key, value] of formDataToSend.entries()) {
+      console.log(
+        `  ${key}:`,
+        value instanceof File ? `File: ${value.name}` : value
+      );
+    }
+
     onUpdate(formDataToSend);
   };
 

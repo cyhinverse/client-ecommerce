@@ -42,57 +42,70 @@ export default function VerifyCodePage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-[#F5F5F7] dark:bg-[#000000] p-4">
-       <div className="w-full max-w-[400px] flex flex-col gap-6">
-          
-          <div className="text-center space-y-2">
-             <Link href="/login" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground mb-4 transition-colors">
-                 <ArrowLeft className="h-4 w-4 mr-1" />
-                 Back to login
-             </Link>
-             <div className="mx-auto w-12 h-12 bg-black dark:bg-white rounded-2xl flex items-center justify-center mb-4 shadow-lg rotate-3 transition-transform hover:rotate-6">
-                <Key className="h-6 w-6 text-white dark:text-black" />
-             </div>
-             <h1 className="text-2xl font-bold tracking-tight text-foreground">Check your email</h1>
-             <p className="text-sm text-muted-foreground">We sent a verification code to your email</p>
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col space-y-2 text-center">
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Check your email
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          We sent a verification code to your email
+        </p>
+      </div>
+
+      <div className="grid gap-6">
+        <form onSubmit={handleSubmit}>
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label className="sr-only" htmlFor="otp">
+                Verification Code
+              </Label>
+              <div className="flex justify-center">
+                <InputOTP value={otp} onChange={handleOTPChange} maxLength={6}>
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} className="w-10 h-10" />
+                    <InputOTPSlot index={1} className="w-10 h-10" />
+                    <InputOTPSlot index={2} className="w-10 h-10" />
+                  </InputOTPGroup>
+                  <InputOTPSeparator />
+                  <InputOTPGroup>
+                    <InputOTPSlot index={3} className="w-10 h-10" />
+                    <InputOTPSlot index={4} className="w-10 h-10" />
+                    <InputOTPSlot index={5} className="w-10 h-10" />
+                  </InputOTPGroup>
+                </InputOTP>
+              </div>
+              <p className="text-xs text-center text-muted-foreground mt-2">
+                Please enter the 6-digit code provided.
+              </p>
+            </div>
+            <Button
+              type="submit"
+              disabled={isLoading || otp.length !== 6}
+              className="rounded-md h-10"
+            >
+              {isLoading ? (
+                <SpinnerLoading
+                  noWrapper
+                  size={16}
+                  className="mr-2 text-white"
+                />
+              ) : (
+                "Verify Code"
+              )}
+            </Button>
           </div>
+        </form>
+      </div>
 
-          <div className="p-8 rounded-[2rem] bg-white/70 dark:bg-[#1C1C1E]/70 backdrop-blur-xl shadow-xl border border-white/20">
-             <form onSubmit={handleSubmit} className="space-y-8">
-                
-                <div className="space-y-4">
-                   <Label className="text-xs font-medium text-muted-foreground text-center block">Verification Code</Label>
-                   <div className="flex justify-center">
-                     <InputOTP value={otp} onChange={handleOTPChange} maxLength={6}>
-                       <InputOTPGroup className="gap-2">
-                         <InputOTPSlot index={0} className="h-12 w-10 text-lg rounded-xl border border-muted-foreground/20 bg-gray-50/50 dark:bg-black/20" />
-                         <InputOTPSlot index={1} className="h-12 w-10 text-lg rounded-xl border border-muted-foreground/20 bg-gray-50/50 dark:bg-black/20" />
-                         <InputOTPSlot index={2} className="h-12 w-10 text-lg rounded-xl border border-muted-foreground/20 bg-gray-50/50 dark:bg-black/20" />
-                       </InputOTPGroup>
-                       <InputOTPSeparator />
-                       <InputOTPGroup className="gap-2">
-                         <InputOTPSlot index={3} className="h-12 w-10 text-lg rounded-xl border border-muted-foreground/20 bg-gray-50/50 dark:bg-black/20" />
-                         <InputOTPSlot index={4} className="h-12 w-10 text-lg rounded-xl border border-muted-foreground/20 bg-gray-50/50 dark:bg-black/20" />
-                         <InputOTPSlot index={5} className="h-12 w-10 text-lg rounded-xl border border-muted-foreground/20 bg-gray-50/50 dark:bg-black/20" />
-                       </InputOTPGroup>
-                     </InputOTP>
-                   </div>
-                   <p className="text-xs text-center text-muted-foreground">
-                      Please enter the 6-digit code provided.
-                   </p>
-                </div>
-
-                <Button 
-                   type="submit" 
-                   disabled={isLoading || otp.length !== 6}
-                   className="w-full h-12 rounded-full bg-[#0071e3] hover:bg-[#0077ED] text-white font-medium text-base shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:scale-[1.01] active:scale-[0.98] transition-all duration-200"
-                >
-                   {isLoading ? <SpinnerLoading noWrapper size={20} className="mr-2 text-white" /> : "Verify Code"}
-                </Button>
-
-             </form>
-          </div>
-       </div>
+      <p className="px-8 text-center text-sm text-muted-foreground">
+        <Link
+          href="/login"
+          className="hover:text-brand underline underline-offset-4 flex items-center justify-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to login
+        </Link>
+      </p>
     </div>
   );
 }

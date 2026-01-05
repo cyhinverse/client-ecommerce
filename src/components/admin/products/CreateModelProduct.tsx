@@ -93,10 +93,16 @@ export function CreateModelProduct({
       const newImages = Array.from(e.target.files);
       setImages((prev) => [...prev, ...newImages]);
     }
+    // Reset input value to allow re-uploading the same file
+    e.target.value = "";
   };
 
   const removeImage = (index: number) => {
     setImages((prev) => prev.filter((_, i) => i !== index));
+    // Reset input value to allow re-uploading the same file
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const addTag = () => {
@@ -136,7 +142,9 @@ export function CreateModelProduct({
               </h3>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-sm font-medium">Product Name</Label>
+                  <Label htmlFor="name" className="text-sm font-medium">
+                    Product Name
+                  </Label>
                   <Input
                     id="name"
                     value={formData.name}
@@ -150,7 +158,9 @@ export function CreateModelProduct({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="slug" className="text-sm font-medium">Slug</Label>
+                  <Label htmlFor="slug" className="text-sm font-medium">
+                    Slug
+                  </Label>
                   <Input
                     id="slug"
                     value={formData.slug}
@@ -165,7 +175,9 @@ export function CreateModelProduct({
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="category" className="text-sm font-medium">Category</Label>
+                    <Label htmlFor="category" className="text-sm font-medium">
+                      Category
+                    </Label>
                     <Input
                       id="category"
                       value={formData.category}
@@ -178,7 +190,9 @@ export function CreateModelProduct({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="brand" className="text-sm font-medium">Brand</Label>
+                    <Label htmlFor="brand" className="text-sm font-medium">
+                      Brand
+                    </Label>
                     <Input
                       id="brand"
                       value={formData.brand}
@@ -201,51 +215,66 @@ export function CreateModelProduct({
               </h3>
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                   <div className="space-y-2">
-                      <Label htmlFor="currentPrice" className="text-sm font-medium">Current Price</Label>
-                      <Input
-                        id="currentPrice"
-                        type="number"
-                        value={formData.price.currentPrice}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            price: {
-                              ...formData.price,
-                              currentPrice: Number(e.target.value),
-                            },
-                          })
-                        }
-                        required
-                        disabled={isLoading}
-                        className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all shadow-sm"
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="currentPrice"
+                      className="text-sm font-medium"
+                    >
+                      Current Price
+                    </Label>
+                    <Input
+                      id="currentPrice"
+                      type="number"
+                      value={formData.price.currentPrice}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          price: {
+                            ...formData.price,
+                            currentPrice: Number(e.target.value),
+                          },
+                        })
+                      }
+                      required
+                      disabled={isLoading}
+                      className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all shadow-sm"
+                    />
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="discountPrice" className="text-sm font-medium">Discount Price</Label>
-                      <Input
-                        id="discountPrice"
-                        type="number"
-                        value={formData.price.discountPrice}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            price: {
-                              ...formData.price,
-                              discountPrice: Number(e.target.value),
-                            },
-                          })
-                        }
-                        disabled={isLoading}
-                        className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all shadow-sm"
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="discountPrice"
+                      className="text-sm font-medium"
+                    >
+                      Discount Price
+                    </Label>
+                    <Input
+                      id="discountPrice"
+                      type="number"
+                      value={formData.price.discountPrice}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          price: {
+                            ...formData.price,
+                            discountPrice: Number(e.target.value),
+                          },
+                        })
+                      }
+                      disabled={isLoading}
+                      className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all shadow-sm"
+                    />
+                  </div>
                 </div>
 
                 <div className="p-4 bg-gray-50/50 rounded-xl border border-border/50 space-y-3">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="isActive" className="text-sm font-medium cursor-pointer">Active Status</Label>
+                    <Label
+                      htmlFor="isActive"
+                      className="text-sm font-medium cursor-pointer"
+                    >
+                      Active Status
+                    </Label>
                     <Switch
                       id="isActive"
                       checked={formData.isActive}
@@ -256,7 +285,12 @@ export function CreateModelProduct({
                     />
                   </div>
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="isNewArrival" className="text-sm font-medium cursor-pointer">New Arrival</Label>
+                    <Label
+                      htmlFor="isNewArrival"
+                      className="text-sm font-medium cursor-pointer"
+                    >
+                      New Arrival
+                    </Label>
                     <Switch
                       id="isNewArrival"
                       checked={formData.isNewArrival}
@@ -267,7 +301,12 @@ export function CreateModelProduct({
                     />
                   </div>
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="isFeatured" className="text-sm font-medium cursor-pointer">Featured Product</Label>
+                    <Label
+                      htmlFor="isFeatured"
+                      className="text-sm font-medium cursor-pointer"
+                    >
+                      Featured Product
+                    </Label>
                     <Switch
                       id="isFeatured"
                       checked={formData.isFeatured}
@@ -278,7 +317,12 @@ export function CreateModelProduct({
                     />
                   </div>
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="onSale" className="text-sm font-medium cursor-pointer">On Sale</Label>
+                    <Label
+                      htmlFor="onSale"
+                      className="text-sm font-medium cursor-pointer"
+                    >
+                      On Sale
+                    </Label>
                     <Switch
                       id="onSale"
                       checked={formData.onSale}
@@ -295,11 +339,13 @@ export function CreateModelProduct({
 
           {/* Mô tả */}
           <div className="space-y-4">
-             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                Details
-              </h3>
+            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+              Details
+            </h3>
             <div className="space-y-2">
-              <Label htmlFor="description" className="text-sm font-medium">Description</Label>
+              <Label htmlFor="description" className="text-sm font-medium">
+                Description
+              </Label>
               <Textarea
                 id="description"
                 value={formData.description}
@@ -314,7 +360,9 @@ export function CreateModelProduct({
 
             {/* Tags */}
             <div className="space-y-2">
-              <Label htmlFor="tags" className="text-sm font-medium">Tags</Label>
+              <Label htmlFor="tags" className="text-sm font-medium">
+                Tags
+              </Label>
               <div className="flex gap-2">
                 <Input
                   value={newTag}
@@ -376,15 +424,20 @@ export function CreateModelProduct({
                 className="w-full h-32 flex flex-col items-center justify-center border-dashed border-2 border-border/50 rounded-xl hover:bg-gray-50/50 hover:border-primary/50 transition-all"
               >
                 <div className="bg-gray-100 p-3 rounded-full mb-2">
-                    <Upload className="h-6 w-6 text-muted-foreground" />
+                  <Upload className="h-6 w-6 text-muted-foreground" />
                 </div>
-                <span className="text-sm text-muted-foreground font-medium">Click to upload images</span>
+                <span className="text-sm text-muted-foreground font-medium">
+                  Click to upload images
+                </span>
               </Button>
-              
+
               {images.length > 0 && (
                 <div className="grid grid-cols-5 gap-4 mt-4">
                   {images.map((file, index) => (
-                    <div key={index} className="relative aspect-square group rounded-xl overflow-hidden border border-border/50">
+                    <div
+                      key={index}
+                      className="relative aspect-square group rounded-xl overflow-hidden border border-border/50"
+                    >
                       <Image
                         src={URL.createObjectURL(file)}
                         alt={`Preview ${index}`}
