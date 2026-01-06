@@ -32,11 +32,11 @@ export function PaginationControls({
             size="icon"
             onClick={() => onPageChange(prevPage || 1)}
             disabled={!hasPrevPage}
-            className="h-9 w-9 rounded-xl border-gray-200 bg-white hover:bg-gray-50 dark:bg-zinc-900 dark:border-zinc-800 disabled:opacity-50 shadow-sm"
+            className="h-9 w-9 rounded-xl border-gray-200 bg-[#f7f7f7] hover:bg-gray-100 disabled:opacity-50"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-sm font-semibold text-foreground min-w-[3.5rem] text-center bg-gray-50 dark:bg-zinc-900 py-2 rounded-xl border border-gray-100 dark:border-zinc-800">
+          <span className="text-sm font-semibold text-foreground min-w-[3.5rem] text-center bg-[#f7f7f7] py-2 rounded-xl border border-gray-100">
              {currentPage} / {totalPages}
           </span>
           <Button
@@ -44,7 +44,7 @@ export function PaginationControls({
             size="icon"
             onClick={() => onPageChange(nextPage || 1)}
             disabled={!hasNextPage}
-            className="h-9 w-9 rounded-xl border-gray-200 bg-white hover:bg-gray-50 dark:bg-zinc-900 dark:border-zinc-800 disabled:opacity-50 shadow-sm"
+            className="h-9 w-9 rounded-xl border-gray-200 bg-[#f7f7f7] hover:bg-gray-100 disabled:opacity-50"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>

@@ -197,11 +197,11 @@ export  function ViewOrderModal({
                       </div>
                     </td>
                     <td className="p-4 text-muted-foreground">
-                      {formatCurrency(item.price.discountPrice || item.price.currentPrice)}
+                      {formatCurrency(item.price)}
                     </td>
                     <td className="p-4 text-center">{item.quantity}</td>
                     <td className="p-4 text-right font-medium">
-                      {formatCurrency((item.price.discountPrice || item.price.currentPrice) * item.quantity)}
+                      {formatCurrency(item.price * item.quantity)}
                     </td>
                   </tr>
                 ))}

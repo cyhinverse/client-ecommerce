@@ -53,13 +53,13 @@ export function UsersStats({
       {stats.map((stat, index) => (
         <div
           key={index}
-          className="rounded-[2rem] border border-border/50 bg-white/60 dark:bg-[#1C1C1E]/60 p-6 shadow-sm backdrop-blur-xl transition-all hover:shadow-md"
+          className="rounded-[2rem] border border-border/50 bg-white/60 p-6 shadow-sm backdrop-blur-xl transition-all hover:shadow-md"
         >
           <div className="flex items-center justify-between space-y-0 pb-2">
             <p className="text-sm font-medium text-muted-foreground font-sans">
               {stat.title}
             </p>
-            <div className="rounded-full bg-gray-100/80 p-2 text-foreground dark:bg-white/10">
+            <div className="rounded-full bg-gray-100/80 p-2 text-foreground">
                 <stat.icon className="h-4 w-4" />
             </div>
           </div>

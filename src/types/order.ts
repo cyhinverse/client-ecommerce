@@ -1,19 +1,27 @@
+import { Shop } from "./product";
+
+// Order product interface - Updated with new structure
 export interface OrderProduct {
   productId: string;
-  variantId?: string;
+  modelId?: string;           // NEW: replaces variantId
+  tierIndex?: number[];       // NEW: e.g. [0, 1] for Blue, M
   name: string;
   sku?: string;
-  color?: string;
-  size?: string;
   image?: string;
   quantity: number;
-  price: {
-    currentPrice: number;
-    discountPrice?: number;
-    currency: string;
-  };
+  price: number;
+  totalPrice?: number;
+  
+  // Variation display (derived from tierIndex)
+  variationInfo?: string;     // e.g. "Color: Red, Size: M"
+  
+  // DEPRECATED: Old variant fields (kept for backward compatibility)
+  variantId?: string;
+  color?: string;
+  size?: string;
 }
 
+// Shipping address interface
 export interface ShippingAddress {
   fullName: string;
   phone: string;
@@ -24,27 +32,52 @@ export interface ShippingAddress {
   note?: string;
 }
 
+// Order status type
+export type OrderStatus = "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
+
+// Order interface - Updated with new structure
 export interface Order {
   _id: string;
+  orderGroupId?: string;      // NEW: for multi-vendor checkout
+  shopId?: string | Shop;     // NEW: which shop this order belongs to
   userId: string | { _id: string; username: string; email: string };
   products: OrderProduct[];
   shippingAddress: ShippingAddress;
-  paymentMethod: "cod" | "vnpay";
+  
+  // Payment info
+  paymentMethod: "cod" | "vnpay" | "momo";
   paymentStatus: "unpaid" | "paid" | "refunded";
+  
+  // Financials - Updated
   subtotal: number;
-  discountCode?: string;
-  discountAmount: number;
+  shippingFee?: number;
+  discountShop?: number;       // NEW: shop voucher discount
+  discountPlatform?: number;   // NEW: platform voucher discount
   totalAmount: number;
-  status: "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
+  
+  // DEPRECATED: Old discount fields (kept for backward compatibility)
+  discountCode?: string;
+  discountAmount?: number;
+  
+  // Status and tracking
+  status: OrderStatus;
+  trackingNumber?: string;
+  carrier?: string;
   deliveredAt?: string;
+  cancelledAt?: string;
+  cancelReason?: string;
+  orderCode?: string;
+  
+  // Timestamps
   createdAt: string;
   updatedAt: string;
-  orderCode?: string;
 }
+
 
 import { PaginationData } from "./common";
 export type { PaginationData };
 
+// Order statistics interface
 export interface OrderStatistics {
   totalOrders: number;
   pendingOrders: number;
@@ -54,8 +87,14 @@ export interface OrderStatistics {
   deliveredOrders: number;
   cancelledOrders: number;
   totalRevenue: number;
+  revenueByPeriod?: Array<{
+    period: string;
+    revenue: number;
+    orders: number;
+  }>;
 }
 
+// Order filters for admin
 export interface OrderFilters {
   page: number;
   limit: number;
@@ -64,22 +103,12 @@ export interface OrderFilters {
   paymentStatus: string;
   paymentMethod: string;
   userId: string;
-  [key: string]: string | number | boolean | null;
+  shopId?: string;            // NEW: filter by shop
+  orderGroupId?: string;      // NEW: filter by order group
+  [key: string]: string | number | boolean | null | undefined;
 }
 
-export interface OrderStatistics {
-  totalOrders: number;
-  totalRevenue: number;
-  pendingOrders: number;
-  deliveredOrders: number;
-  cancelledOrders: number;
-  revenueByPeriod: Array<{
-    period: string;
-    revenue: number;
-    orders: number;
-  }>;
-}
-
+// Order state for Redux
 export interface OrderState {
   userOrders: Order[];
   currentOrder: Order | null;
@@ -93,11 +122,13 @@ export interface OrderState {
   error: string | null;
 }
 
+// Order status count for stats
 export interface OrderStatusCount {
   _id: string;
   count: number;
 }
 
+// Order stats props for components
 export interface OrdersStatsProps {
   totalOrders?: number;
   pendingOrders?: number;
@@ -108,4 +139,29 @@ export interface OrdersStatsProps {
   cancelledOrders?: number;
   totalRevenue?: number;
   ordersByStatus?: OrderStatusCount[];
+}
+
+// Create order payload - Updated
+export interface CreateOrderPayload {
+  products: Array<{
+    productId: string;
+    modelId?: string;
+    tierIndex?: number[];
+    quantity: number;
+    price: number;
+  }>;
+  shippingAddress: ShippingAddress;
+  paymentMethod: "cod" | "vnpay" | "momo";
+  shopId?: string;
+  voucherShopCode?: string;     // NEW: shop voucher
+  voucherPlatformCode?: string; // NEW: platform voucher
+}
+
+// Order group for multi-vendor checkout
+export interface OrderGroup {
+  orderGroupId: string;
+  orders: Order[];
+  totalAmount: number;
+  totalDiscountShop: number;
+  totalDiscountPlatform: number;
 }

@@ -197,7 +197,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
             <div className="bg-muted/30 p-6 rounded-2xl border border-border/50">
               <div className="flex items-start justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                  <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
                     <Key className="h-5 w-5" />
                   </div>
                   <div>
@@ -315,7 +315,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                     className={cn(
                       "h-10 w-10 rounded-full flex items-center justify-center transition-colors",
                       twoFactorEnabled
-                        ? "bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400"
+                        ? "bg-green-50 text-green-600"
                         : "bg-muted text-muted-foreground"
                     )}
                   >
@@ -370,8 +370,8 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                     className={cn(
                       "h-10 w-10 rounded-full flex items-center justify-center transition-colors",
                       user?.isVerifiedEmail
-                        ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
-                        : "bg-amber-50 dark:bg-amber-900/20 text-amber-600"
+                        ? "bg-blue-50 text-blue-600"
+                        : "bg-amber-50 text-amber-600"
                     )}
                   >
                     <Mail className="h-5 w-5" />
@@ -382,14 +382,14 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                       {user?.isVerifiedEmail ? (
                         <Badge
                           variant="secondary"
-                          className="bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400 h-5 px-1.5 text-[10px]"
+                          className="bg-green-100 text-green-700 hover:bg-green-100 h-5 px-1.5 text-[10px]"
                         >
                           Verified
                         </Badge>
                       ) : (
                         <Badge
                           variant="outline"
-                          className="text-amber-600 border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-900/50 h-5 px-1.5 text-[10px]"
+                          className="text-amber-600 border-amber-200 bg-amber-50 h-5 px-1.5 text-[10px]"
                         >
                           Unverified
                         </Badge>

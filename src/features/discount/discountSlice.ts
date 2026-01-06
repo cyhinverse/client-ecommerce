@@ -1,6 +1,21 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { Discount } from "@/types/discount";
+// Import from voucher types (with backward compatibility aliases)
+import { 
+  Voucher, 
+  VoucherState, 
+  ApplyVoucherResult,
+  VoucherStatistics,
+  // Backward compatibility aliases
+  Discount 
+} from "@/types/voucher";
 import {
+  getAllVouchers,
+  createVoucher,
+  updateVoucher,
+  deleteVoucher,
+  applyVoucherCode,
+  getVoucherStatistics,
+  // Backward compatibility aliases
   getAllDiscounts,
   createDiscount,
   updateDiscount,
@@ -10,38 +25,31 @@ import {
 
 import { PaginationData } from "@/types/common";
 
-interface DiscountStatistics {
-  totalDiscounts: number;
-  activeDiscounts: number;
-  expiredDiscounts: number;
-  highUsageDiscounts: number;
-}
-
-interface AppliedDiscount {
-  discountId: string;
-  code: string;
-  discountType: string;
-  discountValue: number;
-  discountAmount: number;
-  finalTotal: number;
-  originalTotal: number;
-}
-
-interface DiscountState {
-  discounts: Discount[];
+// Extended state interface for Redux
+interface DiscountSliceState {
+  vouchers: Voucher[];
+  // Backward compatibility alias
+  discounts: Voucher[];
   pagination: PaginationData | null;
   loading: boolean;
   error: string | null;
-  statistics: DiscountStatistics | null;
-  appliedDiscount: AppliedDiscount | null;
+  statistics: VoucherStatistics | null;
+  // NEW: Applied vouchers for checkout
+  appliedShopVoucher: ApplyVoucherResult | null;
+  appliedPlatformVoucher: ApplyVoucherResult | null;
+  // DEPRECATED: Old applied discount (kept for backward compatibility)
+  appliedDiscount: ApplyVoucherResult | null;
 }
 
-const initState: DiscountState = {
-  discounts: [],
+const initState: DiscountSliceState = {
+  vouchers: [],
+  discounts: [], // Alias for vouchers
   pagination: null,
   loading: false,
   error: null,
   statistics: null,
+  appliedShopVoucher: null,
+  appliedPlatformVoucher: null,
   appliedDiscount: null,
 };
 
@@ -52,101 +60,157 @@ export const discountSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    setVouchers: (state, action) => {
+      state.loading = false;
+      state.vouchers = action.payload;
+      state.discounts = action.payload; // Keep in sync
+    },
+    // DEPRECATED: Use setVouchers instead
     setDiscounts: (state, action) => {
       state.loading = false;
-      console.log(action.payload);
+      state.vouchers = action.payload;
       state.discounts = action.payload;
     },
     setLoading: (state) => {
       state.loading = true;
     },
-    clearAppliedDiscount: (state) => {
+    // NEW: Clear applied vouchers
+    clearAppliedVouchers: (state) => {
+      state.appliedShopVoucher = null;
+      state.appliedPlatformVoucher = null;
       state.appliedDiscount = null;
       state.error = null;
+    },
+    // DEPRECATED: Use clearAppliedVouchers instead
+    clearAppliedDiscount: (state) => {
+      state.appliedShopVoucher = null;
+      state.appliedPlatformVoucher = null;
+      state.appliedDiscount = null;
+      state.error = null;
+    },
+    // NEW: Set applied shop voucher
+    setAppliedShopVoucher: (state, action) => {
+      state.appliedShopVoucher = action.payload;
+    },
+    // NEW: Set applied platform voucher
+    setAppliedPlatformVoucher: (state, action) => {
+      state.appliedPlatformVoucher = action.payload;
     },
   },
   extraReducers: (builder) => {
     builder
-      // Get All Discounts
-      .addCase(getAllDiscounts.pending, (state) => {
-        console.log(`Peding loading discount`, state.loading);
+      // Get All Vouchers (and backward compatible getAllDiscounts)
+      .addCase(getAllVouchers.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(getAllDiscounts.fulfilled, (state, action) => {
+      .addCase(getAllVouchers.fulfilled, (state, action) => {
         state.loading = false;
-        state.discounts = action.payload?.data?.data || [];
-        console.log("discount", state.discounts);
+        const data = action.payload?.data?.data || action.payload?.data || [];
+        state.vouchers = data;
+        state.discounts = data; // Keep in sync
         state.pagination = action.payload?.data?.pagination || null;
-        console.log(`pagination`, state.pagination);
       })
-      .addCase(getAllDiscounts.rejected, (state, action) => {
+      .addCase(getAllVouchers.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || "Failed to fetch discounts";
+        state.error = action.error.message || "Failed to fetch vouchers";
       })
-      // Create Discount
-      .addCase(createDiscount.pending, (state) => {
+      // Create Voucher
+      .addCase(createVoucher.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(createDiscount.fulfilled, (state, action) => {
+      .addCase(createVoucher.fulfilled, (state, action) => {
         state.loading = false;
-        state.discounts.unshift(action.payload);
+        const newVoucher = action.payload?.data || action.payload;
+        state.vouchers.unshift(newVoucher);
+        state.discounts.unshift(newVoucher);
       })
-      .addCase(createDiscount.rejected, (state, action) => {
+      .addCase(createVoucher.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || "Failed to create discount";
+        state.error = action.error.message || "Failed to create voucher";
       })
-      // Update Discount
-      .addCase(updateDiscount.pending, (state) => {
+      // Update Voucher
+      .addCase(updateVoucher.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(updateDiscount.fulfilled, (state, action) => {
+      .addCase(updateVoucher.fulfilled, (state, action) => {
         state.loading = false;
-        const index = state.discounts.findIndex(
-          (discount) => discount._id === action.payload._id
-        );
+        const updated = action.payload?.data || action.payload;
+        const index = state.vouchers.findIndex((v) => v._id === updated._id);
         if (index !== -1) {
-          state.discounts[index] = action.payload;
+          state.vouchers[index] = updated;
+          state.discounts[index] = updated;
         }
       })
-      .addCase(updateDiscount.rejected, (state, action) => {
+      .addCase(updateVoucher.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || "Failed to update discount";
+        state.error = action.error.message || "Failed to update voucher";
       })
-      // Delete Discount
-      .addCase(deleteDiscount.pending, (state) => {
+      // Delete Voucher
+      .addCase(deleteVoucher.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(deleteDiscount.fulfilled, (state, action) => {
+      .addCase(deleteVoucher.fulfilled, (state, action) => {
         state.loading = false;
-        state.discounts = state.discounts.filter(
-          (discount) => discount._id !== action.payload
-        );
+        state.vouchers = state.vouchers.filter((v) => v._id !== action.payload);
+        state.discounts = state.discounts.filter((v) => v._id !== action.payload);
       })
-      .addCase(deleteDiscount.rejected, (state, action) => {
+      .addCase(deleteVoucher.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || "Failed to delete discount";
+        state.error = action.error.message || "Failed to delete voucher";
       })
-      // Apply Discount
-      .addCase(applyDiscountCode.pending, (state) => {
+      // Apply Voucher
+      .addCase(applyVoucherCode.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(applyDiscountCode.fulfilled, (state, action) => {
+      .addCase(applyVoucherCode.fulfilled, (state, action) => {
         state.loading = false;
-        state.appliedDiscount = action.payload?.data;
+        const result = action.payload?.data || action.payload;
+        // Set based on scope
+        if (result?.scope === 'shop') {
+          state.appliedShopVoucher = result;
+        } else if (result?.scope === 'platform') {
+          state.appliedPlatformVoucher = result;
+        }
+        // Also set legacy field
+        state.appliedDiscount = result;
       })
-      .addCase(applyDiscountCode.rejected, (state, action) => {
+      .addCase(applyVoucherCode.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || "Failed to apply discount";
-        state.appliedDiscount = null;
+        state.error = action.error.message || "Failed to apply voucher";
+      })
+      // Get Voucher Statistics
+      .addCase(getVoucherStatistics.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getVoucherStatistics.fulfilled, (state, action) => {
+        state.loading = false;
+        state.statistics = action.payload?.data || action.payload;
+      })
+      .addCase(getVoucherStatistics.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Failed to fetch statistics";
       });
   },
 });
 
-export const { clearError, setDiscounts, setLoading, clearAppliedDiscount } =
-  discountSlice.actions;
+export const { 
+  clearError, 
+  setVouchers,
+  setDiscounts, // Backward compatibility
+  setLoading, 
+  clearAppliedVouchers,
+  clearAppliedDiscount, // Backward compatibility
+  setAppliedShopVoucher,
+  setAppliedPlatformVoucher,
+} = discountSlice.actions;
+
 export default discountSlice.reducer;
+
+// Re-export types for convenience
+export type { Voucher, Discount, VoucherState, ApplyVoucherResult };

@@ -7,8 +7,9 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Discount } from "@/types/discount";
-import { Edit, Calendar, DollarSign, Package, BarChart3, Clock, Tag } from "lucide-react";
+// Updated: Import from voucher types with backward compatibility alias
+import { Discount } from "@/types/voucher";
+import { Edit, Calendar, DollarSign, Package, BarChart3, Clock, Tag, Store } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ViewModelDiscountProps {
@@ -44,9 +45,10 @@ export function ViewModelDiscount({
   };
 
   const getStatus = () => {
+    const usedCount = discount.usedCount ?? discount.usageCount ?? 0;
     if (!discount.isActive) return statusConfig.inactive;
     if (new Date(discount.endDate) < new Date()) return statusConfig.expired;
-    if (discount.usedCount >= discount.usageLimit) return statusConfig.limit;
+    if (usedCount >= discount.usageLimit) return statusConfig.limit;
     return statusConfig.active;
   };
 
@@ -92,8 +94,8 @@ export function ViewModelDiscount({
                 </div>
                 <div className="text-2xl font-bold tracking-tight text-blue-600 dark:text-blue-400">
                    {discount.discountType === "percent" 
-                      ? `${discount.discountValue}%`
-                      : `${discount.discountValue.toLocaleString()}₫`}
+                      ? `${discount.discountValue ?? discount.value ?? 0}%`
+                      : `${(discount.discountValue ?? discount.value ?? 0).toLocaleString()}₫`}
                 </div>
                 <div className="text-sm text-muted-foreground">
                    Amount reduced
@@ -109,7 +111,7 @@ export function ViewModelDiscount({
                       <BarChart3 className="h-5 w-5 text-blue-500" />
                    </div>
                    <div>
-                      <div className="text-sm font-medium">{discount.usedCount} / {discount.usageLimit}</div>
+                      <div className="text-sm font-medium">{discount.usedCount ?? discount.usageCount ?? 0} / {discount.usageLimit}</div>
                       <div className="text-xs text-muted-foreground">Total Usage</div>
                    </div>
                 </div>

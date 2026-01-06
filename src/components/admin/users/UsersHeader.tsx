@@ -18,7 +18,7 @@ export function UsersHeader({ onOpenCreate }: UsersHeaderProps) {
       </div>
       <Button
         onClick={onOpenCreate}
-        className="flex items-center gap-2 rounded-xl bg-black text-white hover:bg-black/90 dark:bg-[#0071e3] transition-colors shadow-sm h-10 px-5"
+        className="flex items-center gap-2 rounded-xl bg-black text-white hover:bg-black/90 transition-colors shadow-sm h-10 px-5"
       >
         <Plus className="h-4 w-4" />
         Add User

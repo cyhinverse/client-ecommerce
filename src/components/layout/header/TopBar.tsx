@@ -9,12 +9,12 @@ import {
   User,
   ChevronDown,
   Globe,
+  Smartphone,
 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
@@ -30,7 +30,7 @@ const TopBarLink = ({ href, icon, children, className }: TopBarLinkProps) => (
   <Link
     href={href}
     className={cn(
-      "flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors",
+      "flex items-center gap-1 text-[11px] text-gray-600 hover:text-[#E53935] transition-colors duration-200",
       className
     )}
   >
@@ -40,36 +40,36 @@ const TopBarLink = ({ href, icon, children, className }: TopBarLinkProps) => (
 );
 
 const Divider = () => (
-  <span className="h-3 w-px bg-border/60 mx-2 hidden sm:block" />
+  <span className="h-3 w-px bg-gray-300 mx-3 hidden sm:block" />
 );
 
 export default function TopBar() {
   const { isAuthenticated, data } = useAppSelector((state) => state.auth);
 
   return (
-    <div className="w-full bg-muted/30 border-b border-border/40 hidden md:block">
-      <div className="container mx-auto px-4 h-8 flex items-center justify-between">
+    <div className="w-full bg-muted border-b border-border hidden md:block">
+      <div className="container mx-auto px-4 h-8 flex items-center justify-between max-w-[1400px]">
         {/* Left Side */}
         <div className="flex items-center">
           {/* Location */}
           <DropdownMenu>
-            <DropdownMenuTrigger className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors outline-none">
+            <DropdownMenuTrigger className="flex items-center gap-1 text-[11px] text-gray-600 hover:text-[#E53935] transition-colors duration-200 outline-none">
               <MapPin className="h-3 w-3" />
-              <span>Việt Nam</span>
+              <span>Giao đến: Việt Nam</span>
               <ChevronDown className="h-3 w-3" />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-40">
-              <DropdownMenuItem>
-                <span className="text-xs">🇻🇳 Việt Nam</span>
+            <DropdownMenuContent align="start" className="w-44 bg-white shadow-lg border-gray-200">
+              <DropdownMenuItem className="text-[11px] hover:bg-[#FFEBEE] hover:text-[#E53935] cursor-pointer">
+                🇻🇳 Việt Nam
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <span className="text-xs">🇺🇸 United States</span>
+              <DropdownMenuItem className="text-[11px] hover:bg-[#FFEBEE] hover:text-[#E53935] cursor-pointer">
+                🇺🇸 United States
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <span className="text-xs">🇯🇵 Japan</span>
+              <DropdownMenuItem className="text-[11px] hover:bg-[#FFEBEE] hover:text-[#E53935] cursor-pointer">
+                🇯🇵 Japan
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <span className="text-xs">🇰🇷 Korea</span>
+              <DropdownMenuItem className="text-[11px] hover:bg-[#FFEBEE] hover:text-[#E53935] cursor-pointer">
+                🇰🇷 Korea
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -78,27 +78,34 @@ export default function TopBar() {
 
           {/* User greeting or login prompt */}
           {isAuthenticated && data ? (
-            <span className="text-xs text-muted-foreground">
+            <span className="text-[11px] text-gray-600">
               Xin chào,{" "}
               <Link
                 href="/profile"
-                className="text-primary hover:underline font-medium"
+                className="text-[#E53935] hover:underline font-medium"
               >
                 {data.username || data.email?.split("@")[0]}
               </Link>
             </span>
           ) : (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1 text-[11px] text-gray-600">
               <span>Xin chào,</span>
-              <Link href="/login" className="text-primary hover:underline">
+              <Link href="/login" className="text-[#E53935] hover:underline font-medium">
                 Đăng nhập
               </Link>
               <span>hoặc</span>
-              <Link href="/register" className="text-primary hover:underline">
+              <Link href="/register" className="text-[#E53935] hover:underline font-medium">
                 Đăng ký
               </Link>
             </div>
           )}
+
+          <Divider />
+
+          {/* Download App */}
+          <TopBarLink href="/download" icon={<Smartphone className="h-3 w-3" />}>
+            Tải ứng dụng
+          </TopBarLink>
         </div>
 
         {/* Right Side */}
@@ -110,7 +117,7 @@ export default function TopBar() {
                 href="/profile/orders"
                 icon={<User className="h-3 w-3" />}
               >
-                Đơn hàng của tôi
+                Đơn hàng
               </TopBarLink>
               <Divider />
               <TopBarLink href="/wishlist" icon={<Heart className="h-3 w-3" />}>
@@ -122,7 +129,7 @@ export default function TopBar() {
 
           {/* Support */}
           <TopBarLink href="/support" icon={<Phone className="h-3 w-3" />}>
-            Hotline: 1900-xxxx
+            Hotline: 1900-6868
           </TopBarLink>
 
           <Divider />
@@ -135,23 +142,23 @@ export default function TopBar() {
 
           {/* Language Selector */}
           <DropdownMenu>
-            <DropdownMenuTrigger className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors outline-none">
+            <DropdownMenuTrigger className="flex items-center gap-1 text-[11px] text-gray-600 hover:text-[#E53935] transition-colors duration-200 outline-none">
               <Globe className="h-3 w-3" />
               <span>Tiếng Việt</span>
               <ChevronDown className="h-3 w-3" />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-36">
-              <DropdownMenuItem>
-                <span className="text-xs">🇻🇳 Tiếng Việt</span>
+            <DropdownMenuContent align="end" className="w-36 bg-white shadow-lg border-gray-200">
+              <DropdownMenuItem className="text-[11px] hover:bg-[#FFEBEE] hover:text-[#E53935] cursor-pointer">
+                🇻🇳 Tiếng Việt
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <span className="text-xs">🇺🇸 English</span>
+              <DropdownMenuItem className="text-[11px] hover:bg-[#FFEBEE] hover:text-[#E53935] cursor-pointer">
+                🇺🇸 English
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <span className="text-xs">🇯🇵 日本語</span>
+              <DropdownMenuItem className="text-[11px] hover:bg-[#FFEBEE] hover:text-[#E53935] cursor-pointer">
+                🇯🇵 日本語
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <span className="text-xs">🇰🇷 한국어</span>
+              <DropdownMenuItem className="text-[11px] hover:bg-[#FFEBEE] hover:text-[#E53935] cursor-pointer">
+                🇰🇷 한국어
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

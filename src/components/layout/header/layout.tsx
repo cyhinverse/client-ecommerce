@@ -133,11 +133,11 @@ export default function HeaderLayout() {
       {/* Top Utility Bar */}
       <TopBar />
 
-      {/* Main Header - Taobao Style */}
-      <header className="sticky top-0 z-50 w-full bg-white dark:bg-background pt-4 pb-0">
+      {/* Main Header - Taobao Light Style */}
+      <header className="sticky top-0 z-50 w-full bg-white pt-3 pb-0 border-b border-[#f0f0f0]">
         {/* Primary Header Row */}
         <div className="w-full mb-1">
-          <div className="container mx-auto px-4">
+          <div className="container mx-auto px-4 max-w-[1400px]">
             <div className="flex items-start justify-between gap-8 h-[75px]">
               {/* Mobile Menu & Logo */}
               <div className="flex flex-col shrink-0 pt-1">
@@ -158,7 +158,7 @@ export default function HeaderLayout() {
                       className="w-[300px] sm:w-[400px]"
                     >
                       <SheetHeader>
-                        <SheetTitle className="text-left text-lg font-bold text-[#ff5000]">
+                        <SheetTitle className="text-left text-lg font-bold text-[#E53935]">
                           Store
                         </SheetTitle>
                       </SheetHeader>
@@ -200,7 +200,7 @@ export default function HeaderLayout() {
                         src="/images/logo.png"
                         alt="TaoBao"
                         fill
-                        className="object-cover object-center scale-110 mix-blend-multiply dark:mix-blend-screen"
+                        className="object-cover object-center scale-110 mix-blend-multiply"
                         priority
                         unoptimized
                       />
@@ -217,14 +217,14 @@ export default function HeaderLayout() {
                 <div
                   className={cn(
                     "flex flex-col w-full max-w-[700px] transition-all duration-200 relative",
-                    isSearchFocused ? "z-[60]" : "z-10"
+                    isSearchFocused ? "z-60" : "z-10"
                   )}
                 >
                   {/* Search Input Container */}
                   <form
                     onSubmit={(e) => handleSearchSubmit(e)}
                     className={cn(
-                      "flex items-center w-full h-[40px] border-2 border-[#ff5000] bg-white transition-all relative z-20 hover:border-[#ff5000]",
+                      "flex items-center w-full h-[40px] border-2 border-[#E53935] bg-white transition-all relative z-20 hover:border-[#E53935]",
                       isSearchFocused
                         ? "rounded-t-2xl rounded-b-none border-b-0"
                         : "rounded-full"
@@ -232,10 +232,10 @@ export default function HeaderLayout() {
                   >
                     {/* Left Category Trigger (Mock) */}
                     <div className="hidden sm:flex items-center px-4 gap-1 cursor-pointer border-r border-gray-100 h-5 group">
-                      <span className="text-xs font-medium text-gray-600 group-hover:text-[#ff5000]">
-                        Goods
+                      <span className="text-xs font-medium text-gray-600 group-hover:text-[#E53935]">
+                        Sản phẩm
                       </span>
-                      <span className="text-[10px] text-gray-400 group-hover:text-[#ff5000] ml-0.5 mt-0.5">
+                      <span className="text-[10px] text-gray-400 group-hover:text-[#E53935] ml-0.5 mt-0.5">
                         ▼
                       </span>
                     </div>
@@ -247,40 +247,40 @@ export default function HeaderLayout() {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         onFocus={() => setIsSearchFocused(true)}
-                        placeholder="Search for items..."
+                        placeholder="Tìm kiếm sản phẩm..."
                         className="w-full h-full text-sm bg-transparent outline-none placeholder:text-gray-400 font-medium"
                       />
                       {/* Camera Icon */}
-                      <Camera className="w-5 h-5 text-gray-400 hover:text-[#ff5000] cursor-pointer absolute right-2 transition-colors" />
+                      <Camera className="w-5 h-5 text-gray-400 hover:text-[#E53935] cursor-pointer absolute right-2 transition-colors" />
                     </div>
 
                     {/* Search Button */}
                     <button
                       type="submit"
                       className={cn(
-                        "h-[38px] px-8 bg-[#ff5000] text-white text-base font-bold transition-colors -mr-[2px] -my-[2px] hover:bg-orange-600",
+                        "h-[38px] px-8 bg-[#E53935] text-white text-base font-bold transition-colors -mr-[2px] -my-[2px] hover:bg-orange-600",
                         isSearchFocused ? "rounded-tr-2xl" : "rounded-r-full"
                       )}
                     >
-                      Search
+                      Tìm kiếm
                     </button>
                   </form>
 
                   {/* Hot Search Links - Always Visible */}
                   <div className="flex items-center gap-4 mt-1.5 px-2 text-xs">
                     {[
-                      "iPhone 15 Pro",
-                      "Summer Dress",
+                      "iPhone 16 Pro",
+                      "Váy hè",
                       "Nike Air Max",
-                      "Skin Care",
-                      "Snacks",
+                      "Mỹ phẩm",
+                      "Đồ ăn vặt",
                     ].map((text, i) => (
                       <span
                         key={i}
                         className={cn(
-                          "cursor-pointer hover:text-[#ff5000] transition-colors",
+                          "cursor-pointer hover:text-[#E53935] transition-colors",
                           i === 0
-                            ? "text-[#ff5000] font-medium"
+                            ? "text-[#E53935] font-medium"
                             : "text-gray-500"
                         )}
                         onClick={() => handleSearchSubmit(undefined, text)}
@@ -292,13 +292,13 @@ export default function HeaderLayout() {
 
                   {/* Dropdown Results */}
                   {isSearchFocused && (
-                    <div className="absolute top-[38px] left-0 right-0 bg-white border-2 border-t-0 border-[#ff5000] rounded-b-2xl shadow-xl p-4 z-10 animate-in fade-in zoom-in-95 duration-100 origin-top">
+                    <div className="absolute top-[38px] left-0 right-0 bg-white border-2 border-t-0 border-[#E53935] rounded-b-2xl shadow-xl p-4 z-10 animate-in fade-in zoom-in-95 duration-100 origin-top">
                       {/* History */}
                       {recentSearches.length > 0 && (
                         <div className="mb-4">
                           <div className="flex items-center justify-between mb-2">
                             <h4 className="text-xs font-bold text-gray-500">
-                              History Search
+                              Lịch sử tìm kiếm
                             </h4>
                             <Trash2
                               className="w-3.5 h-3.5 text-gray-400 hover:text-red-500 cursor-pointer"
@@ -324,18 +324,18 @@ export default function HeaderLayout() {
                       {/* Hot / Guess You Like */}
                       <div>
                         <h4 className="text-xs font-bold text-gray-500 mb-2">
-                          Guess You Like
+                          Có thể bạn thích
                         </h4>
                         <div className="flex flex-wrap gap-2">
                           {[
-                            "iPhone 15 Case",
-                            "Men's Sneakers",
-                            "Winter Coat",
-                            "Gaming Keyboards",
+                            "Ốp iPhone 16",
+                            "Giày nam",
+                            "Áo khoác",
+                            "Bàn phím gaming",
                           ].map((term) => (
                             <div
                               key={term}
-                              className="px-3 py-1 bg-white border border-gray-200 hover:border-[#ff5000] hover:text-[#ff5000] text-xs text-gray-600 rounded-full cursor-pointer transition-colors"
+                              className="px-3 py-1 bg-white border border-gray-200 hover:border-[#E53935] hover:text-[#E53935] text-xs text-gray-600 rounded-full cursor-pointer transition-colors"
                               onClick={() =>
                                 handleSearchSubmit(undefined, term)
                               }
@@ -359,10 +359,10 @@ export default function HeaderLayout() {
                       {/* Chat */}
                       <button
                         onClick={() => dispatch(toggleChat())}
-                        className="group flex flex-col items-center gap-0.5 text-gray-500 hover:text-[#ff5000] transition-colors"
+                        className="group flex flex-col items-center gap-0.5 text-gray-500 hover:text-[#E53935] transition-colors"
                       >
                         <MessageCircle className="h-6 w-6 stroke-[1.5]" />
-                        <span className="text-[10px]">Message</span>
+                        <span className="text-[10px]">Tin nhắn</span>
                       </button>
 
                       {/* Notifications */}
@@ -371,44 +371,44 @@ export default function HeaderLayout() {
                         className={cn(
                           "group flex flex-col items-center gap-0.5 transition-colors relative",
                           isOpen
-                            ? "text-[#ff5000]"
-                            : "text-gray-500 hover:text-[#ff5000]"
+                            ? "text-[#E53935]"
+                            : "text-gray-500 hover:text-[#E53935]"
                         )}
                       >
                         <div className="relative">
                           <Bell className="h-6 w-6 stroke-[1.5]" />
                           {unreadCount > 0 && (
-                            <span className="absolute -top-1 -right-1 h-3.5 min-w-[14px] px-0.5 rounded-full bg-[#ff5000] text-[9px] font-bold text-white flex items-center justify-center border border-white">
+                            <span className="absolute -top-1 -right-1 h-3.5 min-w-[14px] px-0.5 rounded-full bg-[#E53935] text-[9px] font-bold text-white flex items-center justify-center border border-white">
                               {unreadCount > 9 ? "9+" : unreadCount}
                             </span>
                           )}
                         </div>
-                        <span className="text-[10px]">Notice</span>
+                        <span className="text-[10px]">Thông báo</span>
                       </button>
 
                       {/* Cart */}
                       <Link
                         href="/cart"
-                        className="group flex flex-col items-center gap-0.5 text-gray-500 hover:text-[#ff5000] transition-colors relative"
+                        className="group flex flex-col items-center gap-0.5 text-gray-500 hover:text-[#E53935] transition-colors relative"
                       >
                         <div className="relative">
                           <ShoppingCart className="h-6 w-6 stroke-[1.5]" />
                           {/* Badge handled by app if needed, often hidden in taobao minimalist mode or small dot */}
                           {cartItemsCount > 0 && (
-                            <span className="absolute -top-1 -right-1 h-3.5 min-w-[14px] px-0.5 rounded-full bg-[#ff5000] text-[9px] font-bold text-white flex items-center justify-center border border-white">
+                            <span className="absolute -top-1 -right-1 h-3.5 min-w-[14px] px-0.5 rounded-full bg-[#E53935] text-[9px] font-bold text-white flex items-center justify-center border border-white">
                               {cartItemsCount > 99 ? "99+" : cartItemsCount}
                             </span>
                           )}
                         </div>
-                        <span className="text-[10px]">Cart</span>
+                        <span className="text-[10px]">Giỏ hàng</span>
                       </Link>
 
                       {/* User */}
                       <Link
                         href="/profile"
-                        className="flex items-center gap-2 pl-2 border-l border-gray-200 ml-1"
+                        className="flex items-center gap-2 pl-3 border-l border-gray-200 ml-1"
                       >
-                        <div className="relative w-9 h-9 rounded-full overflow-hidden border border-gray-100 group-hover:border-[#ff5000] transition-colors">
+                        <div className="relative w-9 h-9 rounded-full overflow-hidden border border-gray-100 group-hover:border-[#E53935] transition-colors">
                           <Image
                             alt={data?.username || "User"}
                             src={data?.avatar || "/images/CyBer.jpg"}
@@ -424,26 +424,26 @@ export default function HeaderLayout() {
                     <div className="flex items-center gap-4">
                       <Link
                         href="/cart"
-                        className="group flex flex-col items-center gap-0.5 text-gray-500 hover:text-[#ff5000] transition-colors relative"
+                        className="group flex flex-col items-center gap-0.5 text-gray-500 hover:text-[#E53935] transition-colors relative"
                       >
                         <ShoppingCart className="h-6 w-6 stroke-[1.5]" />
-                        <span className="text-[10px]">Cart</span>
+                        <span className="text-[10px]">Giỏ hàng</span>
                       </Link>
 
                       <div className="border-l border-gray-200 h-8 mx-2" />
 
                       <Link
                         href="/login"
-                        className="text-sm font-medium text-gray-600 hover:text-[#ff5000] transition-colors"
+                        className="text-sm font-medium text-gray-600 hover:text-[#E53935] transition-colors"
                       >
-                        Login
+                        Đăng nhập
                       </Link>
 
                       <Link
                         href="/register"
-                        className="px-4 py-1.5 bg-[#ff5000] text-white text-sm font-medium rounded-full hover:bg-orange-600 transition-all shadow-sm shadow-orange-200"
+                        className="px-5 py-2 bg-[#E53935] text-white text-sm font-medium rounded-full hover:bg-[#D32F2F] transition-all"
                       >
-                        Sign Up
+                        Đăng ký
                       </Link>
                     </div>
                   </>

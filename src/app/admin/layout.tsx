@@ -48,12 +48,12 @@ export default function AdminLayout({
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F5F7] dark:bg-[#000000] flex">
+    <div className="min-h-screen bg-background dark:bg-[#000000] flex">
       {/* Mobile Sidebar */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <SheetContent
           side="left"
-          className="w-[280px] p-0 border-r-0 bg-[#F5F5F7]/95 dark:bg-[#1C1C1E]/95 backdrop-blur-xl"
+          className="w-[280px] p-0 border-r-0 bg-background/95 dark:bg-[#1C1C1E]/95 backdrop-blur-xl"
         >
           <SheetTitle className="sr-only">Admin Navigation Menu</SheetTitle>
           <div className="flex h-full flex-col">
@@ -94,7 +94,7 @@ export default function AdminLayout({
       {/* Desktop Sidebar */}
       <aside
         className={cn(
-          "hidden lg:flex flex-col border-r border-border/40 bg-[#F5F5F7]/80 dark:bg-[#1C1C1E]/80 backdrop-blur-xl fixed inset-y-0 z-50 transition-all duration-300 ease-in-out",
+          "hidden lg:flex flex-col border-r border-border/40 bg-background/80 dark:bg-[#1C1C1E]/80 backdrop-blur-xl fixed inset-y-0 z-50 transition-all duration-300 ease-in-out",
           isCollapsed ? "w-20" : "w-[280px]"
         )}
       >

@@ -218,6 +218,7 @@ export const deleteProduct = createAsyncThunk(
   }
 );
 
+// DEPRECATED: Old variant actions (kept for backward compatibility)
 export const deleteVariantByVariantId = createAsyncThunk(
   "variant/delete/:variantId",
   async ({ productId, variantId }: { productId: string; variantId: string }) => {
@@ -238,6 +239,33 @@ export const updateVariant = createAsyncThunk(
     );
     if (!response) {
       throw new Error("Failed to update variant");
+    }
+    return response.data;
+  }
+);
+
+// NEW: Model actions for tier variation structure
+export const deleteModelById = createAsyncThunk(
+  "model/delete/:modelId",
+  async ({ productId, modelId }: { productId: string; modelId: string }) => {
+    const res = await instance.delete(`/products/${productId}/models/${modelId}`);
+    if (!res) {
+      throw new Error("Failed to delete model");
+    }
+    return res.data;
+  }
+);
+
+export const updateModel = createAsyncThunk(
+  "model/update",
+  async (data: { productId: string; modelId: string; updateData: { price?: number; stock?: number; sku?: string } }) => {
+    const { productId, modelId, updateData } = data;
+    const response = await instance.put(
+      `/products/${productId}/models/${modelId}`,
+      updateData
+    );
+    if (!response) {
+      throw new Error("Failed to update model");
     }
     return response.data;
   }

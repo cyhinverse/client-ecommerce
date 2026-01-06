@@ -1,3 +1,4 @@
+// ProfilePage - Taobao Style
 "use client";
 import { getProfile } from "@/features/user/userAction";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
@@ -20,6 +21,10 @@ import {
   Settings,
   LogOut,
   ChevronRight,
+  Heart,
+  Wallet,
+  Gift,
+  Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -40,131 +45,168 @@ export default function ProfilePage() {
     dispatch(getProfile());
   }, [dispatch]);
 
-  // Handle URL query param for tab
   useEffect(() => {
     const tabParam = searchParams.get("tab");
     if (tabParam && ["profile", "orders", "address", "settings"].includes(tabParam)) {
-        if (activeTab !== tabParam) {
-            // eslint-disable-next-line
-            setActiveTab(tabParam);
-        }
+      if (activeTab !== tabParam) {
+        setActiveTab(tabParam);
+      }
     }
   }, [searchParams, activeTab]);
 
   const handleLogout = () => {
     dispatch(logout());
-    toast.success("Logged out successfully");
+    toast.success("Đăng xuất thành công");
     router.push("/");
   };
 
   const tabs = [
-    { value: "profile", label: "General", icon: User, description: "Personal information" },
-    { value: "orders", label: "Orders", icon: Package, description: "Track & history" },
-    { value: "address", label: "Address", icon: MapPin, description: "Shipping details" },
-    { value: "settings", label: "Settings", icon: Settings, description: "App preferences" },
+    { value: "profile", label: "Hồ sơ", icon: User, description: "Thông tin cá nhân" },
+    { value: "orders", label: "Đơn hàng", icon: Package, description: "Theo dõi & lịch sử" },
+    { value: "address", label: "Địa chỉ", icon: MapPin, description: "Địa chỉ giao hàng" },
+    { value: "settings", label: "Cài đặt", icon: Settings, description: "Tùy chỉnh" },
+  ];
+
+  // Quick stats for user card
+  const quickStats = [
+    { label: "Đơn hàng", value: "12", icon: Package },
+    { label: "Yêu thích", value: "28", icon: Heart },
+    { label: "Xu", value: "1,500", icon: Gift },
   ];
 
   if (!isAuthenticated && !loading) {
-     return (
-        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6 text-center">
-             <div className="w-20 h-20 bg-muted/50 rounded-full flex items-center justify-center">
-                <User className="h-10 w-10 text-muted-foreground" />
-             </div>
-             <div className="space-y-2">
-                 <h2 className="text-2xl font-bold tracking-tight">Sign in required</h2>
-                 <p className="text-muted-foreground">Please login to manage your account</p>
-             </div>
-             <Button onClick={() => router.push("/login")} size="lg" className="rounded-full px-8">
-                 Login now
-             </Button>
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6 text-center bg-background -mt-4 -mx-4 px-4 py-20">
+        <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center">
+          <User className="h-10 w-10 text-muted-foreground" />
         </div>
-     )
+        <div className="space-y-2">
+          <h2 className="text-xl font-bold text-foreground">Vui lòng đăng nhập</h2>
+          <p className="text-muted-foreground text-sm">Đăng nhập để quản lý tài khoản của bạn</p>
+        </div>
+        <Button 
+          onClick={() => router.push("/login")} 
+          className="bg-primary hover:bg-primary/90 rounded px-8 h-10"
+        >
+          Đăng nhập ngay
+        </Button>
+      </div>
+    );
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 py-8 md:py-12">
+    <div className="w-full min-h-screen bg-background -mt-4 -mx-4 px-4 py-4">
       {(loading || isLoading) && (
         <SpinnerLoading className="fixed inset-0 z-50 m-auto" />
       )}
       
-      <div className={cn("transition-opacity duration-300", (loading || isLoading) && "opacity-50 pointer-events-none")}>
-        <div className="flex flex-col md:flex-row gap-8 lg:gap-12">
-            
-            {/* Sidebar */}
-            <div className="w-full md:w-64 lg:w-72 flex-shrink-0 space-y-8">
-                {/* User Snapshot (Mobile/Desktop consistent) */}
-                <div className="flex items-center gap-4 px-2">
-                     <Avatar className="h-14 w-14 border border-border/50">
-                        <AvatarImage src={currentUser?.avatar ?? undefined} className="object-cover" />
-                        <AvatarFallback className="text-lg bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
-                             {currentUser?.username?.charAt(0).toUpperCase() || "U"}
-                        </AvatarFallback>
-                     </Avatar>
-                     <div className="min-w-0 flex-1">
-                         <p className="font-semibold truncate">{currentUser?.username || "Welcome"}</p>
-                         <p className="text-xs text-muted-foreground truncate">{currentUser?.email}</p>
-                     </div>
+      <div className={cn("max-w-[1200px] mx-auto transition-opacity duration-300", (loading || isLoading) && "opacity-50 pointer-events-none")}>
+        <div className="flex flex-col md:flex-row gap-4">
+          {/* Sidebar */}
+          <div className="w-full md:w-[240px] shrink-0 space-y-4">
+            {/* User Card */}
+            <div className="bg-card rounded-sm p-4 border border-border">
+              <div className="flex items-center gap-3 pb-4 border-b border-border">
+                <Avatar className="h-14 w-14 border-2 border-primary/20">
+                  <AvatarImage src={currentUser?.avatar ?? undefined} className="object-cover" />
+                  <AvatarFallback className="text-lg bg-primary/10 text-primary">
+                    {currentUser?.username?.charAt(0).toUpperCase() || "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-foreground truncate">
+                    {currentUser?.username || "Người dùng"}
+                  </p>
+                  <div className="flex items-center gap-1 mt-0.5">
+                    <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                    <span className="text-xs text-muted-foreground">Thành viên Vàng</span>
+                  </div>
                 </div>
+              </div>
 
-                <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="w-full">
-                    <TabsList className="flex flex-col h-auto w-full bg-transparent p-0 space-y-1">
-                        {tabs.map((tab) => {
-                            const Icon = tab.icon;
-                            return (
-                                <TabsTrigger
-                                    key={tab.value}
-                                    value={tab.value}
-                                    className={cn(
-                                        "w-full justify-start px-4 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden text-sm font-medium",
-                                        "hover:bg-muted/50 text-muted-foreground hover:text-foreground",
-                                        "data-[state=active]:bg-[#0071E3] data-[state=active]:text-white data-[state=active]:shadow-md",
-                                        "data-[state=active]:hover:bg-[#0077ED]"
-                                    )}
-                                >
-                                    <Icon className="h-5 w-5 mr-3 flex-shrink-0 transition-colors group-data-[state=active]:text-white text-muted-foreground group-hover:text-foreground" />
-                                    <div className="flex-1 text-left">
-                                        <span className="block transition-colors group-data-[state=active]:text-white text-foreground">
-                                            {tab.label}
-                                        </span>
-                                    </div>
-                                    <ChevronRight className="h-4 w-4 ml-2 transition-colors text-transparent group-data-[state=active]:text-white/70" />
-                                </TabsTrigger>
-                            );
-                        })}
-                    </TabsList>
-                </Tabs>
-
-                <div className="px-2">
-                     <Button
-                        onClick={handleLogout}
-                        variant="ghost"
-                        className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl px-4 py-6"
-                     >
-                        <LogOut className="h-5 w-5 mr-3" />
-                        Sign Out
-                     </Button>
-                </div>
+              {/* Quick Stats */}
+              <div className="grid grid-cols-3 gap-2 pt-4">
+                {quickStats.map((stat) => {
+                  const Icon = stat.icon;
+                  return (
+                    <div key={stat.label} className="text-center">
+                      <p className="font-bold text-primary">{stat.value}</p>
+                      <p className="text-[10px] text-muted-foreground">{stat.label}</p>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
-            {/* Main Content Area */}
-            <div className="flex-1 min-w-0">
-                <div className="bg-background rounded-3xl min-h-[400px]">
-                     <Tabs value={activeTab} className="w-full">
-                        <TabsContent value="profile" className="mt-0 focus-visible:ring-0">
-                            {currentUser && <ProfileTab user={currentUser} />}
-                        </TabsContent>
-                        <TabsContent value="orders" className="mt-0 focus-visible:ring-0">
-                            <OrdersTab />
-                        </TabsContent>
-                        <TabsContent value="address" className="mt-0 focus-visible:ring-0">
-                            {currentUser && <AddressTab user={currentUser} />}
-                        </TabsContent>
-                        <TabsContent value="settings" className="mt-0 focus-visible:ring-0">
-                            {currentUser && <SettingsTab user={currentUser} />}
-                        </TabsContent>
-                     </Tabs>
-                </div>
+            {/* Navigation Tabs */}
+            <div className="bg-card rounded-sm overflow-hidden border border-border">
+              <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="w-full">
+                <TabsList className="flex flex-col h-auto w-full bg-transparent p-0">
+                  {tabs.map((tab) => {
+                    const Icon = tab.icon;
+                    return (
+                      <TabsTrigger
+                        key={tab.value}
+                        value={tab.value}
+                        className={cn(
+                          "w-full justify-start px-4 py-3 rounded-none transition-all duration-200 text-sm font-medium border-l-2",
+                          "hover:bg-muted text-muted-foreground hover:text-foreground",
+                          "data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:border-l-primary",
+                          "data-[state=inactive]:border-l-transparent"
+                        )}
+                      >
+                        <Icon className="h-4 w-4 mr-3 shrink-0" />
+                        <span className="flex-1 text-left">{tab.label}</span>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground data-[state=active]:text-primary" />
+                      </TabsTrigger>
+                    );
+                  })}
+                </TabsList>
+              </Tabs>
+
+              {/* Logout Button */}
+              <div className="border-t border-border">
+                <Button
+                  onClick={handleLogout}
+                  variant="ghost"
+                  className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-none px-4 py-3 h-auto"
+                >
+                  <LogOut className="h-4 w-4 mr-3" />
+                  Đăng xuất
+                </Button>
+              </div>
             </div>
+
+            {/* Wallet Card */}
+            <div className="bg-primary rounded-sm p-4 text-white">
+              <div className="flex items-center gap-2 mb-3">
+                <Wallet className="h-5 w-5" />
+                <span className="font-medium">Ví của tôi</span>
+              </div>
+              <p className="text-2xl font-bold">₫0</p>
+              <p className="text-xs text-white/70 mt-1">Số dư khả dụng</p>
+            </div>
+          </div>
+
+          {/* Main Content Area */}
+          <div className="flex-1 min-w-0">
+            <div className="bg-card rounded-sm min-h-[500px] border border-border">
+              <Tabs value={activeTab} className="w-full">
+                <TabsContent value="profile" className="mt-0 focus-visible:ring-0 p-4">
+                  {currentUser && <ProfileTab user={currentUser} />}
+                </TabsContent>
+                <TabsContent value="orders" className="mt-0 focus-visible:ring-0 p-4">
+                  <OrdersTab />
+                </TabsContent>
+                <TabsContent value="address" className="mt-0 focus-visible:ring-0 p-4">
+                  {currentUser && <AddressTab user={currentUser} />}
+                </TabsContent>
+                <TabsContent value="settings" className="mt-0 focus-visible:ring-0 p-4">
+                  {currentUser && <SettingsTab user={currentUser} />}
+                </TabsContent>
+              </Tabs>
+            </div>
+          </div>
         </div>
       </div>
 

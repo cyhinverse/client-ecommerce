@@ -112,7 +112,7 @@ export default function Category({
             return (
               <div
                 key={cat._id}
-                onClick={() => onSelectCategory(cat.slug)}
+                onClick={() => onSelectCategory(cat.slug ?? null)}
                 className="group flex items-center gap-1.5 min-w-fit py-1 cursor-pointer select-none"
               >
                 {/* Icon - Only colored when active/hover */}
@@ -124,7 +124,7 @@ export default function Category({
                       : "text-muted-foreground group-hover:text-primary"
                   )}
                 >
-                  {getIcon(cat.slug)}
+                  {getIcon(cat.slug ?? '')}
                 </span>
 
                 <span

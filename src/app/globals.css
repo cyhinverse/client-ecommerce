@@ -1,8 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -43,95 +41,130 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  /* Border Radius Scale */
+  --radius-none: 0;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-full: 9999px;
 }
 
 :root {
-  --radius: 1rem;
-  --background: #f5f5f7;
-  --foreground: #1d1d1f;
-  --card: #f7f7f7;
-  --card-foreground: #1d1d1f;
-  --popover: #f7f7f7;
-  --popover-foreground: #1d1d1f;
-  /* E-commerce Red Theme */
-  --primary: #dc2626;
-  --primary-foreground: #ffffff;
-  --secondary: #fef2f2;
-  --secondary-foreground: #1d1d1f;
-  --muted: #f5f5f7;
-  --muted-foreground: #86868b;
-  --accent: #fff7ed;
-  --accent-foreground: #dc2626;
-  --destructive: #b91c1c;
-  --destructive-foreground: #ffffff;
-  --success: #16a34a;
-  --success-foreground: #ffffff;
-  --warning: #f59e0b;
-  --warning-foreground: #ffffff;
-  --info: #0ea5e9;
-  --info-foreground: #ffffff;
-  --border: #e5e5ea;
-  --input: #e5e5ea;
-  --ring: #dc2626;
-  --chart-1: #dc2626;
-  --chart-2: #16a34a;
-  --chart-3: #f59e0b;
-  --chart-4: #0ea5e9;
-  --chart-5: #8b5cf6;
-  --sidebar: #f5f5f7;
-  --sidebar-foreground: #1d1d1f;
-  --sidebar-primary: #dc2626;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #fef2f2;
-  --sidebar-accent-foreground: #dc2626;
-  --sidebar-border: #e5e5ea;
-  --sidebar-ring: #dc2626;
-}
-
-.dark {
-  --background: #0a0a0a;
-  --foreground: #f5f5f7;
-  --card: #171717;
-  --card-foreground: #f5f5f7;
-  --popover: #171717;
-  --popover-foreground: #f5f5f7;
-  /* E-commerce Red Theme - Dark Mode */
-  --primary: #ef4444;
-  --primary-foreground: #ffffff;
-  --secondary: #292524;
-  --secondary-foreground: #f5f5f7;
-  --muted: #1c1c1e;
-  --muted-foreground: #a1a1aa;
-  --accent: #292524;
-  --accent-foreground: #ef4444;
-  --destructive: #dc2626;
-  --destructive-foreground: #ffffff;
-  --success: #22c55e;
-  --success-foreground: #ffffff;
-  --warning: #f59e0b;
-  --warning-foreground: #ffffff;
-  --info: #38bdf8;
-  --info-foreground: #ffffff;
-  --border: #27272a;
-  --input: #27272a;
-  --ring: #ef4444;
-  --chart-1: #ef4444;
-  --chart-2: #22c55e;
-  --chart-3: #f59e0b;
-  --chart-4: #38bdf8;
-  --chart-5: #a78bfa;
-  --sidebar: #0a0a0a;
-  --sidebar-foreground: #f5f5f7;
-  --sidebar-primary: #ef4444;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #292524;
-  --sidebar-accent-foreground: #ef4444;
-  --sidebar-border: #27272a;
-  --sidebar-ring: #ef4444;
+  /* ========================================
+     TAOBAO LIGHT DESIGN SYSTEM TOKENS
+     ======================================== */
+  
+  /* Primary Colors - Taobao Red */
+  --primary: #E53935;
+  --primary-hover: #D32F2F;
+  --primary-light: #EF5350;
+  --primary-bg: #FFEBEE;
+  --primary-foreground: #FFFFFF;
+  
+  /* Secondary Colors */
+  --secondary: #FFEBEE;
+  --secondary-foreground: #1D1D1F;
+  
+  /* Neutral Colors */
+  --background: #FFFFFF;
+  --foreground: #1D1D1F;
+  --muted: #F5F5F7;
+  --muted-foreground: #86868B;
+  --card: #FFFFFF;
+  --card-foreground: #1D1D1F;
+  --popover: #FFFFFF;
+  --popover-foreground: #1D1D1F;
+  --border: #E5E5EA;
+  --input: #E5E5EA;
+  
+  /* Accent Colors */
+  --accent: #FFEBEE;
+  --accent-foreground: #E53935;
+  
+  /* Semantic Colors */
+  --success: #4CAF50;
+  --success-foreground: #FFFFFF;
+  --warning: #FF9800;
+  --warning-foreground: #FFFFFF;
+  --info: #2196F3;
+  --info-foreground: #FFFFFF;
+  --destructive: #DC2626;
+  --destructive-foreground: #FFFFFF;
+  
+  /* Ring Color */
+  --ring: #E53935;
+  
+  /* Chart Colors */
+  --chart-1: #E53935;
+  --chart-2: #4CAF50;
+  --chart-3: #FF9800;
+  --chart-4: #2196F3;
+  --chart-5: #8B5CF6;
+  
+  /* Sidebar Colors */
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #1D1D1F;
+  --sidebar-primary: #E53935;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #FFEBEE;
+  --sidebar-accent-foreground: #E53935;
+  --sidebar-border: #f0f0f0;
+  --sidebar-ring: #E53935;
+  
+  /* Base Radius */
+  --radius: 12px;
+  
+  /* ========================================
+     SPACING SCALE (4px base unit)
+     ======================================== */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  
+  /* ========================================
+     TYPOGRAPHY SCALE
+     ======================================== */
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 13px;
+  --text-md: 14px;
+  --text-lg: 16px;
+  --text-xl: 18px;
+  --text-2xl: 20px;
+  --text-3xl: 24px;
+  --text-4xl: 32px;
+  
+  /* ========================================
+     SHADOW LEVELS - Light Design
+     ======================================== */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.06);
+  --shadow-card: none;
+  --shadow-hover: 0 2px 8px rgba(0, 0, 0, 0.08);
+  
+  /* ========================================
+     TRANSITION DURATIONS
+     ======================================== */
+  --transition-fast: 150ms;
+  --transition-normal: 200ms;
+  --transition-slow: 300ms;
+  
+  /* ========================================
+     LAYOUT
+     ======================================== */
+  --container-max: 1400px;
+  --header-height: 120px;
+  --topbar-height: 32px;
 }
 
 @layer base {
@@ -143,6 +176,7 @@
     @apply bg-background text-foreground;
     -ms-overflow-style: none;
     scrollbar-width: none;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
   html::-webkit-scrollbar,
   body::-webkit-scrollbar {
@@ -156,7 +190,55 @@
   }
 
   .no-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  /* Taobao Red Button */
+  .btn-taobao {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    transition: background-color var(--transition-normal) ease;
+  }
+  .btn-taobao:hover {
+    background-color: var(--primary-hover);
+  }
+  
+  /* Card Hover Effect - Light */
+  .card-hover {
+    transition: background-color var(--transition-normal) ease;
+    border: 1px solid #f0f0f0;
+  }
+  .card-hover:hover {
+    background-color: #fafafa;
+  }
+  
+  /* Text Truncate 2 Lines */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  /* Container Max Width */
+  .container-taobao {
+    max-width: var(--container-max);
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+  
+  /* Light Card Style */
+  .card-light {
+    background-color: #FFFFFF;
+    border: 1px solid #f0f0f0;
+    border-radius: 4px;
+  }
+  
+  /* Price Color */
+  .price-primary {
+    color: var(--primary);
   }
 }

@@ -58,7 +58,7 @@ interface UsersTableProps {
 
 export const getVerifiedBadge = (isVerified: boolean) => {
   return isVerified ? (
-    <Badge className="bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-500/10 dark:text-green-400 border-0 rounded-lg px-2.5 py-0.5 shadow-none">
+    <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-0 rounded-lg px-2.5 py-0.5 shadow-none">
       <CheckCircle className="h-3 w-3 mr-1" />
       Verified
     </Badge>
@@ -147,7 +147,7 @@ export function UsersTable({
   return (
     <div className="space-y-4">
       {/* Search and Filters */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-white/50 dark:bg-white/5 p-4 rounded-[1.5rem] backdrop-blur-xl border border-border/50">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-white/50 p-4 rounded-[1.5rem] backdrop-blur-xl border border-border/50">
         <div className="flex flex-1 items-center space-x-2">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -258,7 +258,7 @@ export function UsersTable({
             id="pageSize"
             value={pageSize}
             onChange={(e) => onPageSizeChange(Number(e.target.value))}
-            className="h-9 rounded-lg border border-gray-200 bg-white/80 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 dark:bg-black/20 dark:border-white/10"
+            className="h-9 rounded-lg border border-gray-200 bg-white/80 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-black/5"
           >
             <option value="5">5</option>
             <option value="10">10</option>
@@ -269,7 +269,7 @@ export function UsersTable({
       </div>
 
       {/* Table */}
-      <div className="rounded-[2rem] border border-border/50 bg-white/60 dark:bg-[#1C1C1E]/60 backdrop-blur-xl shadow-sm overflow-hidden">
+      <div className="rounded-[2rem] border border-border/50 bg-white/60 backdrop-blur-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto no-scrollbar">
             <Table>
             <TableHeader className="bg-gray-50/50">

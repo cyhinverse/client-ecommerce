@@ -1,59 +1,111 @@
 import { User } from "./auth";
 
-export interface category {
+// Category interface
+export interface Category {
   _id: string;
   name: string;
   slug: string;
 }
 
-export interface price {
+// Price interface
+export interface Price {
   currentPrice: number;
-  discountPrice: number;
+  discountPrice?: number | null;
   currency: string;
   _id?: string;
 }
 
-export interface reviews extends User {
+// Review interface
+export interface Review extends User {
   _id: string;
   rating: number;
   comment: string;
 }
-export interface variants {
+
+// NEW: TierVariation interface (replaces old variants structure)
+export interface TierVariation {
+  name: string;           // e.g. "Color", "Size"
+  options: string[];      // e.g. ["Red", "Blue", "Green"]
+  images?: string[];      // Optional images for each option
+}
+
+// NEW: ProductModel interface (SKU with tierIndex mapping)
+export interface ProductModel {
+  _id: string;
+  sku?: string;
+  tierIndex: number[];    // e.g. [0, 1] means Color[0], Size[1]
+  price: number;
+  stock: number;
+  sold?: number;
+}
+
+// NEW: Shop interface
+export interface Shop {
+  _id: string;
+  name: string;
+  slug?: string;
+  logo?: string;
+}
+
+// DEPRECATED: Old variants interface (kept for backward compatibility)
+export interface Variant {
   sku: string;
   color: string;
   size: string;
   stock: number;
   images: string[];
-  price?: price;
+  price?: Price;
   _id: string;
 }
 
+// Product interface - Updated with new structure
 export interface Product {
   _id: string;
   name: string;
   description: string;
   images: string[];
   slug: string;
-  category: category | null;
-  brand: string;
-  price: price | null;
-  variants: variants[];
-  reviews: reviews[] | null;
-  tags: string[] | null;
+  category: Category | null;
+  brand?: string;
+  price: Price | null;
+  
+  // NEW: Tier variation structure (Taobao-style)
+  tierVariations: TierVariation[];
+  models: ProductModel[];
+  
+  // NEW: Shop reference
+  shop?: Shop | string;
+  shopCategory?: string;
+  
+  // DEPRECATED: Old variants (kept for backward compatibility)
+  variants?: Variant[];
+  
+  // Reviews and ratings
+  reviews?: Review[] | null;
+  tags?: string[] | null;
   soldCount: number;
   averageRating?: number;
+  ratingAverage?: number;
   numberOfReviews?: number;
+  reviewCount?: number;
+  
+  // Status flags
   isActive: boolean;
   isFeatured?: boolean;
   isNewArrival?: boolean;
   onSale?: boolean;
+  status?: "draft" | "published" | "suspended";
+  
+  // Timestamps
   createdAt: string;
   updatedAt: string;
 }
 
+
 import { PaginationData } from "./common";
 export type { PaginationData };
 
+// Product State for Redux
 export interface ProductState {
   all: Product[];
   featured: Product[];
@@ -70,6 +122,7 @@ export interface ProductState {
   related: Product[];
 }
 
+// Query params for product listing
 export type Params = {
   page: number;
   limit: number;
@@ -80,8 +133,10 @@ export type Params = {
   rating?: string;
   colors?: string;
   sizes?: string;
+  category?: string;
 };
 
+// Product filters for frontend
 export interface ProductFilters {
   search: string;
   minPrice: number;
@@ -92,6 +147,7 @@ export interface ProductFilters {
   sortBy: string;
 }
 
+// Admin product filters
 export interface AdminProductFilters {
   page: number;
   limit: number;
@@ -104,6 +160,7 @@ export interface AdminProductFilters {
   [key: string]: string | number | boolean | null;
 }
 
+// URL-based product filters
 export interface ProductUrlFilters {
   search: string;
   minPrice: number;
@@ -114,3 +171,27 @@ export interface ProductUrlFilters {
   sortBy: string;
   [key: string]: string | number | boolean | null;
 }
+
+// Helper function to get variation display from model
+export function getVariationDisplay(product: Product, model: ProductModel): string {
+  if (!product.tierVariations || !model.tierIndex) return "";
+  return model.tierIndex.map((idx, i) => {
+    const tier = product.tierVariations[i];
+    if (!tier) return "";
+    return `${tier.name}: ${tier.options[idx] || ""}`;
+  }).filter(Boolean).join(", ");
+}
+
+// Helper function to find model by tierIndex
+export function findModelByTierIndex(product: Product, tierIndex: number[]): ProductModel | undefined {
+  return product.models?.find(model => 
+    model.tierIndex.length === tierIndex.length &&
+    model.tierIndex.every((val, idx) => val === tierIndex[idx])
+  );
+}
+
+// Backward compatibility aliases
+export type category = Category;
+export type price = Price;
+export type reviews = Review;
+export type variants = Variant;

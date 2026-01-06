@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -24,6 +24,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { addToCart } from "@/features/cart/cartAction";
 import { cn } from "@/lib/utils";
+import { Product, ProductModel, findModelByTierIndex, getVariationDisplay } from "@/types/product";
 
 export default function ProductDetailPage() {
   const dispatch = useAppDispatch();
@@ -31,22 +32,79 @@ export default function ProductDetailPage() {
   const { currentProduct, isLoading, error } = useAppSelector(
     (state) => state.product
   );
+  
+  // State for tier variation selection (new structure)
+  const [selectedTierIndexes, setSelectedTierIndexes] = useState<number[]>([]);
+  // State for old variant selection (backward compatibility)
   const [selectedVariant, setSelectedVariant] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const router = useRouter();
 
+  // Determine if product uses new tier variation structure
+  const usesTierVariations = useMemo(() => {
+    return currentProduct?.tierVariations && currentProduct.tierVariations.length > 0;
+  }, [currentProduct]);
+
+  // Get selected model based on tier indexes (new structure)
+  const selectedModel = useMemo(() => {
+    if (!usesTierVariations || !currentProduct) return null;
+    return findModelByTierIndex(currentProduct, selectedTierIndexes);
+  }, [usesTierVariations, currentProduct, selectedTierIndexes]);
+
+  // Old variant logic (backward compatibility)
   const hasVariant =
-    currentProduct?.variants[selectedVariant] &&
+    !usesTierVariations &&
+    currentProduct?.variants?.[selectedVariant] &&
     currentProduct.variants.length > 0;
-  const variant = hasVariant ? currentProduct.variants[selectedVariant] : null;
+  const variant = hasVariant ? currentProduct.variants![selectedVariant] : null;
+
+  // Get active price based on selection
+  const activePrice = useMemo(() => {
+    if (usesTierVariations && selectedModel) {
+      return { currentPrice: selectedModel.price, discountPrice: null };
+    }
+    if (variant?.price) {
+      return variant.price;
+    }
+    return currentProduct?.price;
+  }, [usesTierVariations, selectedModel, variant, currentProduct]);
+
+  // Get shop info
+  const shopInfo = useMemo(() => {
+    if (!currentProduct?.shop) return null;
+    if (typeof currentProduct.shop === 'string') return { _id: currentProduct.shop, name: 'Shop' };
+    return currentProduct.shop;
+  }, [currentProduct]);
+
+  // Get display images - MUST be before early return to maintain hooks order
+  const displayImages = useMemo(() => {
+    if (!currentProduct) return [];
+    // Try tier variation images first
+    if (usesTierVariations && currentProduct.tierVariations?.[0]?.images?.length) {
+      const tierImages = currentProduct.tierVariations[0].images;
+      if (tierImages[selectedTierIndexes[0]]) {
+        return [tierImages[selectedTierIndexes[0]], ...currentProduct.images.filter(img => img !== tierImages[selectedTierIndexes[0]])];
+      }
+    }
+    // Try variant images (old structure)
+    if (variant?.images && variant.images.length > 0) {
+      return variant.images;
+    }
+    return currentProduct.images || [];
+  }, [usesTierVariations, currentProduct, variant, selectedTierIndexes]);
 
   const HandleAddToCart = async () => {
+    if (!currentProduct) return;
+    
     const result = await dispatch(
       addToCart({
-        productId: currentProduct?._id as string,
+        productId: currentProduct._id,
+        shopId: shopInfo?._id || '',
         quantity,
-        variantId: variant?._id ?? null,
+        // Use modelId for new structure, variantId for old
+        modelId: selectedModel?._id,
+        variantId: variant?._id ?? undefined,
       })
     );
     if (result) {
@@ -59,6 +117,14 @@ export default function ProductDetailPage() {
   useEffect(() => {
     dispatch(getProductBySlug(path.slug as string));
   }, [dispatch, path.slug]);
+
+  // Initialize tier indexes when product loads
+  useEffect(() => {
+    if (currentProduct?.tierVariations && currentProduct.tierVariations.length > 0) {
+      // Initialize with first option of each tier
+      setSelectedTierIndexes(currentProduct.tierVariations.map(() => 0));
+    }
+  }, [currentProduct]);
 
   useEffect(() => {
     if (error) {
@@ -73,14 +139,22 @@ export default function ProductDetailPage() {
     }
   };
 
+  // Handle tier option selection
+  const handleTierOptionSelect = (tierIndex: number, optionIndex: number) => {
+    const newIndexes = [...selectedTierIndexes];
+    newIndexes[tierIndex] = optionIndex;
+    setSelectedTierIndexes(newIndexes);
+    
+    // Update image if tier has images
+    const tier = currentProduct?.tierVariations?.[tierIndex];
+    if (tier?.images?.[optionIndex]) {
+      setSelectedImageIndex(0);
+    }
+  };
+
   if (isLoading || !currentProduct) return <ProductDetailSkeleton />;
 
   const product = currentProduct;
-  const activePrice = variant ? variant.price : product.price;
-  const displayImages =
-    variant?.images && variant.images.length > 0
-      ? variant.images
-      : product.images || [];
 
   const parameters = [
     { label: "Model", value: "304" },
@@ -149,7 +223,7 @@ export default function ProductDetailPage() {
             <Button
               variant="outline"
               size="sm"
-              className="h-7 text-xs border-gray-200 rounded-sm hover:text-[#ff5000] hover:border-[#ff5000]"
+              className="h-7 text-xs border-gray-200 rounded-sm hover:text-[#E53935] hover:border-[#E53935]"
             >
               <Heart className="w-3.5 h-3.5 mr-1" /> Collection
             </Button>
@@ -178,7 +252,7 @@ export default function ProductDetailPage() {
                   className={cn(
                     "w-[60px] h-[60px] border-2 rounded-sm overflow-hidden relative transition-all",
                     selectedImageIndex === idx
-                      ? "border-[#ff5000]"
+                      ? "border-[#E53935]"
                       : "border-transparent"
                   )}
                 >
@@ -200,14 +274,14 @@ export default function ProductDetailPage() {
                 priority
               />
               {/* Image Navigation Mockups */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-white/70 backdrop-blur-md px-4 py-1.5 rounded-full border border-gray-200 shadow-sm text-[11px] font-medium text-gray-600">
-                <span className="cursor-pointer hover:text-[#ff5000]">
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-white/70 backdrop-blur-md px-4 py-1.5 rounded-full border border-gray-200 text-[11px] font-medium text-gray-600">
+                <span className="cursor-pointer hover:text-[#E53935]">
                   Video
                 </span>
                 <span className="w-px h-3 bg-gray-200 mx-1"></span>
-                <span className="cursor-pointer text-[#ff5000]">Image</span>
+                <span className="cursor-pointer text-[#E53935]">Image</span>
                 <span className="w-px h-3 bg-gray-200 mx-1"></span>
-                <span className="cursor-pointer hover:text-[#ff5000]">
+                <span className="cursor-pointer hover:text-[#E53935]">
                   Params
                 </span>
               </div>
@@ -234,7 +308,7 @@ export default function ProductDetailPage() {
             <h1 className="text-lg lg:text-xl font-bold text-[#111] leading-snug mb-4">
               {product.name}
             </h1>
-            <p className="text-[#ff5000] text-sm mb-6 leading-relaxed">
+            <p className="text-[#E53935] text-sm mb-6 leading-relaxed">
               Specializing in high-quality minimalist design for modern
               lifestyle.
             </p>
@@ -267,8 +341,43 @@ export default function ProductDetailPage() {
 
             {/* Selection Grid */}
             <div className="space-y-6">
-              {/* Colors */}
-              {product.variants && product.variants.length > 0 && (
+              {/* NEW: Tier Variations (Taobao-style) */}
+              {usesTierVariations && product.tierVariations?.map((tier, tierIdx) => (
+                <div key={tierIdx} className="flex items-start gap-4">
+                  <span className="text-sm text-gray-400 w-12 pt-2">{tier.name}</span>
+                  <div className="flex-1 grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {tier.options.map((option, optIdx) => (
+                      <button
+                        key={optIdx}
+                        onClick={() => handleTierOptionSelect(tierIdx, optIdx)}
+                        className={cn(
+                          "flex items-center gap-2 p-1 border rounded-sm transition-all overflow-hidden bg-white",
+                          selectedTierIndexes[tierIdx] === optIdx
+                            ? "border-[#E53935] ring-1 ring-[#E53935]"
+                            : "border-gray-200 hover:border-gray-300"
+                        )}
+                      >
+                        {tier.images?.[optIdx] && (
+                          <div className="w-10 h-10 relative bg-gray-50 shrink-0">
+                            <Image
+                              src={tier.images[optIdx]}
+                              alt={option}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        )}
+                        <span className="text-[11px] truncate pr-2 text-gray-700">
+                          {option}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+
+              {/* OLD: Variants (backward compatibility) */}
+              {!usesTierVariations && product.variants && product.variants.length > 0 && (
                 <div className="flex items-start gap-4">
                   <span className="text-sm text-gray-400 w-12 pt-2">Color</span>
                   <div className="flex-1 grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -283,7 +392,7 @@ export default function ProductDetailPage() {
                         className={cn(
                           "flex items-center gap-2 p-1 border rounded-sm transition-all overflow-hidden bg-white",
                           selectedVariant === i
-                            ? "border-[#ff5000] ring-1 ring-[#ff5000] shadow-sm"
+                            ? "border-[#E53935] ring-1 ring-[#E53935]"
                             : "border-gray-200 hover:border-gray-300"
                         )}
                       >
@@ -301,6 +410,21 @@ export default function ProductDetailPage() {
                       </button>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* Selected Model Info (new structure) */}
+              {usesTierVariations && selectedModel && (
+                <div className="flex items-center gap-4 text-sm text-gray-600 bg-gray-50 p-3 rounded-sm">
+                  <span>Selected: {getVariationDisplay(product, selectedModel)}</span>
+                  <span className="text-gray-400">|</span>
+                  <span>Stock: {selectedModel.stock}</span>
+                  {selectedModel.sku && (
+                    <>
+                      <span className="text-gray-400">|</span>
+                      <span>SKU: {selectedModel.sku}</span>
+                    </>
+                  )}
                 </div>
               )}
 
@@ -338,11 +462,11 @@ export default function ProductDetailPage() {
             <div className="hidden lg:flex items-center gap-4 mt-12 pb-10">
               <button
                 onClick={HandleAddToCart}
-                className="w-[180px] h-12 rounded-full border border-[#ff5000] text-[#ff5000] font-bold text-sm bg-[#fff7f5] hover:bg-[#fff0eb] transition-colors"
+                className="w-[180px] h-12 rounded-full border border-[#E53935] text-[#E53935] font-bold text-sm bg-[#FFEBEE] hover:bg-[#FFCDD2] transition-colors"
               >
                 Add to Cart
               </button>
-              <button className="w-[180px] h-12 rounded-full bg-gradient-to-r from-[#ff5000] to-[#ff0036] text-white font-bold text-sm shadow-md shadow-orange-500/20 active:scale-95 transition-transform">
+              <button className="w-[180px] h-12 rounded-full bg-[#E53935] text-white font-bold text-sm hover:bg-[#D32F2F] active:scale-95 transition-all">
                 Buy Now
               </button>
             </div>
@@ -352,16 +476,16 @@ export default function ProductDetailPage() {
         {/* 3. Detail Tabs & Bottom Sections */}
         <div className="mt-16 border-b border-gray-100 sticky top-0 lg:top-14 bg-white z-20">
           <div className="flex items-center gap-12 max-w-[800px] overflow-x-auto no-scrollbar">
-            <button className="px-2 py-4 text-sm font-bold text-[#ff5000] border-b-2 border-[#ff5000] whitespace-nowrap">
+            <button className="px-2 py-4 text-sm font-bold text-[#E53935] border-b-2 border-[#E53935] whitespace-nowrap">
               User Reviews
             </button>
-            <button className="px-2 py-4 text-sm font-medium text-gray-500 hover:text-[#ff5000] whitespace-nowrap">
+            <button className="px-2 py-4 text-sm font-medium text-gray-500 hover:text-[#E53935] whitespace-nowrap">
               Parameters
             </button>
-            <button className="px-2 py-4 text-sm font-medium text-gray-500 hover:text-[#ff5000] whitespace-nowrap">
+            <button className="px-2 py-4 text-sm font-medium text-gray-500 hover:text-[#E53935] whitespace-nowrap">
               Graphics Details
             </button>
-            <button className="px-2 py-4 text-sm font-medium text-gray-500 hover:text-[#ff5000] whitespace-nowrap">
+            <button className="px-2 py-4 text-sm font-medium text-gray-500 hover:text-[#E53935] whitespace-nowrap">
               See Also
             </button>
           </div>
@@ -430,7 +554,7 @@ export default function ProductDetailPage() {
             <div className="text-center pt-6">
               <Button
                 variant="ghost"
-                className="text-xs text-gray-400 hover:text-[#ff5000]"
+                className="text-xs text-gray-400 hover:text-[#E53935]"
               >
                 View All Reviews <ChevronRight className="w-3 h-3 ml-1" />
               </Button>
@@ -490,7 +614,7 @@ export default function ProductDetailPage() {
 
             <div className="space-y-6">
               <div>
-                <strong className="text-gray-800 block mb-2 underline decoration-[#ff5000]/30 underline-offset-4">
+                <strong className="text-gray-800 block mb-2 underline decoration-[#E53935]/30 underline-offset-4">
                   Underlined Price
                 </strong>
                 <p>
@@ -500,7 +624,7 @@ export default function ProductDetailPage() {
                 </p>
               </div>
               <div>
-                <strong className="text-gray-800 block mb-2 underline decoration-[#ff5000]/30 underline-offset-4">
+                <strong className="text-gray-800 block mb-2 underline decoration-[#E53935]/30 underline-offset-4">
                   Uncrossed Price
                 </strong>
                 <p>
@@ -540,7 +664,7 @@ export default function ProductDetailPage() {
                   />
                 </div>
                 <div className="px-1 space-y-2">
-                  <p className="text-xs text-gray-700 line-clamp-2 leading-relaxed group-hover:text-[#ff5000]">
+                  <p className="text-xs text-gray-700 line-clamp-2 leading-relaxed group-hover:text-[#E53935]">
                     {product.name} Variant Choice {item}
                   </p>
                   <div className="flex items-center gap-2">
@@ -565,8 +689,8 @@ export default function ProductDetailPage() {
             className="flex flex-col items-center cursor-pointer group"
             onClick={() => router.push("/")}
           >
-            <Home className="w-5 h-5 text-gray-600 group-hover:text-[#ff5000] transition-colors" />
-            <span className="text-[10px] text-gray-400 group-hover:text-[#ff5000] font-medium mt-1">
+            <Home className="w-5 h-5 text-gray-600 group-hover:text-[#E53935] transition-colors" />
+            <span className="text-[10px] text-gray-400 group-hover:text-[#E53935] font-medium mt-1">
               Shop
             </span>
           </div>
@@ -574,14 +698,14 @@ export default function ProductDetailPage() {
             className="flex flex-col items-center cursor-pointer group"
             onClick={() => router.push("/cart")}
           >
-            <ShoppingCart className="w-5 h-5 text-gray-600 group-hover:text-[#ff5000] transition-colors" />
-            <span className="text-[10px] text-gray-400 group-hover:text-[#ff5000] font-medium mt-1">
+            <ShoppingCart className="w-5 h-5 text-gray-600 group-hover:text-[#E53935] transition-colors" />
+            <span className="text-[10px] text-gray-400 group-hover:text-[#E53935] font-medium mt-1">
               Cart
             </span>
           </div>
           <div className="flex flex-col items-center cursor-pointer group">
-            <Star className="w-5 h-5 text-gray-600 group-hover:text-[#ff5000] transition-colors" />
-            <span className="text-[10px] text-gray-400 group-hover:text-[#ff5000] font-medium mt-1">
+            <Star className="w-5 h-5 text-gray-600 group-hover:text-[#E53935] transition-colors" />
+            <span className="text-[10px] text-gray-400 group-hover:text-[#E53935] font-medium mt-1">
               Collect
             </span>
           </div>
@@ -589,11 +713,11 @@ export default function ProductDetailPage() {
         <div className="flex items-center gap-3 lg:gap-4 flex-1 lg:flex-none justify-end pl-6">
           <button
             onClick={HandleAddToCart}
-            className="px-6 h-11 lg:h-12 rounded-full bg-gradient-to-r from-[#ffc900] to-[#ff9500] text-white text-[13px] font-bold shadow-md shadow-yellow-500/20 active:scale-95 transition-all lg:w-[160px]"
+            className="px-6 h-11 lg:h-12 rounded-full bg-[#FFEBEE] text-[#E53935] border border-[#E53935] text-[13px] font-bold hover:bg-[#FFCDD2] active:scale-95 transition-all lg:w-[160px]"
           >
             Add to Cart
           </button>
-          <button className="px-8 h-11 lg:h-12 rounded-full bg-gradient-to-r from-[#ff5e00] to-[#ff0036] text-white text-[13px] font-bold shadow-md shadow-orange-500/20 active:scale-95 transition-all lg:w-[160px]">
+          <button className="px-8 h-11 lg:h-12 rounded-full bg-[#E53935] text-white text-[13px] font-bold hover:bg-[#D32F2F] active:scale-95 transition-all lg:w-[160px]">
             Buy Now
           </button>
         </div>

@@ -5,20 +5,32 @@ import { getProductsBySlugOfCategory } from "@/features/product/productAction";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ProductCard } from "@/components/product/ProductCard";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { 
+  ChevronRight, 
+  ChevronLeft,
+  Grid3X3, 
+  LayoutList, 
+  ChevronDown,
+  Package,
+} from "lucide-react";
 
-export default function CategoriesPage() {
+type SortType = 'default' | 'sales' | 'price-asc' | 'price-desc' | 'newest';
+
+export default function CategoryDetailPage() {
   const dispatch = useAppDispatch();
   const path = usePathname();
-  const slug = path.split("/")[2]; // Get slug from path
+  const slug = path.split("/")[2];
   const { isLoading: isCategoryLoading, categories, error } = useAppSelector(
     (state) => state.category
   );
   const { byCategory, isLoading: isProductLoading } = useAppSelector((state) => state.product);
+  
+  const [sortBy, setSortBy] = useState<SortType>('default');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
     dispatch(getTreeCategories());
@@ -26,7 +38,7 @@ export default function CategoriesPage() {
 
   useEffect(() => {
     if (slug) {
-        dispatch(getProductsBySlugOfCategory(slug));
+      dispatch(getProductsBySlugOfCategory(slug));
     }
   }, [dispatch, slug]);
 
@@ -36,83 +48,230 @@ export default function CategoriesPage() {
     }
   }, [error]);
 
-  const currentCategoryName = categories?.find(c => c.slug === slug)?.name || "Category";
+  const currentCategory = categories?.find(c => c.slug === slug);
+
+  // Sort products
+  const sortedProducts = [...(byCategory || [])].sort((a, b) => {
+    switch (sortBy) {
+      case 'price-asc':
+        return (a.price?.currentPrice || 0) - (b.price?.currentPrice || 0);
+      case 'price-desc':
+        return (b.price?.currentPrice || 0) - (a.price?.currentPrice || 0);
+      case 'newest':
+        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+      default:
+        return 0;
+    }
+  });
+
+  const isLoading = isCategoryLoading || isProductLoading;
 
   return (
-
-    <div className="w-full relative bg-white dark:bg-black min-h-screen">
-       {(isCategoryLoading || isProductLoading) && <SpinnerLoading className="fixed inset-0 m-auto z-50" />}
-       
-       <div className={cn("transition-opacity duration-300", (isCategoryLoading || isProductLoading) ? "opacity-30" : "opacity-100")}>
-           
-           {/* Hero Section */}
-           <div className="relative w-full py-20 lg:py-32 bg-[#F5F5F7] dark:bg-[#1C1C1E] flex flex-col items-center justify-center text-center px-4 overflow-hidden mb-8">
-                {/* Background Pattern */}
-               <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none bg-[radial-gradient(#000_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px]" />
-               
-               <div className="relative z-10 space-y-4 max-w-4xl mx-auto">
-                   <h1 className="text-5xl md:text-7xl font-bold tracking-tighter text-foreground animate-in fade-in slide-in-from-bottom-4 duration-700">
-                     {currentCategoryName}
-                   </h1>
-                   <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-5 duration-700 delay-100">
-                      Explore the latest collection designed to inspire and perform.
-                   </p>
-               </div>
-           </div>
-
-           {/* Sticky Category Navigation */}
-           <div className="sticky top-[60px] z-40 w-full bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-gray-100 dark:border-zinc-800 mb-10">
-               <div className="max-w-[1400px] mx-auto px-4 py-4 overflow-x-auto no-scrollbar">
-                  <div className="flex gap-2 min-w-max">
-                        {categories && categories.length > 0 && categories.map((category) => {
-                            const isActive = category.slug === slug;
-                            return (
-                                <Link key={category._id} href={`/categories/${category.slug}`} scroll={false}>
-                                    <div className={cn(
-                                        "px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300",
-                                        isActive 
-                                            ? "bg-black text-white dark:bg-white dark:text-black shadow-lg shadow-black/5" 
-                                            : "bg-gray-100 dark:bg-zinc-800 text-muted-foreground hover:bg-gray-200 dark:hover:bg-zinc-700 hover:text-foreground"
-                                    )}>
-                                        {category.name}
-                                    </div>
-                                </Link>
-                            )
-                        })}
-                  </div>
-               </div>
-           </div>
-           
-           {/* Products Grid */}
-           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-               <div className="flex items-center justify-between mb-8">
-                  <span className="text-sm font-medium text-muted-foreground">
-                      Showing {byCategory?.length || 0} products
-                  </span>
-                  {/* Sort Controls could go here */}
-               </div>
-
-               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12">
-                {byCategory && byCategory.length > 0 ? (
-                  byCategory.map((p) => (
-                    <ProductCard key={p._id} product={p} />
-                  ))
-                ) : (
-                    !(isCategoryLoading || isProductLoading) && (
-                      <div className="col-span-full flex flex-col items-center justify-center py-32 text-center">
-                         <div className="w-24 h-24 bg-gray-50 dark:bg-zinc-900 rounded-full flex items-center justify-center mb-6">
-                            <span className="text-4xl">🔍</span>
-                         </div>
-                        <h3 className="text-xl font-bold mb-2">No products found</h3>
-                        <p className="text-muted-foreground mb-6">We couldn&apos;t find any products in this category.</p>
-                        <Button asChild className="rounded-full px-8">
-                            <Link href="/products">Browse All Products</Link>
-                        </Button>
-                      </div>
-                    )
-                )}
+    <div className="w-full min-h-screen bg-background">
+      {isLoading && <SpinnerLoading className="fixed inset-0 m-auto z-50" />}
+      
+      <div className={cn("transition-opacity duration-200", isLoading ? "opacity-50" : "opacity-100")}>
+        
+        {/* Subcategory Tabs with Images - Taobao Style */}
+        {currentCategory?.subcategories && currentCategory.subcategories.length > 0 && (
+          <div className="bg-card">
+            <div className="container-taobao py-3">
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+                <button className="p-1.5 rounded-full bg-muted hover:bg-muted/80 shrink-0">
+                  <ChevronLeft className="w-4 h-4 text-muted-foreground" />
+                </button>
+                
+                {currentCategory.subcategories.slice(0, 12).map((sub) => (
+                  <Link
+                    key={sub._id}
+                    href={`/categories/${sub.slug}`}
+                    className="flex flex-col items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-muted/50 transition-colors shrink-0 min-w-[80px]"
+                  >
+                    <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center overflow-hidden">
+                      <Package className="w-6 h-6 text-muted-foreground" />
+                    </div>
+                    <span className="text-[11px] text-foreground text-center line-clamp-1 max-w-[70px]">
+                      {sub.name}
+                    </span>
+                  </Link>
+                ))}
+                
+                <button className="p-1.5 rounded-full bg-muted hover:bg-muted/80 shrink-0">
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                </button>
               </div>
+            </div>
           </div>
+        )}
+
+        {/* Main Tabs */}
+        <div className="bg-card">
+          <div className="container-taobao">
+            <div className="flex items-center gap-4 py-2">
+              <span className="text-sm font-medium text-primary border-b-2 border-primary pb-2 -mb-2">
+                Tất cả sản phẩm
+              </span>
+              <span className="text-sm text-muted-foreground hover:text-foreground cursor-pointer pb-2 -mb-2">
+                Chính hãng
+              </span>
+              <span className="text-sm text-muted-foreground hover:text-foreground cursor-pointer pb-2 -mb-2">
+                Shop Mall
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Filter & Sort Bar - Taobao Style */}
+        <div className="bg-card sticky top-[60px] z-40">
+          <div className="container-taobao py-2">
+            <div className="flex items-center justify-between">
+              {/* Sort Tabs */}
+              <div className="flex items-center">
+                <button
+                  onClick={() => setSortBy('default')}
+                  className={cn(
+                    "px-4 py-1.5 text-xs font-medium rounded-sm transition-colors",
+                    sortBy === 'default' 
+                      ? "bg-primary text-white" 
+                      : "text-foreground hover:text-primary"
+                  )}
+                >
+                  Tổng hợp
+                </button>
+                <button
+                  onClick={() => setSortBy('sales')}
+                  className={cn(
+                    "px-4 py-1.5 text-xs font-medium transition-colors",
+                    sortBy === 'sales' 
+                      ? "text-primary" 
+                      : "text-foreground hover:text-primary"
+                  )}
+                >
+                  Bán chạy
+                </button>
+                <button
+                  onClick={() => setSortBy(sortBy === 'price-asc' ? 'price-desc' : 'price-asc')}
+                  className={cn(
+                    "px-4 py-1.5 text-xs font-medium transition-colors flex items-center gap-0.5",
+                    (sortBy === 'price-asc' || sortBy === 'price-desc')
+                      ? "text-primary" 
+                      : "text-foreground hover:text-primary"
+                  )}
+                >
+                  Giá
+                  <ChevronDown className={cn(
+                    "w-3 h-3 transition-transform",
+                    sortBy === 'price-asc' && "rotate-180"
+                  )} />
+                </button>
+                
+                {/* Price Range */}
+                <div className="flex items-center gap-1 ml-2 text-xs text-muted-foreground">
+                  <span className="text-primary">Khoảng giá</span>
+                  <ChevronDown className="w-3 h-3" />
+                </div>
+                
+                {/* Brand filter */}
+                <div className="flex items-center gap-1 ml-3 text-xs text-muted-foreground">
+                  <span>Thương hiệu</span>
+                  <ChevronDown className="w-3 h-3" />
+                </div>
+                
+                {/* More filters */}
+                <button
+                  onClick={() => setSortBy('newest')}
+                  className={cn(
+                    "px-3 py-1.5 text-xs font-medium transition-colors ml-2",
+                    sortBy === 'newest' 
+                      ? "text-primary" 
+                      : "text-foreground hover:text-primary"
+                  )}
+                >
+                  Mới nhất
+                </button>
+              </div>
+
+              {/* Right side - View mode & count */}
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-muted-foreground">
+                  {sortedProducts.length} sản phẩm
+                </span>
+                <div className="flex items-center overflow-hidden">
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={cn(
+                      "p-1.5 transition-colors",
+                      viewMode === 'grid' ? "text-primary" : "text-muted-foreground hover:text-primary"
+                    )}
+                  >
+                    <Grid3X3 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={cn(
+                      "p-1.5 transition-colors",
+                      viewMode === 'list' ? "text-primary" : "text-muted-foreground hover:text-primary"
+                    )}
+                  >
+                    <LayoutList className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Filter Tags */}
+        <div className="bg-card">
+          <div className="container-taobao py-2">
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+              <span className="px-3 py-1 text-xs bg-primary/10 text-primary rounded-full whitespace-nowrap">
+                Miễn phí vận chuyển
+              </span>
+              <span className="px-3 py-1 text-xs bg-muted text-muted-foreground rounded-full whitespace-nowrap hover:bg-primary/10 hover:text-primary cursor-pointer transition-colors">
+                Giảm giá sốc
+              </span>
+              <span className="px-3 py-1 text-xs bg-muted text-muted-foreground rounded-full whitespace-nowrap hover:bg-primary/10 hover:text-primary cursor-pointer transition-colors">
+                Hàng mới về
+              </span>
+              <span className="px-3 py-1 text-xs bg-muted text-muted-foreground rounded-full whitespace-nowrap hover:bg-primary/10 hover:text-primary cursor-pointer transition-colors">
+                Đánh giá cao
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Products Grid */}
+        <div className="container-taobao py-4">
+          {sortedProducts.length > 0 ? (
+            <div className={cn(
+              "grid gap-2",
+              viewMode === 'grid' 
+                ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5" 
+                : "grid-cols-1"
+            )}>
+              {sortedProducts.map((p) => (
+                <ProductCard key={p._id} product={p} />
+              ))}
+            </div>
+          ) : (
+            !isLoading && (
+              <div className="flex flex-col items-center justify-center py-16">
+                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                  <Package className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <h3 className="font-semibold text-foreground mb-2">Không tìm thấy sản phẩm</h3>
+                <p className="text-sm text-muted-foreground mb-4">Danh mục này chưa có sản phẩm nào</p>
+                <Link 
+                  href="/products"
+                  className="px-4 py-2 bg-primary text-white text-sm rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                  Xem tất cả sản phẩm
+                </Link>
+              </div>
+            )
+          )}
+        </div>
       </div>
     </div>
   );

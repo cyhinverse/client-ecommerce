@@ -10,11 +10,12 @@ import {
   createDiscount,
   getDiscountStatistics,
 } from "@/features/discount/discountAction";
+// Updated: Import from voucher types with backward compatibility aliases
 import {
   Discount,
   DiscountFilters,
   CreateDiscountData,
-} from "@/types/discount";
+} from "@/types/voucher";
 import { DiscountsHeader } from "@/components/admin/discounts/DiscountHeader";
 import { DiscountsStats } from "@/components/admin/discounts/DiscountStats";
 import { DiscountsTable } from "@/components/admin/discounts/DiscountTable";
@@ -144,12 +145,16 @@ export default function AdminDiscountsPage() {
 
     setIsUpdating(true);
     try {
-      await dispatch(
-        updateDiscount({
-          id: selectedDiscount._id,
-          ...discountData,
-        })
-      ).unwrap();
+      // Extract shopId as string if it's an object
+      const updateData = {
+        ...discountData,
+        shopId: typeof discountData.shopId === 'object' 
+          ? (discountData.shopId as { _id: string })._id 
+          : discountData.shopId,
+        id: selectedDiscount._id,
+      };
+      
+      await dispatch(updateDiscount(updateData)).unwrap();
 
       // Refresh list
       const params: Record<string, string | number | boolean> = {
@@ -237,7 +242,7 @@ export default function AdminDiscountsPage() {
     (discount) => new Date(discount.endDate) < new Date()
   ).length;
   const highUsageDiscounts = discounts.filter(
-    (discount) => discount.usedCount >= discount.usageLimit * 0.8
+    (discount) => (discount.usedCount ?? discount.usageCount ?? 0) >= discount.usageLimit * 0.8
   ).length;
 
   if (discountState?.error) {

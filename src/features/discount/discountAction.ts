@@ -1,63 +1,122 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { CreateDiscountData, UpdateDiscountData } from "@/types/discount";
+import { 
+  CreateVoucherData, 
+  UpdateVoucherData, 
+  VoucherFilters,
+  VoucherScope,
+  // Backward compatibility aliases
+  CreateDiscountData,
+  UpdateDiscountData,
+} from "@/types/voucher";
 import instance from "@/api/api";
 
-export const getAllDiscounts = createAsyncThunk(
-  "discount/getAllDiscounts",
-  async (params: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    discountType?: string;
-    isActive?: boolean;
-  }) => {
-    const response = await instance.get("/discounts", { params });
+// ==================== VOUCHER ACTIONS (NEW) ====================
 
-    console.log("Check data res from discount action", response.data)
-    return response.data
-  }
-);
-
-export const getDiscountById = createAsyncThunk(
-  "discount/getDiscountById",
-  async (discountId: string) => {
-    const response = await instance.get(`/discounts/${discountId}`);
+// Get all vouchers
+export const getAllVouchers = createAsyncThunk(
+  "voucher/getAllVouchers",
+  async (params: Partial<VoucherFilters>) => {
+    const response = await instance.get("/vouchers", { params });
     return response.data;
   }
 );
 
-export const createDiscount = createAsyncThunk(
-  "discount/createDiscount",
-  async (discountData: CreateDiscountData) => {
-    const response = await instance.post("/discounts", discountData);
+// Get voucher by ID
+export const getVoucherById = createAsyncThunk(
+  "voucher/getVoucherById",
+  async (voucherId: string) => {
+    const response = await instance.get(`/vouchers/${voucherId}`);
     return response.data;
   }
 );
 
-export const updateDiscount = createAsyncThunk(
-  "discount/updateDiscount",
-  async ({ id, ...updateData }: UpdateDiscountData & { id: string }) => {
-    const response = await instance.put(`/discounts/${id}`, updateData);
+// Create voucher
+export const createVoucher = createAsyncThunk(
+  "voucher/createVoucher",
+  async (voucherData: CreateVoucherData) => {
+    const response = await instance.post("/vouchers", voucherData);
     return response.data;
   }
 );
 
-export const deleteDiscount = createAsyncThunk(
-  "discount/deleteDiscount",
-  async (discountId: string) => {
-    await instance.delete(`/discounts/${discountId}`);
-    return discountId;
+// Update voucher
+export const updateVoucher = createAsyncThunk(
+  "voucher/updateVoucher",
+  async ({ id, ...updateData }: UpdateVoucherData & { id: string }) => {
+    const response = await instance.put(`/vouchers/${id}`, updateData);
+    return response.data;
   }
 );
 
-export const getDiscountStatistics = createAsyncThunk(
-  "discount/getDiscountStatistics",
+// Delete voucher
+export const deleteVoucher = createAsyncThunk(
+  "voucher/deleteVoucher",
+  async (voucherId: string) => {
+    await instance.delete(`/vouchers/${voucherId}`);
+    return voucherId;
+  }
+);
+
+// Get voucher statistics
+export const getVoucherStatistics = createAsyncThunk(
+  "voucher/getVoucherStatistics",
   async () => {
-    const response = await instance.get("/discounts/statistics");
+    const response = await instance.get("/vouchers/statistics");
     return response.data;
   }
 );
 
+// Apply voucher code
+export const applyVoucherCode = createAsyncThunk(
+  "voucher/applyVoucherCode",
+  async ({
+    code,
+    orderTotal,
+    shopId,
+  }: {
+    code: string;
+    orderTotal: number;
+    shopId?: string;
+  }) => {
+    const response = await instance.post("/vouchers/apply", {
+      code,
+      orderTotal,
+      shopId,
+    });
+    return response.data;
+  }
+);
+
+// Get available vouchers for checkout
+export const getAvailableVouchers = createAsyncThunk(
+  "voucher/getAvailableVouchers",
+  async ({
+    orderTotal,
+    shopId,
+    scope,
+  }: {
+    orderTotal: number;
+    shopId?: string;
+    scope?: VoucherScope;
+  }) => {
+    const response = await instance.get("/vouchers/available", {
+      params: { orderTotal, shopId, scope },
+    });
+    return response.data;
+  }
+);
+
+// ==================== BACKWARD COMPATIBILITY ALIASES ====================
+// These map old discount actions to new voucher actions
+
+export const getAllDiscounts = getAllVouchers;
+export const getDiscountById = getVoucherById;
+export const createDiscount = createVoucher;
+export const updateDiscount = updateVoucher;
+export const deleteDiscount = deleteVoucher;
+export const getDiscountStatistics = getVoucherStatistics;
+
+// Apply discount code (backward compatible)
 export const applyDiscountCode = createAsyncThunk(
   "discount/applyDiscountCode",
   async ({
@@ -69,10 +128,10 @@ export const applyDiscountCode = createAsyncThunk(
     orderTotal: number;
     productIds: string[];
   }) => {
-    const response = await instance.post("/discounts/apply", {
+    // Use voucher endpoint
+    const response = await instance.post("/vouchers/apply", {
       code,
       orderTotal,
-      productIds,
     });
     return response.data;
   }

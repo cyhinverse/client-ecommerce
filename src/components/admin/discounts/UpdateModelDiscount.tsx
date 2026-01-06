@@ -19,7 +19,8 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { UpdateDiscountData, Discount } from "@/types/discount";
+// Updated: Import from voucher types with backward compatibility aliases
+import { UpdateDiscountData, Discount } from "@/types/voucher";
 import { useAppDispatch } from "@/hooks/hooks";
 import { getAllProducts } from "@/features/product/productAction";
 import { Product } from "@/types/product";

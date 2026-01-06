@@ -15,11 +15,17 @@ import {
   Utensils,
   Dumbbell,
   Sparkles,
-  ChevronRight,
   Package,
+  Headphones,
+  Camera,
+  Gamepad2,
+  BookOpen,
+  Flower2,
+  Clock,
+  Ticket,
 } from "lucide-react";
 
-// Icon mapping for categories
+// Icon mapping for categories - Taobao style
 const categoryIcons: Record<string, React.ReactNode> = {
   electronics: <Laptop className="w-4 h-4" />,
   phones: <Smartphone className="w-4 h-4" />,
@@ -35,6 +41,11 @@ const categoryIcons: Record<string, React.ReactNode> = {
   food: <Utensils className="w-4 h-4" />,
   sports: <Dumbbell className="w-4 h-4" />,
   beauty: <Sparkles className="w-4 h-4" />,
+  audio: <Headphones className="w-4 h-4" />,
+  camera: <Camera className="w-4 h-4" />,
+  gaming: <Gamepad2 className="w-4 h-4" />,
+  books: <BookOpen className="w-4 h-4" />,
+  garden: <Flower2 className="w-4 h-4" />,
   default: <Package className="w-4 h-4" />,
 };
 
@@ -68,88 +79,128 @@ export default function CategorySidebar({ className }: CategorySidebarProps) {
   const activeCategory = categories.find((c) => c._id === hoveredCategory);
 
   return (
-    <div
-      className={cn(
-        "w-[220px] bg-card rounded-xl relative border border-none", // Removed shadow
-        className
-      )}
-    >
-      <ul className="py-1 h-full overflow-y-auto">
-        {categories.slice(0, 12).map((category) => (
-          <li
-            key={category._id}
-            className="relative"
-            onMouseEnter={() => setHoveredCategory(category._id)}
-            onMouseLeave={() => setHoveredCategory(null)}
-          >
-            <Link
-              href={`/categories/${category.slug}`}
-              className={cn(
-                "flex items-center justify-between px-4 py-2.5 text-sm transition-all rounded-lg mx-1",
-                hoveredCategory === category._id
-                  ? "bg-muted text-primary"
-                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-              )}
+    <div className="relative z-50">
+      <div
+        className={cn(
+          "w-[220px] bg-card rounded-lg border border-border",
+          className
+        )}
+        onMouseLeave={() => setHoveredCategory(null)}
+      >
+        {/* Promo Banner - First Row */}
+        <Link 
+          href="/vouchers"
+          className="flex items-center gap-2 px-4 py-2.5 text-primary hover:bg-primary/5 transition-colors border-b border-border"
+        >
+          <Clock className="w-4 h-4" />
+          <span className="text-[13px] font-medium">Flash Sale</span>
+          <span className="text-[13px] text-muted-foreground">/</span>
+          <span className="text-[13px] text-primary">Giảm đến 50%</span>
+        </Link>
+
+        {/* Category List - Taobao Style */}
+        <ul className="py-1">
+          {categories.slice(0, 10).map((category) => (
+            <li
+              key={category._id}
+              className="relative"
+              onMouseEnter={() => setHoveredCategory(category._id ?? null)}
             >
-              <div className="flex items-center gap-3">
+              <div
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 text-[13px] transition-all duration-150 cursor-pointer",
+                  hoveredCategory === category._id
+                    ? "bg-primary/5"
+                    : "hover:bg-muted/50"
+                )}
+              >
+                {/* Icon */}
                 <span
                   className={cn(
-                    "transition-colors",
+                    "transition-colors duration-150 flex-shrink-0",
                     hoveredCategory === category._id
                       ? "text-primary"
                       : "text-muted-foreground"
                   )}
                 >
-                  {getIcon(category.slug)}
+                  {getIcon(category.slug ?? '')}
                 </span>
-                <span className="truncate font-medium">{category.name}</span>
+                
+                {/* Category Name + Inline Subcategories */}
+                <div className="flex items-center gap-1 flex-1 min-w-0 overflow-hidden">
+                  <Link
+                    href={`/categories/${category.slug ?? ''}`}
+                    className={cn(
+                      "font-medium whitespace-nowrap transition-colors",
+                      hoveredCategory === category._id
+                        ? "text-primary"
+                        : "text-foreground hover:text-primary"
+                    )}
+                  >
+                    {category.name}
+                  </Link>
+                  
+                  {/* Inline Subcategories with / separator */}
+                  {category.subcategories && category.subcategories.length > 0 && (
+                    <div className="flex items-center gap-1 text-muted-foreground overflow-hidden">
+                      {category.subcategories.slice(0, 3).map((sub, idx) => (
+                        <span key={sub._id} className="flex items-center gap-1 whitespace-nowrap">
+                          <span className="text-border">/</span>
+                          <Link
+                            href={`/categories/${sub.slug}`}
+                            className="hover:text-primary transition-colors truncate"
+                          >
+                            {sub.name}
+                          </Link>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
+            </li>
+          ))}
+        </ul>
+      </div>
 
-              {category.subcategories && category.subcategories.length > 0 && (
-                <ChevronRight className="w-3.5 h-3.5 opacity-50" />
-              )}
-            </Link>
-          </li>
-        ))}
-      </ul>
-
-      {/* Subcategory Popup - Shows on hover */}
+      {/* Mega Menu Popup - Shows on hover */}
       {activeCategory &&
         activeCategory.subcategories &&
         activeCategory.subcategories.length > 0 && (
           <div
-            className="absolute left-full top-0 ml-1 w-[600px] bg-white dark:bg-zinc-900 shadow-xl rounded-lg border border-red-500 dark:border-red-600 z-[100] min-h-[460px] max-h-[460px] overflow-y-auto p-6"
-            onMouseEnter={() => setHoveredCategory(activeCategory._id)}
+            className="absolute left-[216px] top-0 pl-1 z-[9999]"
+            onMouseEnter={() => setHoveredCategory(activeCategory._id ?? null)}
             onMouseLeave={() => setHoveredCategory(null)}
           >
-            <h3 className="text-base font-bold text-gray-900 dark:text-white mb-4 pb-2 border-b border-gray-100 dark:border-zinc-700">
-              {activeCategory.name}
-            </h3>
-            <div className="grid grid-cols-3 gap-x-6 gap-y-4">
-              {activeCategory.subcategories.map((child) => (
-                <div key={child._id} className="space-y-2">
+            {/* Invisible bridge */}
+            <div className="absolute left-0 top-0 w-2 h-full" />
+            <div className="w-[500px] bg-card shadow-lg rounded-lg border border-primary p-4 max-h-[400px] overflow-y-auto">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-3 pb-2 border-b border-border">
+                <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                  {getIcon(activeCategory.slug ?? '')}
+                  {activeCategory.name}
+                </h3>
+                <Link
+                  href={`/categories/${activeCategory.slug}`}
+                  className="text-xs text-primary hover:underline"
+                >
+                  Xem tất cả →
+                </Link>
+              </div>
+
+              {/* Subcategories Grid */}
+              <div className="grid grid-cols-4 gap-2">
+                {activeCategory.subcategories.map((child) => (
                   <Link
+                    key={child._id}
                     href={`/categories/${child.slug}`}
-                    className="text-sm font-semibold text-red-600 hover:text-red-700 hover:underline block"
+                    className="px-2 py-1.5 text-xs text-muted-foreground hover:text-primary hover:bg-primary/5 rounded transition-colors text-center truncate"
                   >
                     {child.name}
                   </Link>
-                  {child.subcategories && child.subcategories.length > 0 && (
-                    <ul className="space-y-1.5">
-                      {child.subcategories.slice(0, 6).map((subChild) => (
-                        <li key={subChild._id}>
-                          <Link
-                            href={`/categories/${subChild.slug}`}
-                            className="text-xs text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-500 transition-colors block"
-                          >
-                            {subChild.name}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         )}

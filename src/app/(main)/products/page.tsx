@@ -1,15 +1,17 @@
+// ProductsPage - Taobao Style with Sticky Category Tabs
 "use client";
 
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
 import { getAllProducts } from "@/features/product/productAction";
+import { getAllCategories } from "@/features/category/categoryAction";
 import { Button } from "@/components/ui/button";
-import { SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal, Grid3X3, LayoutGrid, ChevronDown } from "lucide-react";
 import ProductFilter from "@/components/product/ProductFilter";
+import ProductGrid from "@/components/product/ProductGrid";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { Params, ProductFilters, ProductUrlFilters } from "@/types/product";
-import { ProductCard } from "@/components/product/ProductCard";
 import {
   Sheet,
   SheetContent,
@@ -26,13 +28,30 @@ const DEFAULT_FILTERS: ProductUrlFilters = {
   colors: "",
   sizes: "",
   sortBy: "newest",
+  category: "",
 };
+
+// Sort tabs for Taobao style
+const SORT_TABS = [
+  { label: "Phổ biến", value: "popular" },
+  { label: "Mới nhất", value: "newest" },
+  { label: "Bán chạy", value: "best_selling" },
+  { label: "Giá", value: "price", hasDropdown: true },
+];
 
 export default function ProductsPage() {
   const dispatch = useAppDispatch();
   const { all: products, isLoading } = useAppSelector((state) => state.product);
+  const { categories } = useAppSelector((state) => state.category);
 
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [priceSort, setPriceSort] = useState<"asc" | "desc" | null>(null);
+
+  // Fetch categories on mount
+  useEffect(() => {
+    dispatch(getAllCategories({}));
+  }, [dispatch]);
 
   const {
     filters: urlFilters,
@@ -75,12 +94,13 @@ export default function ProductsPage() {
       if (filters.rating.length > 0) params.rating = filters.rating.join(",");
       if (filters.colors.length > 0) params.colors = filters.colors.join(",");
       if (filters.sizes.length > 0) params.sizes = filters.sizes.join(",");
+      if (activeCategory) params.category = activeCategory;
 
       dispatch(getAllProducts(params));
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [dispatch, filters]);
+  }, [dispatch, filters, activeCategory]);
 
   const handleFilterChange = useCallback(
     (newFilters: Partial<ProductFilters>) => {
@@ -106,82 +126,150 @@ export default function ProductsPage() {
 
   const handleClearFilters = useCallback(() => {
     resetFilters();
+    setActiveCategory(null);
+    setPriceSort(null);
   }, [resetFilters]);
 
-  return (
-    <div className="w-full relative">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 lg:mb-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">All Products</h1>
-          <p className="text-muted-foreground mt-1">
-            {products?.length || 0} items
-          </p>
-        </div>
+  const handleSortTabClick = (value: string) => {
+    if (value === "price") {
+      const newSort = priceSort === "asc" ? "desc" : "asc";
+      setPriceSort(newSort);
+      handleFilterChange({ sortBy: `price_${newSort}` });
+    } else {
+      setPriceSort(null);
+      handleFilterChange({ sortBy: value });
+    }
+  };
 
-        <div className="flex items-center gap-2">
-          {/* Mobile Filter Trigger */}
-          <Sheet open={isMobileFilterOpen} onOpenChange={setIsMobileFilterOpen}>
-            <SheetTrigger asChild>
-              <Button variant="outline" className="lg:hidden rounded-full">
-                <SlidersHorizontal className="w-4 h-4 mr-2" />
-                Filters
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] overflow-y-auto">
-              <SheetHeader>
-                <SheetTitle>Filters</SheetTitle>
-              </SheetHeader>
-              <div className="mt-6 space-y-6">
-                <ProductFilter
-                  filters={filters}
-                  onFilterChange={handleFilterChange}
-                  onClearFilters={handleClearFilters}
-                />
+  const handleCategoryClick = (categoryId: string | null | undefined) => {
+    setActiveCategory(categoryId ?? null);
+  };
+
+  return (
+    <div className="w-full bg-background min-h-screen -mt-4 -mx-4 px-4 pt-4">
+      {/* Sticky Category Tabs */}
+      <div className="sticky top-[120px] z-30 bg-white border-b border-gray-200 -mx-4 px-4 mb-4">
+        <div className="max-w-[1400px] mx-auto">
+          {/* Category Pills */}
+          <div className="flex items-center gap-2 py-3 overflow-x-auto scrollbar-hide">
+            <button
+              onClick={() => handleCategoryClick(null)}
+              className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                !activeCategory
+                  ? "bg-[#E53935] text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              Tất cả
+            </button>
+            {categories?.slice(0, 8).map((category) => (
+              <button
+                key={category._id}
+                onClick={() => handleCategoryClick(category._id)}
+                className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  activeCategory === category._id
+                    ? "bg-[#E53935] text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                {category.name}
+              </button>
+            ))}
+          </div>
+
+          {/* Sort Tabs */}
+          <div className="flex items-center gap-1 py-2 border-t border-gray-100">
+            <span className="text-sm text-gray-500 mr-2">Sắp xếp theo</span>
+            {SORT_TABS.map((tab) => (
+              <button
+                key={tab.value}
+                onClick={() => handleSortTabClick(tab.value)}
+                className={`flex items-center gap-1 px-4 py-1.5 text-sm font-medium rounded transition-colors ${
+                  filters.sortBy === tab.value ||
+                  (tab.value === "price" && filters.sortBy?.startsWith("price"))
+                    ? "bg-[#E53935] text-white"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                {tab.label}
+                {tab.hasDropdown && (
+                  <ChevronDown
+                    className={`h-3.5 w-3.5 transition-transform ${
+                      priceSort === "desc" ? "rotate-180" : ""
+                    }`}
+                  />
+                )}
+              </button>
+            ))}
+
+            {/* Mobile Filter Button */}
+            <Sheet open={isMobileFilterOpen} onOpenChange={setIsMobileFilterOpen}>
+              <SheetTrigger asChild>
                 <Button
                   variant="outline"
-                  className="w-full rounded-full"
-                  onClick={handleClearFilters}
+                  size="sm"
+                  className="lg:hidden ml-auto rounded h-8 border-gray-200"
                 >
-                  Clear All
+                  <SlidersHorizontal className="w-4 h-4 mr-1.5" />
+                  Lọc
                 </Button>
-              </div>
-            </SheetContent>
-          </Sheet>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[280px] overflow-y-auto p-0">
+                <SheetHeader className="p-4 border-b">
+                  <SheetTitle>Bộ lọc</SheetTitle>
+                </SheetHeader>
+                <div className="p-4">
+                  <ProductFilter
+                    filters={filters}
+                    onFilterChange={handleFilterChange}
+                    onClearFilters={handleClearFilters}
+                  />
+                </div>
+              </SheetContent>
+            </Sheet>
+
+            {/* Product Count */}
+            <div className="hidden lg:flex items-center ml-auto text-sm text-gray-500">
+              <span className="font-medium text-gray-800">{products?.length || 0}</span>
+              <span className="ml-1">sản phẩm</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-12 align-top">
-        {/* Desktop Sidebar */}
-        <aside className="hidden lg:block w-64 flex-shrink-0 sticky top-24 h-fit">
+      {/* Main Content */}
+      <div className="max-w-[1400px] mx-auto">
+        <div className="flex gap-4">
+          {/* Desktop Sidebar */}
           <ProductFilter
             filters={filters}
             onFilterChange={handleFilterChange}
             onClearFilters={handleClearFilters}
           />
-        </aside>
 
-        {/* Product Grid */}
-        <div className="flex-1 min-h-[500px] relative">
-          {isLoading && (
-            <div className="absolute inset-0 z-10 bg-background/50 backdrop-blur-sm flex items-center justify-center rounded-xl">
-              <SpinnerLoading />
+          {/* Product Grid */}
+          <div className="flex-1 min-h-[500px] relative">
+            {isLoading && (
+              <div className="absolute inset-0 z-10 bg-white/60 flex items-center justify-center rounded-lg">
+                <SpinnerLoading />
+              </div>
+            )}
+
+            <div className="bg-[#f7f7f7] rounded-lg p-4">
+              <ProductGrid products={products || []} isLoading={isLoading && !products?.length} />
             </div>
-          )}
 
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-8 sm:gap-x-6 sm:gap-y-10">
-            {products && products.length > 0
-              ? products.map((product) => (
-                  <ProductCard key={product._id} product={product} />
-                ))
-              : !isLoading && (
-                  <div className="col-span-full py-20 text-center text-muted-foreground">
-                    <p className="text-lg">No products found.</p>
-                    <Button variant="link" onClick={handleClearFilters}>
-                      Clear all filters
-                    </Button>
-                  </div>
-                )}
+            {/* Load More */}
+            {products && products.length > 0 && (
+              <div className="flex justify-center mt-6">
+                <Button
+                  variant="outline"
+                  className="px-8 h-10 rounded border-[#E53935] text-[#E53935] hover:bg-[#E53935]/5"
+                >
+                  Xem thêm sản phẩm
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>

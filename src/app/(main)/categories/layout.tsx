@@ -6,7 +6,7 @@ export default function LayoutCategories({
   children: React.ReactNode;
 }) {
   return (
-    <main className="w-full min-h-screen bg-white dark:bg-black">
+    <main className="w-full min-h-screen bg-background">
       {children}
     </main>
   );

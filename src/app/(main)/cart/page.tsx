@@ -1,11 +1,10 @@
+// CartPage - Taobao Style with Shop Grouping
 "use client";
-import { useEffect, useState } from "react";
-import { Plus, Minus, ShoppingBag, ArrowRight } from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
+import { Plus, Minus, ShoppingBag, ArrowRight, Store, Trash2, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import {
@@ -27,6 +26,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { groupCartItemsByShop, CartItem } from "@/types/cart";
 
 export default function CartPage() {
   const {
@@ -55,11 +55,12 @@ export default function CartPage() {
   const handleClearCart = () => {
     dispatch(clearCart());
     dispatch(clearAppliedDiscount());
-    toast.success("Cart cleared successfully");
+    toast.success("Đã xóa giỏ hàng");
   };
 
   const handleRemoveItem = (itemId: string) => {
     dispatch(removeFromCart({ itemId }));
+    toast.success("Đã xóa sản phẩm");
   };
 
   const handleToggleSelect = (itemId: string) => {
@@ -76,7 +77,7 @@ export default function CartPage() {
 
   const handleCheckout = () => {
     if (selectedItemsCount === 0) {
-      toast.error("Please select at least one item to checkout");
+      toast.error("Vui lòng chọn ít nhất một sản phẩm");
       return;
     }
     dispatch(prepareForCheckout());
@@ -85,17 +86,19 @@ export default function CartPage() {
 
   const handleApplyDiscount = async () => {
     if (!promoCode.trim()) {
-      toast.error("Please enter a discount code");
+      toast.error("Vui lòng nhập mã giảm giá");
       return;
     }
 
     if (!selectedItems || selectedItems.length === 0) {
-      toast.error("Please select items to apply discount code");
+      toast.error("Vui lòng chọn sản phẩm để áp dụng mã giảm giá");
       return;
     }
 
     const orderTotal = checkoutTotal || 0;
-    const productIds = selectedItems.map((item) => item.productId._id);
+    const productIds = selectedItems.map((item) => 
+      typeof item.productId === 'object' ? item.productId._id : item.productId
+    );
 
     try {
       await dispatch(
@@ -105,10 +108,10 @@ export default function CartPage() {
           productIds,
         })
       ).unwrap();
-      toast.success("Discount code applied successfully!");
+      toast.success("Áp dụng mã giảm giá thành công!");
     } catch (err) {
       const errorMessage =
-        (err as Error).message || "Failed to apply discount code";
+        (err as Error).message || "Không thể áp dụng mã giảm giá";
       toast.error(errorMessage);
       dispatch(clearAppliedDiscount());
     }
@@ -117,23 +120,25 @@ export default function CartPage() {
   const handleRemoveDiscount = () => {
     dispatch(clearAppliedDiscount());
     setPromoCode("");
-    toast.success("Discount code removed");
+    toast.success("Đã xóa mã giảm giá");
   };
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
+      maximumFractionDigits: 0,
     }).format(price);
   };
 
   const subtotal =
     cartData?.items?.reduce((sum, item) => {
+      const discountPrice = item.price?.discountPrice ?? 0;
+      const currentPrice = item.price?.currentPrice ?? 0;
       const effectivePrice =
-        item.price.discountPrice > 0 &&
-        item.price.discountPrice < item.price.currentPrice
-          ? item.price.discountPrice
-          : item.price.currentPrice;
+        discountPrice > 0 && discountPrice < currentPrice
+          ? discountPrice
+          : currentPrice;
       return sum + (effectivePrice || 0) * item.quantity;
     }, 0) ?? 0;
 
@@ -146,41 +151,63 @@ export default function CartPage() {
       : false;
 
   const hasCartItems = cartData?.items && cartData.items.length > 0;
-
   const hasSelectedItems = selectedItems && selectedItems.length > 0;
 
+  // Group cart items by shop for display
+  const itemsByShop = useMemo(() => {
+    if (!cartData?.items) return [];
+    return groupCartItemsByShop(cartData.items);
+  }, [cartData?.items]);
+
+  // Helper to get item image
+  const getItemImage = (item: CartItem): string | null => {
+    if (item.variant?.images?.[0]) return item.variant.images[0];
+    if (typeof item.productId === 'object' && item.productId.images?.[0]) {
+      return item.productId.images[0];
+    }
+    return null;
+  };
+
+  // Helper to get effective price
+  const getEffectivePrice = (item: CartItem): number => {
+    const discountPrice = item.price?.discountPrice ?? 0;
+    const currentPrice = item.price?.currentPrice ?? 0;
+    return discountPrice > 0 && discountPrice < currentPrice
+      ? discountPrice
+      : currentPrice;
+  };
+
   if (error) {
-    toast.error("Error loading cart");
+    toast.error("Lỗi khi tải giỏ hàng");
   }
 
-  // Empty State
+  // Empty State - Taobao Style
   if (!isLoading && (!cartData?.items || cartData.items.length === 0)) {
     return (
-      <div className="min-h-[80vh] flex flex-col items-center justify-center p-4">
+      <div className="min-h-[70vh] flex flex-col items-center justify-center p-4 bg-background">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="text-center max-w-md space-y-6"
+          className="text-center max-w-md space-y-4"
         >
-          <div className="w-24 h-24 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-6">
-            <ShoppingBag className="h-10 w-10 text-muted-foreground/50" />
+          <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <ShoppingBag className="h-10 w-10 text-gray-300" />
           </div>
 
           <div className="space-y-2">
-            <h2 className="text-3xl font-semibold tracking-tight text-foreground">
-              Your bag is empty.
+            <h2 className="text-xl font-semibold text-gray-800">
+              Giỏ hàng trống
             </h2>
-            <p className="text-muted-foreground text-lg">
-              Start shopping to add items to your bag.
+            <p className="text-gray-500 text-sm">
+              Hãy thêm sản phẩm vào giỏ hàng của bạn
             </p>
           </div>
 
           <Link href="/products" className="block pt-4">
             <Button
-              size="lg"
-              className="rounded-full px-8 h-12 text-base shadow-lg hover:shadow-xl transition-all"
+              className="rounded bg-[#E53935] hover:bg-[#D32F2F] px-8 h-10 text-sm"
             >
-              Start Shopping <ArrowRight className="ml-2 h-4 w-4" />
+              Mua sắm ngay <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
         </motion.div>
@@ -189,311 +216,282 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F5F7] dark:bg-black/50 py-12 md:py-20 transition-colors duration-500">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header - Apple Style: Big, bold typography */}
-        <div className="mb-12 border-b border-border/40 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground mb-2">
-              Review your bag.
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              Free delivery and free returns.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {hasCartItems && (
-              <>
-                <Button
-                  variant="ghost"
-                  onClick={isAllSelected ? handleUnselectAll : handleSelectAll}
-                  className="text-primary hover:text-primary/80 font-medium"
-                >
-                  {isAllSelected ? "Deselect All" : "Select All Items"}
-                </Button>
-
-                <div className="h-4 w-px bg-border/50 mx-2" />
-
-                <Button
-                  variant="ghost"
-                  onClick={handleClearCart}
-                  className="text-muted-foreground hover:text-destructive transition-colors"
-                >
-                  Clear Cart
-                </Button>
-              </>
-            )}
-          </div>
+    <div className="min-h-screen bg-background py-4 -mt-4 -mx-4 px-4">
+      <div className="max-w-[1200px] mx-auto">
+        {/* Header */}
+        <div className="bg-[#f7f7f7] rounded-sm mb-4 p-4">
+          <h1 className="text-xl font-bold text-gray-800">Giỏ hàng của bạn</h1>
         </div>
 
-        <div className="grid lg:grid-cols-12 gap-12 items-start">
-          {/* Cart Items List */}
-          <div className="lg:col-span-8 space-y-6">
+        <div className="flex flex-col lg:flex-row gap-4">
+          {/* Cart Items */}
+          <div className="flex-1 space-y-4">
             {isLoading && <SpinnerLoading className="py-20" />}
 
+            {/* Select All Header */}
+            {hasCartItems && (
+              <div className="bg-[#f7f7f7] rounded-sm p-4 flex items-center gap-4 text-sm">
+                <Checkbox
+                  checked={isAllSelected}
+                  onCheckedChange={() => isAllSelected ? handleUnselectAll() : handleSelectAll()}
+                  className="h-4 w-4 rounded border-gray-300 data-[state=checked]:bg-[#E53935] data-[state=checked]:border-[#E53935]"
+                />
+                <span className="text-gray-600">Chọn tất cả ({cartData?.items?.length || 0} sản phẩm)</span>
+                <button
+                  onClick={handleClearCart}
+                  className="ml-auto text-gray-500 hover:text-red-500 flex items-center gap-1"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Xóa tất cả
+                </button>
+              </div>
+            )}
+
+            {/* Items Grouped by Shop */}
             <AnimatePresence mode="popLayout">
-              {cartData?.items?.map((item, index) => (
+              {itemsByShop.map((shopGroup) => (
                 <motion.div
-                  key={item._id}
+                  key={shopGroup.shop._id}
                   layout
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
-                  className="group relative bg-white dark:bg-[#1c1c1e] rounded-3xl p-6 shadow-sm border border-border/20 overflow-hidden"
+                  className="bg-[#f7f7f7] rounded-sm overflow-hidden"
                 >
-                  <div className="flex gap-6 sm:gap-8">
-                    {/* Checkbox - Custom Style */}
-                    <div className="pt-2">
+                  {/* Shop Header */}
+                  <div className="flex items-center gap-3 p-4 border-b border-gray-100">
+                    <Checkbox
+                      checked={shopGroup.items.every(item => item.selected)}
+                      onCheckedChange={() => {
+                        const allSelected = shopGroup.items.every(item => item.selected);
+                        shopGroup.items.forEach(item => {
+                          if (allSelected ? item.selected : !item.selected) {
+                            handleToggleSelect(item._id);
+                          }
+                        });
+                      }}
+                      className="h-4 w-4 rounded border-gray-300 data-[state=checked]:bg-[#E53935] data-[state=checked]:border-[#E53935]"
+                    />
+                    <Store className="h-4 w-4 text-[#E53935]" />
+                    <span className="font-medium text-gray-800">{shopGroup.shop.name}</span>
+                    <span className="text-xs text-[#E53935] border border-[#E53935] px-1.5 py-0.5 rounded">Mall</span>
+                  </div>
+
+                  {/* Shop Items */}
+                  {shopGroup.items.map((item) => (
+                    <div
+                      key={item._id}
+                      className="flex items-start gap-4 p-4 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors"
+                    >
+                      {/* Checkbox */}
                       <Checkbox
                         checked={item.selected || false}
                         onCheckedChange={() => handleToggleSelect(item._id)}
-                        className="h-5 w-5 rounded-full border-muted-foreground/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary transition-all"
+                        className="h-4 w-4 mt-4 rounded border-gray-300 data-[state=checked]:bg-[#E53935] data-[state=checked]:border-[#E53935]"
                       />
-                    </div>
 
-                    {/* Image */}
-                    <Link
-                      href={`/products/${item.productId._id}`}
-                      className="shrink-0"
-                    >
-                      <div className="relative w-28 h-28 sm:w-36 sm:h-36 bg-[#F5F5F7] dark:bg-black/20 rounded-2xl overflow-hidden">
-                        {item.variant?.images?.[0] ? (
-                          <Image
-                            src={item.variant.images[0]}
-                            alt={item.productId.name}
-                            fill
-                            className="object-contain p-2 hover:scale-105 transition-transform duration-500"
-                          />
-                        ) : item.productId.images?.[0] ? (
-                          <Image
-                            src={item.productId.images[0]}
-                            alt={item.productId.name}
-                            fill
-                            className="object-contain p-2 hover:scale-105 transition-transform duration-500"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
-                            No Image
-                          </div>
-                        )}
-                      </div>
-                    </Link>
-
-                    {/* Content */}
-                    <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
-                      <div>
-                        <div className="flex justify-between items-start gap-4">
-                          <Link
-                            href={`/products/${item.productId._id}`}
-                            className="hover:underline"
-                          >
-                            <h3 className="font-semibold text-lg sm:text-xl text-foreground truncate max-w-[200px] sm:max-w-md">
-                              {item.productId.name}
-                            </h3>
-                          </Link>
-                          <div className="text-right">
-                            <p className="font-semibold text-lg text-foreground">
-                              {formatPrice(
-                                item.price.discountPrice > 0 &&
-                                  item.price.discountPrice <
-                                    item.price.currentPrice
-                                  ? item.price.discountPrice
-                                  : item.price.currentPrice
-                              )}
-                            </p>
-                            {item.price.discountPrice > 0 &&
-                              item.price.currentPrice >
-                                item.price.discountPrice && (
-                                <p className="text-sm text-muted-foreground line-through">
-                                  {formatPrice(item.price.currentPrice)}
-                                </p>
-                              )}
-                          </div>
-                        </div>
-
-                        <div className="mt-2 text-sm text-muted-foreground flex flex-wrap gap-x-4 gap-y-1">
-                          {item.productId.category?.name && (
-                            <span>{item.productId.category.name}</span>
-                          )}
-
-                          {item.variant?.color && (
-                            <div className="flex items-center gap-1.5">
-                              <div
-                                className="w-3 h-3 rounded-full border border-border shadow-sm"
-                                style={{ backgroundColor: item.variant.color }}
-                              />
-                              <span className="capitalize">
-                                {item.variant.color}
-                              </span>
+                      {/* Image */}
+                      <Link
+                        href={`/products/${typeof item.productId === 'object' ? item.productId.slug || item.productId._id : item.productId}`}
+                        className="shrink-0"
+                      >
+                        <div className="relative w-20 h-20 bg-gray-100 rounded overflow-hidden">
+                          {getItemImage(item) ? (
+                            <Image
+                              src={getItemImage(item)!}
+                              alt={typeof item.productId === 'object' ? item.productId.name : 'Product'}
+                              fill
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                              No Image
                             </div>
                           )}
-
-                          {item.variant?.size && (
-                            <span>Size: {item.variant.size}</span>
-                          )}
                         </div>
+                      </Link>
 
-                        {item.variant?.stock !== undefined &&
-                          item.variant.stock < 5 && (
-                            <p className="text-xs text-orange-600 mt-2 font-medium">
-                              Only {item.variant.stock} left in stock - order
-                              soon.
-                            </p>
-                          )}
-                      </div>
+                      {/* Product Info */}
+                      <div className="flex-1 min-w-0">
+                        <Link
+                          href={`/products/${typeof item.productId === 'object' ? item.productId.slug || item.productId._id : item.productId}`}
+                          className="hover:text-[#E53935] transition-colors"
+                        >
+                          <h3 className="text-sm text-gray-800 line-clamp-2 mb-1">
+                            {typeof item.productId === 'object' ? item.productId.name : 'Sản phẩm'}
+                          </h3>
+                        </Link>
+                        
+                        {/* Variation Info */}
+                        {(item.variationInfo || item.variant) && (
+                          <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded inline-block mb-2">
+                            {item.variationInfo || 
+                              [item.variant?.color, item.variant?.size && `Size: ${item.variant.size}`]
+                                .filter(Boolean)
+                                .join(', ')
+                            }
+                          </div>
+                        )}
 
-                      <div className="flex items-center justify-between mt-6">
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() =>
-                                updateQuantity(item._id, item.quantity - 1)
-                              }
-                              disabled={item.quantity <= 1}
-                              className="h-8 w-8 rounded-full hover:bg-muted text-foreground"
-                            >
-                              <Minus className="h-3.5 w-3.5" />
-                            </Button>
-                            <span className="w-8 text-center font-medium text-lg">
-                              {item.quantity}
+                        {/* Price & Quantity Row */}
+                        <div className="flex items-center justify-between mt-2">
+                          {/* Price */}
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-[#E53935] font-bold">
+                              {formatPrice(getEffectivePrice(item))}
                             </span>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() =>
-                                updateQuantity(item._id, item.quantity + 1)
-                              }
-                              disabled={
-                                item.variant &&
-                                item.quantity >= item.variant.stock
-                              }
-                              className="h-8 w-8 rounded-full hover:bg-muted text-primary"
-                            >
-                              <Plus className="h-3.5 w-3.5" />
-                            </Button>
+                            {(item.price?.discountPrice ?? 0) > 0 &&
+                              (item.price?.currentPrice ?? 0) > (item.price?.discountPrice ?? 0) && (
+                              <span className="text-xs text-gray-400 line-through">
+                                {formatPrice(item.price?.currentPrice ?? 0)}
+                              </span>
+                            )}
                           </div>
 
-                          <Button
-                            variant="ghost"
-                            className="text-primary hover:text-primary/80 hover:bg-transparent p-0 h-auto font-medium text-sm"
+                          {/* Quantity Controls */}
+                          <div className="flex items-center">
+                            <button
+                              onClick={() => updateQuantity(item._id, item.quantity - 1)}
+                              disabled={item.quantity <= 1}
+                              className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-l text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                            >
+                              <Minus className="h-3 w-3" />
+                            </button>
+                            <input
+                              type="text"
+                              value={item.quantity}
+                              readOnly
+                              className="w-10 h-7 text-center text-sm border-y border-gray-200 focus:outline-none"
+                            />
+                            <button
+                              onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                              className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-r text-gray-500 hover:bg-gray-50"
+                            >
+                              <Plus className="h-3 w-3" />
+                            </button>
+                          </div>
+
+                          {/* Subtotal */}
+                          <span className="text-[#E53935] font-bold min-w-[100px] text-right">
+                            {formatPrice(getEffectivePrice(item) * item.quantity)}
+                          </span>
+
+                          {/* Remove */}
+                          <button
                             onClick={() => handleRemoveItem(item._id)}
+                            className="text-gray-400 hover:text-red-500 ml-4"
                           >
-                            Remove
-                          </Button>
+                            <Trash2 className="h-4 w-4" />
+                          </button>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  ))}
                 </motion.div>
               ))}
             </AnimatePresence>
           </div>
 
-          {/* Order Summary - Sticky Sidebar */}
-          <div className="lg:col-span-4 lg:sticky lg:top-24">
-            <Card className="rounded-3xl border-0 shadow-xl bg-white/80 dark:bg-[#1c1c1e]/80 backdrop-blur-xl overflow-hidden">
-              <CardContent className="p-8 space-y-8">
-                <div>
-                  <h2 className="text-2xl font-bold mb-6">Summary</h2>
+          {/* Order Summary Sidebar */}
+          <div className="lg:w-[320px] shrink-0">
+            <div className="bg-[#f7f7f7] rounded-sm p-4 lg:sticky lg:top-[140px]">
+              <h2 className="text-base font-bold text-gray-800 mb-4 pb-3 border-b border-gray-100">
+                Thông tin đơn hàng
+              </h2>
 
-                  <div className="space-y-4">
-                    <div className="flex justify-between text-base">
-                      <span className="text-muted-foreground">Subtotal</span>
-                      <span className="font-semibold">
-                        {formatPrice(
-                          hasSelectedItems ? checkoutTotal || 0 : subtotal
-                        )}
-                      </span>
-                    </div>
-
-                    {appliedDiscount && (
-                      <div className="flex justify-between text-base text-green-600">
-                        <span className="flex items-center gap-1">
-                          Discount{" "}
-                          <Badge
-                            variant="secondary"
-                            className="text-[10px] h-4 ml-1"
-                          >
-                            {appliedDiscount.code}
-                          </Badge>
-                        </span>
-                        <span>
-                          -{formatPrice(appliedDiscount.discountAmount)}
-                        </span>
-                      </div>
-                    )}
-
-                    <div className="flex justify-between text-base pt-4 border-t border-dashed border-border/50">
-                      <span className="font-medium text-lg">Total</span>
-                      <div className="text-right">
-                        <span className="font-bold text-2xl block text-foreground">
-                          {formatPrice(
-                            appliedDiscount
-                              ? appliedDiscount.finalTotal
-                              : hasSelectedItems
-                              ? checkoutTotal || 0
-                              : subtotal
-                          )}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          Including VAT
-                        </span>
-                      </div>
-                    </div>
+              {/* Promo Code */}
+              <div className="mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Tag className="h-4 w-4 text-[#E53935]" />
+                  <span className="text-sm text-gray-600">Mã giảm giá</span>
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Nhập mã giảm giá"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value)}
+                    disabled={!!appliedDiscount}
+                    className="h-9 text-sm rounded border-gray-200 focus:border-[#E53935] focus:ring-[#E53935]/20"
+                  />
+                  {appliedDiscount ? (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleRemoveDiscount}
+                      className="h-9 px-3 text-red-500 border-red-200 hover:bg-red-50"
+                    >
+                      Xóa
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      onClick={handleApplyDiscount}
+                      disabled={discountLoading || !promoCode}
+                      className="h-9 px-4 bg-[#E53935] hover:bg-[#D32F2F] rounded"
+                    >
+                      Áp dụng
+                    </Button>
+                  )}
+                </div>
+                {appliedDiscount && (
+                  <div className="mt-2 text-xs text-green-600 flex items-center gap-1">
+                    <span>✓</span>
+                    <span>Đã áp dụng mã: {appliedDiscount.code}</span>
                   </div>
+                )}
+              </div>
+
+              {/* Summary */}
+              <div className="space-y-3 py-4 border-t border-gray-100">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Tạm tính ({selectedItemsCount} sản phẩm)</span>
+                  <span className="text-gray-800">
+                    {formatPrice(hasSelectedItems ? checkoutTotal || 0 : subtotal)}
+                  </span>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="relative">
-                    <Input
-                      placeholder="Enter promo code"
-                      value={promoCode}
-                      onChange={(e) => setPromoCode(e.target.value)}
-                      disabled={!!appliedDiscount}
-                      className="rounded-xl pr-20 h-11 bg-muted/40 border-transparent focus:bg-background transition-all"
-                    />
-                    {appliedDiscount ? (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={handleRemoveDiscount}
-                        className="absolute right-1 top-1 h-9 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
-                      >
-                        Remove
-                      </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        onClick={handleApplyDiscount}
-                        disabled={discountLoading || !promoCode}
-                        className="absolute right-1 top-1 h-9 rounded-lg"
-                      >
-                        Apply
-                      </Button>
-                    )}
+                {appliedDiscount && (
+                  <div className="flex justify-between text-sm text-green-600">
+                    <span>Giảm giá</span>
+                    <span>-{formatPrice(appliedDiscount.discountAmount)}</span>
                   </div>
+                )}
 
-                  <Button
-                    className="w-full rounded-full h-12 text-base font-semibold shadow-lg shadow-primary/25"
-                    size="lg"
-                    onClick={handleCheckout}
-                    disabled={!hasSelectedItems}
-                  >
-                    {hasSelectedItems
-                      ? `Check Out (${selectedItemsCount})`
-                      : "Select Items to Checkout"}
-                  </Button>
-
-                  <p className="text-center text-xs text-muted-foreground pt-2">
-                    Free shipping on all orders.
-                  </p>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Phí vận chuyển</span>
+                  <span className="text-gray-800">Miễn phí</span>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+
+              {/* Total */}
+              <div className="flex justify-between items-center py-4 border-t border-gray-100">
+                <span className="text-gray-800 font-medium">Tổng cộng</span>
+                <span className="text-xl font-bold text-[#E53935]">
+                  {formatPrice(
+                    appliedDiscount
+                      ? (appliedDiscount.finalTotal ?? 0)
+                      : hasSelectedItems
+                      ? checkoutTotal || 0
+                      : subtotal
+                  )}
+                </span>
+              </div>
+
+              {/* Checkout Button */}
+              <Button
+                className="w-full h-11 bg-[#E53935] hover:bg-[#D32F2F] rounded text-base font-medium"
+                onClick={handleCheckout}
+                disabled={!hasSelectedItems}
+              >
+                {hasSelectedItems
+                  ? `Mua hàng (${selectedItemsCount})`
+                  : "Chọn sản phẩm để mua"}
+              </Button>
+
+              <p className="text-center text-xs text-gray-400 mt-3">
+                Miễn phí vận chuyển cho đơn hàng từ ₫500.000
+              </p>
+            </div>
           </div>
         </div>
       </div>

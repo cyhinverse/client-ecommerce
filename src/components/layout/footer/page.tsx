@@ -56,7 +56,7 @@ export default function FooterLayout() {
   if (adminPaths.includes(path)) return null;
 
   return (
-    <footer className="w-full bg-[#FAFAFC] dark:bg-[#1C1C1E] border-t border-border/40">
+    <footer className="w-full bg-[#FAFAFC] border-t border-border/40">
       <div className="container mx-auto px-4 py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           {/* Brand & Newsletter */}

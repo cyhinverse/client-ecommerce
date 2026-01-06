@@ -101,8 +101,8 @@ export default function AddressTab({ user }: AddressTabProps) {
       className={cn(
         "group relative flex flex-col md:flex-row justify-between p-6 rounded-2xl border transition-all duration-200",
         address.isDefault
-          ? "border-primary bg-primary/5 dark:bg-primary/10"
-          : "border-border hover:border-foreground/20 hover:shadow-sm bg-card"
+          ? "border-primary bg-primary/5"
+          : "border-border hover:border-foreground/20 bg-[#f7f7f7]"
       )}
     >
       <div className="flex-1 space-y-3">
@@ -168,7 +168,7 @@ export default function AddressTab({ user }: AddressTabProps) {
                 <p className="text-muted-foreground text-sm">Manage your shipping destinations</p>
             </div>
             {addresses.length > 0 && (
-                <Button onClick={openAddDialog} className="rounded-full shadow-sm">
+                <Button onClick={openAddDialog} className="rounded-full">
                     <Plus className="h-4 w-4 mr-2" />
                     Add Address
                 </Button>

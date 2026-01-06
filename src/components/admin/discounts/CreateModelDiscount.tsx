@@ -28,7 +28,8 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AppDispatch } from "@/store/configStore";
-import { CreateDiscountData } from "@/types/discount";
+// Updated: Import from voucher types with backward compatibility alias
+import { CreateDiscountData } from "@/types/voucher";
 
 interface CreateModelDiscountProps {
   open: boolean;
@@ -85,12 +86,22 @@ export function CreateModelDiscount({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const discountData = {
-      ...formData,
-      discountType: formData.discountType as "percent" | "fixed",
-      discountValue: Number(formData.discountValue),
+    // Map old field names to new voucher structure
+    const discountData: CreateDiscountData = {
+      code: formData.code,
+      name: formData.code, // Use code as name for backward compat
+      description: formData.description,
+      type: formData.discountType === "percent" ? "percentage" : "fixed_amount",
+      value: Number(formData.discountValue),
+      scope: "platform", // Default to platform scope
       minOrderValue: Number(formData.minOrderValue) || 0,
       usageLimit: Number(formData.usageLimit),
+      startDate: formData.startDate,
+      endDate: formData.endDate,
+      isActive: formData.isActive,
+      // Backward compatibility fields
+      discountType: formData.discountType as "percent" | "fixed",
+      discountValue: Number(formData.discountValue),
       applicableProducts: selectedProducts,
     };
 

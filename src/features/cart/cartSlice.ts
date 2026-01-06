@@ -5,8 +5,9 @@ import {
   getCart,
   removeFromCart,
   updateCartItem,
+  removeItemsByShop,
 } from "./cartAction";
-import { CartItem, CartState } from "@/types/cart";
+import { CartItem, CartState, groupCartItemsByShop } from "@/types/cart";
 
 const initialState: CartState = {
   data: null,
@@ -14,24 +15,25 @@ const initialState: CartState = {
   error: null,
   selectedItems: [],
   checkoutTotal: 0,
+  itemsByShop: [], // NEW: Items grouped by shop
 };
 
 const calculateCartTotals = (items: CartItem[], selectedItems: CartItem[]) => {
   const totalAmount = items.reduce((sum, item) => {
     const price =
-      item.price.discountPrice > 0 &&
+      item.price?.discountPrice && item.price.discountPrice > 0 &&
       item.price.discountPrice < item.price.currentPrice
         ? item.price.discountPrice
-        : item.price.currentPrice;
+        : item.price?.currentPrice || 0;
     return sum + (price || 0) * item.quantity;
   }, 0);
 
   const checkoutTotal = selectedItems.reduce((sum, item) => {
     const price =
-      item.price.discountPrice > 0 &&
+      item.price?.discountPrice && item.price.discountPrice > 0 &&
       item.price.discountPrice < item.price.currentPrice
         ? item.price.discountPrice
-        : item.price.currentPrice;
+        : item.price?.currentPrice || 0;
     return sum + (price || 0) * item.quantity;
   }, 0);
 
@@ -54,8 +56,8 @@ export const cartSlice = createSlice({
         const existingItemIndex = state.data.items.findIndex(
           (item) =>
             item._id === action.payload._id ||
-            (item.productId._id === action.payload.productId._id &&
-              item.variantId === action.payload.variantId)
+            (typeof item.productId === 'object' && item.productId._id === action.payload.productId._id &&
+              (item.modelId === action.payload.modelId || item.variantId === action.payload.variantId))
         );
 
         if (existingItemIndex > -1) {
@@ -410,6 +412,37 @@ export const cartSlice = createSlice({
     builder.addCase(updateCartItem.rejected, (state, action) => {
       state.isLoading = false;
       state.error = action.error.message || "Không thể cập nhật giỏ hàng";
+    });
+
+    // NEW: Remove items by shop
+    builder.addCase(removeItemsByShop.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(removeItemsByShop.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.error = null;
+
+      let cartData = null;
+      if (action.payload.data) {
+        cartData = action.payload.data;
+      } else if (action.payload) {
+        cartData = action.payload;
+      }
+
+      if (cartData && cartData.items) {
+        cartData.items = cartData.items.map((item: CartItem) => ({
+          ...item,
+          selected: item.selected || false,
+        }));
+        state.itemsByShop = groupCartItemsByShop(cartData.items);
+      }
+
+      state.data = cartData;
+    });
+    builder.addCase(removeItemsByShop.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.error.message || "Không thể xóa sản phẩm theo shop";
     });
   },
 });

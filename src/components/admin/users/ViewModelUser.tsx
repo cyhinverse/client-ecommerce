@@ -37,7 +37,7 @@ export function ViewModelUser({
 
   const getVerifiedBadge = (isVerified: boolean) => {
     return isVerified ? (
-      <Badge className="bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-500/10 dark:text-green-400 border-0 rounded-lg px-2.5 py-0.5 shadow-none flex items-center gap-1 w-fit">
+      <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-0 rounded-lg px-2.5 py-0.5 shadow-none flex items-center gap-1 w-fit">
         <CheckCircle className="h-3 w-3" />
         Verified
       </Badge>
@@ -75,7 +75,7 @@ export function ViewModelUser({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-[2rem] border-border/50 bg-white/80 dark:bg-[#1C1C1E]/80 backdrop-blur-xl shadow-2xl p-6 max-w-lg max-h-[90vh] overflow-y-auto no-scrollbar">
+      <DialogContent className="rounded-[2rem] border-border/50 bg-white/80 backdrop-blur-xl shadow-2xl p-6 max-w-lg max-h-[90vh] overflow-y-auto no-scrollbar">
         <DialogHeader className="border-b border-border/50 pb-6 mb-6">
             <div className="flex items-center justify-between">
                 <div>
@@ -175,7 +175,7 @@ export function ViewModelUser({
             {onEdit && (
               <Button
                 onClick={handleEdit}
-                className="rounded-xl h-10 bg-black text-white hover:bg-black/90 dark:bg-[#0071e3] gap-2 px-5"
+                className="rounded-xl h-10 bg-black text-white hover:bg-black/90 gap-2 px-5"
               >
                 <Edit className="h-4 w-4" />
                 Edit User

@@ -147,7 +147,7 @@ export default function OrdersTab() {
                         key={tab.value}
                         value={tab.value}
                         className={cn(
-                            "rounded-full px-4 py-2 text-xs font-medium transition-all data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm dark:data-[state=active]:bg-zinc-800 dark:data-[state=active]:text-white",
+                            "rounded-full px-4 py-2 text-xs font-medium transition-all data-[state=active]:bg-white data-[state=active]:text-black",
                             tab.count === 0 && "text-muted-foreground/60"
                         )}
                     >

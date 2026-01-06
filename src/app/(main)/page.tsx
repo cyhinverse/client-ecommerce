@@ -11,17 +11,20 @@ export default function Home() {
 
   return (
     <>
-      <main className="w-full min-h-screen bg-gray-50 dark:bg-background">
+      <main className="w-full min-h-screen bg-gray-50">
         <HeroSection />
 
-        <div className="container mx-auto px-4 mt-2 mb-8 sticky top-[64px] z-30 bg-gray-50 dark:bg-background py-2">
-          <Category
-            selectedSlug={selectedCategorySlug}
-            onSelectCategory={setSelectedCategorySlug}
-          />
+        {/* Sticky Category Bar - Full width background */}
+        <div className="sticky top-[88px] z-30 w-full bg-white">
+          <div className="container mx-auto px-4 py-2">
+            <Category
+              selectedSlug={selectedCategorySlug}
+              onSelectCategory={setSelectedCategorySlug}
+            />
+          </div>
         </div>
 
-        <div className="container mx-auto px-4 pb-20 min-h-[500px]">
+        <div className="container mx-auto px-4 pb-20 min-h-[500px] mt-4">
           <HomeProductList selectedCategorySlug={selectedCategorySlug} />
         </div>
       </main>

@@ -163,9 +163,9 @@ export function UpdateModelProduct({
       const safeVariants = (product.variants || []).map((variant) => ({
         ...variant,
         price: variant.price || {
-          currentPrice: productPrice.currentPrice,
-          discountPrice: productPrice.discountPrice,
-          currency: productPrice.currency,
+          currentPrice: productPrice.currentPrice ?? 0,
+          discountPrice: productPrice.discountPrice ?? 0,
+          currency: productPrice.currency ?? "VND",
         },
       }));
 
@@ -181,9 +181,9 @@ export function UpdateModelProduct({
         isFeatured: product.isFeatured || false,
         onSale: product.onSale || false,
         price: {
-          currentPrice: productPrice.currentPrice,
-          discountPrice: productPrice.discountPrice,
-          currency: productPrice.currency,
+          currentPrice: productPrice.currentPrice ?? 0,
+          discountPrice: productPrice.discountPrice ?? 0,
+          currency: productPrice.currency ?? "VND",
         },
         variants: safeVariants,
         tags: product.tags || [],

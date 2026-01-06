@@ -1,7 +1,7 @@
 import instance from "@/api/api";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-// Create new order
+// Create new order - Updated to support shop/platform vouchers
 export const createOrder = createAsyncThunk(
   "order/create",
   async (orderData: {
@@ -15,7 +15,11 @@ export const createOrder = createAsyncThunk(
       ward: string;
       note?: string;
     };
-    paymentMethod: "cod" | "vnpay";
+    paymentMethod: "cod" | "vnpay" | "momo";
+    // NEW: Support for shop and platform vouchers
+    voucherShopCode?: string;
+    voucherPlatformCode?: string;
+    // DEPRECATED: Old discount code (kept for backward compatibility)
     discountCode?: string;
     note?: string;
   }) => {
@@ -192,21 +196,40 @@ export const getOrderStatistics = createAsyncThunk(
   }
 );
 
-// Apply discount code - Uses discount endpoint
+// Apply discount code - Uses voucher endpoint
+// UPDATED: Now uses voucher endpoint instead of discount
 export const applyDiscountCode = createAsyncThunk(
   "order/apply-discount",
   async (payload: {
     discountCode: string;
     cartItemIds: string[];
     totalAmount: number;
+    shopId?: string; // NEW: For shop vouchers
   }) => {
-    const response = await instance.post("/discounts/apply", {
+    const response = await instance.post("/vouchers/apply", {
       code: payload.discountCode,
       orderTotal: payload.totalAmount,
       productIds: payload.cartItemIds,
+      shopId: payload.shopId,
     });
     if (!response.data) {
-      throw new Error("Failed to apply discount code");
+      throw new Error("Failed to apply voucher code");
+    }
+    return response.data.data || response.data;
+  }
+);
+
+// NEW: Apply voucher (shop or platform)
+export const applyVoucher = createAsyncThunk(
+  "order/apply-voucher",
+  async (payload: {
+    code: string;
+    orderTotal: number;
+    shopId?: string;
+  }) => {
+    const response = await instance.post("/vouchers/apply", payload);
+    if (!response.data) {
+      throw new Error("Failed to apply voucher");
     }
     return response.data.data || response.data;
   }

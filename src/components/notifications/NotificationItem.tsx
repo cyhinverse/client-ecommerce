@@ -54,12 +54,12 @@ export default function NotificationItem({ notification, onClick }: Notification
 
   const Content = (
     <div className={cn(
-        "relative flex gap-3 p-4 transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/5",
-        !notification.isRead && "bg-blue-50/50 dark:bg-blue-500/10"
+        "relative flex gap-3 p-4 transition-all duration-200 hover:bg-black/5",
+        !notification.isRead && "bg-blue-50/50"
     )}>
       {/* Icon Wrapper */}
       <div className={cn(
-          "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full shadow-sm mt-1",
+          "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full mt-1",
           getIconBg()
       )}>
         {getIcon()}
@@ -72,7 +72,7 @@ export default function NotificationItem({ notification, onClick }: Notification
                {notification.title}
              </p>
              {!notification.isRead && (
-                 <span className="h-2 w-2 rounded-full bg-blue-500 ring-2 ring-white dark:ring-black shrink-0" />
+                 <span className="h-2 w-2 rounded-full bg-blue-500 ring-2 ring-white shrink-0" />
              )}
           </div>
           

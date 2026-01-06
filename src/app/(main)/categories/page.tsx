@@ -5,7 +5,61 @@ import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import Link from "next/link";
 import { useEffect } from "react";
 import { toast } from "sonner";
-import { Folder, ChevronRight, LayoutGrid } from "lucide-react";
+import { 
+  ChevronRight, 
+  Laptop, 
+  Smartphone, 
+  Home, 
+  Shirt, 
+  Watch, 
+  Baby, 
+  Car, 
+  Utensils, 
+  Dumbbell, 
+  Sparkles, 
+  Package,
+  Headphones,
+  Camera,
+  Gamepad2,
+  BookOpen,
+  Flower2,
+  Flame,
+  TrendingUp
+} from "lucide-react";
+
+// Icon mapping for categories
+const categoryIcons: Record<string, React.ReactNode> = {
+  electronics: <Laptop className="w-5 h-5" />,
+  phones: <Smartphone className="w-5 h-5" />,
+  home: <Home className="w-5 h-5" />,
+  fashion: <Shirt className="w-5 h-5" />,
+  men: <Shirt className="w-5 h-5" />,
+  women: <Sparkles className="w-5 h-5" />,
+  watches: <Watch className="w-5 h-5" />,
+  jewelry: <Watch className="w-5 h-5" />,
+  baby: <Baby className="w-5 h-5" />,
+  kids: <Baby className="w-5 h-5" />,
+  automotive: <Car className="w-5 h-5" />,
+  food: <Utensils className="w-5 h-5" />,
+  sports: <Dumbbell className="w-5 h-5" />,
+  beauty: <Sparkles className="w-5 h-5" />,
+  audio: <Headphones className="w-5 h-5" />,
+  camera: <Camera className="w-5 h-5" />,
+  gaming: <Gamepad2 className="w-5 h-5" />,
+  books: <BookOpen className="w-5 h-5" />,
+  garden: <Flower2 className="w-5 h-5" />,
+  default: <Package className="w-5 h-5" />,
+};
+
+const getIcon = (slug: string) => {
+  const normalizedSlug = slug?.toLowerCase() || '';
+  for (const key of Object.keys(categoryIcons)) {
+    if (normalizedSlug.includes(key)) {
+      return categoryIcons[key];
+    }
+  }
+  return categoryIcons.default;
+};
 
 export default function CategoriesPage() {
   const dispatch = useAppDispatch();
@@ -23,74 +77,109 @@ export default function CategoriesPage() {
     }
   }, [error]);
 
-  const getCategoryColor = (index: number) => {
-      const colors = [
-          "bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400",
-          "bg-purple-50 text-purple-600 dark:bg-purple-950/30 dark:text-purple-400",
-          "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400",
-          "bg-orange-50 text-orange-600 dark:bg-orange-950/30 dark:text-orange-400",
-          "bg-pink-50 text-pink-600 dark:bg-pink-950/30 dark:text-pink-400",
-          "bg-cyan-50 text-cyan-600 dark:bg-cyan-950/30 dark:text-cyan-400",
-      ];
-      return colors[index % colors.length];
-  };
-
   return (
-    <div className="w-full relative min-h-screen bg-white dark:bg-black py-12 lg:py-20">
+    <div className="w-full min-h-screen bg-background">
       {isLoading && <SpinnerLoading className="fixed inset-0 m-auto z-50" />}
       
-      <div className={`container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1400px] ${isLoading ? "opacity-50 pointer-events-none" : ""}`}>
-          <div className="flex flex-col items-center text-center mb-16 space-y-4">
-             <span className="text-sm font-bold tracking-widest text-primary uppercase">Collections</span>
-             <h1 className="text-4xl md:text-6xl font-bold tracking-tighter text-foreground">
-                Browse Categories
-             </h1>
-             <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                Discover our curated collections. From everyday essentials to premium selections, find exactly what you&apos;re looking for.
-             </p>
+      <div className={`container-taobao py-4 ${isLoading ? "opacity-50 pointer-events-none" : ""}`}>
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
+          <Link href="/" className="hover:text-primary transition-colors">Trang chủ</Link>
+          <ChevronRight className="w-3 h-3" />
+          <span className="text-foreground">Tất cả danh mục</span>
+        </div>
+
+        {/* Hot Categories Banner */}
+        <div className="bg-gradient-to-r from-primary to-primary-hover rounded-lg p-4 mb-4">
+          <div className="flex items-center gap-2 text-white">
+            <Flame className="w-5 h-5" />
+            <span className="font-bold text-sm">Danh mục hot</span>
+            <TrendingUp className="w-4 h-4 ml-auto" />
           </div>
+        </div>
 
-          {categories && categories.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-              {categories.map((category, index) => (
-                <Link
-                  key={category._id}
-                  href={`/categories/${category.slug}`}
-                  className="group relative flex flex-col justify-between h-[280px] p-8 rounded-[2rem] bg-gray-50 dark:bg-zinc-900 border border-transparent dark:border-zinc-800 hover:border-gray-200 dark:hover:border-zinc-700 transition-all duration-500 overflow-hidden"
-                >
-                    {/* Hover Gradient Background */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/0 to-white/0 group-hover:from-gray-100/50 group-hover:via-transparent group-hover:to-transparent dark:group-hover:from-zinc-800/50 transition-all duration-500" />
-                    
-                    <div className="relative z-10 flex justify-between items-start">
-                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3 ${getCategoryColor(index)}`}>
-                            <LayoutGrid className="w-7 h-7" />
-                        </div>
-                        <div className="w-10 h-10 rounded-full border border-gray-200 dark:border-zinc-700 flex items-center justify-center text-muted-foreground group-hover:bg-primary group-hover:border-primary group-hover:text-primary-foreground transition-all duration-300">
-                             <ChevronRight className="w-5 h-5 -ml-0.5 group-hover:ml-0.5 transition-all" />
-                        </div>
+        {/* Categories Grid - Taobao Style */}
+        {categories && categories.length > 0 ? (
+          <div className="space-y-3">
+            {categories.map((category) => (
+              <div 
+                key={category._id} 
+                className="bg-card rounded-lg border border-border overflow-hidden"
+              >
+                {/* Category Header - Compact */}
+                <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+                      {getIcon(category.slug ?? '')}
                     </div>
-
-                    <div className="relative z-10">
-                        <h3 className="text-2xl font-bold text-foreground mb-2 group-hover:translate-x-1 transition-transform duration-300">
-                            {category.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground font-medium group-hover:text-primary transition-colors">
-                           Browse Collection
-                        </p>
+                    <div>
+                      <Link 
+                        href={`/categories/${category.slug}`}
+                        className="font-semibold text-sm text-foreground hover:text-primary transition-colors"
+                      >
+                        {category.name}
+                      </Link>
+                      <p className="text-[10px] text-muted-foreground">
+                        {category.subcategories?.length || 0} danh mục con
+                      </p>
                     </div>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            !isLoading && (
-                <div className="flex flex-col items-center justify-center py-32 text-muted-foreground space-y-6">
-                    <div className="w-20 h-20 bg-gray-100 dark:bg-zinc-900 rounded-3xl flex items-center justify-center">
-                        <Folder className="w-10 h-10 opacity-20" />
-                    </div>
-                    <p className="text-lg font-medium">No categories found</p>
+                  </div>
+                  <Link 
+                    href={`/categories/${category.slug}`}
+                    className="flex items-center gap-1 text-xs text-primary hover:underline"
+                  >
+                    Xem tất cả
+                    <ChevronRight className="w-3 h-3" />
+                  </Link>
                 </div>
-            )
-          )}
+
+                {/* Subcategories Grid - Always Visible */}
+                {category.subcategories && category.subcategories.length > 0 && (
+                  <div className="p-3">
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+                      {category.subcategories.slice(0, 16).map((sub) => (
+                        <Link
+                          key={sub._id}
+                          href={`/categories/${sub.slug}`}
+                          className="group flex flex-col items-center p-2 rounded-lg hover:bg-primary/5 transition-all"
+                        >
+                          <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center mb-1.5 group-hover:bg-primary/10 transition-colors overflow-hidden">
+                            <Package className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                          </div>
+                          <span className="text-[11px] text-center text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight">
+                            {sub.name}
+                          </span>
+                        </Link>
+                      ))}
+                      {category.subcategories.length > 16 && (
+                        <Link
+                          href={`/categories/${category.slug}`}
+                          className="group flex flex-col items-center p-2 rounded-lg hover:bg-primary/5 transition-all"
+                        >
+                          <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-1.5">
+                            <span className="text-xs font-bold text-primary">+{category.subcategories.length - 16}</span>
+                          </div>
+                          <span className="text-[11px] text-center text-primary font-medium">
+                            Xem thêm
+                          </span>
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          !isLoading && (
+            <div className="flex flex-col items-center justify-center py-16 bg-card rounded-lg border border-border">
+              <div className="w-14 h-14 bg-muted rounded-full flex items-center justify-center mb-3">
+                <Package className="w-7 h-7 text-muted-foreground" />
+              </div>
+              <p className="text-sm text-muted-foreground">Không có danh mục nào</p>
+            </div>
+          )
+        )}
       </div>
     </div>
   );

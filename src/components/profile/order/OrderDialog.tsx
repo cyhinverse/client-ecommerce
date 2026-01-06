@@ -43,12 +43,12 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
 
     const getStatusConfig = (status: Order["status"]) => {
         switch (status) {
-            case "pending": return { icon: Clock, color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-900/20", label: "Pending" };
+            case "pending": return { icon: Clock, color: "text-amber-500", bg: "bg-amber-50", label: "Pending" };
             case "confirmed":
-            case "processing": return { icon: RefreshCw, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20", label: "Processing" };
-            case "shipped": return { icon: Truck, color: "text-purple-500", bg: "bg-purple-50 dark:bg-purple-900/20", label: "On the way" };
-            case "delivered": return { icon: CheckCircle, color: "text-green-500", bg: "bg-green-50 dark:bg-green-900/20", label: "Delivered" };
-            case "cancelled": return { icon: XCircle, color: "text-red-500", bg: "bg-red-50 dark:bg-red-900/20", label: "Cancelled" };
+            case "processing": return { icon: RefreshCw, color: "text-blue-500", bg: "bg-blue-50", label: "Processing" };
+            case "shipped": return { icon: Truck, color: "text-purple-500", bg: "bg-purple-50", label: "On the way" };
+            case "delivered": return { icon: CheckCircle, color: "text-green-500", bg: "bg-green-50", label: "Delivered" };
+            case "cancelled": return { icon: XCircle, color: "text-red-500", bg: "bg-red-50", label: "Cancelled" };
             default: return { icon: Package, color: "text-gray-500", bg: "bg-gray-50", label: status };
         }
     };
@@ -104,7 +104,7 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
                             <div className="space-y-6">
                                 {order.products.map((product, index) => (
                                     <div key={product.productId + index} className="flex gap-4 sm:gap-6 items-center group">
-                                        <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-2xl overflow-hidden border border-border/60 bg-white flex-shrink-0 shadow-sm">
+                                        <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-2xl overflow-hidden border border-border/60 bg-[#f7f7f7] flex-shrink-0">
                                             <Image
                                                 src={product.image || "/images/placeholder-product.jpg"}
                                                 alt={product.name}
@@ -124,7 +124,7 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
                                                     )}
                                                 </div>
                                                 <div className="text-left sm:text-right flex-shrink-0">
-                                                    <p className="font-semibold text-base">{formatCurrency(product.price.discountPrice || product.price.currentPrice)}</p>
+                                                    <p className="font-semibold text-base">{formatCurrency(product.price)}</p>
                                                     <p className="text-sm text-muted-foreground mt-0.5">x{product.quantity}</p>
                                                 </div>
                                             </div>
@@ -144,7 +144,7 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
                                 <CreditCard className="h-4 w-4 text-muted-foreground" />
                                 Payment
                             </h3>
-                             <div className="bg-background rounded-2xl p-4 border border-border/60 shadow-sm space-y-4">
+                             <div className="bg-[#f7f7f7] rounded-2xl p-4 border border-border/60 space-y-4">
                                 <div className="flex justify-between text-sm items-center">
                                     <span className="text-muted-foreground">Method</span>
                                     <span className="font-medium">{order.paymentMethod === "cod" ? "Cash on Delivery" : "VNPay Wallet"}</span>
@@ -152,7 +152,7 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
                                 <Separator className="bg-border/50" />
                                 <div className="flex justify-between text-sm items-center">
                                     <span className="text-muted-foreground">Status</span>
-                                    <Badge variant={order.paymentStatus === "paid" ? "outline" : "secondary"} className={cn("rounded-lg px-2.5 font-medium border-0", order.paymentStatus === "paid" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-300")}>
+                                    <Badge variant={order.paymentStatus === "paid" ? "outline" : "secondary"} className={cn("rounded-lg px-2.5 font-medium border-0", order.paymentStatus === "paid" ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-900")}>
                                         {order.paymentStatus === "paid" ? "Paid" : "Unpaid"}
                                     </Badge>
                                 </div>
@@ -192,10 +192,10 @@ export default function OrderDialog({ order, open, onClose }: OrderDialogProps) 
                                 <span>Subtotal</span>
                                 <span>{formatCurrency(order.subtotal)}</span>
                             </div>
-                            {order.discountAmount > 0 && (
+                            {(order.discountAmount ?? 0) > 0 && (
                                 <div className="flex justify-between text-sm text-emerald-600 font-medium">
                                     <span>Discount</span>
-                                    <span>-{formatCurrency(order.discountAmount)}</span>
+                                    <span>-{formatCurrency(order.discountAmount ?? 0)}</span>
                                 </div>
                             )}
                             <div className="flex justify-between text-sm text-muted-foreground">

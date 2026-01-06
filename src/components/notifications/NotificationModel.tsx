@@ -40,10 +40,10 @@ export default function NotificationModel({isOpen, onClose}: {isOpen: boolean, o
                 className="fixed inset-0 z-[60] bg-black/10 backdrop-blur-[2px]" 
                 onClick={onClose} 
             />
-            <div className="fixed right-4 top-16 w-[360px] max-h-[80vh] flex flex-col shadow-2xl border border-white/20 bg-white/90 dark:bg-black/90 backdrop-blur-xl z-[70] rounded-2xl overflow-hidden animate-in slide-in-from-top-5 duration-300">
+            <div className="fixed right-4 top-16 w-[360px] max-h-[80vh] flex flex-col shadow-2xl border border-white/20 bg-white/90 backdrop-blur-xl z-[70] rounded-2xl overflow-hidden animate-in slide-in-from-top-5 duration-300">
                 
                 {/* Header */}
-                <div className="p-4 border-b border-black/5 dark:border-white/5 flex justify-between items-center bg-white/50 dark:bg-black/50">
+                <div className="p-4 border-b border-black/5 flex justify-between items-center bg-white/50">
                     <h3 className="font-semibold text-sm tracking-tight flex items-center gap-2">
                         Notifications
                         {unreadCount > 0 && <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{unreadCount}</span>}
@@ -75,7 +75,7 @@ export default function NotificationModel({isOpen, onClose}: {isOpen: boolean, o
                 </div>
 
                 {/* Footer */}
-                <div className="p-3 border-t border-black/5 dark:border-white/5 bg-gray-50/80 dark:bg-zinc-900/80 flex justify-between">
+                <div className="p-3 border-t border-black/5 bg-gray-50/80 flex justify-between">
                     <Button 
                         variant="ghost" 
                         size="sm" 
@@ -87,7 +87,7 @@ export default function NotificationModel({isOpen, onClose}: {isOpen: boolean, o
                     <Button 
                         variant="ghost" 
                         size="sm" 
-                        className="text-xs h-8 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        className="text-xs h-8 text-red-500 hover:text-red-600 hover:bg-red-50"
                         onClick={cleanAllNotification}
                     >
                         Clear all

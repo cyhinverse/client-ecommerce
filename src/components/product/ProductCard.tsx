@@ -1,80 +1,175 @@
 import Link from "next/link";
 import Image from "next/image";
-
+import { Star } from "lucide-react";
 import { Product } from "@/types/product";
 
-// ProductCard Component
-export const ProductCard = ({ product }: { product: Product }) => (
-  <Link
-    href={`/products/${product.slug || product._id}`}
-    className="group block h-full"
-  >
-    <div className="flex flex-col gap-2 p-2 rounded-xl hover:bg-card transition-colors duration-200">
-      {/* Image Container - Reduced radius to rounded-xl */}
-      <div className="relative aspect-square overflow-hidden rounded-xl bg-muted">
-        {product.images?.[0] || product.variants?.[0]?.images?.[0] ? (
-          <Image
-            src={
-              product.images?.[0] || product.variants?.[0]?.images?.[0] || ""
-            }
-            alt={product.name || "Product image"}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-secondary/50">
-            <span className="text-muted-foreground text-[10px]">No Image</span>
-          </div>
-        )}
-      </div>
+// Helper function to get price range from models
+const getPriceFromModels = (product: Product): { min: number; max: number } | null => {
+  if (!product.models || product.models.length === 0) return null;
+  
+  const prices = product.models.map(m => m.price).filter(p => p > 0);
+  if (prices.length === 0) return null;
+  
+  return {
+    min: Math.min(...prices),
+    max: Math.max(...prices),
+  };
+};
 
-      {/* Product Info - Compact layout */}
-      <div className="space-y-1">
-        <h3 className="font-medium text-[13px] leading-tight text-foreground line-clamp-2 h-9 group-hover:text-primary transition-colors">
-          {product.name || "Product Name"}
-        </h3>
+// Helper function to get display price
+const getDisplayPrice = (product: Product): { current: number; discount?: number } => {
+  const modelPrices = getPriceFromModels(product);
+  if (modelPrices) {
+    return { current: modelPrices.min };
+  }
+  
+  return {
+    current: product.price?.currentPrice || 0,
+    discount: product.price?.discountPrice || undefined,
+  };
+};
 
-        <div className="flex items-baseline gap-1.5 pt-1">
-          {product.onSale &&
-          product.price?.discountPrice &&
-          product.price.discountPrice < product.price.currentPrice ? (
-            <>
-              <span className="font-bold text-[15px] text-primary">
-                {new Intl.NumberFormat("vi-VN", {
-                  style: "currency",
-                  currency: "VND",
-                  maximumFractionDigits: 0,
-                }).format(product.price.discountPrice)}
-              </span>
-              <span className="text-[11px] text-muted-foreground line-through decoration-muted-foreground/50">
-                {new Intl.NumberFormat("vi-VN", {
-                  style: "currency",
-                  currency: "VND",
-                  maximumFractionDigits: 0,
-                }).format(product.price.currentPrice)}
-              </span>
-            </>
+// Helper function to get product image
+const getProductImage = (product: Product): string | null => {
+  if (product.images?.[0]) return product.images[0];
+  if (product.tierVariations?.[0]?.images?.[0]) {
+    return product.tierVariations[0].images[0];
+  }
+  if (product.variants?.[0]?.images?.[0]) {
+    return product.variants[0].images[0];
+  }
+  return null;
+};
+
+// Format price to VND
+const formatPrice = (price: number): string => {
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+    maximumFractionDigits: 0,
+  }).format(price);
+};
+
+// Format sold count
+const formatSoldCount = (count: number): string => {
+  if (count >= 1000) {
+    return `${(count / 1000).toFixed(1)}k đã bán`;
+  }
+  return count > 0 ? `${count} đã bán` : "Mới";
+};
+
+// Calculate discount percentage
+const getDiscountPercent = (original: number, sale: number): number => {
+  if (original <= 0 || sale >= original) return 0;
+  return Math.round(((original - sale) / original) * 100);
+};
+
+// ProductCard Component - Taobao Light Style
+export const ProductCard = ({ product }: { product: Product }) => {
+  const displayPrice = getDisplayPrice(product);
+  const productImage = getProductImage(product);
+  const modelPrices = getPriceFromModels(product);
+  
+  const hasDiscount = product.onSale && 
+    displayPrice.discount && 
+    displayPrice.discount < displayPrice.current;
+  
+  const discountPercent = hasDiscount 
+    ? getDiscountPercent(displayPrice.current, displayPrice.discount!)
+    : 0;
+  
+  return (
+    <Link
+      href={`/products/${product.slug || product._id}`}
+      className="group block h-full"
+    >
+      <div className="flex flex-col bg-white rounded overflow-hidden border border-transparent hover:border-[#f0f0f0] hover:bg-[#fafafa] transition-all duration-200 h-full">
+        {/* Image Container */}
+        <div className="relative aspect-square overflow-hidden bg-gray-50">
+          {productImage ? (
+            <Image
+              src={productImage}
+              alt={product.name || "Product image"}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-102"
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+            />
           ) : (
-            <span className="font-bold text-[15px] text-primary">
-              {new Intl.NumberFormat("vi-VN", {
-                style: "currency",
-                currency: "VND",
-                maximumFractionDigits: 0,
-              }).format(product.price?.currentPrice || 0)}
-            </span>
+            <div className="w-full h-full flex items-center justify-center bg-gray-50">
+              <span className="text-gray-400 text-xs">Không có ảnh</span>
+            </div>
+          )}
+          
+          {/* Discount Badge - Orange */}
+          {discountPercent > 0 && (
+            <div className="absolute top-2 left-2 bg-[#FF9800] text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+              -{discountPercent}%
+            </div>
+          )}
+          
+          {/* New Badge */}
+          {product.soldCount === 0 && (
+            <div className="absolute top-2 right-2 bg-[#4CAF50] text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+              Mới
+            </div>
           )}
         </div>
 
-        <div className="flex items-center justify-between text-[11px] text-gray-500">
-          <span className="truncate max-w-[80px]">
-            {product.brand || "BaBy Shop"}
-          </span>
-          <span>
-            {product.soldCount > 0 ? `${product.soldCount} đã bán` : "Mới"}
-          </span>
+        {/* Product Info */}
+        <div className="flex flex-col flex-1 p-3 gap-2">
+          {/* Product Name */}
+          <h3 className="font-medium text-[13px] leading-tight text-gray-800 line-clamp-2 min-h-[36px] group-hover:text-[#E53935] transition-colors">
+            {product.name || "Tên sản phẩm"}
+          </h3>
+
+          {/* Price Section */}
+          <div className="flex flex-col gap-0.5 mt-auto">
+            {/* Price Range */}
+            {modelPrices && modelPrices.min !== modelPrices.max ? (
+              <div className="flex items-baseline gap-1">
+                <span className="text-[10px] text-[#E53935]">₫</span>
+                <span className="font-bold text-base text-[#E53935]">
+                  {modelPrices.min.toLocaleString('vi-VN')}
+                </span>
+                <span className="text-[11px] text-gray-500">
+                  - ₫{modelPrices.max.toLocaleString('vi-VN')}
+                </span>
+              </div>
+            ) : hasDiscount ? (
+              <div className="flex items-baseline gap-2">
+                <div className="flex items-baseline">
+                  <span className="text-[10px] text-[#E53935]">₫</span>
+                  <span className="font-bold text-base text-[#E53935]">
+                    {displayPrice.discount!.toLocaleString('vi-VN')}
+                  </span>
+                </div>
+                <span className="text-[11px] text-gray-400 line-through">
+                  ₫{displayPrice.current.toLocaleString('vi-VN')}
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-baseline">
+                <span className="text-[10px] text-[#E53935]">₫</span>
+                <span className="font-bold text-base text-[#E53935]">
+                  {displayPrice.current.toLocaleString('vi-VN')}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Shop & Sold Count */}
+          <div className="flex items-center justify-between text-[11px] text-[#999] pt-1 border-t border-border">
+            <span className="truncate max-w-[60%]">
+              {product.brand || (typeof product.shop === 'object' ? product.shop.name : "Shop")}
+            </span>
+            <span className="shrink-0">
+              {formatSoldCount(product.soldCount)}
+            </span>
+          </div>
         </div>
       </div>
-    </div>
-  </Link>
-);
+    </Link>
+  );
+};
+
+export default ProductCard;

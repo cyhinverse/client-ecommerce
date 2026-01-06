@@ -26,8 +26,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, MoreHorizontal, Eye, Edit, Trash2, Filter } from "lucide-react";
-import { Discount } from "@/types/discount";
+import { Search, MoreHorizontal, Eye, Edit, Trash2, Filter, Store } from "lucide-react";
+// Updated: Import from voucher types with backward compatibility alias
+import { Discount } from "@/types/voucher";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { cn } from "@/lib/utils";
 
@@ -90,20 +91,22 @@ export function DiscountsTable({
     if (isExpired(discount.endDate)) {
       return <Badge className="bg-red-50 text-red-600 hover:bg-red-50 border-red-100 rounded-lg px-2.5 py-0.5 shadow-none font-medium">Expired</Badge>;
     }
-    if (discount.usedCount >= discount.usageLimit) {
+    if ((discount.usedCount ?? discount.usageCount ?? 0) >= discount.usageLimit) {
       return <Badge className="bg-orange-50 text-orange-600 hover:bg-orange-50 border-orange-100 rounded-lg px-2.5 py-0.5 shadow-none font-medium">Limit Reached</Badge>;
     }
     return <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-0 rounded-lg px-2.5 py-0.5 shadow-none font-medium">Active</Badge>;
   };
 
-  const getDiscountTypeText = (type: string) => {
+  const getDiscountTypeText = (type: string | undefined) => {
     return type === "percent" ? "Percentage" : "Fixed Amount";
   };
 
   const getDiscountValueText = (discount: Discount) => {
-    return discount.discountType === "percent"
-      ? `${discount.discountValue}%`
-      : `${(discount.discountValue ?? 0).toLocaleString()}đ`;
+    const discountType = discount.discountType ?? (discount.type === "percentage" ? "percent" : "fixed");
+    const discountValue = discount.discountValue ?? discount.value ?? 0;
+    return discountType === "percent"
+      ? `${discountValue}%`
+      : `${discountValue.toLocaleString()}đ`;
   };
 
   return (
@@ -228,13 +231,13 @@ export function DiscountsTable({
                         </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground font-medium align-top py-4">
-                        {getDiscountTypeText(discount.discountType)}
+                        {getDiscountTypeText(discount.discountType ?? (discount.type === "percentage" ? "percent" : "fixed"))}
                     </TableCell>
                     <TableCell className="text-foreground font-bold align-top py-4">{getDiscountValueText(discount)}</TableCell>
                     <TableCell className="text-muted-foreground text-sm align-top py-4">{formatDate(discount.startDate)}</TableCell>
                     <TableCell className="text-muted-foreground text-sm align-top py-4">{formatDate(discount.endDate)}</TableCell>
                     <TableCell className="text-muted-foreground text-sm align-top py-4">
-                        <span className="font-medium text-foreground">{discount.usedCount}</span> / {discount.usageLimit}
+                        <span className="font-medium text-foreground">{discount.usedCount ?? discount.usageCount ?? 0}</span> / {discount.usageLimit}
                     </TableCell>
                     <TableCell className="align-top py-4">{getStatusBadge(discount)}</TableCell>
                     <TableCell className="text-right pr-6 align-top py-4">

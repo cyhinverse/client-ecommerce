@@ -86,9 +86,9 @@ export default function Banner() {
 
   if (isLoading || length === 0) {
     return (
-      <div className="w-full h-full bg-neutral-900 animate-pulse flex items-center justify-center rounded-sm">
-        <span className="text-white/20 text-xl font-medium">
-          Loading Experience...
+      <div className="w-full h-full bg-[#f7f7f7] animate-pulse flex items-center justify-center rounded-lg">
+        <span className="text-gray-400 text-sm font-medium">
+          Đang tải...
         </span>
       </div>
     );
@@ -96,7 +96,7 @@ export default function Banner() {
 
   return (
     <section
-      className="relative w-full h-full overflow-hidden bg-black group rounded-sm"
+      className="relative w-full h-full overflow-hidden bg-gray-100 group rounded-lg"
       onMouseEnter={() => (isHoveringRef.current = true)}
       onMouseLeave={() => (isHoveringRef.current = false)}
     >
@@ -125,7 +125,7 @@ export default function Banner() {
             />
 
             {/* Dynamic Vignette & Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60 pointer-events-none" />
+            <div className="absolute inset-0 bg-black/30 pointer-events-none" />
 
             {/* Content Layer */}
             <div className="absolute inset-x-0 bottom-0 top-0 flex flex-col items-center justify-center px-6 text-center z-10">
@@ -135,9 +135,9 @@ export default function Banner() {
                   initial="hidden"
                   animate="visible"
                   variants={textVariants}
-                  className="inline-block px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-bold tracking-[0.15em] uppercase mb-2"
+                  className="inline-block px-3 py-1 rounded-full bg-[#E53935]/90 backdrop-blur-md text-white text-xs font-bold tracking-wide uppercase mb-2"
                 >
-                  Prime Selection
+                  Ưu đãi đặc biệt
                 </motion.span>
 
                 <motion.h2
@@ -186,13 +186,13 @@ export default function Banner() {
                       }
                     }}
                     className={cn(
-                      "rounded-full px-4 py-1 text-[10px] font-bold transition-all hover:scale-105 active:scale-95",
+                      "rounded-full px-5 py-2 text-xs font-bold transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg",
                       banners[currentIndex].theme === "light"
-                        ? "bg-black text-white"
-                        : "bg-white text-black"
+                        ? "bg-[#E53935] text-white hover:bg-[#D32F2F]"
+                        : "bg-white text-[#E53935] hover:bg-gray-100"
                     )}
                   >
-                    Shop Now
+                    Mua ngay
                   </Button>
                 </motion.div>
               </div>
@@ -201,25 +201,25 @@ export default function Banner() {
         </motion.div>
       </AnimatePresence>
 
-      {/* Navigation Controls - Hidden on Idle */}
-      <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-4 pointer-events-none z-20">
+      {/* Navigation Controls - Visible on hover */}
+      <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-3 pointer-events-none z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <button
           onClick={() => paginate(-1)}
-          className="p-2 rounded-full bg-black/10 hover:bg-black/40 text-white/40 hover:text-white backdrop-blur-md border border-white/5 transition-all pointer-events-auto group/nav"
+          className="p-1.5 rounded-full bg-white/80 hover:bg-white text-gray-700 hover:text-[#E53935] shadow-md transition-all pointer-events-auto"
         >
-          <ChevronLeft className="w-5 h-5 transition-transform group-hover/nav:-translate-x-0.5" />
+          <ChevronLeft className="w-5 h-5" />
         </button>
         <button
           onClick={() => paginate(1)}
-          className="p-2 rounded-full bg-black/10 hover:bg-black/40 text-white/40 hover:text-white backdrop-blur-md border border-white/5 transition-all pointer-events-auto group/nav"
+          className="p-1.5 rounded-full bg-white/80 hover:bg-white text-gray-700 hover:text-[#E53935] shadow-md transition-all pointer-events-auto"
         >
-          <ChevronRight className="w-5 h-5 transition-transform group-hover/nav:translate-x-0.5" />
+          <ChevronRight className="w-5 h-5" />
         </button>
       </div>
 
-      {/* Modern Pagination - Sleek Apple Style Bars */}
-      <div className="absolute bottom-6 left-0 right-0 z-30 flex justify-center px-4">
-        <div className="flex gap-2.5 max-w-full overflow-x-auto no-scrollbar py-2">
+      {/* Pagination Dots - Taobao Style */}
+      <div className="absolute bottom-3 left-0 right-0 z-30 flex justify-center">
+        <div className="flex gap-1.5 bg-black/20 backdrop-blur-sm rounded-full px-2 py-1">
           {banners.map((_, idx) => (
             <button
               key={idx}
@@ -227,22 +227,16 @@ export default function Banner() {
                 setDirection(idx > currentIndex ? 1 : -1);
                 setCurrentIndex(idx);
               }}
-              className="relative h-1 w-8 sm:w-16 rounded-full bg-white/20 overflow-hidden transition-all duration-300 hover:bg-white/40"
-            >
-              {idx === currentIndex && (
-                <motion.div
-                  layoutId="activeBar"
-                  className="absolute inset-0 bg-white shadow-[0_0_15px_rgba(255,255,255,0.8)]"
-                  initial={false}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                />
+              className={cn(
+                "w-2 h-2 rounded-full transition-all duration-300",
+                idx === currentIndex
+                  ? "bg-white w-5"
+                  : "bg-white/50 hover:bg-white/80"
               )}
-            </button>
+            />
           ))}
         </div>
       </div>
-
-      <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-white/5 to-transparent pointer-events-none blur-3xl z-[5]" />
     </section>
   );
 }

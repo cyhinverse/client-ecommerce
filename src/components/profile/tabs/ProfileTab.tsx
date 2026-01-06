@@ -47,7 +47,7 @@ export default function ProfileTab({ user }: ProfileTabProps) {
       {/* Avatar Section */}
       <div className="flex flex-col items-center gap-6 text-center">
         <div className="relative group">
-          <div className="w-32 h-32 rounded-full ring-4 ring-white dark:ring-zinc-900 shadow-2xl overflow-hidden transition-transform duration-300 group-hover:scale-105 relative">
+          <div className="w-32 h-32 rounded-full ring-4 ring-white shadow-2xl overflow-hidden transition-transform duration-300 group-hover:scale-105 relative">
             <Image
               src={user.avatar || "/placeholder-avatar.jpg"}
               alt={user.username}
@@ -57,7 +57,7 @@ export default function ProfileTab({ user }: ProfileTabProps) {
           </div>
           <Button
             size="icon"
-            className="absolute bottom-1 right-1 h-9 w-9 rounded-full shadow-lg bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black transition-transform hover:scale-110"
+            className="absolute bottom-1 right-1 h-9 w-9 rounded-full shadow-lg bg-black text-white hover:bg-black/90 transition-transform hover:scale-110"
             onClick={handleUploadAvatar}
             disabled={isUploadingAvatar}
           >
@@ -92,7 +92,7 @@ export default function ProfileTab({ user }: ProfileTabProps) {
             sublabel="Used for sign in and notifications"
             action={
                 user.isVerifiedEmail ? (
-                    <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400 gap-1 px-2 py-0.5 h-5 text-[10px]">
+                    <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100 gap-1 px-2 py-0.5 h-5 text-[10px]">
                         <Check className="h-3 w-3" />
                         Verified
                     </Badge>
@@ -126,9 +126,9 @@ interface InfoRowProps {
 }
 
 const InfoRow = ({ icon: Icon, label, value, sublabel, action }: InfoRowProps) => (
-  <div className="flex items-center justify-between p-4 bg-muted/30 rounded-2xl group transition-all hover:bg-muted/50">
+  <div className="flex items-center justify-between p-4 bg-[#f7f7f7] rounded-2xl group transition-all hover:bg-[#f0f0f0]">
       <div className="flex items-center gap-4">
-          <div className="h-10 w-10 rounded-full bg-white dark:bg-zinc-800 flex items-center justify-center shadow-sm text-muted-foreground group-hover:text-primary transition-colors">
+          <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center text-muted-foreground group-hover:text-primary transition-colors">
               <Icon className="h-5 w-5" />
           </div>
           <div>

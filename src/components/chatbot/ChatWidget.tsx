@@ -200,7 +200,7 @@ export default function ChatWidget() {
       >
         <div className="h-full flex flex-col bg-card overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-card shadow-sm">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-card">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
                 <Sparkles className="h-5 w-5 text-primary" />
@@ -267,7 +267,7 @@ export default function ChatWidget() {
                     <button
                       key={i}
                       onClick={() => sendMessage(suggestion)}
-                      className="w-full text-left px-5 py-3.5 rounded-xl bg-card border border-border hover:border-primary/50 hover:bg-primary/5 hover:text-primary transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md"
+                      className="w-full text-left px-5 py-3.5 rounded-xl bg-[#f7f7f7] border border-border hover:border-primary/50 hover:bg-primary/5 hover:text-primary transition-all duration-200 text-sm font-medium"
                     >
                       {suggestion}
                     </button>
@@ -291,7 +291,7 @@ export default function ChatWidget() {
                     )}
                     <div
                       className={cn(
-                        "max-w-[85%] rounded-2xl px-5 py-3.5 text-sm leading-relaxed shadow-sm",
+                        "max-w-[85%] rounded-2xl px-5 py-3.5 text-sm leading-relaxed",
                         msg.role === "user"
                           ? "bg-primary text-primary-foreground rounded-br-none"
                           : "bg-card border border-border text-foreground rounded-bl-none"
@@ -337,7 +337,7 @@ export default function ChatWidget() {
                     <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-1">
                       <Sparkles className="h-4 w-4 text-primary" />
                     </div>
-                    <div className="max-w-[85%] rounded-2xl rounded-bl-none px-5 py-3.5 text-sm leading-relaxed bg-card border border-border text-foreground shadow-sm">
+                    <div className="max-w-[85%] rounded-2xl rounded-bl-none px-5 py-3.5 text-sm leading-relaxed bg-card border border-border text-foreground">
                       <div className="prose prose-sm dark:prose-invert max-w-none [&>p]:mb-3 [&>p:last-child]:mb-0">
                         <ReactMarkdown
                           components={{
@@ -369,7 +369,7 @@ export default function ChatWidget() {
                     <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-1">
                       <Sparkles className="h-4 w-4 text-primary" />
                     </div>
-                    <div className="bg-card border border-border rounded-2xl rounded-bl-none px-5 py-4 shadow-sm">
+                    <div className="bg-card border border-border rounded-2xl rounded-bl-none px-5 py-4">
                       <div className="flex items-center gap-1.5">
                         <span className="h-2 w-2 rounded-full bg-primary/40 animate-bounce [animation-delay:-0.3s]" />
                         <span className="h-2 w-2 rounded-full bg-primary/40 animate-bounce [animation-delay:-0.15s]" />
@@ -400,7 +400,7 @@ export default function ChatWidget() {
                 type="submit"
                 disabled={!input.trim() || isLoading}
                 size="icon"
-                className="rounded-full h-9 w-9 bg-primary hover:bg-primary/90 shrink-0 shadow-sm"
+                className="rounded-full h-9 w-9 bg-primary hover:bg-primary/90 shrink-0"
               >
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

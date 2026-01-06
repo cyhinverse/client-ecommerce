@@ -15,12 +15,12 @@ interface OrderCardProps {
 export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancelling }: OrderCardProps) {
     const getStatusConfig = (status: Order["status"]) => {
         switch (status) {
-            case "pending": return { icon: Clock, color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-900/20", label: "Pending" };
-            case "confirmed": return { icon: CheckCircle, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20", label: "Confirmed" };
-            case "processing": return { icon: RefreshCw, color: "text-indigo-500", bg: "bg-indigo-50 dark:bg-indigo-900/20", label: "Processing" };
-            case "shipped": return { icon: Truck, color: "text-purple-500", bg: "bg-purple-50 dark:bg-purple-900/20", label: "On the way" };
-            case "delivered": return { icon: CheckCircle, color: "text-green-500", bg: "bg-green-50 dark:bg-green-900/20", label: "Delivered" };
-            case "cancelled": return { icon: XCircle, color: "text-red-500", bg: "bg-red-50 dark:bg-red-900/20", label: "Cancelled" };
+            case "pending": return { icon: Clock, color: "text-amber-500", bg: "bg-amber-50", label: "Pending" };
+            case "confirmed": return { icon: CheckCircle, color: "text-blue-500", bg: "bg-blue-50", label: "Confirmed" };
+            case "processing": return { icon: RefreshCw, color: "text-indigo-500", bg: "bg-indigo-50", label: "Processing" };
+            case "shipped": return { icon: Truck, color: "text-purple-500", bg: "bg-purple-50", label: "On the way" };
+            case "delivered": return { icon: CheckCircle, color: "text-green-500", bg: "bg-green-50", label: "Delivered" };
+            case "cancelled": return { icon: XCircle, color: "text-red-500", bg: "bg-red-50", label: "Cancelled" };
             default: return { icon: Package, color: "text-gray-500", bg: "bg-gray-50", label: status };
         }
     };
