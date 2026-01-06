@@ -318,3 +318,27 @@ export const getRelatedProducts = createAsyncThunk(
     }
   }
 );
+
+
+// Get products by shop ID
+export const getProductsByShop = createAsyncThunk(
+  "product/shop",
+  async (
+    { shopId, page = 1, limit = 20 }: { shopId: string; page?: number; limit?: number },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await instance.get(`/products/shop/${shopId}`, {
+        params: { page, limit },
+      });
+      return response.data.data || response.data;
+    } catch (error) {
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+      };
+      return rejectWithValue(
+        axiosError.response?.data?.message || "Failed to fetch shop products"
+      );
+    }
+  }
+);

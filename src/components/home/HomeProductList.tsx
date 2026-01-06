@@ -8,6 +8,7 @@ import {
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { ProductCard } from "@/components/product/ProductCard";
 import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 interface HomeProductListProps {
   selectedCategorySlug: string | null;
@@ -20,6 +21,7 @@ export default function HomeProductList({
   const { all, byCategory, isLoading, error } = useAppSelector(
     (state) => state.product
   );
+  const { isOpen: isChatOpen } = useAppSelector((state) => state.chat);
 
   // Determine which list to show
   const products = selectedCategorySlug ? byCategory : all;
@@ -73,7 +75,12 @@ export default function HomeProductList({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3"
+          className={cn(
+            "grid gap-3 transition-all duration-300",
+            isChatOpen 
+              ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5" 
+              : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
+          )}
         >
           {products && products.length > 0
             ? products.map((p) => (

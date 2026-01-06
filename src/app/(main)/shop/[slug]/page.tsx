@@ -11,88 +11,74 @@ import {
   MessageCircle, 
   Clock, 
   Truck,
-  ChevronRight,
   Search,
   Grid3X3,
-  List
+  List,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductCard from "@/components/product/ProductCard";
 import { toast } from "sonner";
-
-// Mock shop data - replace with actual API
-const mockShop = {
-  _id: "shop1",
-  name: "Apple Official Store",
-  slug: "apple-official",
-  logo: "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=200",
-  banner: "https://images.unsplash.com/photo-1491933382434-500287f9b54b?w=1200",
-  description: "Cửa hàng chính hãng Apple tại Việt Nam. Cam kết 100% sản phẩm chính hãng.",
-  rating: 4.9,
-  followers: 125000,
-  metrics: {
-    responseRate: 98,
-    shippingOnTime: 99,
-    ratingCount: 15420,
-  },
-  status: "active",
-};
-
-const mockProducts = [
-  {
-    _id: "1",
-    name: "iPhone 15 Pro Max 256GB - Titan Tự Nhiên",
-    slug: "iphone-15-pro-max",
-    price: { currentPrice: 34990000, discountPrice: 32990000 },
-    images: ["https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=400"],
-    shop: mockShop,
-    soldCount: 1250,
-    onSale: true,
-  },
-  {
-    _id: "2",
-    name: "MacBook Pro 14 inch M3 Pro",
-    slug: "macbook-pro-14-m3",
-    price: { currentPrice: 49990000, discountPrice: null },
-    images: ["https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400"],
-    shop: mockShop,
-    soldCount: 560,
-    onSale: false,
-  },
-  {
-    _id: "3",
-    name: "AirPods Pro 2nd Generation",
-    slug: "airpods-pro-2",
-    price: { currentPrice: 6990000, discountPrice: 5990000 },
-    images: ["https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=400"],
-    shop: mockShop,
-    soldCount: 3200,
-    onSale: true,
-  },
-];
-
-const shopCategories = [
-  { id: "all", name: "Tất cả", count: 156 },
-  { id: "iphone", name: "iPhone", count: 24 },
-  { id: "macbook", name: "MacBook", count: 18 },
-  { id: "ipad", name: "iPad", count: 12 },
-  { id: "accessories", name: "Phụ kiện", count: 102 },
-];
+import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { getShopById } from "@/features/shop/shopAction";
+import { getShopCategories } from "@/features/shopCategory/shopCategoryAction";
+import { getProductsByShop } from "@/features/product/productAction";
+import { startConversation } from "@/features/chat/chatAction";
+import { setChatOpen } from "@/features/chat/chatSlice";
 
 export default function ShopPage() {
   const params = useParams();
-  const [shop, setShop] = useState(mockShop);
-  const [products, setProducts] = useState(mockProducts);
+  const dispatch = useAppDispatch();
+  const slug = params.slug as string;
+
+  const { currentShop, isLoading: shopLoading, error: shopError } = useAppSelector(
+    (state) => state.shop
+  );
+  const { categories, isLoading: categoriesLoading } = useAppSelector(
+    (state) => state.shopCategory
+  );
+  const { all: products, isLoading: productsLoading } = useAppSelector(
+    (state) => state.product
+  );
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+
   const [isFollowing, setIsFollowing] = useState(false);
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
+  useEffect(() => {
+    if (slug) {
+      dispatch(getShopById(slug));
+    }
+  }, [dispatch, slug]);
+
+  useEffect(() => {
+    if (currentShop?._id) {
+      dispatch(getShopCategories(currentShop._id));
+      dispatch(getProductsByShop({ shopId: currentShop._id }));
+    }
+  }, [dispatch, currentShop?._id]);
+
   const handleFollow = () => {
     setIsFollowing(!isFollowing);
     toast.success(isFollowing ? "Đã bỏ theo dõi shop" : "Đã theo dõi shop");
+  };
+
+  const handleChat = async () => {
+    if (!isAuthenticated) {
+      toast.error("Vui lòng đăng nhập để chat với shop");
+      return;
+    }
+    if (!currentShop?._id) return;
+
+    try {
+      await dispatch(startConversation({ shopId: currentShop._id })).unwrap();
+      dispatch(setChatOpen(true));
+    } catch {
+      toast.error("Không thể bắt đầu cuộc trò chuyện");
+    }
   };
 
   const formatNumber = (num: number) => {
@@ -101,13 +87,46 @@ export default function ShopPage() {
     return num.toString();
   };
 
+  // Filter products by category and search
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch = !searchQuery || 
+      product.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = activeCategory === "all" || 
+      product.category?.slug === activeCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  if (shopLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[#E53935]" />
+      </div>
+    );
+  }
+
+  if (shopError || !currentShop) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Store className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+          <p className="text-gray-500">{shopError || "Không tìm thấy shop"}</p>
+          <Link href="/">
+            <Button variant="outline" className="mt-4">
+              Về trang chủ
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background -mt-4 -mx-4">
       {/* Shop Banner */}
       <div className="relative h-[200px] md:h-[280px] w-full">
         <Image
-          src={shop.banner}
-          alt={shop.name}
+          src={currentShop.banner || "/images/default-banner.jpg"}
+          alt={currentShop.name}
           fill
           className="object-cover"
         />
@@ -121,8 +140,8 @@ export default function ShopPage() {
             {/* Logo */}
             <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-4 border-white shrink-0 mx-auto md:mx-0">
               <Image
-                src={shop.logo}
-                alt={shop.name}
+                src={currentShop.logo || "/images/default-shop.png"}
+                alt={currentShop.name}
                 fill
                 className="object-cover"
               />
@@ -131,24 +150,24 @@ export default function ShopPage() {
             {/* Info */}
             <div className="flex-1 text-center md:text-left">
               <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
-                <h1 className="text-xl font-bold text-gray-800">{shop.name}</h1>
+                <h1 className="text-xl font-bold text-gray-800">{currentShop.name}</h1>
                 <span className="inline-flex items-center justify-center md:justify-start gap-1 text-xs text-[#E53935] border border-[#E53935] px-2 py-0.5 rounded w-fit mx-auto md:mx-0">
                   <Store className="h-3 w-3" />
                   Official Store
                 </span>
               </div>
-              <p className="text-sm text-gray-500 mt-1 line-clamp-2">{shop.description}</p>
+              <p className="text-sm text-gray-500 mt-1 line-clamp-2">{currentShop.description}</p>
               
               {/* Stats */}
               <div className="flex items-center justify-center md:justify-start gap-6 mt-3 text-sm">
                 <div className="flex items-center gap-1">
                   <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                  <span className="font-medium">{shop.rating}</span>
-                  <span className="text-gray-400">({formatNumber(shop.metrics.ratingCount)} đánh giá)</span>
+                  <span className="font-medium">{currentShop.rating}</span>
+                  <span className="text-gray-400">({formatNumber(currentShop.metrics?.ratingCount || 0)} đánh giá)</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Users className="h-4 w-4 text-gray-400" />
-                  <span className="font-medium">{formatNumber(shop.followers)}</span>
+                  <span className="font-medium">{formatNumber(currentShop.followers || 0)}</span>
                   <span className="text-gray-400">theo dõi</span>
                 </div>
               </div>
@@ -166,7 +185,7 @@ export default function ShopPage() {
               >
                 {isFollowing ? "Đang theo dõi" : "+ Theo dõi"}
               </Button>
-              <Button variant="outline" className="border-gray-200">
+              <Button variant="outline" className="border-gray-200" onClick={handleChat}>
                 <MessageCircle className="h-4 w-4 mr-1" />
                 Chat
               </Button>
@@ -178,7 +197,7 @@ export default function ShopPage() {
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 text-[#4CAF50]">
                 <MessageCircle className="h-4 w-4" />
-                <span className="font-bold">{shop.metrics.responseRate}%</span>
+                <span className="font-bold">{currentShop.metrics?.responseRate || 0}%</span>
               </div>
               <p className="text-xs text-gray-500 mt-0.5">Tỉ lệ phản hồi</p>
             </div>
@@ -192,7 +211,7 @@ export default function ShopPage() {
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 text-[#FF9800]">
                 <Truck className="h-4 w-4" />
-                <span className="font-bold">{shop.metrics.shippingOnTime}%</span>
+                <span className="font-bold">{currentShop.metrics?.shippingOnTime || 0}%</span>
               </div>
               <p className="text-xs text-gray-500 mt-0.5">Giao đúng hạn</p>
             </div>
@@ -207,23 +226,42 @@ export default function ShopPage() {
           <div className="lg:w-[200px] shrink-0">
             <div className="bg-white rounded border border-[#f0f0f0] p-3">
               <h3 className="font-medium text-gray-800 mb-2">Danh mục Shop</h3>
-              <ul className="space-y-1">
-                {shopCategories.map((cat) => (
-                  <li key={cat.id}>
+              {categoriesLoading ? (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+                </div>
+              ) : (
+                <ul className="space-y-1">
+                  <li>
                     <button
-                      onClick={() => setActiveCategory(cat.id)}
+                      onClick={() => setActiveCategory("all")}
                       className={`w-full text-left px-2 py-1.5 rounded text-sm transition-colors ${
-                        activeCategory === cat.id
+                        activeCategory === "all"
                           ? "bg-[#FFEBEE] text-[#E53935]"
                           : "text-gray-600 hover:bg-gray-50"
                       }`}
                     >
-                      {cat.name}
-                      <span className="text-gray-400 ml-1">({cat.count})</span>
+                      Tất cả
+                      <span className="text-gray-400 ml-1">({products.length})</span>
                     </button>
                   </li>
-                ))}
-              </ul>
+                  {categories.map((cat) => (
+                    <li key={cat._id}>
+                      <button
+                        onClick={() => setActiveCategory(cat.slug)}
+                        className={`w-full text-left px-2 py-1.5 rounded text-sm transition-colors ${
+                          activeCategory === cat.slug
+                            ? "bg-[#FFEBEE] text-[#E53935]"
+                            : "text-gray-600 hover:bg-gray-50"
+                        }`}
+                      >
+                        {cat.name}
+                        <span className="text-gray-400 ml-1">({cat.productCount})</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
 
@@ -257,11 +295,21 @@ export default function ShopPage() {
             </div>
 
             {/* Products */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              {products.map((product) => (
-                <ProductCard key={product._id} product={product as any} />
-              ))}
-            </div>
+            {productsLoading ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-[#E53935]" />
+              </div>
+            ) : filteredProducts.length === 0 ? (
+              <div className="text-center py-12 text-gray-500">
+                Không tìm thấy sản phẩm nào
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {filteredProducts.map((product) => (
+                  <ProductCard key={product._id} product={product as any} />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -1,124 +1,53 @@
 // VoucherPage - Taobao Light Style
 "use client";
 import { useState, useEffect } from "react";
-import { Ticket, Store, Clock, Check, ChevronRight, Filter } from "lucide-react";
+import { Ticket, Store, Clock, Check, ChevronRight, Filter, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { getAllVouchers, getAvailableVouchers } from "@/features/discount/discountAction";
+import { Voucher as VoucherType } from "@/types/voucher";
+import { Shop } from "@/types/product";
 
-interface Voucher {
-  _id: string;
-  code: string;
-  name: string;
-  description?: string;
-  type: "fixed_amount" | "percentage";
-  value: number;
-  maxValue?: number;
-  scope: "shop" | "platform";
-  shopId?: { _id: string; name: string; logo?: string };
-  minOrderValue: number;
-  usageLimit: number;
-  usageCount: number;
-  startDate: string;
-  endDate: string;
+// Extended voucher interface for UI state
+interface Voucher extends Omit<VoucherType, 'shopId'> {
+  shopId?: { _id: string; name: string; logo?: string } | string | Shop;
   isCollected?: boolean;
 }
 
-// Mock vouchers data
-const mockVouchers: Voucher[] = [
-  {
-    _id: "v1",
-    code: "SALE50K",
-    name: "Giảm 50K",
-    description: "Áp dụng cho đơn hàng từ 500K",
-    type: "fixed_amount",
-    value: 50000,
-    scope: "platform",
-    minOrderValue: 500000,
-    usageLimit: 1000,
-    usageCount: 450,
-    startDate: "2024-01-01",
-    endDate: "2024-12-31",
-    isCollected: false,
-  },
-  {
-    _id: "v2",
-    code: "FREESHIP",
-    name: "Miễn phí vận chuyển",
-    description: "Áp dụng cho mọi đơn hàng",
-    type: "fixed_amount",
-    value: 30000,
-    scope: "platform",
-    minOrderValue: 0,
-    usageLimit: 5000,
-    usageCount: 2100,
-    startDate: "2024-01-01",
-    endDate: "2024-12-31",
-    isCollected: true,
-  },
-  {
-    _id: "v3",
-    code: "APPLE10",
-    name: "Giảm 10%",
-    description: "Áp dụng cho sản phẩm Apple",
-    type: "percentage",
-    value: 10,
-    maxValue: 500000,
-    scope: "shop",
-    shopId: { _id: "shop1", name: "Apple Store", logo: "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=100" },
-    minOrderValue: 1000000,
-    usageLimit: 500,
-    usageCount: 120,
-    startDate: "2024-01-01",
-    endDate: "2024-06-30",
-    isCollected: false,
-  },
-  {
-    _id: "v4",
-    code: "SAMSUNG15",
-    name: "Giảm 15%",
-    description: "Áp dụng cho điện thoại Samsung",
-    type: "percentage",
-    value: 15,
-    maxValue: 1000000,
-    scope: "shop",
-    shopId: { _id: "shop2", name: "Samsung Official", logo: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=100" },
-    minOrderValue: 2000000,
-    usageLimit: 300,
-    usageCount: 89,
-    startDate: "2024-01-01",
-    endDate: "2024-12-31",
-    isCollected: false,
-  },
-];
+// Helper to get shop info from voucher
+const getShopInfo = (shopId: Voucher['shopId']): { _id: string; name: string; logo?: string } | undefined => {
+  if (!shopId) return undefined;
+  if (typeof shopId === 'string') return { _id: shopId, name: 'Shop', logo: undefined };
+  if ('name' in shopId) return { _id: shopId._id, name: shopId.name, logo: (shopId as any).logo };
+  return undefined;
+};
 
 export default function VouchersPage() {
-  const [vouchers, setVouchers] = useState<Voucher[]>(mockVouchers);
+  const dispatch = useAppDispatch();
+  const { vouchers: reduxVouchers, loading } = useAppSelector((state) => state.discount);
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  
+  const [collectedIds, setCollectedIds] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState("all");
   const [filterType, setFilterType] = useState<"all" | "percentage" | "fixed_amount">("all");
 
+  // Fetch vouchers on mount
+  useEffect(() => {
+    dispatch(getAllVouchers({ isActive: true }));
+  }, [dispatch]);
+
+  // Map redux vouchers to UI vouchers with collected state
+  const vouchers: Voucher[] = reduxVouchers.map(v => ({
+    ...v,
+    isCollected: collectedIds.has(v._id),
+  }));
+
   const handleCollectVoucher = (voucherId: string) => {
-    setVouchers(prev => 
-      prev.map(v => v._id === voucherId ? { ...v, isCollected: true } : v)
-    );
+    setCollectedIds(prev => new Set(prev).add(voucherId));
     toast.success("Đã lưu voucher thành công!");
-  };
-
-  const formatValue = (voucher: Voucher) => {
-    if (voucher.type === "percentage") {
-      return `${voucher.value}%`;
-    }
-    return `₫${voucher.value.toLocaleString('vi-VN')}`;
-  };
-
-  const formatMinOrder = (value: number) => {
-    if (value === 0) return "Không giới hạn";
-    return `Đơn tối thiểu ₫${value.toLocaleString('vi-VN')}`;
-  };
-
-  const getUsagePercent = (voucher: Voucher) => {
-    return Math.round((voucher.usageCount / voucher.usageLimit) * 100);
   };
 
   const filteredVouchers = vouchers.filter(v => {
@@ -133,16 +62,26 @@ export default function VouchersPage() {
 
   // Group shop vouchers by shop
   const shopVouchersByShop = shopVouchers.reduce((acc, voucher) => {
-    const shopId = voucher.shopId?._id || "unknown";
+    const shopInfo = getShopInfo(voucher.shopId);
+    const shopId = shopInfo?._id || "unknown";
     if (!acc[shopId]) {
       acc[shopId] = {
-        shop: voucher.shopId,
+        shop: shopInfo,
         vouchers: [],
       };
     }
     acc[shopId].vouchers.push(voucher);
     return acc;
-  }, {} as Record<string, { shop: Voucher["shopId"]; vouchers: Voucher[] }>);
+  }, {} as Record<string, { shop: ReturnType<typeof getShopInfo>; vouchers: Voucher[] }>);
+
+  // Loading state
+  if (loading && vouchers.length === 0) {
+    return (
+      <div className="min-h-screen bg-background py-4 -mt-4 -mx-4 px-4 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[#E53935]" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background py-4 -mt-4 -mx-4 px-4">

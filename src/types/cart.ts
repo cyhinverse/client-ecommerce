@@ -78,15 +78,32 @@ export interface CartState {
 // Helper function to group cart items by shop
 export function groupCartItemsByShop(items: CartItem[]): CartItemsByShop[] {
   const shopMap = new Map<string, CartItemsByShop>();
+  const DEFAULT_SHOP_ID = 'default-shop';
   
   items.forEach(item => {
-    const shopId = typeof item.shopId === 'string' ? item.shopId : item.shopId?._id;
-    const shop = typeof item.shopId === 'object' ? item.shopId : { _id: shopId, name: 'Shop' } as Shop;
+    // Try to get shopId from item.shopId or from productId.shop
+    let shopId: string | undefined;
+    let shop: Shop;
     
-    if (!shopId) return;
+    if (item.shopId) {
+      shopId = typeof item.shopId === 'string' ? item.shopId : item.shopId?._id;
+      shop = typeof item.shopId === 'object' ? item.shopId : { _id: shopId || DEFAULT_SHOP_ID, name: 'Shop' } as Shop;
+    } else if (typeof item.productId === 'object' && (item.productId as any).shop) {
+      // Fallback: try to get shop from productId
+      const productShop = (item.productId as any).shop;
+      shopId = typeof productShop === 'string' ? productShop : productShop?._id;
+      shop = typeof productShop === 'object' ? productShop : { _id: shopId || DEFAULT_SHOP_ID, name: 'Shop' } as Shop;
+    } else {
+      // Default shop for items without shopId
+      shopId = DEFAULT_SHOP_ID;
+      shop = { _id: DEFAULT_SHOP_ID, name: 'Shop' } as Shop;
+    }
+
+    // Ensure shopId is always defined
+    const resolvedShopId = shopId || DEFAULT_SHOP_ID;
     
-    if (!shopMap.has(shopId)) {
-      shopMap.set(shopId, {
+    if (!shopMap.has(resolvedShopId)) {
+      shopMap.set(resolvedShopId, {
         shop,
         items: [],
         subtotal: 0,
@@ -94,7 +111,7 @@ export function groupCartItemsByShop(items: CartItem[]): CartItemsByShop[] {
       });
     }
     
-    const group = shopMap.get(shopId)!;
+    const group = shopMap.get(resolvedShopId)!;
     group.items.push(item);
     group.subtotal += (item.price?.discountPrice || item.price?.currentPrice || 0) * item.quantity;
     group.itemCount += item.quantity;

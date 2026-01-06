@@ -14,6 +14,7 @@ import ProfileTab from "@/components/profile/tabs/ProfileTab";
 import OrdersTab from "@/components/profile/tabs/OrdersTab";
 import AddressTab from "@/components/profile/tabs/AddressTab";
 import SettingsTab from "@/components/profile/tabs/SettingsTab";
+import ShopTab from "@/components/profile/tabs/ShopTab";
 import {
   User,
   Package,
@@ -25,6 +26,7 @@ import {
   Wallet,
   Gift,
   Star,
+  Store,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -47,7 +49,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const tabParam = searchParams.get("tab");
-    if (tabParam && ["profile", "orders", "address", "settings"].includes(tabParam)) {
+    if (tabParam && ["profile", "orders", "address", "settings", "shop"].includes(tabParam)) {
       if (activeTab !== tabParam) {
         setActiveTab(tabParam);
       }
@@ -64,6 +66,7 @@ export default function ProfilePage() {
     { value: "profile", label: "Hồ sơ", icon: User, description: "Thông tin cá nhân" },
     { value: "orders", label: "Đơn hàng", icon: Package, description: "Theo dõi & lịch sử" },
     { value: "address", label: "Địa chỉ", icon: MapPin, description: "Địa chỉ giao hàng" },
+    { value: "shop", label: "Shop của tôi", icon: Store, description: "Quản lý shop" },
     { value: "settings", label: "Cài đặt", icon: Settings, description: "Tùy chỉnh" },
   ];
 
@@ -200,6 +203,9 @@ export default function ProfilePage() {
                 </TabsContent>
                 <TabsContent value="address" className="mt-0 focus-visible:ring-0 p-4">
                   {currentUser && <AddressTab user={currentUser} />}
+                </TabsContent>
+                <TabsContent value="shop" className="mt-0 focus-visible:ring-0 p-4">
+                  <ShopTab />
                 </TabsContent>
                 <TabsContent value="settings" className="mt-0 focus-visible:ring-0 p-4">
                   {currentUser && <SettingsTab user={currentUser} />}

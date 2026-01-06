@@ -79,10 +79,10 @@ export default function CategorySidebar({ className }: CategorySidebarProps) {
   const activeCategory = categories.find((c) => c._id === hoveredCategory);
 
   return (
-    <div className="relative z-50">
+    <div className="relative z-30">
       <div
         className={cn(
-          "w-[220px] bg-card rounded-lg border border-border",
+          "w-[220px] bg-[#f7f7f7] rounded-lg",
           className
         )}
         onMouseLeave={() => setHoveredCategory(null)}
@@ -90,7 +90,7 @@ export default function CategorySidebar({ className }: CategorySidebarProps) {
         {/* Promo Banner - First Row */}
         <Link 
           href="/vouchers"
-          className="flex items-center gap-2 px-4 py-2.5 text-primary hover:bg-primary/5 transition-colors border-b border-border"
+          className="flex items-center gap-2 px-4 py-2.5 text-primary hover:bg-white/50 transition-colors border-b border-gray-200"
         >
           <Clock className="w-4 h-4" />
           <span className="text-[13px] font-medium">Flash Sale</span>
@@ -110,8 +110,8 @@ export default function CategorySidebar({ className }: CategorySidebarProps) {
                 className={cn(
                   "flex items-center gap-2 px-4 py-2 text-[13px] transition-all duration-150 cursor-pointer",
                   hoveredCategory === category._id
-                    ? "bg-primary/5"
-                    : "hover:bg-muted/50"
+                    ? "bg-white"
+                    : "hover:bg-white/50"
                 )}
               >
                 {/* Icon */}
@@ -168,15 +168,15 @@ export default function CategorySidebar({ className }: CategorySidebarProps) {
         activeCategory.subcategories &&
         activeCategory.subcategories.length > 0 && (
           <div
-            className="absolute left-[216px] top-0 pl-1 z-[9999]"
+            className="absolute left-[216px] top-0 pl-1 z-40"
             onMouseEnter={() => setHoveredCategory(activeCategory._id ?? null)}
             onMouseLeave={() => setHoveredCategory(null)}
           >
             {/* Invisible bridge */}
             <div className="absolute left-0 top-0 w-2 h-full" />
-            <div className="w-[500px] bg-card shadow-lg rounded-lg border border-primary p-4 max-h-[400px] overflow-y-auto">
+            <div className="w-[500px] bg-white shadow-lg rounded-lg border border-[#E53935] p-4 max-h-[400px] overflow-y-auto">
               {/* Header */}
-              <div className="flex items-center justify-between mb-3 pb-2 border-b border-border">
+              <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200">
                 <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
                   {getIcon(activeCategory.slug ?? '')}
                   {activeCategory.name}

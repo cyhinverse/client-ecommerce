@@ -1,37 +1,59 @@
 "use client";
 import React from "react";
+import { useAppSelector } from "@/hooks/hooks";
 import CategorySidebar from "./CategorySidebar";
 import Banner from "./Banner";
 import SubsidySection from "./SubsidySection";
 import UserCard from "./UserCard";
 import PromoGrid from "./PromoGrid";
+import { cn } from "@/lib/utils";
 
 export default function HeroSection() {
+  const { isOpen: isChatOpen } = useAppSelector((state) => state.chat);
+
   return (
     <div className="w-full bg-white py-4">
-      <div className="container mx-auto px-4 max-w-[1400px]">
+      <div className={cn(
+        "mx-auto px-4 transition-all duration-300",
+        isChatOpen ? "max-w-full" : "max-w-[1400px]"
+      )}>
         <div className="flex gap-3 items-start">
-          {/* Left: Category Sidebar - 220px fixed width */}
-          <div className="hidden lg:block shrink-0 w-[220px]">
+          {/* Left: Category Sidebar - Hidden when chat is open on smaller screens */}
+          <div className={cn(
+            "shrink-0 w-[220px] transition-all duration-300",
+            isChatOpen ? "hidden xl:block" : "hidden lg:block"
+          )}>
             <CategorySidebar className="h-[420px] rounded-lg overflow-hidden" />
           </div>
 
           {/* Right: Main Content Grid */}
-          <div className="flex-1 flex flex-col gap-3">
+          <div className="flex-1 flex flex-col gap-3 min-w-0">
             {/* Top Row: Banner | Subsidy | User */}
-            <div className="flex flex-col lg:flex-row gap-3 h-auto lg:h-[280px]">
-              {/* Banner - 35% width on desktop */}
-              <div className="w-full lg:w-[35%] h-[220px] lg:h-full rounded-lg overflow-hidden">
+            <div className={cn(
+              "flex flex-col gap-3 h-auto",
+              isChatOpen ? "lg:flex-row lg:h-[280px]" : "lg:flex-row lg:h-[280px]"
+            )}>
+              {/* Banner */}
+              <div className={cn(
+                "h-[220px] lg:h-full rounded-lg overflow-hidden transition-all duration-300",
+                isChatOpen ? "w-full lg:w-[45%]" : "w-full lg:w-[35%]"
+              )}>
                 <Banner />
               </div>
 
-              {/* Subsidy Section - 40% width on desktop */}
-              <div className="w-full lg:w-[40%] h-[220px] lg:h-full">
+              {/* Subsidy Section */}
+              <div className={cn(
+                "h-[220px] lg:h-full transition-all duration-300",
+                isChatOpen ? "w-full lg:w-[55%]" : "w-full lg:w-[40%]"
+              )}>
                 <SubsidySection />
               </div>
 
-              {/* User Card - 25% width, hidden on tablet and below */}
-              <div className="hidden xl:block w-[25%] h-full">
+              {/* User Card - Hidden when chat is open */}
+              <div className={cn(
+                "h-full transition-all duration-300",
+                isChatOpen ? "hidden" : "hidden xl:block w-[25%]"
+              )}>
                 <UserCard />
               </div>
             </div>

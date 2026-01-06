@@ -10,6 +10,7 @@ import {
   getProductBySlug,
   getProductsByCategory,
   getProductsBySlugOfCategory,
+  getProductsByShop,
   searchProducts,
   updateProduct,
   deleteVariantByVariantId,
@@ -267,6 +268,20 @@ export const productSlice = createSlice({
     });
     builder.addCase(getRelatedProducts.rejected, (state, action) => {
       state.error = action.error.message || "Failed to load related products";
+    });
+
+    // =========================== PRODUCTS BY SHOP ===========================
+    builder.addCase(getProductsByShop.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(getProductsByShop.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.all = action.payload || [];
+    });
+    builder.addCase(getProductsByShop.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.error.message || "Failed to fetch shop products";
     });
   },
 });

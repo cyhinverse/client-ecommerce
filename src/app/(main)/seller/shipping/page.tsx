@@ -1,0 +1,329 @@
+"use client";
+import { useState, useEffect } from "react";
+import { Truck, Plus, Edit2, Trash2, Loader2, Save, X, Package } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import {
+  getMyShippingTemplates,
+  createShippingTemplate,
+  updateShippingTemplate,
+  deleteShippingTemplate,
+} from "@/features/shipping/shippingAction";
+import { ShippingTemplate, ShippingRule, CreateShippingTemplatePayload } from "@/types/shipping";
+
+export default function SellerShippingPage() {
+  const dispatch = useAppDispatch();
+  const { templates, isLoading, isCreating, isUpdating, isDeleting } = useAppSelector(
+    (state) => state.shipping
+  );
+
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [formData, setFormData] = useState<CreateShippingTemplatePayload>({
+    name: "",
+    rules: [{ name: "Phí cố định", type: "fixed", baseFee: 30000 }],
+    isDefault: false,
+  });
+
+  useEffect(() => {
+    dispatch(getMyShippingTemplates());
+  }, [dispatch]);
+
+  const handleAddRule = () => {
+    setFormData((prev) => ({
+      ...prev,
+      rules: [...prev.rules, { name: "", type: "fixed", baseFee: 0 }],
+    }));
+  };
+
+  const handleRemoveRule = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      rules: prev.rules.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleRuleChange = (index: number, field: keyof ShippingRule, value: string | number) => {
+    setFormData((prev) => ({
+      ...prev,
+      rules: prev.rules.map((rule, i) =>
+        i === index ? { ...rule, [field]: value } : rule
+      ),
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name.trim()) {
+      toast.error("Vui lòng nhập tên template");
+      return;
+    }
+    if (formData.rules.length === 0) {
+      toast.error("Vui lòng thêm ít nhất một quy tắc");
+      return;
+    }
+
+    try {
+      if (editingId) {
+        await dispatch(updateShippingTemplate({ templateId: editingId, data: formData })).unwrap();
+        toast.success("Cập nhật template thành công!");
+      } else {
+        await dispatch(createShippingTemplate(formData)).unwrap();
+        toast.success("Tạo template thành công!");
+      }
+      resetForm();
+    } catch {
+      toast.error("Thao tác thất bại");
+    }
+  };
+
+  const handleEdit = (template: ShippingTemplate) => {
+    setEditingId(template._id);
+    setFormData({
+      name: template.name,
+      rules: template.rules.map((r) => ({ name: r.name, type: r.type, baseFee: r.baseFee, stepUnit: r.stepUnit, stepFee: r.stepFee })),
+      isDefault: template.isDefault,
+    });
+    setShowForm(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Bạn có chắc muốn xóa template này?")) return;
+    try {
+      await dispatch(deleteShippingTemplate(id)).unwrap();
+      toast.success("Xóa template thành công!");
+    } catch {
+      toast.error("Xóa template thất bại");
+    }
+  };
+
+  const resetForm = () => {
+    setShowForm(false);
+    setEditingId(null);
+    setFormData({ name: "", rules: [{ name: "Phí cố định", type: "fixed", baseFee: 30000 }], isDefault: false });
+  };
+
+  const formatCurrency = (value: number) => `₫${value.toLocaleString("vi-VN")}`;
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-[#f7f7f7] rounded-xl flex items-center justify-center">
+            <Truck className="h-6 w-6 text-purple-600" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-gray-800">Phí vận chuyển</h1>
+            <p className="text-sm text-gray-500">Quản lý các template phí ship của shop</p>
+          </div>
+        </div>
+        {!showForm && (
+          <Button onClick={() => setShowForm(true)} className="bg-primary hover:bg-primary/90 rounded-xl h-11 px-5">
+            <Plus className="h-4 w-4 mr-2" />
+            Thêm template
+          </Button>
+        )}
+      </div>
+
+      {/* Form */}
+      {showForm && (
+        <div className="bg-[#f7f7f7] rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="font-semibold text-gray-800">
+              {editingId ? "Chỉnh sửa template" : "Thêm template mới"}
+            </h3>
+            <Button type="button" variant="ghost" size="icon" onClick={resetForm} className="rounded-lg">
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-gray-600">Tên template *</Label>
+                <Input
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="VD: Giao hàng tiêu chuẩn"
+                  className="mt-1.5 h-11 rounded-xl border-0 bg-white"
+                />
+              </div>
+              <div className="flex items-end pb-1">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.isDefault}
+                    onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
+                    className="rounded border-gray-300 w-4 h-4"
+                  />
+                  <span className="text-sm text-gray-600">Đặt làm mặc định</span>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <Label className="text-gray-600">Quy tắc tính phí</Label>
+                <Button type="button" variant="outline" size="sm" onClick={handleAddRule} className="rounded-lg h-9 border-0 bg-white">
+                  <Plus className="h-3 w-3 mr-1" />
+                  Thêm quy tắc
+                </Button>
+              </div>
+              <div className="space-y-3">
+                {formData.rules.map((rule, index) => (
+                  <div key={index} className="flex items-center gap-3 p-3 bg-white rounded-xl">
+                    <Input
+                      className="flex-1 h-10 rounded-lg border-0 bg-[#f7f7f7]"
+                      placeholder="Tên quy tắc"
+                      value={rule.name}
+                      onChange={(e) => handleRuleChange(index, "name", e.target.value)}
+                    />
+                    <Select
+                      value={rule.type}
+                      onValueChange={(v) => handleRuleChange(index, "type", v as ShippingRule["type"])}
+                    >
+                      <SelectTrigger className="w-[150px] h-10 rounded-lg border-0 bg-[#f7f7f7]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="fixed">Cố định</SelectItem>
+                        <SelectItem value="weight_based">Theo cân</SelectItem>
+                        <SelectItem value="quantity_based">Theo số lượng</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      type="number"
+                      className="w-[130px] h-10 rounded-lg border-0 bg-[#f7f7f7]"
+                      placeholder="Phí cơ bản"
+                      value={rule.baseFee}
+                      onChange={(e) => handleRuleChange(index, "baseFee", Number(e.target.value))}
+                    />
+                    {formData.rules.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleRemoveRule(index)}
+                        className="h-9 w-9 rounded-lg shrink-0"
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <Button 
+                type="submit" 
+                disabled={isCreating || isUpdating} 
+                className="bg-primary hover:bg-primary/90 rounded-xl h-11 px-5"
+              >
+                {(isCreating || isUpdating) ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4 mr-2" />
+                )}
+                {editingId ? "Cập nhật" : "Tạo template"}
+              </Button>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={resetForm}
+                className="rounded-xl h-11 border-0 bg-white"
+              >
+                Hủy
+              </Button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Templates List */}
+      <div className="bg-[#f7f7f7] rounded-2xl overflow-hidden">
+        {isLoading ? (
+          <div className="flex justify-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : templates.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
+              <Truck className="h-10 w-10 text-gray-400" />
+            </div>
+            <h3 className="font-semibold text-gray-800 mb-2">Chưa có template nào</h3>
+            <p className="text-gray-500 text-sm mb-6">Tạo template để quản lý phí vận chuyển</p>
+            <Button 
+              onClick={() => setShowForm(true)}
+              className="bg-primary hover:bg-primary/90 rounded-xl"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Thêm template đầu tiên
+            </Button>
+          </div>
+        ) : (
+          <div>
+            {templates.map((template, idx) => (
+              <div
+                key={template._id}
+                className={`p-5 ${idx % 2 === 0 ? "bg-white" : "bg-white/50"}`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-[#f7f7f7] rounded-lg flex items-center justify-center">
+                      <Package className="h-5 w-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-medium text-gray-800">{template.name}</h3>
+                        {template.isDefault && (
+                          <Badge className="bg-primary/10 text-primary hover:bg-primary/10 rounded-full text-xs">
+                            Mặc định
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        {template.rules.length} quy tắc
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => handleEdit(template)}
+                      className="h-9 w-9 rounded-lg"
+                    >
+                      <Edit2 className="h-4 w-4 text-gray-500" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDelete(template._id)}
+                      disabled={isDeleting}
+                      className="h-9 w-9 rounded-lg"
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2 ml-13">
+                  {template.rules.map((rule, i) => (
+                    <span key={i} className="text-xs bg-[#f7f7f7] text-gray-600 px-3 py-1.5 rounded-lg">
+                      {rule.name}: <span className="font-medium text-gray-800">{formatCurrency(rule.baseFee)}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

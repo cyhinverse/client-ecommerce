@@ -6,15 +6,7 @@ import { Search, SlidersHorizontal, X, Check, ChevronDown, ChevronUp } from "luc
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { ProductFilters } from "@/types/product";
 
 interface ProductFilterProps {
@@ -38,15 +30,6 @@ const COLORS = [
 ];
 
 const SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
-
-const SORT_OPTIONS = [
-  { label: "Mới nhất", value: "newest" },
-  { label: "Giá: Thấp đến Cao", value: "price_asc" },
-  { label: "Giá: Cao đến Thấp", value: "price_desc" },
-  { label: "Tên: A đến Z", value: "name_asc" },
-  { label: "Tên: Z đến A", value: "name_desc" },
-  { label: "Đánh giá cao nhất", value: "rating_desc" },
-];
 
 export default function ProductFilter({
   filters,
@@ -78,12 +61,10 @@ export default function ProductFilter({
     onFilterChange({ rating: newRatings });
   };
 
-  // FIX: Đảm bảo hàm xử lý màu hoạt động đúng
   const handleColorChange = (colorValue: string) => {
     const newColors = filters.colors.includes(colorValue)
       ? filters.colors.filter((c) => c !== colorValue)
       : [...filters.colors, colorValue];
-
     onFilterChange({ colors: newColors });
   };
 
@@ -101,15 +82,12 @@ export default function ProductFilter({
     (filters.search ? 1 : 0) +
     (filters.minPrice > 0 || filters.maxPrice < 10000000 ? 1 : 0);
 
-  // local state for debouncing search input
   const [searchTerm, setSearchTerm] = useState(filters.search);
 
-  // Sync internal search state when filters.search changes (e.g. on clear)
   useEffect(() => {
     setSearchTerm(filters.search);
   }, [filters.search]);
 
-  // Debounce search update
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (searchTerm !== filters.search) {
@@ -119,7 +97,6 @@ export default function ProductFilter({
     return () => clearTimeout(timeout);
   }, [searchTerm, onFilterChange, filters.search]);
 
-  // Collapsible section state
   const [expandedSections, setExpandedSections] = useState({
     price: true,
     rating: true,
@@ -164,13 +141,13 @@ export default function ProductFilter({
             placeholder="Tìm trong danh mục..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8 rounded h-9 bg-gray-50 border-gray-200 focus:border-[#E53935] focus:ring-1 focus:ring-[#E53935]/20 text-sm"
+            className="pl-8 rounded h-9 bg-white border-0 focus:ring-1 focus:ring-[#E53935]/20 text-sm"
           />
         </div>
       </div>
 
       {/* Price Range */}
-      <div className="border-t border-gray-100 pt-3">
+      <div className="border-t border-gray-200 pt-3">
         <button
           onClick={() => toggleSection('price')}
           className="flex items-center justify-between w-full text-left"
@@ -202,7 +179,7 @@ export default function ProductFilter({
                   type="text"
                   value={priceRange[0].toLocaleString("vi-VN")}
                   readOnly
-                  className="pl-5 h-8 text-xs bg-gray-50 border-gray-200 rounded"
+                  className="pl-5 h-8 text-xs bg-white border-0 rounded"
                 />
               </div>
               <span className="text-gray-400 text-xs">-</span>
@@ -212,7 +189,7 @@ export default function ProductFilter({
                   type="text"
                   value={priceRange[1].toLocaleString("vi-VN")}
                   readOnly
-                  className="pl-5 h-8 text-xs bg-gray-50 border-gray-200 rounded"
+                  className="pl-5 h-8 text-xs bg-white border-0 rounded"
                 />
               </div>
             </div>
@@ -229,7 +206,7 @@ export default function ProductFilter({
       </div>
 
       {/* Rating */}
-      <div className="border-t border-gray-100 pt-3">
+      <div className="border-t border-gray-200 pt-3">
         <button
           onClick={() => toggleSection('rating')}
           className="flex items-center justify-between w-full text-left"
@@ -249,8 +226,8 @@ export default function ProductFilter({
                 onClick={() => handleRatingChange(rating)}
                 className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors ${
                   filters.rating.includes(rating)
-                    ? "bg-[#E53935]/5 border border-[#E53935]/20"
-                    : "hover:bg-gray-50"
+                    ? "bg-[#E53935]/5"
+                    : "hover:bg-white"
                 }`}
               >
                 <div className="flex">
@@ -272,7 +249,7 @@ export default function ProductFilter({
       </div>
 
       {/* Colors */}
-      <div className="border-t border-gray-100 pt-3">
+      <div className="border-t border-gray-200 pt-3">
         <button
           onClick={() => toggleSection('color')}
           className="flex items-center justify-between w-full text-left"
@@ -292,11 +269,11 @@ export default function ProductFilter({
                 type="button"
                 onClick={() => handleColorChange(color.value)}
                 className={`
-                  relative h-7 w-7 rounded border-2 transition-all duration-200 flex items-center justify-center
+                  relative h-7 w-7 rounded transition-all duration-200 flex items-center justify-center
                   ${
                     filters.colors.includes(color.value)
-                      ? "border-[#E53935] ring-1 ring-[#E53935]/30"
-                      : "border-gray-200 hover:border-gray-300"
+                      ? "ring-2 ring-[#E53935] ring-offset-1"
+                      : "hover:scale-110"
                   }
                 `}
                 style={{ backgroundColor: color.hex }}
@@ -319,7 +296,7 @@ export default function ProductFilter({
       </div>
 
       {/* Sizes */}
-      <div className="border-t border-gray-100 pt-3">
+      <div className="border-t border-gray-200 pt-3">
         <button
           onClick={() => toggleSection('size')}
           className="flex items-center justify-between w-full text-left"
@@ -345,7 +322,7 @@ export default function ProductFilter({
                   ${
                     filters.sizes.includes(size)
                       ? "bg-[#E53935] text-white border-[#E53935] hover:bg-[#D32F2F]"
-                      : "bg-white border-gray-200 text-gray-600 hover:border-[#E53935] hover:text-[#E53935]"
+                      : "bg-white border-0 text-gray-600 hover:bg-gray-100"
                   }
                 `}
               >
@@ -356,35 +333,11 @@ export default function ProductFilter({
         )}
       </div>
 
-      {/* Sort */}
-      <div className="border-t border-gray-100 pt-3">
-        <Label className="text-sm font-semibold text-gray-800 block mb-2">Sắp xếp theo</Label>
-        <Select
-          value={filters.sortBy}
-          onValueChange={(value) => onFilterChange({ sortBy: value })}
-        >
-          <SelectTrigger className="rounded h-9 border-gray-200 bg-gray-50 focus:ring-[#E53935]/20 focus:border-[#E53935] text-sm">
-            <SelectValue placeholder="Chọn cách sắp xếp" />
-          </SelectTrigger>
-          <SelectContent className="rounded border-gray-200 shadow-lg">
-            {SORT_OPTIONS.map((option) => (
-              <SelectItem
-                key={option.value}
-                value={option.value}
-                className="text-sm cursor-pointer"
-              >
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
       {/* Clear Filters */}
       {activeFiltersCount > 0 && (
         <Button
           variant="outline"
-          className="w-full rounded h-9 border-gray-300 text-gray-600 hover:bg-gray-50 text-sm font-medium mt-2"
+          className="w-full rounded h-9 border-0 bg-white text-gray-600 hover:bg-gray-100 text-sm font-medium mt-2"
           onClick={onClearFilters}
         >
           <X className="h-3.5 w-3.5 mr-1.5" />
@@ -398,24 +351,21 @@ export default function ProductFilter({
   if (isMobileOpen) {
     return (
       <>
-        {/* Backdrop */}
         <div
           onClick={onMobileClose}
           className="fixed inset-0 bg-black/40 z-40 lg:hidden"
         />
-
-        {/* Sidebar */}
-        <div className="fixed left-0 top-0 bottom-0 w-[280px] bg-white z-50 lg:hidden overflow-y-auto shadow-xl">
+        <div className="fixed left-0 top-0 bottom-0 w-[280px] bg-white z-50 lg:hidden overflow-y-auto">
           <div className="p-4">{filterContent}</div>
         </div>
       </>
     );
   }
 
-  // Desktop version
+  // Desktop version - Sidebar only
   return (
     <div className="hidden lg:block w-60 shrink-0">
-      <div className="sticky top-24 h-fit max-h-[calc(100vh-120px)] overflow-y-auto bg-[#f7f7f7] rounded-lg border border-gray-100 p-4">
+      <div className="sticky top-[180px] h-fit max-h-[calc(100vh-200px)] overflow-y-auto bg-[#f7f7f7] rounded-lg p-4">
         {filterContent}
       </div>
     </div>

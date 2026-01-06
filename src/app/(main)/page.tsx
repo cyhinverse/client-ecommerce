@@ -1,13 +1,14 @@
 "use client";
 import React, { useState } from "react";
+import { useAppSelector } from "@/hooks/hooks";
 import HeroSection from "@/components/home/HeroSection";
 import Category from "@/components/category/Category";
 import HomeProductList from "@/components/home/HomeProductList";
+import { cn } from "@/lib/utils";
 
 export default function Home() {
-  const [selectedCategorySlug, setSelectedCategorySlug] = useState<
-    string | null
-  >(null);
+  const [selectedCategorySlug, setSelectedCategorySlug] = useState<string | null>(null);
+  const { isOpen: isChatOpen } = useAppSelector((state) => state.chat);
 
   return (
     <>
@@ -16,7 +17,10 @@ export default function Home() {
 
         {/* Sticky Category Bar - Full width background */}
         <div className="sticky top-[88px] z-30 w-full bg-white">
-          <div className="container mx-auto px-4 py-2">
+          <div className={cn(
+            "mx-auto px-4 py-2 transition-all duration-300",
+            isChatOpen ? "max-w-full" : "container max-w-[1400px]"
+          )}>
             <Category
               selectedSlug={selectedCategorySlug}
               onSelectCategory={setSelectedCategorySlug}
@@ -24,7 +28,10 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="container mx-auto px-4 pb-20 min-h-[500px] mt-4">
+        <div className={cn(
+          "mx-auto px-4 pb-20 min-h-[500px] mt-4 transition-all duration-300",
+          isChatOpen ? "max-w-full" : "container max-w-[1400px]"
+        )}>
           <HomeProductList selectedCategorySlug={selectedCategorySlug} />
         </div>
       </main>

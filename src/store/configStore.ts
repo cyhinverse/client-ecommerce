@@ -14,6 +14,9 @@ import { reviewSlice } from "@/features/reviews/reviewSlice";
 import { statisticsSlice } from "@/features/statistics/statisticsSlice";
 import { bannerSlice } from "@/features/banner/bannerSlice";
 import { chatSlice } from "@/features/chat/chatSlice";
+import { shopSlice } from "@/features/shop/shopSlice";
+import { shippingSlice } from "@/features/shipping/shippingSlice";
+import { shopCategorySlice } from "@/features/shopCategory/shopCategorySlice";
 import { injectStore } from "@/api/api";
 
 const createNoopStorage = () => {
@@ -49,6 +52,9 @@ export const rootReducer = combineReducers({
   statistics: statisticsSlice.reducer,
   banner: bannerSlice.reducer,
   chat: chatSlice.reducer,
+  shop: shopSlice.reducer,
+  shipping: shippingSlice.reducer,
+  shopCategory: shopCategorySlice.reducer,
 });
 
 const persistConfig = {

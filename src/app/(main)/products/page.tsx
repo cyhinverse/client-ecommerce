@@ -7,7 +7,7 @@ import { useUrlFilters } from "@/hooks/useUrlFilters";
 import { getAllProducts } from "@/features/product/productAction";
 import { getAllCategories } from "@/features/category/categoryAction";
 import { Button } from "@/components/ui/button";
-import { SlidersHorizontal, Grid3X3, LayoutGrid, ChevronDown } from "lucide-react";
+import { SlidersHorizontal, ChevronDown } from "lucide-react";
 import ProductFilter from "@/components/product/ProductFilter";
 import ProductGrid from "@/components/product/ProductGrid";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
@@ -146,10 +146,10 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="w-full bg-background min-h-screen -mt-4 -mx-4 px-4 pt-4">
-      {/* Sticky Category Tabs */}
-      <div className="sticky top-[120px] z-30 bg-white border-b border-gray-200 -mx-4 px-4 mb-4">
-        <div className="max-w-[1400px] mx-auto">
+    <div className="w-full bg-white min-h-screen">
+      {/* Sticky Category & Sort Tabs */}
+      <div className="sticky top-[91px] z-40 bg-white border-b border-gray-100">
+        <div className="max-w-[1400px] mx-auto px-4">
           {/* Category Pills */}
           <div className="flex items-center gap-2 py-3 overflow-x-auto scrollbar-hide">
             <button
@@ -238,7 +238,7 @@ export default function ProductsPage() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-[1400px] mx-auto">
+      <div className="max-w-[1400px] mx-auto px-4 py-4">
         <div className="flex gap-4">
           {/* Desktop Sidebar */}
           <ProductFilter
