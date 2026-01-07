@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Star } from "lucide-react";
 import { Product } from "@/types/product";
+import WishlistButton from "@/components/common/WishlistButton";
 
 // Helper function to get price range from models
 const getPriceFromModels = (product: Product): { min: number; max: number } | null => {
@@ -100,6 +101,15 @@ export const ProductCard = ({ product }: { product: Product }) => {
             </div>
           )}
           
+          {/* Wishlist Button */}
+          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+            <WishlistButton 
+              productId={product._id} 
+              productName={product.name}
+              size="sm"
+            />
+          </div>
+          
           {/* Discount Badge - Orange */}
           {discountPercent > 0 && (
             <div className="absolute top-2 left-2 bg-[#FF9800] text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
@@ -109,7 +119,7 @@ export const ProductCard = ({ product }: { product: Product }) => {
           
           {/* New Badge */}
           {product.soldCount === 0 && (
-            <div className="absolute top-2 right-2 bg-[#4CAF50] text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+            <div className="absolute top-2 right-2 bg-[#4CAF50] text-white text-[10px] font-bold px-1.5 py-0.5 rounded group-hover:opacity-0 transition-opacity">
               Mới
             </div>
           )}

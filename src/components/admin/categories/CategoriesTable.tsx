@@ -99,7 +99,7 @@ const CategoryRow = ({
   return (
     <>
       <TableRow
-        className={`hover:bg-gray-50/50 border-border/50 transition-colors ${
+        className={`hover:bg-[#f7f7f7]/50 border-0 transition-colors ${
           isLoading ? "opacity-50 pointer-events-none" : ""
         }`}
       >
@@ -112,7 +112,7 @@ const CategoryRow = ({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-6 w-6 p-0 mr-2 hover:bg-gray-100 rounded-lg"
+                className="h-6 w-6 p-0 mr-2 hover:bg-[#f7f7f7] rounded-lg"
                 onClick={() => setIsExpanded(!isExpanded)}
               >
                 {isExpanded ? (
@@ -125,7 +125,7 @@ const CategoryRow = ({
               <div className="w-8" />
             )}
             {category.images && category.images.length > 0 ? (
-               <div className="relative h-10 w-10 mr-3 rounded-lg overflow-hidden border border-border/50">
+               <div className="relative h-10 w-10 mr-3 rounded-lg overflow-hidden bg-[#f7f7f7]">
                   <Image
                     src={category.images[0]}
                     alt={category.name as string}
@@ -134,7 +134,7 @@ const CategoryRow = ({
                   />
                </div>
             ) : (
-              <div className="w-10 h-10 mr-3 rounded-lg border border-border/50 bg-gray-50 flex items-center justify-center">
+              <div className="w-10 h-10 mr-3 rounded-lg bg-[#f7f7f7] flex items-center justify-center">
                 <Package className="h-5 w-5 text-muted-foreground" />
               </div>
             )}
@@ -146,7 +146,7 @@ const CategoryRow = ({
           </div>
         </TableCell>
         <TableCell>
-          <code className="relative rounded-md bg-gray-100 px-[0.4rem] py-[0.2rem] font-mono text-xs text-muted-foreground">
+          <code className="relative rounded-md bg-[#f7f7f7] px-[0.4rem] py-[0.2rem] font-mono text-xs text-muted-foreground">
             {category.slug}
           </code>
         </TableCell>
@@ -159,14 +159,14 @@ const CategoryRow = ({
         <TableCell className="text-right pr-6">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0 rounded-lg hover:bg-gray-100">
+              <Button variant="ghost" className="h-8 w-8 p-0 rounded-lg hover:bg-[#f7f7f7]">
                 <span className="sr-only">Open menu</span>
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="rounded-xl border-border/50 shadow-lg"
+              className="rounded-xl border-0 shadow-lg"
             >
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem onClick={() => onView(category)} className="cursor-pointer gap-2">
@@ -177,7 +177,7 @@ const CategoryRow = ({
                 <Edit className="h-4 w-4" />
                 Edit
               </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-border/50" />
+              <DropdownMenuSeparator className="bg-[#f7f7f7]" />
               <DropdownMenuItem
                 onClick={() => onDelete(category)}
                 className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer gap-2"
@@ -241,7 +241,7 @@ export function CategoriesTable({
   return (
     <div className="space-y-4">
       {/* Search and Filters */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-white/50 dark:bg-white/5 p-4 rounded-[1.5rem] backdrop-blur-xl border border-border/50">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-[#f7f7f7] p-4 rounded-2xl">
         <div className="flex flex-1 items-center space-x-2">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -249,20 +249,20 @@ export function CategoriesTable({
               placeholder="Search categories..."
               value={localSearch}
               onChange={handleSearch}
-              className="pl-9 rounded-xl border-gray-200 bg-white/80 focus-visible:ring-0 focus-visible:border-primary transition-all shadow-sm"
+              className="pl-9 rounded-xl border-0 bg-white focus-visible:ring-0 transition-all"
             />
           </div>
           <Button
             variant="outline"
             size="icon"
-            className="rounded-xl border-gray-200 bg-white/80 hover:bg-gray-50 shadow-sm w-9 h-9"
+            className="rounded-xl border-0 bg-white hover:bg-white/80 w-9 h-9"
           >
             <Filter className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"
             size="icon"
-            className="rounded-xl border-gray-200 bg-white/80 hover:bg-gray-50 shadow-sm w-9 h-9"
+            className="rounded-xl border-0 bg-white hover:bg-white/80 w-9 h-9"
           >
             <Download className="h-4 w-4" />
           </Button>
@@ -276,7 +276,7 @@ export function CategoriesTable({
             id="pageSize"
             value={pageSize}
             onChange={(e) => onPageSizeChange(Number(e.target.value))}
-            className="h-9 rounded-lg border border-gray-200 bg-white/80 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-black/5 dark:bg-black/20 dark:border-white/10"
+            className="h-9 rounded-lg border-0 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E53935]/20"
           >
             <option value="5">5</option>
             <option value="10">10</option>
@@ -287,11 +287,11 @@ export function CategoriesTable({
       </div>
 
       {/* Table */}
-      <div className="rounded-[2rem] border border-border/50 bg-white/60 dark:bg-[#1C1C1E]/60 backdrop-blur-xl shadow-sm overflow-hidden">
+      <div className="rounded-2xl bg-white overflow-hidden">
         <div className="overflow-x-auto no-scrollbar">
             <Table>
-            <TableHeader className="bg-gray-50/50">
-                <TableRow className="border-border/50 hover:bg-transparent">
+            <TableHeader className="bg-[#f7f7f7]">
+                <TableRow className="border-0 hover:bg-transparent">
                 <TableHead className="w-[300px] uppercase text-xs font-bold tracking-wider text-muted-foreground pl-6">
                     Category Name
                 </TableHead>

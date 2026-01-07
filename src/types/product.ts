@@ -47,6 +47,30 @@ export interface Shop {
   logo?: string;
 }
 
+// NEW: Product Dimensions
+export interface ProductDimensions {
+  height?: number;
+  width?: number;
+  length?: number;
+}
+
+// NEW: Product Attribute (for specifications/parameters)
+export interface ProductAttribute {
+  name: string;   // e.g. "Material", "Weight", "Color"
+  value: string;  // e.g. "Cotton", "500g", "Red"
+}
+
+// NEW: Flash Sale Info
+export interface FlashSaleInfo {
+  isActive: boolean;
+  salePrice?: number;
+  discountPercent?: number;
+  stock?: number;
+  soldCount?: number;
+  startTime?: string;
+  endTime?: string;
+}
+
 // DEPRECATED: Old variants interface (kept for backward compatibility)
 export interface Variant {
   sku: string;
@@ -58,43 +82,65 @@ export interface Variant {
   _id: string;
 }
 
-// Product interface - Updated with new structure
+// Product interface - Optimized structure
 export interface Product {
   _id: string;
   name: string;
   description: string;
-  images: string[];
   slug: string;
-  category: Category | null;
-  brand?: string;
-  price: Price | null;
   
-  // NEW: Tier variation structure (Taobao-style)
+  // Media
+  images: string[];              // Product gallery images (max 10)
+  descriptionImages?: string[];  // Detail/infographic images (max 20)
+  video?: string;
+  
+  // Relations
+  shop?: Shop | string;
+  category: Category | null;
+  shopCategory?: string;
+  
+  // Metadata
+  brand?: string;
+  tags?: string[];
+  
+  // Pricing & Inventory (cached aggregates)
+  price: Price | null;
+  stock?: number;
+  soldCount: number;
+  
+  // Variations (Taobao-style)
   tierVariations: TierVariation[];
   models: ProductModel[];
   
-  // NEW: Shop reference
-  shop?: Shop | string;
-  shopCategory?: string;
+  // Shipping
+  shippingTemplate?: string;
+  weight?: number;  // grams
+  dimensions?: ProductDimensions;
   
-  // DEPRECATED: Old variants (kept for backward compatibility)
-  variants?: Variant[];
+  // Specifications
+  attributes?: ProductAttribute[];
   
-  // Reviews and ratings
-  reviews?: Review[] | null;
-  tags?: string[] | null;
-  soldCount: number;
-  averageRating?: number;
+  // Reviews (cached counters - actual reviews in Review collection)
   ratingAverage?: number;
-  numberOfReviews?: number;
   reviewCount?: number;
   
-  // Status flags
-  isActive: boolean;
+  // Flash Sale
+  flashSale?: FlashSaleInfo;
+  
+  // Flags
   isFeatured?: boolean;
   isNewArrival?: boolean;
-  onSale?: boolean;
-  status?: "draft" | "published" | "suspended";
+  
+  // Status - Single source of truth
+  status?: "draft" | "published" | "suspended" | "deleted";
+  
+  // Virtuals (computed by backend)
+  onSale?: boolean;      // Derived from price.discountPrice or flashSale
+  isActive?: boolean;    // Derived from status === "published"
+  effectivePrice?: number; // Considering flash sale
+  
+  // DEPRECATED: Old variants (remove after migration)
+  variants?: Variant[];
   
   // Timestamps
   createdAt: string;

@@ -18,7 +18,7 @@ import {
   User,
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { getProductBySlug } from "@/features/product/productAction";
+import { getProductBySlug, getRelatedProducts } from "@/features/product/productAction";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -32,6 +32,10 @@ export default function ProductDetailPage() {
   const { currentProduct, isLoading, error } = useAppSelector(
     (state) => state.product
   );
+  
+  // Related products state
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [loadingRelated, setLoadingRelated] = useState(false);
   
   // State for tier variation selection (new structure)
   const [selectedTierIndexes, setSelectedTierIndexes] = useState<number[]>([]);
@@ -118,6 +122,24 @@ export default function ProductDetailPage() {
     dispatch(getProductBySlug(path.slug as string));
   }, [dispatch, path.slug]);
 
+  // Fetch related products when currentProduct changes
+  useEffect(() => {
+    if (currentProduct?._id) {
+      setLoadingRelated(true);
+      dispatch(getRelatedProducts({ productId: currentProduct._id }))
+        .unwrap()
+        .then((data) => {
+          setRelatedProducts(data || []);
+        })
+        .catch(() => {
+          setRelatedProducts([]);
+        })
+        .finally(() => {
+          setLoadingRelated(false);
+        });
+    }
+  }, [dispatch, currentProduct?._id]);
+
   // Initialize tier indexes when product loads
   useEffect(() => {
     if (currentProduct?.tierVariations && currentProduct.tierVariations.length > 0) {
@@ -156,16 +178,19 @@ export default function ProductDetailPage() {
 
   const product = currentProduct;
 
-  const parameters = [
-    { label: "Model", value: "304" },
-    { label: "Insulation Performance", value: "6-12 hours" },
-    { label: "Style", value: "Cartoon" },
-    { label: "Capacity", value: "350ml/450ml" },
-    { label: "Inner Material", value: "316 Stainless Steel" },
-    { label: "Outer Material", value: "304 Stainless Steel" },
-    { label: "Shell Material", value: "304 Stainless Steel" },
-    { label: "Function", value: "Portable, Vacuum" },
-  ];
+  // Use real attributes from product, fallback to empty array
+  const parameters = product.attributes && product.attributes.length > 0
+    ? product.attributes.map(attr => ({ label: attr.name, value: attr.value }))
+    : [
+        // Fallback mock data if no attributes
+        { label: "Thương hiệu", value: product.brand || "N/A" },
+        { label: "Danh mục", value: product.category?.name || "N/A" },
+        { label: "Cân nặng", value: product.weight ? `${product.weight}g` : "N/A" },
+        { label: "Kích thước", value: product.dimensions 
+          ? `${product.dimensions.length || 0} x ${product.dimensions.width || 0} x ${product.dimensions.height || 0} cm` 
+          : "N/A" 
+        },
+      ];
 
   const reviews = [
     {
@@ -198,23 +223,23 @@ export default function ProductDetailPage() {
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
               <span className="font-bold text-sm">
-                Star Mall Official Store
+                {shopInfo?.name || "Shop"}
               </span>
               <span className="bg-[#ff0036] text-white text-[10px] px-1.5 py-0.5 rounded-sm font-bold">
-                Tmall
+                Mall
               </span>
             </div>
             <div className="flex items-center gap-4 text-xs">
               <div className="flex items-center gap-1.5 overflow-hidden">
-                <span className="text-gray-400">Description:</span>
+                <span className="text-gray-400">Mô tả:</span>
+                <span className="text-[#ff0036] font-bold">{product.ratingAverage?.toFixed(1) || "4.9"} ↑</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-gray-400">Dịch vụ:</span>
                 <span className="text-[#ff0036] font-bold">4.9 ↑</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-gray-400">Service:</span>
-                <span className="text-[#ff0036] font-bold">4.9 ↑</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-gray-400">Logistics:</span>
+                <span className="text-gray-400">Vận chuyển:</span>
                 <span className="text-[#ff0036] font-bold">4.9 ↑</span>
               </div>
             </div>
@@ -225,14 +250,14 @@ export default function ProductDetailPage() {
               size="sm"
               className="h-7 text-xs border-gray-200 rounded-sm hover:text-[#E53935] hover:border-[#E53935]"
             >
-              <Heart className="w-3.5 h-3.5 mr-1" /> Collection
+              <Heart className="w-3.5 h-3.5 mr-1" /> Yêu thích
             </Button>
             <Button
               variant="outline"
               size="sm"
               className="h-7 text-xs border-gray-200 rounded-sm"
             >
-              <Share2 className="w-3.5 h-3.5 mr-1" /> Buy
+              <Share2 className="w-3.5 h-3.5 mr-1" /> Chia sẻ
             </Button>
           </div>
         </div>
@@ -585,24 +610,32 @@ export default function ProductDetailPage() {
 
           <Separator className="bg-gray-100" />
 
-          {/* Graphic Details Section */}
+          {/* Graphic Details Section - Mô tả chi tiết bằng hình ảnh */}
           <section id="graphics" className="space-y-0">
-            <h2 className="text-lg font-bold mb-8">Visual Gallery</h2>
+            <h2 className="text-lg font-bold mb-8">Mô tả chi tiết</h2>
             <div className="flex flex-col">
-              {displayImages.map((img, i) => (
-                <div
-                  key={i}
-                  className="w-full relative aspect-square md:aspect-[2/1]"
-                >
-                  <Image src={img} alt="detail" fill className="object-cover" />
+              {/* Use descriptionImages if available, otherwise show description text */}
+              {product.descriptionImages && product.descriptionImages.length > 0 ? (
+                product.descriptionImages.map((img, i) => (
+                  <div
+                    key={i}
+                    className="w-full relative"
+                  >
+                    <Image 
+                      src={img} 
+                      alt={`Mô tả chi tiết ${i + 1}`} 
+                      width={900}
+                      height={0}
+                      style={{ height: 'auto' }}
+                      className="w-full"
+                    />
+                  </div>
+                ))
+              ) : (
+                <div className="prose prose-sm max-w-none p-6 bg-gray-50 rounded-lg">
+                  <p className="text-gray-600 whitespace-pre-wrap">{product.description}</p>
                 </div>
-              ))}
-              <div className="w-full h-[600px] bg-[#f9f9f9] flex flex-col items-center justify-center">
-                <h3 className="text-3xl font-light text-gray-300 tracking-widest uppercase mb-4">
-                  Minimalist Home
-                </h3>
-                <div className="w-12 h-0.5 bg-gray-200"></div>
-              </div>
+              )}
             </div>
           </section>
 
@@ -653,31 +686,51 @@ export default function ProductDetailPage() {
             <div className="h-px w-20 bg-gray-200"></div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 lg:gap-6">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((item) => (
-              <div key={item} className="group cursor-pointer">
-                <div className="aspect-square relative rounded-sm overflow-hidden bg-gray-50 mb-3">
-                  <Image
-                    src={product.images?.[0] || ""}
-                    alt="rel"
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
+            {loadingRelated ? (
+              // Loading skeleton
+              [...Array(10)].map((_, i) => (
+                <div key={i} className="space-y-3">
+                  <Skeleton className="aspect-square w-full rounded-sm" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
                 </div>
-                <div className="px-1 space-y-2">
-                  <p className="text-xs text-gray-700 line-clamp-2 leading-relaxed group-hover:text-[#E53935]">
-                    {product.name} Variant Choice {item}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[#ff0036] font-bold text-sm">
-                      ¥{89 + item}
-                    </span>
-                    <span className="text-[10px] text-gray-400">
-                      1000+ sold
-                    </span>
+              ))
+            ) : relatedProducts.length > 0 ? (
+              relatedProducts.map((item) => (
+                <div 
+                  key={item._id} 
+                  className="group cursor-pointer"
+                  onClick={() => router.push(`/products/${item.slug}`)}
+                >
+                  <div className="aspect-square relative rounded-sm overflow-hidden bg-gray-50 mb-3">
+                    <Image
+                      src={item.images?.[0] || ""}
+                      alt={item.name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="px-1 space-y-2">
+                    <p className="text-xs text-gray-700 line-clamp-2 leading-relaxed group-hover:text-[#E53935]">
+                      {item.name}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[#ff0036] font-bold text-sm">
+                        ¥{item.price?.currentPrice?.toLocaleString() || 0}
+                      </span>
+                      <span className="text-[10px] text-gray-400">
+                        {item.soldCount || 0}+ sold
+                      </span>
+                    </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              // No related products
+              <div className="col-span-full text-center text-gray-400 py-8">
+                No related products found
               </div>
-            ))}
+            )}
           </div>
         </section>
       </div>

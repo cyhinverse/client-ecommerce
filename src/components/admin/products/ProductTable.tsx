@@ -173,7 +173,7 @@ export function ProductsTable({
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-white/50 dark:bg-white/5 p-4 rounded-[1.5rem] backdrop-blur-xl border border-border/50">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-[#f7f7f7] p-4 rounded-2xl">
         <div className="flex flex-1 items-center space-x-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar">
           <div className="relative flex-1 min-w-[200px] max-w-sm">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -181,7 +181,7 @@ export function ProductsTable({
               placeholder="Search products..."
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
-              className="pl-9 rounded-xl border-gray-200 bg-white/80 focus-visible:ring-0 focus-visible:border-primary transition-all shadow-sm"
+              className="pl-9 rounded-xl border-0 bg-white focus-visible:ring-0 transition-all"
             />
           </div>
 
@@ -190,10 +190,10 @@ export function ProductsTable({
             value={selectedCategory}
             onValueChange={onCategoryFilterChange}
           >
-            <SelectTrigger className="w-[160px] rounded-xl border-gray-200 bg-white/80 focus:ring-0 shadow-sm">
+            <SelectTrigger className="w-[160px] rounded-xl border-0 bg-white focus:ring-0">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
-            <SelectContent className="rounded-xl border-border/50">
+            <SelectContent className="rounded-xl border-0">
               <SelectItem value="all">All Categories</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category.id} value={category.id}>
@@ -205,10 +205,10 @@ export function ProductsTable({
 
           {/* Brand Filter */}
           <Select value={selectedBrand} onValueChange={onBrandFilterChange}>
-            <SelectTrigger className="w-[140px] rounded-xl border-gray-200 bg-white/80 focus:ring-0 shadow-sm">
+            <SelectTrigger className="w-[140px] rounded-xl border-0 bg-white focus:ring-0">
               <SelectValue placeholder="Brand" />
             </SelectTrigger>
-            <SelectContent className="rounded-xl border-border/50">
+            <SelectContent className="rounded-xl border-0">
               <SelectItem value="all">All Brands</SelectItem>
               {brands.map((brand) => (
                 <SelectItem key={brand} value={brand}>
@@ -222,13 +222,13 @@ export function ProductsTable({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="flex items-center gap-2 rounded-xl border-gray-200 bg-white/80 hover:bg-gray-50 shadow-sm"
+                className="flex items-center gap-2 rounded-xl border-0 bg-white hover:bg-white/80"
               >
                 <Filter className="h-4 w-4" />
                 Price
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-80 p-4 rounded-xl border-border/50">
+            <DropdownMenuContent className="w-80 p-4 rounded-xl border-0">
               <DropdownMenuLabel className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
                 Filter by price
               </DropdownMenuLabel>
@@ -239,19 +239,19 @@ export function ProductsTable({
                     value={localMinPrice}
                     onChange={(e) => setLocalMinPrice(e.target.value)}
                     type="number"
-                    className="rounded-lg"
+                    className="rounded-lg border-0 bg-[#f7f7f7]"
                   />
                   <Input
                     placeholder="Max"
                     value={localMaxPrice}
                     onChange={(e) => setLocalMaxPrice(e.target.value)}
                     type="number"
-                    className="rounded-lg"
+                    className="rounded-lg border-0 bg-[#f7f7f7]"
                   />
                 </div>
                 <Button
                   onClick={handlePriceFilterApply}
-                  className="w-full rounded-lg bg-black text-white hover:bg-black/90 dark:bg-[#0071e3]"
+                  className="w-full rounded-lg bg-[#E53935] text-white hover:bg-[#D32F2F]"
                 >
                   Apply
                 </Button>
@@ -270,10 +270,10 @@ export function ProductsTable({
               }
             }}
           >
-            <SelectTrigger className="w-[140px] rounded-xl border-gray-200 bg-white/80 focus:ring-0 shadow-sm">
+            <SelectTrigger className="w-[140px] rounded-xl border-0 bg-white focus:ring-0">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
-            <SelectContent className="rounded-xl border-border/50">
+            <SelectContent className="rounded-xl border-0">
               <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="true">Active</SelectItem>
               <SelectItem value="false">Inactive</SelectItem>
@@ -286,10 +286,10 @@ export function ProductsTable({
           value={pageSize.toString()}
           onValueChange={(value) => onPageSizeChange(Number(value))}
         >
-          <SelectTrigger className="w-[120px] rounded-xl border-gray-200 bg-white/80 focus:ring-0 shadow-sm">
+          <SelectTrigger className="w-[120px] rounded-xl border-0 bg-white focus:ring-0">
             <SelectValue placeholder="Show" />
           </SelectTrigger>
-          <SelectContent className="rounded-xl border-border/50">
+          <SelectContent className="rounded-xl border-0">
             <SelectItem value="10">10 / page</SelectItem>
             <SelectItem value="20">20 / page</SelectItem>
             <SelectItem value="50">50 / page</SelectItem>
@@ -298,10 +298,10 @@ export function ProductsTable({
       </div>
 
       {/* Table */}
-      <div className="rounded-[2rem] border border-border/50 bg-white/60 dark:bg-[#1C1C1E]/60 backdrop-blur-xl overflow-hidden shadow-sm">
+      <div className="rounded-2xl bg-white overflow-hidden">
         <Table>
-          <TableHeader className="bg-gray-50/50">
-            <TableRow className="border-border/50 hover:bg-transparent">
+          <TableHeader className="bg-[#f7f7f7]">
+            <TableRow className="border-0 hover:bg-transparent">
               <TableHead className="w-[70px] uppercase text-xs font-bold tracking-wider text-muted-foreground pl-6">
                 Image
               </TableHead>
@@ -357,13 +357,13 @@ export function ProductsTable({
               products.map((product) => (
                 <TableRow
                   key={product._id}
-                  className={`border-border/50 hover:bg-gray-50/50 transition-colors ${
+                  className={`border-0 hover:bg-[#f7f7f7]/50 transition-colors ${
                     isLoading ? "opacity-50 pointer-events-none" : ""
                   }`}
                 >
                   <TableCell className="pl-6">
                     {product.variants?.[0]?.images?.[0] ? (
-                      <div className="relative h-12 w-12 rounded-xl overflow-hidden shadow-sm border border-border/50">
+                      <div className="relative h-12 w-12 rounded-xl overflow-hidden bg-[#f7f7f7]">
                         <Image
                           src={product.variants[0].images[0]}
                           alt={product.name}
@@ -373,7 +373,7 @@ export function ProductsTable({
                         />
                       </div>
                     ) : (
-                      <div className="h-12 w-12 rounded-xl bg-gray-100 flex items-center justify-center border border-border/50">
+                      <div className="h-12 w-12 rounded-xl bg-[#f7f7f7] flex items-center justify-center">
                         <Package className="h-5 w-5 text-muted-foreground" />
                       </div>
                     )}
@@ -391,7 +391,7 @@ export function ProductsTable({
                           {product.isNewArrival && (
                             <Badge
                               variant="secondary"
-                              className="h-5 px-1.5 text-[10px] rounded-md bg-blue-50 text-blue-600 border border-blue-100 dark:bg-blue-500/10 dark:text-blue-400"
+                              className="h-5 px-1.5 text-[10px] rounded-md bg-blue-50 text-blue-600 border-0"
                             >
                               New
                             </Badge>
@@ -399,7 +399,7 @@ export function ProductsTable({
                           {product.isFeatured && (
                             <Badge
                               variant="secondary"
-                              className="h-5 px-1.5 text-[10px] rounded-md bg-purple-50 text-purple-600 border border-purple-100 dark:bg-purple-500/10 dark:text-purple-400"
+                              className="h-5 px-1.5 text-[10px] rounded-md bg-purple-50 text-purple-600 border-0"
                             >
                               Hot
                             </Badge>
@@ -407,7 +407,7 @@ export function ProductsTable({
                           {product.onSale && (
                             <Badge
                               variant="secondary"
-                              className="h-5 px-1.5 text-[10px] rounded-md bg-red-50 text-red-600 border border-red-100 dark:bg-red-500/10 dark:text-red-400"
+                              className="h-5 px-1.5 text-[10px] rounded-md bg-red-50 text-red-600 border-0"
                             >
                               Sale
                             </Badge>
@@ -442,7 +442,7 @@ export function ProductsTable({
                   <TableCell>
                     <Badge
                       variant="outline"
-                      className="rounded-lg border-border/50 font-normal bg-white/50"
+                      className="rounded-lg border-0 font-normal bg-[#f7f7f7]"
                     >
                       {getStockCount(product)}
                     </Badge>
@@ -457,8 +457,8 @@ export function ProductsTable({
                       variant={product.isActive ? "default" : "secondary"}
                       className={`rounded-lg font-medium px-2.5 py-0.5 shadow-none border-0 ${
                         product.isActive
-                          ? "bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-500/10 dark:text-green-400"
-                          : "bg-gray-100 text-gray-600 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400"
+                          ? "bg-green-100 text-green-700 hover:bg-green-100"
+                          : "bg-gray-100 text-gray-600 hover:bg-gray-100"
                       }`}
                     >
                       {product.isActive ? "Active" : "Inactive"}
@@ -472,14 +472,14 @@ export function ProductsTable({
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
-                          className="h-8 w-8 p-0 rounded-lg hover:bg-gray-100"
+                          className="h-8 w-8 p-0 rounded-lg hover:bg-[#f7f7f7]"
                         >
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent
                         align="end"
-                        className="rounded-xl border-border/50 shadow-lg"
+                        className="rounded-xl border-0 shadow-lg"
                       >
                         <DropdownMenuItem
                           onClick={() => onView(product)}

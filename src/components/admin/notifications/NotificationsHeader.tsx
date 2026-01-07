@@ -9,7 +9,7 @@ interface NotificationsHeaderProps {
 
 export function NotificationsHeader({ onOpenCreate, onMarkAllRead, onClearAll }: NotificationsHeaderProps) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/50 pb-6 mb-8">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 mb-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground uppercase">Notifications</h1>
         <p className="text-muted-foreground mt-1 text-sm bg-transparent">
@@ -20,7 +20,7 @@ export function NotificationsHeader({ onOpenCreate, onMarkAllRead, onClearAll }:
         <Button 
             variant="outline" 
             onClick={onMarkAllRead}
-            className="rounded-xl border-gray-200 h-10"
+            className="rounded-xl border-0 bg-[#f7f7f7] hover:bg-[#eeeeee] h-10"
         >
             Mark all read
         </Button>
@@ -33,7 +33,7 @@ export function NotificationsHeader({ onOpenCreate, onMarkAllRead, onClearAll }:
         </Button>
         <Button 
           onClick={onOpenCreate}
-          className="rounded-xl h-10 gap-2 text-sm font-medium transition-all shadow-lg hover:shadow-xl bg-black hover:bg-black/90 text-white dark:bg-[#0071e3] dark:hover:bg-[#0077ED] border border-transparent"
+          className="rounded-xl h-10 gap-2 text-sm font-medium transition-all bg-[#E53935] hover:bg-[#D32F2F] text-white"
         >
           <Plus className="h-4 w-4" />
           Create Notification

@@ -13,6 +13,7 @@ import {
   Trash2,
   Search,
   Loader2,
+  Heart,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import NotificationModel from "@/components/notifications/NotificationModel";
@@ -446,6 +447,15 @@ export default function HeaderLayout() {
                   <>
                     {/* Horizontal Layout for Actions */}
                     <div className="flex items-center gap-5">
+                      {/* Wishlist */}
+                      <Link
+                        href="/wishlist"
+                        className="group flex flex-col items-center gap-0.5 text-gray-500 hover:text-[#E53935] transition-colors"
+                      >
+                        <Heart className="h-6 w-6 stroke-[1.5]" />
+                        <span className="text-[10px]">Yêu thích</span>
+                      </Link>
+
                       {/* Chat */}
                       <button
                         onClick={() => dispatch(toggleChat())}

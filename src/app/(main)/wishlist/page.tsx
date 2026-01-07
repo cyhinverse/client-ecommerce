@@ -1,47 +1,53 @@
-// WishlistPage - Taobao Light Style
 "use client";
-import { useState, useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { Heart, ShoppingCart, Trash2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-
-// Mock wishlist data - replace with actual API
-const mockWishlistItems = [
-  {
-    _id: "1",
-    name: "iPhone 15 Pro Max 256GB - Titan Tự Nhiên",
-    slug: "iphone-15-pro-max",
-    price: { currentPrice: 34990000, discountPrice: 32990000 },
-    images: ["https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=400"],
-    shop: { name: "Apple Store", _id: "shop1" },
-    soldCount: 1250,
-  },
-  {
-    _id: "2", 
-    name: "Samsung Galaxy S24 Ultra 512GB",
-    slug: "samsung-galaxy-s24-ultra",
-    price: { currentPrice: 33990000, discountPrice: null },
-    images: ["https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400"],
-    shop: { name: "Samsung Official", _id: "shop2" },
-    soldCount: 890,
-  },
-];
+import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { getWishlist, removeFromWishlist } from "@/features/wishlist/wishlistAction";
+import { addToCart } from "@/features/cart/cartAction";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
+import { useRouter } from "next/navigation";
 
 export default function WishlistPage() {
-  const [wishlistItems, setWishlistItems] = useState(mockWishlistItems);
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+  const { items, isLoading, pagination } = useAppSelector((state) => state.wishlist);
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
 
-  const handleRemoveItem = (itemId: string) => {
-    setWishlistItems(prev => prev.filter(item => item._id !== itemId));
-    toast.success("Đã xóa khỏi danh sách yêu thích");
-  };
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/login?redirect=/wishlist");
+      return;
+    }
+    dispatch(getWishlist({ page: 1, limit: 20 }));
+  }, [dispatch, isAuthenticated, router]);
 
-  const handleAddToCart = (itemId: string) => {
-    toast.success("Đã thêm vào giỏ hàng");
-  };
+  const handleRemoveItem = useCallback(async (productId: string) => {
+    try {
+      await dispatch(removeFromWishlist(productId)).unwrap();
+      toast.success("Đã xóa khỏi danh sách yêu thích");
+    } catch (error: any) {
+      toast.error(error?.message || "Có lỗi xảy ra");
+    }
+  }, [dispatch]);
+
+  const handleAddToCart = useCallback(async (product: any) => {
+    try {
+      const shopId = typeof product.shop === "object" ? product.shop._id : product.shop;
+      await dispatch(addToCart({
+        productId: product._id,
+        shopId: shopId || "",
+        quantity: 1,
+      })).unwrap();
+      toast.success("Đã thêm vào giỏ hàng");
+    } catch (error: any) {
+      toast.error(error?.message || "Không thể thêm vào giỏ hàng");
+    }
+  }, [dispatch]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -51,8 +57,17 @@ export default function WishlistPage() {
     }).format(price);
   };
 
+  // Loading state
+  if (isLoading && items.length === 0) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <SpinnerLoading size={32} />
+      </div>
+    );
+  }
+
   // Empty State
-  if (wishlistItems.length === 0) {
+  if (!isLoading && items.length === 0) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center p-4 bg-background">
         <motion.div
@@ -90,7 +105,9 @@ export default function WishlistPage() {
             <div className="flex items-center gap-2">
               <Heart className="h-5 w-5 text-[#E53935]" />
               <h1 className="text-xl font-bold text-gray-800">Sản phẩm yêu thích</h1>
-              <span className="text-sm text-gray-500">({wishlistItems.length} sản phẩm)</span>
+              <span className="text-sm text-gray-500">
+                ({pagination?.totalItems || items.length} sản phẩm)
+              </span>
             </div>
           </div>
         </div>
@@ -98,76 +115,85 @@ export default function WishlistPage() {
         {/* Product Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           <AnimatePresence mode="popLayout">
-            {wishlistItems.map((item) => (
-              <motion.div
-                key={item._id}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="bg-white rounded border border-transparent hover:border-[#f0f0f0] hover:bg-[#fafafa] transition-all duration-200 overflow-hidden group"
-              >
-                {/* Image */}
-                <Link href={`/products/${item.slug}`}>
-                  <div className="relative aspect-square overflow-hidden bg-gray-50">
-                    <Image
-                      src={item.images[0]}
-                      alt={item.name}
-                      fill
-                      className="object-cover group-hover:scale-102 transition-transform duration-300"
-                    />
-                    {/* Remove Button */}
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleRemoveItem(item._id);
-                      }}
-                      className="absolute top-2 right-2 w-7 h-7 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
-                    >
-                      <Trash2 className="h-3.5 w-3.5 text-gray-500 hover:text-red-500" />
-                    </button>
-                  </div>
-                </Link>
+            {items.map((item) => {
+              const price = item.price?.discountPrice || item.price?.currentPrice || 0;
+              const originalPrice = item.price?.currentPrice || 0;
+              const hasDiscount = item.price?.discountPrice && item.price.discountPrice < originalPrice;
+              const productImage = item.images?.[0] || "/images/placeholder.png";
+              const shopName = typeof item.shop === "object" ? item.shop?.name : "Shop";
 
-                {/* Info */}
-                <div className="p-3">
-                  <Link href={`/products/${item.slug}`}>
-                    <h3 className="text-[13px] text-gray-800 line-clamp-2 min-h-[36px] group-hover:text-[#E53935] transition-colors">
-                      {item.name}
-                    </h3>
+              return (
+                <motion.div
+                  key={item._id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="bg-white rounded border border-transparent hover:border-[#f0f0f0] hover:bg-[#fafafa] transition-all duration-200 overflow-hidden group"
+                >
+                  {/* Image */}
+                  <Link href={`/products/${item.slug || item._id}`}>
+                    <div className="relative aspect-square overflow-hidden bg-gray-50">
+                      <Image
+                        src={productImage}
+                        alt={item.name}
+                        fill
+                        className="object-cover group-hover:scale-102 transition-transform duration-300"
+                        sizes="(max-width: 640px) 50vw, 25vw"
+                      />
+                      {/* Remove Button */}
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleRemoveItem(item._id);
+                        }}
+                        className="absolute top-2 right-2 w-7 h-7 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+                      >
+                        <Trash2 className="h-3.5 w-3.5 text-gray-500 hover:text-red-500" />
+                      </button>
+                    </div>
                   </Link>
 
-                  {/* Price */}
-                  <div className="flex items-baseline gap-1 mt-2">
-                    <span className="text-[10px] text-[#E53935]">₫</span>
-                    <span className="font-bold text-base text-[#E53935]">
-                      {(item.price.discountPrice || item.price.currentPrice).toLocaleString('vi-VN')}
-                    </span>
-                    {item.price.discountPrice && (
-                      <span className="text-[11px] text-gray-400 line-through ml-1">
-                        ₫{item.price.currentPrice.toLocaleString('vi-VN')}
+                  {/* Info */}
+                  <div className="p-3">
+                    <Link href={`/products/${item.slug || item._id}`}>
+                      <h3 className="text-[13px] text-gray-800 line-clamp-2 min-h-[36px] group-hover:text-[#E53935] transition-colors">
+                        {item.name}
+                      </h3>
+                    </Link>
+
+                    {/* Price */}
+                    <div className="flex items-baseline gap-1 mt-2">
+                      <span className="text-[10px] text-[#E53935]">₫</span>
+                      <span className="font-bold text-base text-[#E53935]">
+                        {price.toLocaleString("vi-VN")}
                       </span>
-                    )}
+                      {hasDiscount && (
+                        <span className="text-[11px] text-gray-400 line-through ml-1">
+                          ₫{originalPrice.toLocaleString("vi-VN")}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Shop */}
+                    <p className="text-[11px] text-[#999] mt-1 truncate">
+                      {shopName}
+                    </p>
+
+                    {/* Add to Cart Button */}
+                    <Button
+                      onClick={() => handleAddToCart(item)}
+                      variant="outline"
+                      size="sm"
+                      className="w-full mt-3 h-8 text-xs border-[#E53935] text-[#E53935] hover:bg-[#FFEBEE] hover:text-[#E53935]"
+                    >
+                      <ShoppingCart className="h-3.5 w-3.5 mr-1" />
+                      Thêm vào giỏ
+                    </Button>
                   </div>
-
-                  {/* Shop */}
-                  <p className="text-[11px] text-[#999] mt-1 truncate">
-                    {item.shop.name}
-                  </p>
-
-                  {/* Add to Cart Button */}
-                  <Button
-                    onClick={() => handleAddToCart(item._id)}
-                    variant="outline"
-                    size="sm"
-                    className="w-full mt-3 h-8 text-xs border-[#E53935] text-[#E53935] hover:bg-[#FFEBEE] hover:text-[#E53935]"
-                  >
-                    <ShoppingCart className="h-3.5 w-3.5 mr-1" />
-                    Thêm vào giỏ
-                  </Button>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
         </div>
       </div>

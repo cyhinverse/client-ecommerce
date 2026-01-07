@@ -45,7 +45,7 @@ export function ProductsStats({
       {stats.map((stat, index) => (
         <div
           key={index}
-          className="rounded-4xl border border-border/50 bg-white/60 dark:bg-[#1C1C1E]/60 p-6 shadow-sm backdrop-blur-xl"
+          className="rounded-2xl bg-[#f7f7f7] p-6"
         >
           <div className="flex flex-row items-center justify-between space-y-0 pb-2">
             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">

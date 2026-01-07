@@ -105,7 +105,7 @@ export default function AdminNotificationsPage() {
         onClearAll={handleClearAll}
       />
 
-      <div className="rounded-[2rem] border border-border/40 bg-white/70 dark:bg-[#1C1C1E]/70 shadow-sm backdrop-blur-xl overflow-hidden min-h-[500px] flex flex-col">
+      <div className="rounded-2xl bg-white overflow-hidden min-h-[500px] flex flex-col">
          {loading && notifications.length === 0 ? (
              <div className="flex items-center justify-center flex-1">
                 <SpinnerLoading size={32} />
@@ -122,17 +122,17 @@ export default function AdminNotificationsPage() {
                      <div
                         key={notification._id}
                         className={cn(
-                           "group relative flex gap-4 rounded-xl p-4 transition-all hover:bg-black/5 dark:hover:bg-white/5 border border-transparent",
-                           !notification.isRead && "bg-blue-50/50 dark:bg-blue-500/10 border-blue-100 dark:border-blue-500/20"
+                           "group relative flex gap-4 rounded-xl p-4 transition-all hover:bg-[#f7f7f7]",
+                           !notification.isRead && "bg-red-50"
                         )}
                      >
-                        <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white dark:bg-white/10 shadow-sm">
+                        <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f7f7f7]">
                            {getIcon(notification.type || 'SYSTEM')}
                         </div>
                         
                         <div className="flex-1 space-y-1">
                            <div className="flex items-center justify-between gap-2">
-                              <p className={cn("text-sm font-medium leading-none", !notification.isRead && "text-blue-600 dark:text-blue-400")}>
+                              <p className={cn("text-sm font-medium leading-none", !notification.isRead && "text-[#E53935]")}>
                                  {notification.title}
                               </p>
                               <div className="flex items-center gap-2 text-xs text-muted-foreground whitespace-nowrap">
@@ -150,7 +150,7 @@ export default function AdminNotificationsPage() {
                                  <Button 
                                     variant="ghost" 
                                     size="sm" 
-                                    className="h-7 px-2 text-xs hover:bg-blue-100 hover:text-blue-600 dark:hover:bg-blue-900/30"
+                                    className="h-7 px-2 text-xs hover:bg-red-100 hover:text-[#E53935]"
                                     onClick={() => handleMarkAsRead(notification._id)}
                                  >
                                     Mark as read
@@ -160,7 +160,7 @@ export default function AdminNotificationsPage() {
                         </div>
 
                         {!notification.isRead && (
-                           <div className="absolute right-4 top-4 h-2 w-2 rounded-full bg-blue-500" />
+                           <div className="absolute right-4 top-4 h-2 w-2 rounded-full bg-[#E53935]" />
                         )}
                      </div>
                   ))}
@@ -169,7 +169,7 @@ export default function AdminNotificationsPage() {
          )}
          
          {pagination && (
-            <div className="p-4 border-t border-border/50 text-center text-xs text-muted-foreground">
+            <div className="p-4 bg-[#f7f7f7] text-center text-xs text-muted-foreground">
                Showing {notifications.length} of {pagination.totalItems} notifications
             </div>
          )}

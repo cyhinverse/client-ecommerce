@@ -134,7 +134,7 @@ export function OrdersTable({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-white/50 dark:bg-white/5 p-4 rounded-[1.5rem] backdrop-blur-xl border border-border/50">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-[#f7f7f7] p-4 rounded-2xl">
         <div className="flex flex-1 items-center space-x-2">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -142,14 +142,14 @@ export function OrdersTable({
               placeholder="Search by order ID, customer name..."
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
-              className="pl-9 rounded-xl border-gray-200 bg-white/80 focus-visible:ring-0 focus-visible:border-primary transition-all shadow-sm"
+              className="pl-9 rounded-xl border-0 bg-white focus-visible:ring-0 transition-all"
             />
           </div>
           <Select value={statusFilter} onValueChange={onStatusFilter}>
-            <SelectTrigger className="w-[180px] rounded-xl border-gray-200 bg-white/80 focus:ring-0 shadow-sm">
+            <SelectTrigger className="w-[180px] rounded-xl border-0 bg-white focus:ring-0">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
-            <SelectContent className="rounded-xl border-border/50">
+            <SelectContent className="rounded-xl border-0">
               <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="confirmed">Confirmed</SelectItem>
@@ -164,10 +164,10 @@ export function OrdersTable({
           value={pageSize.toString()}
           onValueChange={(value) => onPageSizeChange(Number(value))}
         >
-          <SelectTrigger className="w-[120px] rounded-xl border-gray-200 bg-white/80 focus:ring-0 shadow-sm">
+          <SelectTrigger className="w-[120px] rounded-xl border-0 bg-white focus:ring-0">
             <SelectValue placeholder="Show" />
           </SelectTrigger>
-          <SelectContent className="rounded-xl border-border/50">
+          <SelectContent className="rounded-xl border-0">
             <SelectItem value="10">10 / page</SelectItem>
             <SelectItem value="20">20 / page</SelectItem>
             <SelectItem value="50">50 / page</SelectItem>
@@ -175,10 +175,10 @@ export function OrdersTable({
         </Select>
       </div>
 
-      <div className="rounded-[2rem] border border-border/50 bg-white/60 dark:bg-[#1C1C1E]/60 backdrop-blur-xl overflow-hidden shadow-sm">
+      <div className="rounded-2xl bg-white overflow-hidden">
         <Table>
-          <TableHeader className="bg-gray-50/50">
-            <TableRow className="border-border/50 hover:bg-transparent">
+          <TableHeader className="bg-[#f7f7f7]">
+            <TableRow className="border-0 hover:bg-transparent">
               <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground pl-6">Order ID</TableHead>
               <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Customer</TableHead>
               <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Date</TableHead>
@@ -211,7 +211,7 @@ export function OrdersTable({
               orders.map((order) => (
                 <TableRow
                   key={order._id}
-                  className={`border-border/50 hover:bg-gray-50/50 transition-colors ${isLoading ? "opacity-50 pointer-events-none" : ""}`}
+                  className={`border-0 hover:bg-[#f7f7f7]/50 transition-colors ${isLoading ? "opacity-50 pointer-events-none" : ""}`}
                 >
                   <TableCell className="font-medium pl-6 text-sm">
                     #{order._id.slice(-8).toUpperCase()}
@@ -235,11 +235,11 @@ export function OrdersTable({
                   <TableCell className="pr-6 text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0 rounded-lg hover:bg-gray-100">
+                        <Button variant="ghost" className="h-8 w-8 p-0 rounded-lg hover:bg-[#f7f7f7]">
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="rounded-xl border-border/50 shadow-lg">
+                      <DropdownMenuContent align="end" className="rounded-xl border-0 shadow-lg">
                         <DropdownMenuItem onClick={() => onView(order)} className="cursor-pointer gap-2">
                           <Eye className="w-4 h-4" />
                           View Details

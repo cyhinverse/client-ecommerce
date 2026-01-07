@@ -53,18 +53,16 @@ export function UsersStats({
       {stats.map((stat, index) => (
         <div
           key={index}
-          className="rounded-[2rem] border border-border/50 bg-white/60 p-6 shadow-sm backdrop-blur-xl transition-all hover:shadow-md"
+          className="rounded-2xl bg-[#f7f7f7] p-6"
         >
           <div className="flex items-center justify-between space-y-0 pb-2">
-            <p className="text-sm font-medium text-muted-foreground font-sans">
+            <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
               {stat.title}
             </p>
-            <div className="rounded-full bg-gray-100/80 p-2 text-foreground">
-                <stat.icon className="h-4 w-4" />
-            </div>
+            <stat.icon className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="mt-3">
-            <div className="text-3xl font-bold tracking-tight text-foreground">
+            <div className="text-2xl font-bold text-foreground">
               {stat.value.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground mt-1">

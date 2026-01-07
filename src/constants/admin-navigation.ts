@@ -8,6 +8,9 @@ import {
   TicketPercent,
   LayoutDashboardIcon,
   Image as ImageIcon,
+  Store,
+  Zap,
+  Tag,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -15,6 +18,7 @@ export interface NavigationItem {
   name: string;
   href: string;
   icon: LucideIcon;
+  badge?: string;
 }
 
 export const ADMIN_NAVIGATION: NavigationItem[] = [
@@ -34,19 +38,14 @@ export const ADMIN_NAVIGATION: NavigationItem[] = [
     icon: ShoppingCart,
   },
   {
-    name: "Banners",
-    href: "/admin/banners",
-    icon: ImageIcon,
-  },
-  {
     name: "Users",
     href: "/admin/users",
     icon: Users,
   },
   {
-    name: "Notifications",
-    href: "/admin/notifications",
-    icon: Bell,
+    name: "Shops",
+    href: "/admin/shops",
+    icon: Store,
   },
   {
     name: "Categories",
@@ -54,9 +53,25 @@ export const ADMIN_NAVIGATION: NavigationItem[] = [
     icon: Album,
   },
   {
-    name: "Discounts",
-    href: "/admin/discounts",
-    icon: TicketPercent,
+    name: "Vouchers",
+    href: "/admin/vouchers",
+    icon: Tag,
+  },
+  {
+    name: "Flash Sale",
+    href: "/admin/flash-sale",
+    icon: Zap,
+    badge: "New",
+  },
+  {
+    name: "Banners",
+    href: "/admin/banners",
+    icon: ImageIcon,
+  },
+  {
+    name: "Notifications",
+    href: "/admin/notifications",
+    icon: Bell,
   },
   {
     name: "Settings",

@@ -43,7 +43,7 @@ export function CategoriesStats({
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {stats.map((stat, index) => (
-        <div key={index} className="rounded-[2rem] border border-border/50 bg-white/60 dark:bg-[#1C1C1E]/60 p-6 shadow-sm backdrop-blur-xl">
+        <div key={index} className="rounded-2xl bg-[#f7f7f7] p-6">
           <div className="flex flex-row items-center justify-between space-y-0 pb-2">
             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">{stat.title}</h3>
             <stat.icon className="h-4 w-4 text-muted-foreground" />

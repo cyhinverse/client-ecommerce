@@ -275,7 +275,7 @@ export default function OrdersAdminPage() {
     return (
       <div className="space-y-6">
         <OrdersHeader />
-        <div className="flex items-center justify-center h-64 rounded-[2rem] border border-border/40 bg-white/70 dark:bg-[#1C1C1E]/70 shadow-sm backdrop-blur-xl">
+        <div className="flex items-center justify-center h-64 rounded-2xl bg-[#f7f7f7] dark:bg-[#1C1C1E]">
           <SpinnerLoading />
         </div>
       </div>
@@ -286,13 +286,13 @@ export default function OrdersAdminPage() {
     return (
       <div className="space-y-6">
         <OrdersHeader />
-        <div className="flex items-center justify-center h-64 rounded-[2rem] border border-border/40 bg-white/70 dark:bg-[#1C1C1E]/70 shadow-sm backdrop-blur-xl">
+        <div className="flex items-center justify-center h-64 rounded-2xl bg-[#f7f7f7] dark:bg-[#1C1C1E]">
           <div className="text-red-500 text-center">
             <div className="text-lg font-semibold mb-2">
               Error loading orders
             </div>
             <div>{orderState.error}</div>
-            <Button onClick={() => window.location.reload()} className="mt-4 rounded-xl">
+            <Button onClick={() => window.location.reload()} className="mt-4 rounded-xl bg-[#E53935] hover:bg-[#D32F2F] text-white">
               Try Again
             </Button>
           </div>

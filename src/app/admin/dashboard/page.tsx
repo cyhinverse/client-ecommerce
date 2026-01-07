@@ -197,18 +197,15 @@ export default function AdminDashboard() {
         </div>
         <div className="flex items-center gap-2">
           <Button
-            variant="outline"
-            className="rounded-xl border-border/50 bg-background/50 h-10 gap-2 text-sm font-medium"
+            variant="ghost"
+            className="rounded-xl bg-[#f7f7f7] h-10 gap-2 text-sm font-medium"
           >
             <Calendar className="h-3.5 w-3.5" />
             {format(new Date(), "MMM dd, yyyy")}
           </Button>
           <Button
             onClick={handleRefresh}
-            className={cn(
-              "rounded-xl h-10 gap-2 text-sm font-medium transition-all shadow-lg hover:shadow-xl",
-              "bg-black hover:bg-black/90 text-white dark:bg-[#0071e3] dark:hover:bg-[#0077ED]"
-            )}
+            className="rounded-xl h-10 gap-2 text-sm font-medium bg-[#E53935] hover:bg-[#D32F2F] text-white"
             disabled={loading}
           >
             {loading ? (
@@ -226,7 +223,7 @@ export default function AdminDashboard() {
         {statCards.map((stat) => (
           <div
             key={stat.name}
-            className="group relative overflow-hidden rounded-[1.5rem] border border-border/40 bg-white/70 dark:bg-[#1C1C1E]/70 p-6 shadow-sm transition-all hover:shadow-md backdrop-blur-xl"
+            className="rounded-2xl bg-[#f7f7f7] dark:bg-[#1C1C1E] p-6"
           >
             <div className="flex items-center justify-between">
               <div className={cn("p-2 rounded-xl", stat.bg)}>
@@ -256,9 +253,6 @@ export default function AdminDashboard() {
                 {stat.value}
               </p>
             </div>
-            <div className="mt-2 text-xs text-muted-foreground/60 line-clamp-1">
-              {stat.description}
-            </div>
           </div>
         ))}
       </div>
@@ -266,7 +260,7 @@ export default function AdminDashboard() {
       {/* Charts Section */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Revenue Chart */}
-        <div className="rounded-[2rem] border border-border/40 bg-white/70 dark:bg-[#1C1C1E]/70 p-6 shadow-sm backdrop-blur-xl">
+        <div className="rounded-2xl bg-[#f7f7f7] dark:bg-[#1C1C1E] p-6">
           <div className="mb-6 flex items-center justify-between">
             <div>
               <h3 className="font-semibold text-lg text-foreground">Revenue</h3>
@@ -274,7 +268,7 @@ export default function AdminDashboard() {
                 Monthly revenue overview
               </p>
             </div>
-            <div className="p-2 rounded-full bg-gray-100 dark:bg-gray-800">
+            <div className="p-2 rounded-full bg-white dark:bg-black/20">
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </div>
           </div>
@@ -291,8 +285,8 @@ export default function AdminDashboard() {
                       x2="0"
                       y2="1"
                     >
-                      <stop offset="5%" stopColor="#0071e3" stopOpacity={0.2} />
-                      <stop offset="95%" stopColor="#0071e3" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#E53935" stopOpacity={0.2} />
+                      <stop offset="95%" stopColor="#E53935" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid
@@ -311,24 +305,16 @@ export default function AdminDashboard() {
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "rgba(28, 28, 30, 0.8)",
-                      borderColor: "rgba(255,255,255,0.1)",
+                      backgroundColor: "#fff",
+                      border: "none",
                       borderRadius: "12px",
-                      boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
-                      backdropFilter: "blur(12px)",
-                      color: "#fff",
-                      border: "1px solid rgba(255,255,255,0.1)",
+                      boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
                     }}
-                    itemStyle={{ color: "#fff", fontSize: "13px" }}
+                    itemStyle={{ color: "#333", fontSize: "13px" }}
                     labelStyle={{
                       color: "#86868B",
                       marginBottom: "4px",
                       fontSize: "11px",
-                    }}
-                    cursor={{
-                      stroke: "#0071e3",
-                      strokeWidth: 1,
-                      strokeDasharray: "4 4",
                     }}
                     formatter={(value: number) => [
                       formatPrice(value),
@@ -338,11 +324,11 @@ export default function AdminDashboard() {
                   <Area
                     type="monotone"
                     dataKey="revenue"
-                    stroke="#0071e3"
+                    stroke="#E53935"
                     strokeWidth={2}
                     fillOpacity={1}
                     fill="url(#colorRevenue)"
-                    activeDot={{ r: 6, strokeWidth: 0, fill: "#0071e3" }}
+                    activeDot={{ r: 6, strokeWidth: 0, fill: "#E53935" }}
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -355,7 +341,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Orders Chart */}
-        <div className="rounded-[2rem] border border-border/40 bg-white/70 dark:bg-[#1C1C1E]/70 p-6 shadow-sm backdrop-blur-xl">
+        <div className="rounded-2xl bg-[#f7f7f7] dark:bg-[#1C1C1E] p-6">
           <div className="mb-6 flex items-center justify-between">
             <div>
               <h3 className="font-semibold text-lg text-foreground">Orders</h3>
@@ -363,7 +349,7 @@ export default function AdminDashboard() {
                 Monthly order volume
               </p>
             </div>
-            <div className="p-2 rounded-full bg-gray-100 dark:bg-gray-800">
+            <div className="p-2 rounded-full bg-white dark:bg-black/20">
               <ShoppingCart className="h-4 w-4 text-muted-foreground" />
             </div>
           </div>
@@ -389,15 +375,12 @@ export default function AdminDashboard() {
                   <Tooltip
                     cursor={{ fill: "rgba(0,0,0,0.02)" }}
                     contentStyle={{
-                      backgroundColor: "rgba(28, 28, 30, 0.8)",
-                      borderColor: "rgba(255,255,255,0.1)",
+                      backgroundColor: "#fff",
+                      border: "none",
                       borderRadius: "12px",
-                      boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
-                      backdropFilter: "blur(12px)",
-                      color: "#fff",
-                      border: "1px solid rgba(255,255,255,0.1)",
+                      boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
                     }}
-                    itemStyle={{ color: "#fff", fontSize: "13px" }}
+                    itemStyle={{ color: "#333", fontSize: "13px" }}
                     labelStyle={{
                       color: "#86868B",
                       marginBottom: "4px",
@@ -406,9 +389,8 @@ export default function AdminDashboard() {
                   />
                   <Bar
                     dataKey="orders"
-                    fill="#3b82f6"
+                    fill="#E53935"
                     radius={[6, 6, 6, 6]}
-                    className="fill-primary dark:fill-blue-500"
                   />
                 </BarChart>
               </ResponsiveContainer>
@@ -423,7 +405,7 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Recent Orders Table */}
-        <div className="rounded-[2rem] border border-border/40 bg-white/70 dark:bg-[#1C1C1E]/70 p-6 shadow-sm backdrop-blur-xl flex flex-col">
+        <div className="rounded-2xl bg-[#f7f7f7] dark:bg-[#1C1C1E] p-6 flex flex-col">
           <div className="mb-6 flex items-center justify-between">
             <div>
               <h3 className="font-semibold text-lg text-foreground">
@@ -435,21 +417,21 @@ export default function AdminDashboard() {
             </div>
             <Link
               href="/admin/orders"
-              className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+              className="text-sm font-medium text-[#E53935] hover:underline flex items-center gap-1"
             >
               View All <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
 
-          <div className="flex-1 space-y-4">
+          <div className="flex-1 space-y-2">
             {displayStats.recentOrders.length > 0 ? (
               displayStats.recentOrders.map((order) => (
                 <div
                   key={order._id}
-                  className="flex items-center justify-between p-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                  className="flex items-center justify-between p-3 rounded-xl hover:bg-white dark:hover:bg-black/20 transition-colors"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="hidden sm:flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+                    <div className="hidden sm:flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-black/20">
                       <Package className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div className="space-y-1">
@@ -482,7 +464,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Top Products List */}
-        <div className="rounded-[2rem] border border-border/40 bg-white/70 dark:bg-[#1C1C1E]/70 p-6 shadow-sm backdrop-blur-xl flex flex-col">
+        <div className="rounded-2xl bg-[#f7f7f7] dark:bg-[#1C1C1E] p-6 flex flex-col">
           <div className="mb-6 flex items-center justify-between">
             <div>
               <h3 className="font-semibold text-lg text-foreground">
@@ -494,21 +476,21 @@ export default function AdminDashboard() {
             </div>
             <Link
               href="/admin/products"
-              className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+              className="text-sm font-medium text-[#E53935] hover:underline flex items-center gap-1"
             >
               View All <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
 
-          <div className="flex-1 space-y-4">
+          <div className="flex-1 space-y-2">
             {displayStats.topProducts.length > 0 ? (
               displayStats.topProducts.map((product, index) => (
                 <div
                   key={product._id}
-                  className="flex items-center justify-between p-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                  className="flex items-center justify-between p-3 rounded-xl hover:bg-white dark:hover:bg-black/20 transition-colors"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="relative h-12 w-12 flex-shrink-0 rounded-xl bg-gray-100 dark:bg-gray-800 overflow-hidden border border-border/50">
+                    <div className="relative h-12 w-12 shrink-0 rounded-xl bg-white dark:bg-black/20 overflow-hidden">
                       {product.variants?.[0]?.images?.[0] ? (
                         <Image
                           src={product.variants[0].images[0]}
@@ -517,7 +499,7 @@ export default function AdminDashboard() {
                           className="object-cover"
                         />
                       ) : (
-                        <div className="flex items-center justify-center h-full w-full bg-secondary text-secondary-foreground text-xs font-bold">
+                        <div className="flex items-center justify-center h-full w-full text-muted-foreground text-xs font-bold">
                           {index + 1}
                         </div>
                       )}

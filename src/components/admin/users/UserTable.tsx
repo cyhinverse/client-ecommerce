@@ -147,7 +147,7 @@ export function UsersTable({
   return (
     <div className="space-y-4">
       {/* Search and Filters */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-white/50 p-4 rounded-[1.5rem] backdrop-blur-xl border border-border/50">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-[#f7f7f7] p-4 rounded-2xl">
         <div className="flex flex-1 items-center space-x-2">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -155,7 +155,7 @@ export function UsersTable({
               placeholder="Search users..."
               value={localSearch}
               onChange={handleSearch}
-              className="pl-9 rounded-xl border-gray-200 bg-white/80 focus-visible:ring-0 focus-visible:border-primary transition-all shadow-sm"
+              className="pl-9 rounded-xl border-0 bg-white focus-visible:ring-0 transition-all"
             />
           </div>
 
@@ -164,7 +164,7 @@ export function UsersTable({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="rounded-xl border-gray-200 bg-white/80 hover:bg-gray-50 shadow-sm"
+                className="rounded-xl border-0 bg-white hover:bg-white/80"
               >
                 <Shield className="h-4 w-4 mr-2 text-muted-foreground" />
                 {selectedRole === "admin"
@@ -174,26 +174,26 @@ export function UsersTable({
                   : "All Roles"}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="rounded-xl border-border/50 shadow-lg p-1">
+            <DropdownMenuContent className="rounded-xl border-0 shadow-lg p-1">
               <DropdownMenuLabel className="text-muted-foreground text-xs uppercase tracking-wider px-2 py-1.5">
                 Filter by Role
               </DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-border/50" />
+              <DropdownMenuSeparator className="bg-[#f7f7f7]" />
               <DropdownMenuItem
                 onClick={() => handleRoleFilter("")}
-                 className={`cursor-pointer rounded-lg ${!selectedRole ? "bg-gray-100 font-medium" : ""}`}
+                 className={`cursor-pointer rounded-lg ${!selectedRole ? "bg-[#f7f7f7] font-medium" : ""}`}
               >
                 All Roles
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleRoleFilter("admin")}
-                className={`cursor-pointer rounded-lg ${selectedRole === "admin" ? "bg-gray-100 font-medium" : ""}`}
+                className={`cursor-pointer rounded-lg ${selectedRole === "admin" ? "bg-[#f7f7f7] font-medium" : ""}`}
               >
                 Admin
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleRoleFilter("user")}
-                 className={`cursor-pointer rounded-lg ${selectedRole === "user" ? "bg-gray-100 font-medium" : ""}`}
+                 className={`cursor-pointer rounded-lg ${selectedRole === "user" ? "bg-[#f7f7f7] font-medium" : ""}`}
               >
                 User
               </DropdownMenuItem>
@@ -205,7 +205,7 @@ export function UsersTable({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="rounded-xl border-gray-200 bg-white/80 hover:bg-gray-50 shadow-sm"
+                className="rounded-xl border-0 bg-white hover:bg-white/80"
               >
                 <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
                 {selectedVerified === true
@@ -215,26 +215,26 @@ export function UsersTable({
                   : "Status"}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="rounded-xl border-border/50 shadow-lg p-1">
+            <DropdownMenuContent className="rounded-xl border-0 shadow-lg p-1">
               <DropdownMenuLabel className="text-muted-foreground text-xs uppercase tracking-wider px-2 py-1.5">
                 Filter by Verification
               </DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-border/50" />
+              <DropdownMenuSeparator className="bg-[#f7f7f7]" />
               <DropdownMenuItem
                 onClick={() => handleVerifiedFilter(null)}
-                className={`cursor-pointer rounded-lg ${selectedVerified === null ? "bg-gray-100 font-medium" : ""}`}
+                className={`cursor-pointer rounded-lg ${selectedVerified === null ? "bg-[#f7f7f7] font-medium" : ""}`}
               >
                 All Status
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleVerifiedFilter(true)}
-                 className={`cursor-pointer rounded-lg ${selectedVerified === true ? "bg-gray-100 font-medium" : ""}`}
+                 className={`cursor-pointer rounded-lg ${selectedVerified === true ? "bg-[#f7f7f7] font-medium" : ""}`}
               >
                 Verified
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleVerifiedFilter(false)}
-                 className={`cursor-pointer rounded-lg ${selectedVerified === false ? "bg-gray-100 font-medium" : ""}`}
+                 className={`cursor-pointer rounded-lg ${selectedVerified === false ? "bg-[#f7f7f7] font-medium" : ""}`}
               >
                 Unverified
               </DropdownMenuItem>
@@ -244,7 +244,7 @@ export function UsersTable({
            <Button
              variant="outline"
              size="icon"
-             className="rounded-xl border-gray-200 bg-white/80 hover:bg-gray-50 shadow-sm w-9 h-9"
+             className="rounded-xl border-0 bg-white hover:bg-white/80 w-9 h-9"
            >
              <Download className="h-4 w-4" />
            </Button>
@@ -258,7 +258,7 @@ export function UsersTable({
             id="pageSize"
             value={pageSize}
             onChange={(e) => onPageSizeChange(Number(e.target.value))}
-            className="h-9 rounded-lg border border-gray-200 bg-white/80 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-black/5"
+            className="h-9 rounded-lg border-0 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E53935]/20"
           >
             <option value="5">5</option>
             <option value="10">10</option>
@@ -269,11 +269,11 @@ export function UsersTable({
       </div>
 
       {/* Table */}
-      <div className="rounded-[2rem] border border-border/50 bg-white/60 backdrop-blur-xl shadow-sm overflow-hidden">
+      <div className="rounded-2xl bg-white overflow-hidden">
         <div className="overflow-x-auto no-scrollbar">
             <Table>
-            <TableHeader className="bg-gray-50/50">
-                <TableRow className="border-border/50 hover:bg-transparent">
+            <TableHeader className="bg-[#f7f7f7]">
+                <TableRow className="border-0 hover:bg-transparent">
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground pl-6">
                     User
                 </TableHead>
@@ -319,11 +319,11 @@ export function UsersTable({
                 users.map((user) => (
                     <TableRow
                     key={user._id}
-                     className="border-border/50 hover:bg-gray-50/50 transition-colors"
+                     className="border-0 hover:bg-[#f7f7f7]/50 transition-colors"
                     >
                     <TableCell className="pl-6 font-medium">
                         <div className="flex items-center gap-3">
-                            <div className="relative w-10 h-10 rounded-full overflow-hidden border border-border/50 bg-gray-100">
+                            <div className="relative w-10 h-10 rounded-full overflow-hidden bg-[#f7f7f7]">
                                 {user.avatar ? (
                                 <Image
                                     alt={user?.username as string}
@@ -369,13 +369,13 @@ export function UsersTable({
                     <TableCell className="text-right pr-6">
                         <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                             <Button variant="ghost" className="h-8 w-8 p-0 rounded-lg hover:bg-gray-100">
+                             <Button variant="ghost" className="h-8 w-8 p-0 rounded-lg hover:bg-[#f7f7f7]">
                                 <MoreHorizontal className="h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
                             align="end"
-                            className="rounded-xl border-border/50 shadow-lg p-1"
+                            className="rounded-xl border-0 shadow-lg p-1"
                         >
                             <DropdownMenuLabel className="text-xs font-normal text-muted-foreground px-2 py-1.5">Actions</DropdownMenuLabel>
                             <DropdownMenuItem
@@ -392,7 +392,7 @@ export function UsersTable({
                             <Edit className="h-4 w-4" />
                             Edit User
                             </DropdownMenuItem>
-                            <DropdownMenuSeparator className="bg-border/50 my-1" />
+                            <DropdownMenuSeparator className="bg-[#f7f7f7] my-1" />
                             <DropdownMenuItem
                              className="cursor-pointer rounded-lg gap-2 text-destructive focus:text-destructive focus:bg-destructive/10"
                             onClick={() => onDelete(user)}
