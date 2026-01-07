@@ -13,7 +13,6 @@ export const handleNotificationEvents = (
   if (!socket) return;
 
   socket.on("new_notification", (notification) => {
-    // Defensive check: Ensure title/message are strings
     const title =
       typeof notification.title === "string"
         ? notification.title

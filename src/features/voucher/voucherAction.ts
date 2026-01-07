@@ -4,13 +4,8 @@ import {
   UpdateVoucherData, 
   VoucherFilters,
   VoucherScope,
-  // Backward compatibility aliases
-  CreateDiscountData,
-  UpdateDiscountData,
 } from "@/types/voucher";
 import instance from "@/api/api";
-
-// ==================== VOUCHER ACTIONS (NEW) ====================
 
 // Get all vouchers
 export const getAllVouchers = createAsyncThunk(
@@ -57,6 +52,7 @@ export const deleteVoucher = createAsyncThunk(
   }
 );
 
+
 // Get voucher statistics
 export const getVoucherStatistics = createAsyncThunk(
   "voucher/getVoucherStatistics",
@@ -80,7 +76,7 @@ export const applyVoucherCode = createAsyncThunk(
   }) => {
     const response = await instance.post("/vouchers/apply", {
       code,
-      orderTotal,
+      orderValue: orderTotal, // Server expects 'orderValue', not 'orderTotal'
       shopId,
     });
     return response.data;
@@ -101,37 +97,6 @@ export const getAvailableVouchers = createAsyncThunk(
   }) => {
     const response = await instance.get("/vouchers/available", {
       params: { orderTotal, shopId, scope },
-    });
-    return response.data;
-  }
-);
-
-// ==================== BACKWARD COMPATIBILITY ALIASES ====================
-// These map old discount actions to new voucher actions
-
-export const getAllDiscounts = getAllVouchers;
-export const getDiscountById = getVoucherById;
-export const createDiscount = createVoucher;
-export const updateDiscount = updateVoucher;
-export const deleteDiscount = deleteVoucher;
-export const getDiscountStatistics = getVoucherStatistics;
-
-// Apply discount code (backward compatible)
-export const applyDiscountCode = createAsyncThunk(
-  "discount/applyDiscountCode",
-  async ({
-    code,
-    orderTotal,
-    productIds,
-  }: {
-    code: string;
-    orderTotal: number;
-    productIds: string[];
-  }) => {
-    // Use voucher endpoint
-    const response = await instance.post("/vouchers/apply", {
-      code,
-      orderTotal,
     });
     return response.data;
   }

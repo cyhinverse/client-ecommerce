@@ -5,15 +5,8 @@ import {
   ShoppingCart, Package, Users, Calendar, ArrowUpRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAppSelector } from "@/hooks/hooks";
-import api from "@/api/api";
-
-interface Stats {
-  revenue: { total: number; change: number };
-  orders: { total: number; change: number };
-  products: { total: number; sold: number };
-  customers: { total: number; new: number };
-}
+import { useAppSelector, useAppDispatch } from "@/hooks/hooks";
+import { getProductsByShop } from "@/features/product/productAction";
 
 const formatPrice = (price: number): string => {
   if (price >= 1000000000) return (price / 1000000000).toFixed(1) + "B";
@@ -23,33 +16,18 @@ const formatPrice = (price: number): string => {
 };
 
 export default function SellerStatisticsPage() {
+  const dispatch = useAppDispatch();
   const { myShop } = useAppSelector((state) => state.shop);
+  const { pagination: productPagination } = useAppSelector((state) => state.product);
   const [period, setPeriod] = useState<"week" | "month" | "year">("month");
-  const [stats, setStats] = useState<Stats>({
-    revenue: { total: 0, change: 0 },
-    orders: { total: 0, change: 0 },
-    products: { total: 0, sold: 0 },
-    customers: { total: 0, new: 0 },
-  });
+
+  const totalProducts = productPagination?.totalItems || 0;
 
   useEffect(() => {
     if (myShop?._id) {
-      fetchStats();
+      dispatch(getProductsByShop({ shopId: myShop._id, page: 1, limit: 1 }));
     }
-  }, [myShop, period]);
-
-  const fetchStats = async () => {
-    try {
-      const productsRes = await api.get(`/products?shop=${myShop?._id}&limit=1`);
-      const totalProducts = productsRes.data?.data?.pagination?.total || 0;
-      setStats(prev => ({
-        ...prev,
-        products: { ...prev.products, total: totalProducts },
-      }));
-    } catch (error) {
-      console.error("Failed to fetch stats:", error);
-    }
-  };
+  }, [myShop, period, dispatch]);
 
   const periods = [
     { key: "week", label: "7 ngày" },
@@ -93,29 +71,29 @@ export default function SellerStatisticsPage() {
       <div className="grid grid-cols-4 gap-4">
         <StatCard
           title="Doanh thu"
-          value={`₫${formatPrice(stats.revenue.total)}`}
-          change={stats.revenue.change}
+          value={`₫${formatPrice(0)}`}
+          change={0}
           icon={DollarSign}
           color="green"
         />
         <StatCard
           title="Đơn hàng"
-          value={stats.orders.total}
-          change={stats.orders.change}
+          value={0}
+          change={0}
           icon={ShoppingCart}
           color="blue"
         />
         <StatCard
           title="Sản phẩm đã bán"
-          value={stats.products.sold}
-          subtext={`${stats.products.total} sản phẩm`}
+          value={0}
+          subtext={`${totalProducts} sản phẩm`}
           icon={Package}
           color="purple"
         />
         <StatCard
           title="Khách hàng"
-          value={stats.customers.total}
-          subtext={`+${stats.customers.new} mới`}
+          value={0}
+          subtext={`+0 mới`}
           icon={Users}
           color="orange"
         />

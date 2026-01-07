@@ -161,13 +161,39 @@ export function ProductsTable({
   };
 
   const getStockCount = (product: Product) => {
+    // New schema: use models
+    if (product.models && product.models.length > 0) {
+      return product.models.reduce((total, model) => total + (model.stock || 0), 0);
+    }
+    // Fallback to stock field
+    if (product.stock) return product.stock;
+    // Legacy: variants
     if (product.variants && product.variants.length > 0) {
-      return product.variants.reduce(
-        (total, variant) => total + (variant.stock || 0),
-        0
-      );
+      return product.variants.reduce((total, variant) => total + (variant.stock || 0), 0);
     }
     return 0;
+  };
+
+  // Get main image from tierVariations or legacy variants
+  const getMainImage = (product: Product): string | null => {
+    // New schema: tierVariations[0].images[0]
+    if (product.tierVariations?.[0]?.images?.[0]) {
+      const firstImage = product.tierVariations[0].images[0];
+      // Handle both 2D array (new) and flat array (old) structure
+      if (Array.isArray(firstImage)) {
+        return firstImage[0] || null;
+      }
+      return typeof firstImage === 'string' ? firstImage : null;
+    }
+    // Fallback to images array
+    if (product.images?.[0]) {
+      return product.images[0];
+    }
+    // Legacy: variants
+    if (product.variants?.[0]?.images?.[0]) {
+      return product.variants[0].images[0];
+    }
+    return null;
   };
 
   return (
@@ -362,10 +388,10 @@ export function ProductsTable({
                   }`}
                 >
                   <TableCell className="pl-6">
-                    {product.variants?.[0]?.images?.[0] ? (
+                    {getMainImage(product) ? (
                       <div className="relative h-12 w-12 rounded-xl overflow-hidden bg-[#f7f7f7]">
                         <Image
-                          src={product.variants[0].images[0]}
+                          src={getMainImage(product)!}
                           alt={product.name}
                           width={48}
                           height={48}

@@ -1,40 +1,40 @@
 import { Ticket, Clock, AlertCircle, BarChart3 } from "lucide-react";
 
-interface DiscountsStatsProps {
-  totalDiscounts: number;
-  activeDiscounts: number;
-  expiredDiscounts: number;
-  highUsageDiscounts: number;
+interface VouchersStatsProps {
+  totalVouchers: number;
+  activeVouchers: number;
+  expiredVouchers: number;
+  highUsageVouchers: number;
 }
 
-export function DiscountsStats({
-  totalDiscounts,
-  activeDiscounts,
-  expiredDiscounts,
-  highUsageDiscounts,
-}: DiscountsStatsProps) {
+export function VouchersStats({
+  totalVouchers,
+  activeVouchers,
+  expiredVouchers,
+  highUsageVouchers,
+}: VouchersStatsProps) {
   const stats = [
     {
-      title: "Total Discounts",
-      value: totalDiscounts,
+      title: "Total Vouchers",
+      value: totalVouchers,
       icon: Ticket,
-      description: "All discount codes",
+      description: "All voucher codes",
     },
     {
       title: "Active",
-      value: activeDiscounts,
+      value: activeVouchers,
       icon: BarChart3,
       description: "Active codes",
     },
     {
       title: "Expired",
-      value: expiredDiscounts,
+      value: expiredVouchers,
       icon: Clock,
       description: "Expired codes",
     },
     {
       title: "Running Out",
-      value: highUsageDiscounts,
+      value: highUsageVouchers,
       icon: AlertCircle,
       description: "Used >80% limit",
     },

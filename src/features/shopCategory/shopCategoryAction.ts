@@ -12,7 +12,8 @@ export const getShopCategories = createAsyncThunk(
   "shopCategory/getAll",
   async (shopId: string | undefined, { rejectWithValue }) => {
     try {
-      const url = shopId ? `/shop-categories/shop/${shopId}` : "/shop-categories";
+      // If shopId provided, get public shop categories; otherwise get seller's own
+      const url = shopId ? `/shop-categories/${shopId}` : "/shop-categories/my";
       const response = await instance.get(url);
       return response.data.data || response.data;
     } catch (error) {

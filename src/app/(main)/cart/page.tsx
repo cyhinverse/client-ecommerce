@@ -19,8 +19,8 @@ import {
   unselectAllItems,
   prepareForCheckout,
 } from "@/features/cart/cartSlice";
-import { applyDiscountCode } from "@/features/discount/discountAction";
-import { clearAppliedDiscount } from "@/features/discount/discountSlice";
+import { applyVoucherCode } from "@/features/voucher/voucherAction";
+import { clearAppliedVouchers } from "@/features/voucher/voucherSlice";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -36,8 +36,8 @@ export default function CartPage() {
     selectedItems,
     checkoutTotal,
   } = useAppSelector((state) => state.cart);
-  const { appliedDiscount, loading: discountLoading } = useAppSelector(
-    (state) => state.discount
+  const { appliedShopVoucher, appliedPlatformVoucher, loading: voucherLoading } = useAppSelector(
+    (state) => state.voucher
   );
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -54,7 +54,7 @@ export default function CartPage() {
 
   const handleClearCart = () => {
     dispatch(clearCart());
-    dispatch(clearAppliedDiscount());
+    dispatch(clearAppliedVouchers());
     toast.success("Đã xóa giỏ hàng");
   };
 
@@ -84,7 +84,7 @@ export default function CartPage() {
     router.push("/checkout");
   };
 
-  const handleApplyDiscount = async () => {
+  const handleApplyVoucher = async () => {
     if (!promoCode.trim()) {
       toast.error("Vui lòng nhập mã giảm giá");
       return;
@@ -96,16 +96,12 @@ export default function CartPage() {
     }
 
     const orderTotal = checkoutTotal || 0;
-    const productIds = selectedItems.map((item) => 
-      typeof item.productId === 'object' ? item.productId._id : item.productId
-    );
 
     try {
       await dispatch(
-        applyDiscountCode({
+        applyVoucherCode({
           code: promoCode,
           orderTotal,
-          productIds,
         })
       ).unwrap();
       toast.success("Áp dụng mã giảm giá thành công!");
@@ -113,12 +109,12 @@ export default function CartPage() {
       const errorMessage =
         (err as Error).message || "Không thể áp dụng mã giảm giá";
       toast.error(errorMessage);
-      dispatch(clearAppliedDiscount());
+      dispatch(clearAppliedVouchers());
     }
   };
 
-  const handleRemoveDiscount = () => {
-    dispatch(clearAppliedDiscount());
+  const handleRemoveVoucher = () => {
+    dispatch(clearAppliedVouchers());
     setPromoCode("");
     toast.success("Đã xóa mã giảm giá");
   };
@@ -410,14 +406,14 @@ export default function CartPage() {
                     placeholder="Nhập mã giảm giá"
                     value={promoCode}
                     onChange={(e) => setPromoCode(e.target.value)}
-                    disabled={!!appliedDiscount}
+                    disabled={!!appliedPlatformVoucher}
                     className="h-9 text-sm rounded border-gray-200 focus:border-[#E53935] focus:ring-[#E53935]/20"
                   />
-                  {appliedDiscount ? (
+                  {appliedPlatformVoucher ? (
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={handleRemoveDiscount}
+                      onClick={handleRemoveVoucher}
                       className="h-9 px-3 text-red-500 border-red-200 hover:bg-red-50"
                     >
                       Xóa
@@ -425,18 +421,18 @@ export default function CartPage() {
                   ) : (
                     <Button
                       size="sm"
-                      onClick={handleApplyDiscount}
-                      disabled={discountLoading || !promoCode}
+                      onClick={handleApplyVoucher}
+                      disabled={voucherLoading || !promoCode}
                       className="h-9 px-4 bg-[#E53935] hover:bg-[#D32F2F] rounded"
                     >
                       Áp dụng
                     </Button>
                   )}
                 </div>
-                {appliedDiscount && (
+                {appliedPlatformVoucher && (
                   <div className="mt-2 text-xs text-green-600 flex items-center gap-1">
                     <span>✓</span>
-                    <span>Đã áp dụng mã: {appliedDiscount.code}</span>
+                    <span>Đã áp dụng mã: {appliedPlatformVoucher.code}</span>
                   </div>
                 )}
               </div>
@@ -450,10 +446,10 @@ export default function CartPage() {
                   </span>
                 </div>
 
-                {appliedDiscount && (
+                {appliedPlatformVoucher && (
                   <div className="flex justify-between text-sm text-green-600">
                     <span>Giảm giá</span>
-                    <span>-{formatPrice(appliedDiscount.discountAmount)}</span>
+                    <span>-{formatPrice(appliedPlatformVoucher.discountAmount)}</span>
                   </div>
                 )}
 
@@ -468,8 +464,8 @@ export default function CartPage() {
                 <span className="text-gray-800 font-medium">Tổng cộng</span>
                 <span className="text-xl font-bold text-[#E53935]">
                   {formatPrice(
-                    appliedDiscount
-                      ? (appliedDiscount.finalTotal ?? 0)
+                    appliedPlatformVoucher
+                      ? (checkoutTotal || 0) - appliedPlatformVoucher.discountAmount
                       : hasSelectedItems
                       ? checkoutTotal || 0
                       : subtotal

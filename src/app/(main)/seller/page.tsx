@@ -1,20 +1,13 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import { 
   Package, ShoppingCart, DollarSign, TrendingUp,
   Eye, Star, Users, ArrowRight, Clock, CheckCircle2,
   XCircle, Truck
 } from "lucide-react";
-import { useAppSelector } from "@/hooks/hooks";
-import api from "@/api/api";
-
-interface DashboardStats {
-  totalProducts: number;
-  totalOrders: number;
-  totalRevenue: number;
-  pendingOrders: number;
-}
+import { useAppSelector, useAppDispatch } from "@/hooks/hooks";
+import { getProductsByShop } from "@/features/product/productAction";
 
 const formatPrice = (price: number): string => {
   if (price >= 1000000) {
@@ -27,29 +20,17 @@ const formatPrice = (price: number): string => {
 };
 
 export default function SellerDashboardPage() {
+  const dispatch = useAppDispatch();
   const { myShop } = useAppSelector((state) => state.shop);
-  const [stats, setStats] = useState<DashboardStats>({
-    totalProducts: 0,
-    totalOrders: 0,
-    totalRevenue: 0,
-    pendingOrders: 0,
-  });
+  const { pagination: productPagination } = useAppSelector((state) => state.product);
+
+  const totalProducts = productPagination?.totalItems || 0;
 
   useEffect(() => {
     if (myShop?._id) {
-      fetchStats();
+      dispatch(getProductsByShop({ shopId: myShop._id, page: 1, limit: 1 }));
     }
-  }, [myShop]);
-
-  const fetchStats = async () => {
-    try {
-      const productsRes = await api.get(`/products?shop=${myShop?._id}&limit=1`);
-      const totalProducts = productsRes.data?.data?.pagination?.total || 0;
-      setStats(prev => ({ ...prev, totalProducts }));
-    } catch (error) {
-      console.error("Failed to fetch stats:", error);
-    }
-  };
+  }, [myShop, dispatch]);
 
   const orderStats = [
     { label: "Chờ xác nhận", value: 0, icon: Clock, color: "text-yellow-600", bg: "bg-yellow-50" },
@@ -79,21 +60,21 @@ export default function SellerDashboardPage() {
       <div className="grid grid-cols-4 gap-4">
         <StatCard
           title="Sản phẩm"
-          value={stats.totalProducts}
+          value={totalProducts}
           icon={Package}
           color="blue"
           href="/seller/products"
         />
         <StatCard
           title="Đơn hàng"
-          value={stats.totalOrders}
+          value={0}
           icon={ShoppingCart}
           color="green"
           href="/seller/orders"
         />
         <StatCard
           title="Doanh thu"
-          value={`₫${formatPrice(stats.totalRevenue)}`}
+          value={`₫${formatPrice(0)}`}
           icon={DollarSign}
           color="yellow"
         />

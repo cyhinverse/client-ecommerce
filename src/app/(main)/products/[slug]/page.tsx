@@ -7,14 +7,12 @@ import { toast } from "sonner";
 import {
   Star,
   Heart,
-  ShoppingCart,
   Minus,
   Plus,
   ShieldCheck,
   Truck,
   ChevronRight,
   Share2,
-  Home,
   User,
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
@@ -24,7 +22,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { addToCart } from "@/features/cart/cartAction";
 import { cn } from "@/lib/utils";
-import { Product, ProductModel, findModelByTierIndex, getVariationDisplay } from "@/types/product";
+import { Product, findModelByTierIndex, getVariationDisplay } from "@/types/product";
 
 export default function ProductDetailPage() {
   const dispatch = useAppDispatch();
@@ -87,8 +85,21 @@ export default function ProductDetailPage() {
     // Try tier variation images first
     if (usesTierVariations && currentProduct.tierVariations?.[0]?.images?.length) {
       const tierImages = currentProduct.tierVariations[0].images;
-      if (tierImages[selectedTierIndexes[0]]) {
-        return [tierImages[selectedTierIndexes[0]], ...currentProduct.images.filter(img => img !== tierImages[selectedTierIndexes[0]])];
+      const selectedOptionIdx = selectedTierIndexes[0] || 0;
+      
+      // Check if images is 2D array (new structure) or flat array (old structure)
+      if (Array.isArray(tierImages[selectedOptionIdx])) {
+        // 2D array: tierImages[optionIndex] = [url1, url2, ...]
+        const optionImages = tierImages[selectedOptionIdx] as string[];
+        if (optionImages.length > 0) {
+          // Only show images for the selected option - don't mix with other options
+          return optionImages;
+        }
+      } else if (typeof tierImages[selectedOptionIdx] === 'string') {
+        // Flat array (old structure): tierImages = [url1, url2, ...]
+        // Just use the single image at that index
+        const selectedImage = tierImages[selectedOptionIdx] as string;
+        return [selectedImage];
       }
     }
     // Try variant images (old structure)
@@ -216,7 +227,7 @@ export default function ProductDetailPage() {
   ];
 
   return (
-    <div className="bg-white min-h-screen pb-24 text-[#333] font-sans">
+    <div className="bg-white min-h-screen text-[#333] font-sans">
       {/* 1. Shop Header Bar (Tmall Style) */}
       <div className="border-b border-gray-100 hidden lg:block bg-white sticky top-0 z-40">
         <div className="max-w-[1240px] mx-auto px-4 h-14 flex items-center justify-between">
@@ -367,39 +378,54 @@ export default function ProductDetailPage() {
             {/* Selection Grid */}
             <div className="space-y-6">
               {/* NEW: Tier Variations (Taobao-style) */}
-              {usesTierVariations && product.tierVariations?.map((tier, tierIdx) => (
-                <div key={tierIdx} className="flex items-start gap-4">
-                  <span className="text-sm text-gray-400 w-12 pt-2">{tier.name}</span>
-                  <div className="flex-1 grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {tier.options.map((option, optIdx) => (
-                      <button
-                        key={optIdx}
-                        onClick={() => handleTierOptionSelect(tierIdx, optIdx)}
-                        className={cn(
-                          "flex items-center gap-2 p-1 border rounded-sm transition-all overflow-hidden bg-white",
-                          selectedTierIndexes[tierIdx] === optIdx
-                            ? "border-[#E53935] ring-1 ring-[#E53935]"
-                            : "border-gray-200 hover:border-gray-300"
-                        )}
-                      >
-                        {tier.images?.[optIdx] && (
-                          <div className="w-10 h-10 relative bg-gray-50 shrink-0">
-                            <Image
-                              src={tier.images[optIdx]}
-                              alt={option}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                        )}
-                        <span className="text-[11px] truncate pr-2 text-gray-700">
-                          {option}
-                        </span>
-                      </button>
-                    ))}
+              {usesTierVariations && product.tierVariations?.map((tier, tierIdx) => {
+                // Helper to get first image for an option (handles both flat and 2D array)
+                const getOptionImage = (optIdx: number): string | null => {
+                  if (!tier.images?.[optIdx]) return null;
+                  const img = tier.images[optIdx];
+                  if (Array.isArray(img)) {
+                    return img[0] || null; // 2D array: get first image
+                  }
+                  return typeof img === 'string' ? img : null; // Flat array
+                };
+
+                return (
+                  <div key={tierIdx} className="flex items-start gap-4">
+                    <span className="text-sm text-gray-400 w-12 pt-2">{tier.name}</span>
+                    <div className="flex-1 grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {tier.options.map((option, optIdx) => {
+                        const optionImage = getOptionImage(optIdx);
+                        return (
+                          <button
+                            key={optIdx}
+                            onClick={() => handleTierOptionSelect(tierIdx, optIdx)}
+                            className={cn(
+                              "flex items-center gap-2 p-1 border rounded-sm transition-all overflow-hidden bg-white",
+                              selectedTierIndexes[tierIdx] === optIdx
+                                ? "border-[#E53935] ring-1 ring-[#E53935]"
+                                : "border-gray-200 hover:border-gray-300"
+                            )}
+                          >
+                            {optionImage && (
+                              <div className="w-10 h-10 relative bg-gray-50 shrink-0">
+                                <Image
+                                  src={optionImage}
+                                  alt={option}
+                                  fill
+                                  className="object-cover"
+                                />
+                              </div>
+                            )}
+                            <span className="text-[11px] truncate pr-2 text-gray-700">
+                              {option}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
 
               {/* OLD: Variants (backward compatibility) */}
               {!usesTierVariations && product.variants && product.variants.length > 0 && (
@@ -735,46 +761,6 @@ export default function ProductDetailPage() {
         </section>
       </div>
 
-      {/* 5. Sticky Bottom Action Bar (Universal) */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-4 py-2 flex items-center justify-between z-50 lg:px-20 h-16 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] backdrop-blur-md bg-white/95">
-        <div className="flex items-center gap-6 lg:gap-12">
-          <div
-            className="flex flex-col items-center cursor-pointer group"
-            onClick={() => router.push("/")}
-          >
-            <Home className="w-5 h-5 text-gray-600 group-hover:text-[#E53935] transition-colors" />
-            <span className="text-[10px] text-gray-400 group-hover:text-[#E53935] font-medium mt-1">
-              Shop
-            </span>
-          </div>
-          <div
-            className="flex flex-col items-center cursor-pointer group"
-            onClick={() => router.push("/cart")}
-          >
-            <ShoppingCart className="w-5 h-5 text-gray-600 group-hover:text-[#E53935] transition-colors" />
-            <span className="text-[10px] text-gray-400 group-hover:text-[#E53935] font-medium mt-1">
-              Cart
-            </span>
-          </div>
-          <div className="flex flex-col items-center cursor-pointer group">
-            <Star className="w-5 h-5 text-gray-600 group-hover:text-[#E53935] transition-colors" />
-            <span className="text-[10px] text-gray-400 group-hover:text-[#E53935] font-medium mt-1">
-              Collect
-            </span>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 lg:gap-4 flex-1 lg:flex-none justify-end pl-6">
-          <button
-            onClick={HandleAddToCart}
-            className="px-6 h-11 lg:h-12 rounded-full bg-[#FFEBEE] text-[#E53935] border border-[#E53935] text-[13px] font-bold hover:bg-[#FFCDD2] active:scale-95 transition-all lg:w-[160px]"
-          >
-            Add to Cart
-          </button>
-          <button className="px-8 h-11 lg:h-12 rounded-full bg-[#E53935] text-white text-[13px] font-bold hover:bg-[#D32F2F] active:scale-95 transition-all lg:w-[160px]">
-            Buy Now
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { toast } from "sonner";
 import { 
   Package, Plus, Search, Edit, Trash2, Eye, 
   Loader2, MoreHorizontal, Filter, Tag
@@ -15,8 +15,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAppSelector } from "@/hooks/hooks";
-import api from "@/api/api";
+import { useAppSelector, useAppDispatch } from "@/hooks/hooks";
+import { createProduct, updateProduct, deleteProduct, getProductsByShop } from "@/features/product/productAction";
+import { CreateModelProduct } from "@/components/product/forms/CreateModelProduct";
+import { UpdateModelProduct } from "@/components/product/forms/UpdateModelProduct";
+import { ViewModelProduct } from "@/components/product/forms/ViewModelProduct";
+import { Product } from "@/types/product";
 
 const formatPrice = (price: number): string => {
   return new Intl.NumberFormat("vi-VN", {
@@ -25,68 +29,146 @@ const formatPrice = (price: number): string => {
   }).format(price);
 };
 
-interface Product {
-  _id: string;
-  name: string;
-  slug: string;
-  images: string[];
-  price: {
-    originalPrice: number;
-    currentPrice: number;
-    discount?: number;
-  };
-  stock: number;
-  isActive: boolean;
-  category?: { name: string };
-  createdAt: string;
-}
-
 export default function SellerProductsPage() {
-  const router = useRouter();
+  const dispatch = useAppDispatch();
   const { myShop } = useAppSelector((state) => state.shop);
+  const { all: products, pagination: productPagination, isLoading } = useAppSelector((state) => state.product);
 
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 10,
-    total: 0,
-    totalPages: 0,
-  });
+  const [page, setPage] = useState(1);
+  const limit = 10;
+
+  // Modal states
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (myShop?._id) {
-      fetchProducts();
+      dispatch(getProductsByShop({ shopId: myShop._id, page, limit }));
     }
-  }, [myShop, pagination.page, searchTerm]);
+  }, [myShop, page, dispatch]);
 
-  const fetchProducts = async () => {
-    if (!myShop?._id) return;
-    
-    setIsLoading(true);
+  // Handle search with debounce effect
+  useEffect(() => {
+    if (myShop?._id && searchTerm) {
+      const timer = setTimeout(() => {
+        dispatch(getProductsByShop({ shopId: myShop._id, page: 1, limit }));
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [searchTerm, myShop, dispatch]);
+
+  const fetchProducts = () => {
+    if (myShop?._id) {
+      dispatch(getProductsByShop({ shopId: myShop._id, page, limit }));
+    }
+  };
+
+  // Create product handler
+  const handleCreateProduct = async (formData: FormData) => {
+    setIsSubmitting(true);
     try {
-      const params = new URLSearchParams({
-        shop: myShop._id,
-        page: pagination.page.toString(),
-        limit: pagination.limit.toString(),
-      });
-      if (searchTerm) params.append("search", searchTerm);
-
-      const response = await api.get(`/products?${params}`);
-      if (response.data?.data) {
-        setProducts(response.data.data.products || []);
-        setPagination(prev => ({
-          ...prev,
-          total: response.data.data.pagination?.total || 0,
-          totalPages: response.data.data.pagination?.totalPages || 0,
-        }));
-      }
-    } catch (error) {
-      console.error("Failed to fetch products:", error);
+      await dispatch(createProduct(formData)).unwrap();
+      toast.success("Tạo sản phẩm thành công!");
+      setCreateModalOpen(false);
+      fetchProducts();
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      toast.error(err.message || "Không thể tạo sản phẩm");
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
+  };
+
+  // Update product handler
+  const handleUpdateProduct = async (formData: FormData) => {
+    if (!selectedProduct) return;
+    setIsSubmitting(true);
+    try {
+      await dispatch(updateProduct({ productId: selectedProduct._id, updateData: formData })).unwrap();
+      toast.success("Cập nhật sản phẩm thành công!");
+      setUpdateModalOpen(false);
+      setSelectedProduct(null);
+      fetchProducts();
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      toast.error(err.message || "Không thể cập nhật sản phẩm");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Delete product handler
+  const handleDeleteProduct = async (product: Product) => {
+    if (!confirm("Bạn có chắc muốn xóa sản phẩm này?")) return;
+    try {
+      await dispatch(deleteProduct(product._id)).unwrap();
+      toast.success("Xóa sản phẩm thành công!");
+      fetchProducts();
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      toast.error(err.message || "Không thể xóa sản phẩm");
+    }
+  };
+
+  // Modal handlers
+  const handleOpenCreate = () => setCreateModalOpen(true);
+  
+  const handleOpenEdit = (product: Product) => {
+    setSelectedProduct(product);
+    setUpdateModalOpen(true);
+  };
+
+  const handleOpenView = (product: Product) => {
+    setSelectedProduct(product);
+    setViewModalOpen(true);
+  };
+
+  const handleEditFromView = (product: Product) => {
+    setViewModalOpen(false);
+    setSelectedProduct(product);
+    setUpdateModalOpen(true);
+  };
+
+  const handleCloseCreateModal = (open: boolean) => {
+    setCreateModalOpen(open);
+  };
+
+  const handleCloseUpdateModal = (open: boolean) => {
+    setUpdateModalOpen(open);
+    if (!open) setSelectedProduct(null);
+  };
+
+  const handleCloseViewModal = (open: boolean) => {
+    setViewModalOpen(open);
+    if (!open) setSelectedProduct(null);
+  };
+
+  // Get main image from product
+  const getMainImage = (product: Product): string | null => {
+    if (product.tierVariations?.[0]?.images?.[0]) {
+      const firstImage = product.tierVariations[0].images[0];
+      // Handle both 2D array (new) and flat array (old) structure
+      if (Array.isArray(firstImage)) {
+        return firstImage[0] || null;
+      }
+      return typeof firstImage === 'string' ? firstImage : null;
+    }
+    if (product.images?.[0]) {
+      return product.images[0];
+    }
+    return null;
+  };
+
+  // Get stock count
+  const getStockCount = (product: Product): number => {
+    if (product.models && product.models.length > 0) {
+      return product.models.reduce((total, model) => total + (model.stock || 0), 0);
+    }
+    return product.stock || 0;
   };
 
   if (!myShop) return null;
@@ -102,11 +184,14 @@ export default function SellerProductsPage() {
           <div>
             <h1 className="text-xl font-bold text-gray-800">Quản lý sản phẩm</h1>
             <p className="text-sm text-gray-500">
-              {pagination.total} sản phẩm trong shop của bạn
+              {productPagination?.totalItems || 0} sản phẩm trong shop của bạn
             </p>
           </div>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 rounded-xl h-11 px-5">
+        <Button 
+          onClick={handleOpenCreate}
+          className="bg-[#E53935] hover:bg-[#D32F2F] rounded-xl h-11 px-5"
+        >
           <Plus className="h-4 w-4 mr-2" />
           Thêm sản phẩm
         </Button>
@@ -135,7 +220,7 @@ export default function SellerProductsPage() {
       <div className="bg-[#f7f7f7] rounded-2xl overflow-hidden">
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <Loader2 className="h-8 w-8 animate-spin text-[#E53935]" />
           </div>
         ) : products.length === 0 ? (
           <div className="text-center py-20">
@@ -144,7 +229,10 @@ export default function SellerProductsPage() {
             </div>
             <h3 className="font-semibold text-gray-800 mb-2">Chưa có sản phẩm nào</h3>
             <p className="text-gray-500 text-sm mb-6">Bắt đầu thêm sản phẩm để bán hàng</p>
-            <Button className="bg-primary hover:bg-primary/90 rounded-xl">
+            <Button 
+              onClick={handleOpenCreate}
+              className="bg-[#E53935] hover:bg-[#D32F2F] rounded-xl"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Thêm sản phẩm đầu tiên
             </Button>
@@ -177,9 +265,9 @@ export default function SellerProductsPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
                         <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-[#f7f7f7] shrink-0">
-                          {product.images?.[0] ? (
+                          {getMainImage(product) ? (
                             <Image
-                              src={product.images[0]}
+                              src={getMainImage(product)!}
                               alt={product.name}
                               fill
                               className="object-cover"
@@ -197,31 +285,31 @@ export default function SellerProductsPage() {
                           <div className="flex items-center gap-1.5 mt-1">
                             <Tag className="h-3 w-3 text-gray-400" />
                             <span className="text-xs text-gray-500">
-                              {product.category?.name || "Chưa phân loại"}
+                              {typeof product.category === 'object' ? product.category?.name : "Chưa phân loại"}
                             </span>
                           </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="font-semibold text-primary">
-                        {formatPrice(product.price.currentPrice)}
+                      <p className="font-semibold text-[#E53935]">
+                        {formatPrice(product.price?.currentPrice || 0)}
                       </p>
-                      {product.price.discount && product.price.discount > 0 && (
+                      {product.price?.discountPrice && product.price.discountPrice > 0 && (
                         <p className="text-xs text-gray-400 line-through">
-                          {formatPrice(product.price.originalPrice)}
+                          {formatPrice(product.price.discountPrice)}
                         </p>
                       )}
                     </td>
                     <td className="px-6 py-4">
                       <span className={`font-medium ${
-                        product.stock > 10 
+                        getStockCount(product) > 10 
                           ? "text-green-600" 
-                          : product.stock > 0 
+                          : getStockCount(product) > 0 
                             ? "text-yellow-600" 
                             : "text-red-500"
                       }`}>
-                        {product.stock}
+                        {getStockCount(product)}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -243,19 +331,25 @@ export default function SellerProductsPage() {
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-40">
+                        <DropdownMenuContent align="end" className="w-40 rounded-xl">
                           <DropdownMenuItem 
-                            onClick={() => router.push(`/product/${product.slug}`)}
+                            onClick={() => handleOpenView(product)}
                             className="cursor-pointer"
                           >
                             <Eye className="h-4 w-4 mr-2" />
-                            Xem
+                            Xem chi tiết
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer">
+                          <DropdownMenuItem 
+                            onClick={() => handleOpenEdit(product)}
+                            className="cursor-pointer"
+                          >
                             <Edit className="h-4 w-4 mr-2" />
                             Chỉnh sửa
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-600">
+                          <DropdownMenuItem 
+                            onClick={() => handleDeleteProduct(product)}
+                            className="cursor-pointer text-red-600 focus:text-red-600"
+                          >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Xóa
                           </DropdownMenuItem>
@@ -268,17 +362,17 @@ export default function SellerProductsPage() {
             </table>
 
             {/* Pagination */}
-            {pagination.totalPages > 1 && (
+            {(productPagination?.totalPages || 0) > 1 && (
               <div className="flex items-center justify-between px-6 py-4 bg-white/50">
                 <p className="text-sm text-gray-500">
-                  Hiển thị {products.length} / {pagination.total} sản phẩm
+                  Hiển thị {products.length} / {productPagination?.totalItems || 0} sản phẩm
                 </p>
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    disabled={pagination.page <= 1}
-                    onClick={() => setPagination(p => ({ ...p, page: p.page - 1 }))}
+                    disabled={page <= 1}
+                    onClick={() => setPage(p => p - 1)}
                     className="rounded-lg border-0 bg-white"
                   >
                     Trước
@@ -286,8 +380,8 @@ export default function SellerProductsPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    disabled={pagination.page >= pagination.totalPages}
-                    onClick={() => setPagination(p => ({ ...p, page: p.page + 1 }))}
+                    disabled={page >= (productPagination?.totalPages || 0)}
+                    onClick={() => setPage(p => p + 1)}
                     className="rounded-lg border-0 bg-white"
                   >
                     Sau
@@ -298,6 +392,29 @@ export default function SellerProductsPage() {
           </>
         )}
       </div>
+
+      {/* Modals */}
+      <CreateModelProduct
+        open={createModalOpen}
+        onOpenChange={handleCloseCreateModal}
+        onCreate={handleCreateProduct}
+        isLoading={isSubmitting}
+      />
+
+      <UpdateModelProduct
+        open={updateModalOpen}
+        onOpenChange={handleCloseUpdateModal}
+        product={selectedProduct}
+        onUpdate={handleUpdateProduct}
+        isLoading={isSubmitting}
+      />
+
+      <ViewModelProduct
+        open={viewModalOpen}
+        onOpenChange={handleCloseViewModal}
+        product={selectedProduct}
+        onEdit={handleEditFromView}
+      />
     </div>
   );
 }

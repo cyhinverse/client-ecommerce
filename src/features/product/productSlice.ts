@@ -277,7 +277,9 @@ export const productSlice = createSlice({
     });
     builder.addCase(getProductsByShop.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.all = action.payload || [];
+      // Response structure: { data: [...], pagination: {...} }
+      state.all = action.payload?.data || action.payload || [];
+      state.pagination = action.payload?.pagination || null;
     });
     builder.addCase(getProductsByShop.rejected, (state, action) => {
       state.isLoading = false;

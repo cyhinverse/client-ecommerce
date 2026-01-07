@@ -8,13 +8,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { updateShop } from "@/features/shop/shopAction";
+import { updateShop, uploadShopImage } from "@/features/shop/shopAction";
 import { UpdateShopPayload } from "@/types/shop";
-import api from "@/api/api";
 
 export default function SellerSettingsPage() {
   const dispatch = useAppDispatch();
-  const { myShop, isUpdating, error } = useAppSelector((state) => state.shop);
+  const { myShop, isUpdating, error, isUploadingLogo, isUploadingBanner } = useAppSelector((state) => state.shop);
 
   const [formData, setFormData] = useState<UpdateShopPayload>({
     name: "",
@@ -31,8 +30,6 @@ export default function SellerSettingsPage() {
     },
   });
 
-  const [uploadingLogo, setUploadingLogo] = useState(false);
-  const [uploadingBanner, setUploadingBanner] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
@@ -65,31 +62,7 @@ export default function SellerSettingsPage() {
     }));
   };
 
-  const handleImageUpload = async (file: File, type: "logo" | "banner") => {
-    const setUploading = type === "logo" ? setUploadingLogo : setUploadingBanner;
-    setUploading(true);
-
-    try {
-      const formDataUpload = new FormData();
-      formDataUpload.append("image", file);
-      formDataUpload.append("type", type);
-
-      const response = await api.post("/shops/upload-image", formDataUpload, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      if (response.data?.data?.url) {
-        setFormData((prev) => ({ ...prev, [type]: response.data.data.url }));
-        toast.success(`Upload ${type === "logo" ? "logo" : "banner"} thành công!`);
-      }
-    } catch {
-      toast.error(`Upload ${type === "logo" ? "logo" : "banner"} thất bại`);
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: "logo" | "banner") => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, type: "logo" | "banner") => {
     const file = e.target.files?.[0];
     if (file) {
       if (!file.type.startsWith("image/")) {
@@ -100,7 +73,14 @@ export default function SellerSettingsPage() {
         toast.error("File ảnh không được vượt quá 5MB");
         return;
       }
-      handleImageUpload(file, type);
+      
+      try {
+        const result = await dispatch(uploadShopImage({ file, type })).unwrap();
+        setFormData((prev) => ({ ...prev, [type]: result.url }));
+        toast.success(`Upload ${type === "logo" ? "logo" : "banner"} thành công!`);
+      } catch {
+        toast.error(`Upload ${type === "logo" ? "logo" : "banner"} thất bại`);
+      }
     }
   };
 
@@ -139,7 +119,7 @@ export default function SellerSettingsPage() {
               onClick={() => bannerInputRef.current?.click()}
               className="absolute bottom-4 right-4 bg-black/50 hover:bg-black/70 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors"
             >
-              {uploadingBanner ? (
+              {isUploadingBanner ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <Camera className="h-4 w-4" />
@@ -160,7 +140,7 @@ export default function SellerSettingsPage() {
                   onChange={(e) => handleFileChange(e, "logo")}
                 />
                 <div className="w-24 h-24 rounded-2xl overflow-hidden bg-white">
-                  {uploadingLogo ? (
+                  {isUploadingLogo ? (
                     <div className="w-full h-full flex items-center justify-center bg-gray-100">
                       <Loader2 className="h-6 w-6 animate-spin text-primary" />
                     </div>
@@ -187,6 +167,7 @@ export default function SellerSettingsPage() {
             </div>
           </div>
         </div>
+
 
         {/* Basic Info */}
         <div className="bg-[#f7f7f7] rounded-2xl p-6">

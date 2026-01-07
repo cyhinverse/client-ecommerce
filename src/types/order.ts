@@ -120,6 +120,11 @@ export interface OrderState {
   isUpdating: boolean;
   isCancelling: boolean;
   error: string | null;
+  // Seller shop orders
+  shopOrders: Order[];
+  shopOrdersPagination: PaginationData | null;
+  isLoadingShopOrders: boolean;
+  shopOrdersError: string | null;
 }
 
 // Order status count for stats

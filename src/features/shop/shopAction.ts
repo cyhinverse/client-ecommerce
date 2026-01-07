@@ -52,17 +52,70 @@ export const updateShop = createAsyncThunk(
   }
 );
 
-// Get shop information by ID (public)
+// Get shop information by ID or slug (public)
 export const getShopById = createAsyncThunk(
   "shop/getById",
-  async (shopId: string, { rejectWithValue }) => {
+  async (shopIdOrSlug: string, { rejectWithValue }) => {
     try {
-      const response = await instance.get(`/shops/${shopId}`);
+      // Check if it's a MongoDB ObjectId (24 hex characters)
+      const isObjectId = /^[0-9a-fA-F]{24}$/.test(shopIdOrSlug);
+      const url = isObjectId ? `/shops/${shopIdOrSlug}` : `/shops/slug/${shopIdOrSlug}`;
+      const response = await instance.get(url);
       return response.data.data || response.data;
     } catch (error) {
       const axiosError = error as AxiosError<ApiErrorResponse>;
       const message = axiosError.response?.data?.message || "Không tìm thấy shop";
       return rejectWithValue({ message });
+    }
+  }
+);
+
+// Upload shop image (logo or banner) - for existing shops
+export const uploadShopImage = createAsyncThunk(
+  "shop/uploadImage",
+  async (params: { file: File; type: "logo" | "banner" }, { rejectWithValue }) => {
+    try {
+      const formData = new FormData();
+      formData.append("image", params.file);
+      formData.append("type", params.type);
+
+      const response = await instance.post("/shops/upload-image", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      if (response.data?.data?.url) {
+        return { type: params.type, url: response.data.data.url };
+      }
+      throw new Error("Upload failed - no URL returned");
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiErrorResponse>;
+      const message = axiosError.response?.data?.message || `Upload ${params.type} thất bại`;
+      return rejectWithValue({ message, type: params.type });
+    }
+  }
+);
+
+// Upload image during shop registration (doesn't require seller role)
+export const uploadRegisterImage = createAsyncThunk(
+  "shop/uploadRegisterImage",
+  async (params: { file: File; type: "logo" | "banner" }, { rejectWithValue }) => {
+    try {
+      const formData = new FormData();
+      formData.append("image", params.file);
+      formData.append("type", params.type);
+
+      const response = await instance.post("/shops/upload-register-image", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      if (response.data?.data?.url) {
+        return { type: params.type, url: response.data.data.url };
+      }
+      throw new Error("Upload failed - no URL returned");
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiErrorResponse>;
+      const message = axiosError.response?.data?.message || `Upload ${params.type} thất bại`;
+      return rejectWithValue({ message, type: params.type });
     }
   }
 );

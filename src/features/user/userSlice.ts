@@ -10,10 +10,6 @@ import {
   deleteAddress,
   setDefaultAddress,
   changePassword,
-  // verifyEmail,
-  // enableTwoFactor,
-  // verifyTwoFactor,
-  // disableTwoFactor,
 } from "./userAction";
 import { User, UserState } from "@/types/user";
 
@@ -153,33 +149,6 @@ export const userSlice = createSlice({
         state.isChangingPassword = false;
         state.error = action.error.message || "Failed to change password";
       });
-
-    // // Verify Email
-    // builder
-    //   .addCase(verifyEmail.fulfilled, () => {
-    //     // Có thể cập nhật state nếu cần
-    //   })
-    //   .addCase(verifyEmail.rejected, (state, action) => {
-    //     state.error = action.error.message || "Failed to verify email";
-    //   });
-
-    // // Two-Factor Authentication
-    // builder
-    //   .addCase(enableTwoFactor.fulfilled, (state) => {
-    //     if (state.user.length > 0) {
-    //       state.user[0].isTwoFactorEnabled = true;
-    //     }
-    //   })
-    //   .addCase(verifyTwoFactor.fulfilled, (state) => {
-    //     if (state.user.length > 0) {
-    //       state.user[0].isTwoFactorEnabled = true;
-    //     }
-    //   })
-    //   .addCase(disableTwoFactor.fulfilled, (state) => {
-    //     if (state.user.length > 0) {
-    //       state.user[0].isTwoFactorEnabled = false;
-    //     }
-    //   });
 
     // Address Management
     builder

@@ -65,6 +65,10 @@ export interface ShopState {
   isRegistering: boolean;
   isUpdating: boolean;
   error: string | null;
+  // Image upload states
+  isUploadingLogo: boolean;
+  isUploadingBanner: boolean;
+  uploadError: string | null;
 }
 
 // Shop filters for listing

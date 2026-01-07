@@ -252,3 +252,49 @@ export const getOrderByIdAdmin = createAsyncThunk(
     return response.data.data || response.data;
   }
 );
+
+// Seller: Get orders for shop
+export const getOrdersByShop = createAsyncThunk(
+  "order/shop/list",
+  async (params: {
+    shopId: string;
+    page?: number;
+    limit?: number;
+    status?: string;
+    search?: string;
+  }, { rejectWithValue }) => {
+    try {
+      const { shopId, page = 1, limit = 10, status, search } = params;
+      
+      const queryParams: Record<string, string | number> = {
+        shop: shopId,
+        page,
+        limit,
+      };
+      
+      if (status && status !== "all") {
+        queryParams.status = status;
+      }
+      if (search) {
+        queryParams.search = search;
+      }
+
+      const response = await instance.get("/orders/shop", { params: queryParams });
+      
+      if (!response.data) {
+        throw new Error("Failed to fetch shop orders");
+      }
+      
+      const responseData = response.data.data || response.data;
+      return {
+        orders: responseData.orders || [],
+        pagination: responseData.pagination || null,
+      };
+    } catch (error) {
+      const axiosError = error as { response?: { data?: { message?: string } }; message?: string };
+      return rejectWithValue(
+        axiosError.response?.data?.message || axiosError.message || "Failed to fetch shop orders"
+      );
+    }
+  }
+);

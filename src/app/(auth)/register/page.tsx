@@ -10,21 +10,20 @@ import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { register } from "@/features/auth/authAction";
 import { toast } from "sonner";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Check } from "lucide-react";
 import Link from "next/link";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
+import { cn } from "@/lib/utils";
 
 const registerSchema = z
   .object({
-    username: z.string().min(3, "Username must be at least 3 characters"),
-    email: z.string().email("Invalid email"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
-    confirmPassword: z
-      .string()
-      .min(6, "Password confirmation must be at least 6 characters"),
+    username: z.string().min(3, "Tên người dùng phải có ít nhất 3 ký tự"),
+    email: z.string().email("Email không hợp lệ"),
+    password: z.string().min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
+    confirmPassword: z.string().min(6, "Xác nhận mật khẩu phải có ít nhất 6 ký tự"),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
+    message: "Mật khẩu không khớp",
     path: ["confirmPassword"],
   });
 
@@ -45,151 +44,196 @@ export default function RegisterPage() {
     },
   });
 
+  const password = form.watch("password");
+
   async function onSubmit(data: z.infer<typeof registerSchema>) {
     try {
       const result = await dispatch(register(data));
       if (register.fulfilled.match(result)) {
-        toast.success("Account created! Please verify your email.");
+        toast.success("Tạo tài khoản thành công! Vui lòng xác thực email.");
         router.push("/send-code");
       } else {
         const errorMessage =
-          (result.payload as { message: string })?.message ||
-          "Registration failed";
+          (result.payload as { message: string })?.message || "Đăng ký thất bại";
         toast.error(errorMessage);
       }
     } catch {
-      toast.error("Something went wrong");
+      toast.error("Đã có lỗi xảy ra");
     }
   }
 
+  const PasswordRequirement = ({ met, text }: { met: boolean; text: string }) => (
+    <div
+      className={cn(
+        "flex items-center gap-1.5 text-xs transition-colors",
+        met ? "text-green-600" : "text-gray-400"
+      )}
+    >
+      {met ? (
+        <Check className="h-3 w-3" />
+      ) : (
+        <div className="h-1.5 w-1.5 rounded-full bg-current" />
+      )}
+      <span>{text}</span>
+    </div>
+  );
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col space-y-2 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Create an account
+      {/* Header */}
+      <div className="text-center space-y-2">
+        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+          Tạo tài khoản
         </h1>
         <p className="text-sm text-muted-foreground">
-          Enter your email below to create your account
+          Nhập thông tin để tạo tài khoản mới
         </p>
       </div>
-      <div className="grid gap-6">
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <div className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                placeholder="username"
-                autoComplete="username"
-                autoCorrect="off"
-                disabled={loading}
-                {...form.register("username")}
-                className="h-10 rounded-md"
-              />
-              {form.formState.errors.username && (
-                <p className="text-sm text-red-500">
-                  {form.formState.errors.username.message}
-                </p>
+
+      {/* Form */}
+      <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+        {/* Username */}
+        <div className="grid gap-2">
+          <Label htmlFor="username" className="text-sm font-medium">
+            Tên người dùng
+          </Label>
+          <Input
+            id="username"
+            placeholder="username"
+            autoComplete="username"
+            autoCorrect="off"
+            disabled={loading}
+            {...form.register("username")}
+            className="h-11 rounded-xl border-gray-200 focus:border-[#E53935] focus:ring-[#E53935]/20"
+          />
+          {form.formState.errors.username && (
+            <p className="text-sm text-red-500">
+              {form.formState.errors.username.message}
+            </p>
+          )}
+        </div>
+
+        {/* Email */}
+        <div className="grid gap-2">
+          <Label htmlFor="email" className="text-sm font-medium">
+            Email
+          </Label>
+          <Input
+            id="email"
+            placeholder="name@example.com"
+            type="email"
+            autoCapitalize="none"
+            autoComplete="email"
+            autoCorrect="off"
+            disabled={loading}
+            {...form.register("email")}
+            className="h-11 rounded-xl border-gray-200 focus:border-[#E53935] focus:ring-[#E53935]/20"
+          />
+          {form.formState.errors.email && (
+            <p className="text-sm text-red-500">
+              {form.formState.errors.email.message}
+            </p>
+          )}
+        </div>
+
+        {/* Password */}
+        <div className="grid gap-2">
+          <Label htmlFor="password" className="text-sm font-medium">
+            Mật khẩu
+          </Label>
+          <div className="relative">
+            <Input
+              id="password"
+              placeholder="••••••••"
+              type={showPassword ? "text" : "password"}
+              autoComplete="new-password"
+              disabled={loading}
+              {...form.register("password")}
+              className="h-11 rounded-xl border-gray-200 focus:border-[#E53935] focus:ring-[#E53935]/20 pr-11"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              {showPassword ? (
+                <EyeOff className="h-5 w-5" />
+              ) : (
+                <Eye className="h-5 w-5" />
               )}
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                placeholder="name@example.com"
-                type="email"
-                autoCapitalize="none"
-                autoComplete="email"
-                autoCorrect="off"
-                disabled={loading}
-                {...form.register("email")}
-                className="h-10 rounded-md"
-              />
-              {form.formState.errors.email && (
-                <p className="text-sm text-red-500">
-                  {form.formState.errors.email.message}
-                </p>
-              )}
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  placeholder="••••••••"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="new-password"
-                  disabled={loading}
-                  {...form.register("password")}
-                  className="h-10 rounded-md pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </button>
-              </div>
-              {form.formState.errors.password && (
-                <p className="text-sm text-red-500">
-                  {form.formState.errors.password.message}
-                </p>
-              )}
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <div className="relative">
-                <Input
-                  id="confirmPassword"
-                  placeholder="••••••••"
-                  type={showConfirmPassword ? "text" : "password"}
-                  autoComplete="new-password"
-                  disabled={loading}
-                  {...form.register("confirmPassword")}
-                  className="h-10 rounded-md pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </button>
-              </div>
-              {form.formState.errors.confirmPassword && (
-                <p className="text-sm text-red-500">
-                  {form.formState.errors.confirmPassword.message}
-                </p>
-              )}
-            </div>
-            <Button disabled={loading} className="rounded-md h-10 mt-2">
-              {loading && (
-                <SpinnerLoading
-                  noWrapper
-                  size={16}
-                  className="mr-2 text-white"
-                />
-              )}
-              Create Account
-            </Button>
+            </button>
           </div>
-        </form>
-      </div>
-      <p className="px-8 text-center text-sm text-muted-foreground">
+          {/* Password Strength Indicators */}
+          {password && (
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1 pt-1">
+              <PasswordRequirement met={password.length >= 6} text="6+ ký tự" />
+              <PasswordRequirement met={/[A-Z]/.test(password)} text="Chữ hoa" />
+              <PasswordRequirement met={/[a-z]/.test(password)} text="Chữ thường" />
+              <PasswordRequirement met={/\d/.test(password)} text="Số" />
+            </div>
+          )}
+          {form.formState.errors.password && (
+            <p className="text-sm text-red-500">
+              {form.formState.errors.password.message}
+            </p>
+          )}
+        </div>
+
+        {/* Confirm Password */}
+        <div className="grid gap-2">
+          <Label htmlFor="confirmPassword" className="text-sm font-medium">
+            Xác nhận mật khẩu
+          </Label>
+          <div className="relative">
+            <Input
+              id="confirmPassword"
+              placeholder="••••••••"
+              type={showConfirmPassword ? "text" : "password"}
+              autoComplete="new-password"
+              disabled={loading}
+              {...form.register("confirmPassword")}
+              className="h-11 rounded-xl border-gray-200 focus:border-[#E53935] focus:ring-[#E53935]/20 pr-11"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              {showConfirmPassword ? (
+                <EyeOff className="h-5 w-5" />
+              ) : (
+                <Eye className="h-5 w-5" />
+              )}
+            </button>
+          </div>
+          {form.formState.errors.confirmPassword && (
+            <p className="text-sm text-red-500">
+              {form.formState.errors.confirmPassword.message}
+            </p>
+          )}
+        </div>
+
+        {/* Submit Button */}
+        <Button
+          type="submit"
+          disabled={loading}
+          className="w-full h-11 bg-[#E53935] hover:bg-[#D32F2F] rounded-full text-base font-medium mt-2"
+        >
+          {loading && (
+            <SpinnerLoading noWrapper size={18} className="mr-2 text-white" />
+          )}
+          Tạo tài khoản
+        </Button>
+      </form>
+
+      {/* Footer */}
+      <p className="text-center text-sm text-muted-foreground">
+        Đã có tài khoản?{" "}
         <Link
           href="/login"
-          className="hover:text-brand underline underline-offset-4"
+          className="text-[#E53935] hover:underline underline-offset-4 font-medium"
         >
-          Already have an account? Sign In
+          Đăng nhập
         </Link>
       </p>
     </div>

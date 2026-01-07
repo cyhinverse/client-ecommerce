@@ -9,14 +9,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { registerShop, getMyShop } from "@/features/shop/shopAction";
+import { registerShop, getMyShop, uploadRegisterImage } from "@/features/shop/shopAction";
 import { CreateShopPayload } from "@/types/shop";
-import api from "@/api/api";
 
 export default function SellerRegisterPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { isRegistering, error, myShop, isLoading } = useAppSelector((state) => state.shop);
+  const { isRegistering, error, myShop, isLoading, isUploadingLogo, isUploadingBanner } = useAppSelector((state) => state.shop);
   const { isAuthenticated, token, data } = useAppSelector((state) => state.auth);
 
   // Check if user has seller or admin role (can have a shop)
@@ -67,8 +66,6 @@ export default function SellerRegisterPage() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [uploadingLogo, setUploadingLogo] = useState(false);
-  const [uploadingBanner, setUploadingBanner] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
@@ -122,32 +119,7 @@ export default function SellerRegisterPage() {
     }));
   };
 
-  const handleImageUpload = async (file: File, type: "logo" | "banner") => {
-    const setUploading = type === "logo" ? setUploadingLogo : setUploadingBanner;
-    setUploading(true);
-
-    try {
-      const formDataUpload = new FormData();
-      formDataUpload.append("image", file);
-      formDataUpload.append("type", type);
-
-      // Use register-specific endpoint (doesn't require seller role)
-      const response = await api.post("/shops/upload-register-image", formDataUpload, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      if (response.data?.data?.url) {
-        setFormData((prev) => ({ ...prev, [type]: response.data.data.url }));
-        toast.success(`Upload ${type === "logo" ? "logo" : "banner"} thành công!`);
-      }
-    } catch {
-      toast.error(`Upload ${type === "logo" ? "logo" : "banner"} thất bại`);
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: "logo" | "banner") => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, type: "logo" | "banner") => {
     const file = e.target.files?.[0];
     if (file) {
       if (!file.type.startsWith("image/")) {
@@ -158,7 +130,14 @@ export default function SellerRegisterPage() {
         toast.error("File ảnh không được vượt quá 5MB");
         return;
       }
-      handleImageUpload(file, type);
+      
+      try {
+        const result = await dispatch(uploadRegisterImage({ file, type })).unwrap();
+        setFormData((prev) => ({ ...prev, [type]: result.url }));
+        toast.success(`Upload ${type === "logo" ? "logo" : "banner"} thành công!`);
+      } catch {
+        toast.error(`Upload ${type === "logo" ? "logo" : "banner"} thất bại`);
+      }
     }
   };
 
@@ -223,7 +202,7 @@ export default function SellerRegisterPage() {
                     className="mt-2 relative w-20 h-20 rounded-full overflow-hidden border-2 border-dashed border-gray-200 cursor-pointer hover:border-[#E53935] transition-colors"
                     onClick={() => logoInputRef.current?.click()}
                   >
-                    {uploadingLogo ? (
+                    {isUploadingLogo ? (
                       <div className="w-full h-full flex items-center justify-center bg-gray-50">
                         <Loader2 className="h-5 w-5 animate-spin text-[#E53935]" />
                       </div>
@@ -250,7 +229,7 @@ export default function SellerRegisterPage() {
                     className="mt-2 relative w-full h-20 rounded overflow-hidden border-2 border-dashed border-gray-200 cursor-pointer hover:border-[#E53935] transition-colors"
                     onClick={() => bannerInputRef.current?.click()}
                   >
-                    {uploadingBanner ? (
+                    {isUploadingBanner ? (
                       <div className="w-full h-full flex items-center justify-center bg-gray-50">
                         <Loader2 className="h-5 w-5 animate-spin text-[#E53935]" />
                       </div>

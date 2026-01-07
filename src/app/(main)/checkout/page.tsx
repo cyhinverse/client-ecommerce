@@ -18,8 +18,8 @@ import { createOrder } from "@/features/order/orderAction";
 import { clearCart } from "@/features/cart/cartAction";
 import { toast } from "sonner";
 import { createPaymentUrl } from "@/features/payment/paymentAction";
-import { applyDiscountCode, applyVoucherCode } from "@/features/discount/discountAction";
-import { clearAppliedDiscount, clearAppliedVouchers, setAppliedShopVoucher, setAppliedPlatformVoucher } from "@/features/discount/discountSlice";
+import { applyVoucherCode } from "@/features/voucher/voucherAction";
+import { clearAppliedVouchers, setAppliedShopVoucher, setAppliedPlatformVoucher } from "@/features/voucher/voucherSlice";
 import {
   Check,
   CreditCard,
@@ -56,8 +56,8 @@ export default function CheckoutPage() {
   const { data: cartData, checkoutTotal, selectedItems } = useAppSelector(
     (state) => state.cart
   );
-  const { appliedDiscount, appliedShopVoucher, appliedPlatformVoucher, loading: discountLoading } = useAppSelector(
-    (state) => state.discount
+  const { appliedShopVoucher, appliedPlatformVoucher, loading: voucherLoading } = useAppSelector(
+    (state) => state.voucher
   );
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -74,7 +74,7 @@ export default function CheckoutPage() {
   // Calculate discounts
   const shopDiscount = appliedShopVoucher?.discountAmount || 0;
   const platformDiscount = appliedPlatformVoucher?.discountAmount || 0;
-  const totalDiscount = shopDiscount + platformDiscount + (appliedDiscount?.discountAmount || 0);
+  const totalDiscount = shopDiscount + platformDiscount;
   
   const finalTotal = (checkoutTotal || 0) - totalDiscount;
   const cartItemIds = cartItems.map((item) => item._id);
@@ -129,7 +129,6 @@ export default function CheckoutPage() {
         paymentMethod,
         voucherShopCode: appliedShopVoucher?.code,
         voucherPlatformCode: appliedPlatformVoucher?.code,
-        discountCode: appliedDiscount?.code,
         note: formData.note,
       };
 
@@ -168,30 +167,27 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleApplyDiscount = async () => {
+  const handleApplyVoucher = async () => {
     if (!promoCode.trim()) {
       toast.error("Vui lòng nhập mã giảm giá");
       return;
     }
 
     const orderTotal = checkoutTotal || 0;
-    const productIds = cartItems.map((item) => 
-      typeof item.productId === 'object' ? item.productId._id : item.productId
-    );
 
     try {
       await dispatch(
-        applyDiscountCode({ code: promoCode, orderTotal, productIds })
+        applyVoucherCode({ code: promoCode, orderTotal })
       ).unwrap();
       toast.success("Áp dụng mã giảm giá thành công!");
     } catch (err) {
       const errorMessage = (err as Error).message || "Không thể áp dụng mã giảm giá";
       toast.error(errorMessage);
-      dispatch(clearAppliedDiscount());
+      dispatch(clearAppliedVouchers());
     }
   };
 
-  const handleRemoveDiscount = () => {
+  const handleRemoveVoucher = () => {
     dispatch(clearAppliedVouchers());
     setPromoCode("");
     setShopVoucherCode("");
@@ -433,15 +429,15 @@ export default function CheckoutPage() {
                       placeholder="Nhập mã voucher"
                       value={promoCode}
                       onChange={(e) => setPromoCode(e.target.value)}
-                      disabled={!!appliedDiscount}
+                      disabled={!!appliedPlatformVoucher}
                       className="h-9 w-40 text-sm rounded border-gray-200"
                     />
-                    {appliedDiscount ? (
+                    {appliedPlatformVoucher ? (
                       <Button
                         type="button"
                         size="sm"
                         variant="outline"
-                        onClick={handleRemoveDiscount}
+                        onClick={handleRemoveVoucher}
                         className="h-9 text-red-500 border-red-200 hover:bg-red-50"
                       >
                         Xóa
@@ -450,8 +446,8 @@ export default function CheckoutPage() {
                       <Button
                         type="button"
                         size="sm"
-                        onClick={handleApplyDiscount}
-                        disabled={discountLoading || !promoCode}
+                        onClick={handleApplyVoucher}
+                        disabled={voucherLoading || !promoCode}
                         className="h-9 bg-[#E53935] hover:bg-[#D32F2F]"
                       >
                         Áp dụng
@@ -459,10 +455,10 @@ export default function CheckoutPage() {
                     )}
                   </div>
                 </div>
-                {appliedDiscount && (
+                {appliedPlatformVoucher && (
                   <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
                     <Check className="h-3 w-3" />
-                    Đã áp dụng mã: {appliedDiscount.code} (-{formatPrice(appliedDiscount.discountAmount)})
+                    Đã áp dụng mã: {appliedPlatformVoucher.code} (-{formatPrice(appliedPlatformVoucher.discountAmount)})
                   </p>
                 )}
               </div>
@@ -580,13 +576,6 @@ export default function CheckoutPage() {
                     <div className="flex justify-between text-green-600">
                       <span>Voucher nền tảng</span>
                       <span>-{formatPrice(platformDiscount)}</span>
-                    </div>
-                  )}
-
-                  {appliedDiscount && !shopDiscount && !platformDiscount && (
-                    <div className="flex justify-between text-green-600">
-                      <span>Giảm giá</span>
-                      <span>-{formatPrice(appliedDiscount.discountAmount)}</span>
                     </div>
                   )}
 

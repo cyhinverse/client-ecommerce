@@ -26,7 +26,7 @@ export interface Review extends User {
 export interface TierVariation {
   name: string;           // e.g. "Color", "Size"
   options: string[];      // e.g. ["Red", "Blue", "Green"]
-  images?: string[];      // Optional images for each option
+  images?: (string | string[])[];  // Can be flat array or 2D array per option
 }
 
 // NEW: ProductModel interface (SKU with tierIndex mapping)

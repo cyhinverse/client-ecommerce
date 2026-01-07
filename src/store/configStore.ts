@@ -6,7 +6,7 @@ import { cartSlice } from "@/features/cart/cartSlice";
 import { categorySlice } from "@/features/category/categorySlice";
 import { productSlice } from "@/features/product/productSlice";
 import { userSlice } from "@/features/user/userSlice";
-import { discountSlice } from "@/features/discount/discountSlice";
+import { voucherSlice } from "@/features/voucher/voucherSlice";
 import { orderSlice } from "@/features/order/orderSlice";
 import { paymentSlice } from "@/features/payment/paymentSlice";
 import { notificationSlice } from "@/features/notification/notificationSlice";
@@ -49,7 +49,7 @@ export const rootReducer = combineReducers({
   cart: cartSlice.reducer,
   user: userSlice.reducer,
   product: productSlice.reducer,
-  discount: discountSlice.reducer,
+  voucher: voucherSlice.reducer,
   order: orderSlice.reducer,
   payment: paymentSlice.reducer,
   notification: notificationSlice.reducer,
@@ -93,6 +93,5 @@ injectStore(store);
 
 export const persistor = persistStore(store);
 
-// QUAN TRỌNG: Export types đúng cách
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

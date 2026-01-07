@@ -34,7 +34,12 @@ const getDisplayPrice = (product: Product): { current: number; discount?: number
 const getProductImage = (product: Product): string | null => {
   if (product.images?.[0]) return product.images[0];
   if (product.tierVariations?.[0]?.images?.[0]) {
-    return product.tierVariations[0].images[0];
+    const firstImage = product.tierVariations[0].images[0];
+    // Handle both 2D array (new) and flat array (old) structure
+    if (Array.isArray(firstImage)) {
+      return firstImage[0] || null;
+    }
+    return typeof firstImage === 'string' ? firstImage : null;
   }
   if (product.variants?.[0]?.images?.[0]) {
     return product.variants[0].images[0];

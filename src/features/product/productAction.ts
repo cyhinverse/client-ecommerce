@@ -328,9 +328,10 @@ export const getProductsByShop = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await instance.get(`/products/shop/${shopId}`, {
-        params: { page, limit },
+      const response = await instance.get(`/products`, {
+        params: { shop: shopId, page, limit },
       });
+      // Response structure: { data: { data: [...], pagination: {...} } }
       return response.data.data || response.data;
     } catch (error) {
       const axiosError = error as {

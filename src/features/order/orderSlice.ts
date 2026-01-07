@@ -7,6 +7,7 @@ import {
   getAllOrders,
   updateOrderStatus,
   getOrderStatistics,
+  getOrdersByShop,
 } from "./orderAction";
 import type { OrderState } from "@/types/order";
 
@@ -22,6 +23,11 @@ const initialState: OrderState = {
   isUpdating: false,
   isCancelling: false,
   error: null,
+  // Seller shop orders
+  shopOrders: [],
+  shopOrdersPagination: null,
+  isLoadingShopOrders: false,
+  shopOrdersError: null,
 };
 
 export const orderSlice = createSlice({
@@ -195,6 +201,22 @@ export const orderSlice = createSlice({
       .addCase(getOrderStatistics.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message || "Failed to fetch statistics";
+      });
+
+    // Seller: Get Orders By Shop
+    builder
+      .addCase(getOrdersByShop.pending, (state) => {
+        state.isLoadingShopOrders = true;
+        state.shopOrdersError = null;
+      })
+      .addCase(getOrdersByShop.fulfilled, (state, action) => {
+        state.isLoadingShopOrders = false;
+        state.shopOrders = action.payload.orders || [];
+        state.shopOrdersPagination = action.payload.pagination;
+      })
+      .addCase(getOrdersByShop.rejected, (state, action) => {
+        state.isLoadingShopOrders = false;
+        state.shopOrdersError = action.payload as string || "Failed to fetch shop orders";
       });
   },
 });

@@ -14,8 +14,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAppSelector } from "@/hooks/hooks";
-import api from "@/api/api";
+import { useAppSelector, useAppDispatch } from "@/hooks/hooks";
+import { getOrdersByShop } from "@/features/order/orderAction";
 
 interface OrderItem {
   product: {
@@ -65,50 +65,37 @@ const formatDate = (date: string): string => {
 };
 
 export default function SellerOrdersPage() {
+  const dispatch = useAppDispatch();
   const { myShop } = useAppSelector((state) => state.shop);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { shopOrders, shopOrdersPagination, isLoadingShopOrders } = useAppSelector((state) => state.order);
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 10,
-    total: 0,
-    totalPages: 0,
-  });
+  const [page, setPage] = useState(1);
+  const limit = 10;
 
   useEffect(() => {
     if (myShop?._id) {
-      fetchOrders();
+      dispatch(getOrdersByShop({
+        shopId: myShop._id,
+        page,
+        limit,
+        status: statusFilter,
+        search: searchTerm,
+      }));
     }
-  }, [myShop, pagination.page, statusFilter]);
+  }, [dispatch, myShop, page, statusFilter]);
 
-  const fetchOrders = async () => {
-    if (!myShop?._id) return;
-    setIsLoading(true);
-    try {
-      const params = new URLSearchParams({
-        shop: myShop._id,
-        page: pagination.page.toString(),
-        limit: pagination.limit.toString(),
-      });
-      if (statusFilter !== "all") params.append("status", statusFilter);
-      if (searchTerm) params.append("search", searchTerm);
-
-      const response = await api.get(`/orders/shop?${params}`);
-      if (response.data?.data) {
-        setOrders(response.data.data.orders || []);
-        setPagination(prev => ({
-          ...prev,
-          total: response.data.data.pagination?.total || 0,
-          totalPages: response.data.data.pagination?.totalPages || 0,
-        }));
-      }
-    } catch (error) {
-      console.error("Failed to fetch orders:", error);
-      setOrders([]);
-    } finally {
-      setIsLoading(false);
+  const handleSearch = () => {
+    if (myShop?._id) {
+      setPage(1);
+      dispatch(getOrdersByShop({
+        shopId: myShop._id,
+        page: 1,
+        limit,
+        status: statusFilter,
+        search: searchTerm,
+      }));
     }
   };
 
@@ -121,6 +108,11 @@ export default function SellerOrdersPage() {
     { key: "cancelled", label: "Đã hủy" },
   ];
 
+  // Cast shopOrders to local Order type for rendering
+  const orders = shopOrders as unknown as Order[];
+  const total = shopOrdersPagination?.totalItems || 0;
+  const totalPages = shopOrdersPagination?.totalPages || 0;
+
   if (!myShop) return null;
 
   return (
@@ -132,7 +124,7 @@ export default function SellerOrdersPage() {
         </div>
         <div>
           <h1 className="text-xl font-bold text-gray-800">Quản lý đơn hàng</h1>
-          <p className="text-sm text-gray-500">{pagination.total} đơn hàng</p>
+          <p className="text-sm text-gray-500">{total} đơn hàng</p>
         </div>
       </div>
 
@@ -144,7 +136,7 @@ export default function SellerOrdersPage() {
               key={tab.key}
               onClick={() => {
                 setStatusFilter(tab.key);
-                setPagination(p => ({ ...p, page: 1 }));
+                setPage(1);
               }}
               className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 statusFilter === tab.key
@@ -167,7 +159,7 @@ export default function SellerOrdersPage() {
               placeholder="Tìm theo mã đơn, tên khách hàng..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && fetchOrders()}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               className="pl-11 h-11 rounded-xl border-0 bg-white"
             />
           </div>
@@ -178,9 +170,10 @@ export default function SellerOrdersPage() {
         </div>
       </div>
 
+
       {/* Orders List */}
       <div className="bg-[#f7f7f7] rounded-2xl overflow-hidden">
-        {isLoading ? (
+        {isLoadingShopOrders ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
@@ -279,17 +272,17 @@ export default function SellerOrdersPage() {
             </div>
 
             {/* Pagination */}
-            {pagination.totalPages > 1 && (
+            {totalPages > 1 && (
               <div className="flex items-center justify-between px-6 py-4 bg-white/50">
                 <p className="text-sm text-gray-500">
-                  Hiển thị {orders.length} / {pagination.total} đơn hàng
+                  Hiển thị {orders.length} / {total} đơn hàng
                 </p>
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    disabled={pagination.page <= 1}
-                    onClick={() => setPagination(p => ({ ...p, page: p.page - 1 }))}
+                    disabled={page <= 1}
+                    onClick={() => setPage(p => p - 1)}
                     className="rounded-lg border-0 bg-white"
                   >
                     Trước
@@ -297,8 +290,8 @@ export default function SellerOrdersPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    disabled={pagination.page >= pagination.totalPages}
-                    onClick={() => setPagination(p => ({ ...p, page: p.page + 1 }))}
+                    disabled={page >= totalPages}
+                    onClick={() => setPage(p => p + 1)}
                     className="rounded-lg border-0 bg-white"
                   >
                     Sau

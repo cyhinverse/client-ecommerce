@@ -1,26 +1,42 @@
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Download, RefreshCw } from "lucide-react";
 
 interface ProductsHeaderProps {
-  onOpenCreate: () => void;
+  onRefresh?: () => void;
+  onExport?: () => void;
 }
 
-export function ProductsHeader({ onOpenCreate }: ProductsHeaderProps) {
+export function ProductsHeader({ onRefresh, onExport }: ProductsHeaderProps) {
   return (
     <div className="flex items-center justify-between pb-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground uppercase">Product Management</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground uppercase">Quản lý sản phẩm</h1>
         <p className="text-muted-foreground mt-1">
-          Manage all products in store
+          Xem và duyệt sản phẩm từ các shop trên sàn
         </p>
       </div>
-      <Button 
-        onClick={onOpenCreate} 
-        className="flex items-center gap-2 rounded-xl bg-[#E53935] hover:bg-[#D32F2F] text-white"
-      >
-        <Plus className="h-4 w-4" />
-        Add Product
-      </Button>
+      <div className="flex gap-2">
+        {onRefresh && (
+          <Button 
+            onClick={onRefresh} 
+            variant="outline"
+            className="flex items-center gap-2 rounded-xl border-gray-200"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Làm mới
+          </Button>
+        )}
+        {onExport && (
+          <Button 
+            onClick={onExport} 
+            variant="outline"
+            className="flex items-center gap-2 rounded-xl border-gray-200"
+          >
+            <Download className="h-4 w-4" />
+            Xuất Excel
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { ShopState } from "@/types/shop";
-import { registerShop, getMyShop, updateShop, getShopById } from "./shopAction";
+import { registerShop, getMyShop, updateShop, getShopById, uploadShopImage, uploadRegisterImage } from "./shopAction";
 
 const initialState: ShopState = {
   myShop: null,
@@ -9,6 +9,10 @@ const initialState: ShopState = {
   isRegistering: false,
   isUpdating: false,
   error: null,
+  // Image upload states
+  isUploadingLogo: false,
+  isUploadingBanner: false,
+  uploadError: null,
 };
 
 export const shopSlice = createSlice({
@@ -20,6 +24,9 @@ export const shopSlice = createSlice({
     },
     clearCurrentShop: (state) => {
       state.currentShop = null;
+    },
+    clearUploadError: (state) => {
+      state.uploadError = null;
     },
   },
   extraReducers: (builder) => {
@@ -86,8 +93,69 @@ export const shopSlice = createSlice({
         state.isLoading = false;
         state.error = (action.payload as { message: string })?.message || "Không tìm thấy shop";
       });
+
+    // Upload Shop Image (for existing shops)
+    builder
+      .addCase(uploadShopImage.pending, (state, action) => {
+        if (action.meta.arg.type === "logo") {
+          state.isUploadingLogo = true;
+        } else {
+          state.isUploadingBanner = true;
+        }
+        state.uploadError = null;
+      })
+      .addCase(uploadShopImage.fulfilled, (state, action) => {
+        if (action.payload.type === "logo") {
+          state.isUploadingLogo = false;
+          if (state.myShop) {
+            state.myShop.logo = action.payload.url;
+          }
+        } else {
+          state.isUploadingBanner = false;
+          if (state.myShop) {
+            state.myShop.banner = action.payload.url;
+          }
+        }
+      })
+      .addCase(uploadShopImage.rejected, (state, action) => {
+        const payload = action.payload as { message: string; type: string } | undefined;
+        if (payload?.type === "logo") {
+          state.isUploadingLogo = false;
+        } else {
+          state.isUploadingBanner = false;
+        }
+        state.uploadError = payload?.message || "Upload thất bại";
+      });
+
+    // Upload Register Image (for new shop registration)
+    builder
+      .addCase(uploadRegisterImage.pending, (state, action) => {
+        if (action.meta.arg.type === "logo") {
+          state.isUploadingLogo = true;
+        } else {
+          state.isUploadingBanner = true;
+        }
+        state.uploadError = null;
+      })
+      .addCase(uploadRegisterImage.fulfilled, (state, action) => {
+        if (action.payload.type === "logo") {
+          state.isUploadingLogo = false;
+        } else {
+          state.isUploadingBanner = false;
+        }
+        // Note: Don't update myShop here as shop doesn't exist yet
+      })
+      .addCase(uploadRegisterImage.rejected, (state, action) => {
+        const payload = action.payload as { message: string; type: string } | undefined;
+        if (payload?.type === "logo") {
+          state.isUploadingLogo = false;
+        } else {
+          state.isUploadingBanner = false;
+        }
+        state.uploadError = payload?.message || "Upload thất bại";
+      });
   },
 });
 
-export const { clearShopError, clearCurrentShop } = shopSlice.actions;
+export const { clearShopError, clearCurrentShop, clearUploadError } = shopSlice.actions;
 export default shopSlice.reducer;

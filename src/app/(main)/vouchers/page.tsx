@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { getAllVouchers, getAvailableVouchers } from "@/features/discount/discountAction";
+import { getAllVouchers, getAvailableVouchers } from "@/features/voucher/voucherAction";
 import { Voucher as VoucherType } from "@/types/voucher";
 import { Shop } from "@/types/product";
 
@@ -27,7 +27,7 @@ const getShopInfo = (shopId: Voucher['shopId']): { _id: string; name: string; lo
 
 export default function VouchersPage() {
   const dispatch = useAppDispatch();
-  const { vouchers: reduxVouchers, loading } = useAppSelector((state) => state.discount);
+  const { vouchers: reduxVouchers, loading } = useAppSelector((state) => state.voucher);
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   
   const [collectedIds, setCollectedIds] = useState<Set<string>>(new Set());

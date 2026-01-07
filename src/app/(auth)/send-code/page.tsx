@@ -7,11 +7,11 @@ import { Label } from "@/components/ui/label";
 import { sendCode } from "@/features/auth/authAction";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { Mail, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 
-export default function VerifyEmailPage() {
+export default function SendCodePage() {
   const dispatch = useAppDispatch();
   const [email, setEmail] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -23,13 +23,12 @@ export default function VerifyEmailPage() {
     try {
       const result = await dispatch(sendCode({ email })).unwrap();
       if (result) {
-        toast.success("Verification code sent to your email");
+        toast.success("Mã xác nhận đã được gửi đến email của bạn");
         router.push("/verify-code");
       }
     } catch (error) {
       toast.error(
-        (error as { message?: string })?.message ||
-          "Failed to send verification code"
+        (error as { message?: string })?.message || "Không thể gửi mã xác nhận"
       );
     } finally {
       setIsLoading(false);
@@ -38,53 +37,57 @@ export default function VerifyEmailPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col space-y-2 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">Verify Email</h1>
+      {/* Header */}
+      <div className="text-center space-y-2">
+        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+          Xác thực email
+        </h1>
         <p className="text-sm text-muted-foreground">
-          Enter your email to receive verification code
+          Nhập email để nhận mã xác thực
         </p>
       </div>
 
-      <div className="grid gap-6">
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="name@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="h-10 rounded-md"
-                disabled={isLoading}
-              />
-            </div>
-            <Button disabled={isLoading || !email} className="rounded-md h-10">
-              {isLoading && (
-                <SpinnerLoading
-                  noWrapper
-                  size={16}
-                  className="mr-2 text-white"
-                />
-              )}
-              Send Code
-            </Button>
-          </div>
-        </form>
-      </div>
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="grid gap-4">
+        {/* Email */}
+        <div className="grid gap-2">
+          <Label htmlFor="email" className="text-sm font-medium">
+            Email
+          </Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="name@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="h-11 rounded-xl border-gray-200 focus:border-[#E53935] focus:ring-[#E53935]/20"
+            disabled={isLoading}
+          />
+        </div>
 
-      <p className="px-8 text-center text-sm text-muted-foreground">
-        <Link
-          href="/login"
-          className="hover:text-brand underline underline-offset-4 flex items-center justify-center gap-2"
+        {/* Submit Button */}
+        <Button
+          type="submit"
+          disabled={isLoading || !email}
+          className="w-full h-11 bg-[#E53935] hover:bg-[#D32F2F] rounded-full text-base font-medium mt-2"
         >
-          <ArrowLeft className="h-4 w-4" />
-          Back to login
-        </Link>
-      </p>
+          {isLoading && (
+            <SpinnerLoading noWrapper size={18} className="mr-2 text-white" />
+          )}
+          Gửi mã xác nhận
+        </Button>
+      </form>
+
+      {/* Footer */}
+      <Link
+        href="/login"
+        className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-[#E53935] transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Quay lại đăng nhập
+      </Link>
     </div>
   );
 }

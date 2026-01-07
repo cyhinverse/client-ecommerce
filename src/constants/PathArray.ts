@@ -1,12 +1,14 @@
 export const pathArray = [
   "/admin",
+  "/admin/dashboard",
   "/admin/products",
   "/admin/orders",
   "/admin/users",
-  "/admin/notifications",
+  "/admin/shops",
   "/admin/categories",
-  "/admin/discounts",
-  "/admin/settings",
-  "/admin/dashboard",
+  "/admin/vouchers",
+  "/admin/flash-sale",
   "/admin/banners",
+  "/admin/notifications",
+  "/admin/settings",
 ];
