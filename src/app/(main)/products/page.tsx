@@ -3,6 +3,7 @@
 
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { useDebounce } from "@/hooks/useDebounce";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
 import { getAllProducts } from "@/features/product/productAction";
 import { getAllCategories } from "@/features/category/categoryAction";
@@ -79,28 +80,28 @@ export default function ProductsPage() {
     [urlFilters]
   );
 
-  // Debounce API calls
+  // Debounced filters using custom hook
+  const debouncedFilters = useDebounce(filters, 300);
+  const debouncedCategory = useDebounce(activeCategory, 300);
+
+  // API call with debounced values
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      const params: Params = {
-        page: 1,
-        limit: 50,
-      };
+    const params: Params = {
+      page: 1,
+      limit: 50,
+    };
 
-      if (filters.search) params.search = filters.search;
-      if (filters.minPrice > 0) params.minPrice = filters.minPrice;
-      if (filters.maxPrice < 10000000) params.maxPrice = filters.maxPrice;
-      if (filters.sortBy !== "newest") params.sortBy = filters.sortBy;
-      if (filters.rating.length > 0) params.rating = filters.rating.join(",");
-      if (filters.colors.length > 0) params.colors = filters.colors.join(",");
-      if (filters.sizes.length > 0) params.sizes = filters.sizes.join(",");
-      if (activeCategory) params.category = activeCategory;
+    if (debouncedFilters.search) params.search = debouncedFilters.search;
+    if (debouncedFilters.minPrice > 0) params.minPrice = debouncedFilters.minPrice;
+    if (debouncedFilters.maxPrice < 10000000) params.maxPrice = debouncedFilters.maxPrice;
+    if (debouncedFilters.sortBy !== "newest") params.sortBy = debouncedFilters.sortBy;
+    if (debouncedFilters.rating.length > 0) params.rating = debouncedFilters.rating.join(",");
+    if (debouncedFilters.colors.length > 0) params.colors = debouncedFilters.colors.join(",");
+    if (debouncedFilters.sizes.length > 0) params.sizes = debouncedFilters.sizes.join(",");
+    if (debouncedCategory) params.category = debouncedCategory;
 
-      dispatch(getAllProducts(params));
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
-  }, [dispatch, filters, activeCategory]);
+    dispatch(getAllProducts(params));
+  }, [dispatch, debouncedFilters, debouncedCategory]);
 
   const handleFilterChange = useCallback(
     (newFilters: Partial<ProductFilters>) => {

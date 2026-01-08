@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useAppSelector, useAppDispatch } from "@/hooks/hooks";
+import { useDebounce } from "@/hooks/useDebounce";
 import {
   ShoppingCart,
   Bell,
@@ -76,6 +77,9 @@ export default function HeaderLayout() {
 
   const path = usePathname();
 
+  // Debounced search query
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
   useEffect(() => {
     if (isAuthenticated && token) {
       dispatch(countUnreadNotification());
@@ -94,15 +98,12 @@ export default function HeaderLayout() {
     }
   }, []);
 
-  // Debounced search API call
+  // Debounced search API call using custom hook
   useEffect(() => {
-    if (searchQuery.trim().length >= 2) {
-      const timeoutId = setTimeout(() => {
-        dispatch(searchProducts({ keyword: searchQuery.trim(), limit: 8 }));
-      }, 300);
-      return () => clearTimeout(timeoutId);
+    if (debouncedSearchQuery.trim().length >= 2) {
+      dispatch(searchProducts({ keyword: debouncedSearchQuery.trim(), limit: 8 }));
     }
-  }, [searchQuery, dispatch]);
+  }, [debouncedSearchQuery, dispatch]);
 
   // Handle outside click to close search dropdown
   useEffect(() => {

@@ -119,7 +119,8 @@ export default function WishlistPage() {
               const price = item.price?.discountPrice || item.price?.currentPrice || 0;
               const originalPrice = item.price?.currentPrice || 0;
               const hasDiscount = item.price?.discountPrice && item.price.discountPrice < originalPrice;
-              const productImage = item.images?.[0] || "/images/placeholder.png";
+              // Get image from: image field (from server) -> variants[0].images[0] -> placeholder
+              const productImage = item.image || item.variants?.[0]?.images?.[0] || "/images/placeholder.png";
               const shopName = typeof item.shop === "object" ? item.shop?.name : "Shop";
 
               return (
