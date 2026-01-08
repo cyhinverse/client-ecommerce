@@ -339,12 +339,22 @@ export default function HeaderLayout() {
                                   >
                                     {/* Product Image */}
                                     <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 shrink-0">
-                                      <Image
-                                        src={product.variants?.[0]?.images?.[0] || product.images?.[0] || "/images/placeholder.png"}
-                                        alt={product.name}
-                                        fill
-                                        className="object-cover"
-                                      />
+                                      {(product.image || product.variants?.[0]?.images?.[0]) ? (
+                                        <Image
+                                          src={product.image || product.variants?.[0]?.images?.[0]}
+                                          alt={product.name}
+                                          fill
+                                          className="object-cover"
+                                          onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.style.display = 'none';
+                                          }}
+                                        />
+                                      ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                                          <Search className="w-5 h-5 text-gray-300" />
+                                        </div>
+                                      )}
                                     </div>
                                     {/* Product Info */}
                                     <div className="flex-1 min-w-0">
