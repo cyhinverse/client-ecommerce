@@ -46,8 +46,8 @@ export default function UpdateUserProfile({
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    // TODO: Connect to backend
+    // TODO: Connect to backend to update user profile
+    void values; // Placeholder until backend integration
   }
 
   return (

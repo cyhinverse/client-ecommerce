@@ -1,38 +1,45 @@
 import instance from "@/api/api";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { extractApiData, extractApiError } from "@/utils/api";
 
-export const getTreeCategories = createAsyncThunk("category/tree", async () => {
-  const response = await instance.get(`/categories/tree`);
-  if (!response) {
-    throw new Error("Failed to fetch category tree");
+export const getTreeCategories = createAsyncThunk(
+  "category/tree",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await instance.get(`/categories/tree`);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
+    }
   }
-  return response.data;
-});
+);
 
 export const getAllCategories = createAsyncThunk(
   "category/all",
-  async (params: { page?: number; limit?: number; search?: string; parentCategory?: string | null } = {}) => {
-    const { page = 1, limit = 10, search = "", parentCategory } = params;
-    let url = `/categories?page=${page}&limit=${limit}&search=${search}`;
-    if (parentCategory !== undefined) {
-      url += `&parentCategory=${parentCategory}`;
+  async (params: { page?: number; limit?: number; search?: string; parentCategory?: string | null } = {}, { rejectWithValue }) => {
+    try {
+      const { page = 1, limit = 10, search = "", parentCategory } = params;
+      let url = `/categories?page=${page}&limit=${limit}&search=${search}`;
+      if (parentCategory !== undefined) {
+        url += `&parentCategory=${parentCategory}`;
+      }
+      const response = await instance.get(url);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    const response = await instance.get(url);
-    if (!response) {
-      throw new Error("Failed to fetch all categories");
-    }
-    return response.data;
   }
 );
 
 export const deleteCategory = createAsyncThunk(
   "category/delete",
-  async (categoryId: string) => {
-    const response = await instance.delete(`/categories/${categoryId}`);
-    if (!response) {
-      throw new Error("Failed to delete category");
+  async (categoryId: string, { rejectWithValue }) => {
+    try {
+      const response = await instance.delete(`/categories/${categoryId}`);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data;
   }
 );
 
@@ -45,35 +52,38 @@ export const updateCategory = createAsyncThunk(
     description?: string;
     isActive: boolean;
     isFeatured?: boolean;
-  }) => {
-    const { id, ...data } = categoryData;
-    const response = await instance.put(`/categories/${id}`, data);
-    if (!response) {
-      throw new Error("Failed to update category");
+  }, { rejectWithValue }) => {
+    try {
+      const { id, ...data } = categoryData;
+      const response = await instance.put(`/categories/${id}`, data);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data;
   }
 );
 
 export const getCategoryById = createAsyncThunk(
   "category/:id",
-  async (categoryId: string) => {
-    const response = await instance.get(`/categories/${categoryId}`);
-    if (!response) {
-      throw new Error("Failed to fetch category");
+  async (categoryId: string, { rejectWithValue }) => {
+    try {
+      const response = await instance.get(`/categories/${categoryId}`);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data;
   }
 );
 
 export const statisticsCategories = createAsyncThunk(
   "category/statistics",
-  async () => {
-    const response = await instance.get(`/categories/statistics`);
-    if (!response) {
-      throw new Error("Failed to fetch category statistics");
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await instance.get(`/categories/statistics`);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data;
   }
 );
 
@@ -86,11 +96,12 @@ export const creatCategory = createAsyncThunk(
     images: string[];
     isActive?: boolean;
     parentCategory?: string;
-  }) => {
-    const response = await instance.post(`/categories`, category);
-    if (!response) {
-      throw new Error("Failed to create category");
+  }, { rejectWithValue }) => {
+    try {
+      const response = await instance.post(`/categories`, category);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data;
   }
 );

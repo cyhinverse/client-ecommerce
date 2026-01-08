@@ -1,11 +1,7 @@
 import instance from "@/api/api";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { AxiosError } from "axios";
 import { SearchParams } from "@/types/search";
-
-interface ApiErrorResponse {
-  message?: string;
-}
+import { extractApiData, extractApiError } from "@/utils/api";
 
 // Get search suggestions (autocomplete)
 export const getSearchSuggestions = createAsyncThunk(
@@ -13,11 +9,9 @@ export const getSearchSuggestions = createAsyncThunk(
   async (params: { q: string; limit?: number }, { rejectWithValue }) => {
     try {
       const response = await instance.get("/search/suggestions", { params });
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể lấy gợi ý";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -30,11 +24,9 @@ export const getTrendingSearches = createAsyncThunk(
       const response = await instance.get("/search/trending", {
         params: { limit },
       });
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể lấy xu hướng tìm kiếm";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -47,11 +39,9 @@ export const getHotKeywords = createAsyncThunk(
       const response = await instance.get("/search/hot-keywords", {
         params: { limit },
       });
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể lấy từ khóa hot";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -62,11 +52,9 @@ export const advancedSearch = createAsyncThunk(
   async (params: SearchParams, { rejectWithValue }) => {
     try {
       const response = await instance.get("/search", { params });
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Tìm kiếm thất bại";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );

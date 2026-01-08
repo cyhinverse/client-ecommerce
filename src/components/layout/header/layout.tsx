@@ -340,7 +340,7 @@ export default function HeaderLayout() {
                                     {/* Product Image */}
                                     <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 shrink-0">
                                       <Image
-                                        src={product.images?.[0] || "/images/placeholder.png"}
+                                        src={product.variants?.[0]?.images?.[0] || product.images?.[0] || "/images/placeholder.png"}
                                         alt={product.name}
                                         fill
                                         className="object-cover"

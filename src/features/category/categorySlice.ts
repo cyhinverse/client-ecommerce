@@ -46,7 +46,8 @@ export const categorySlice = createSlice({
     });
     builder.addCase(getTreeCategories.fulfilled, (state, action) => {
       state.isLoading = false;
-      const newData = action.payload?.data;
+      // extractApiData already extracts the data
+      const newData = Array.isArray(action.payload) ? action.payload : (action.payload?.data || []);
       if (JSON.stringify(newData) !== JSON.stringify(state.categories)) {
         state.categories = newData;
       }
@@ -63,8 +64,10 @@ export const categorySlice = createSlice({
     });
     builder.addCase(getAllCategories.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.pagination = action.payload.data.pagination;
-      state.categories = action.payload.data.data;
+      // extractApiData already extracts the data
+      const payload = action.payload;
+      state.pagination = payload?.pagination || null;
+      state.categories = payload?.data || payload || [];
     });
     builder.addCase(getAllCategories.rejected, (state, action) => {
       state.isLoading = false;
@@ -95,7 +98,8 @@ export const categorySlice = createSlice({
     });
     builder.addCase(updateCategory.fulfilled, (state, action) => {
       state.isLoading = false;
-      const updatedCategory = action.payload.data;
+      // extractApiData already extracts the data
+      const updatedCategory = action.payload;
       const index = state.categories.findIndex(
         (category) => category._id === updatedCategory._id
       );
@@ -114,7 +118,8 @@ export const categorySlice = createSlice({
     });
     builder.addCase(getCategoryById.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.categories = action.payload?.data;
+      // extractApiData already extracts the data
+      state.categories = Array.isArray(action.payload) ? action.payload : [action.payload];
     });
     builder.addCase(getCategoryById.rejected, (state, action) => {
       state.isLoading = false;
@@ -128,7 +133,8 @@ export const categorySlice = createSlice({
     });
     builder.addCase(statisticsCategories.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.categories = action.payload?.data;
+      // extractApiData already extracts the data
+      state.categories = Array.isArray(action.payload) ? action.payload : (action.payload?.data || []);
     });
     builder.addCase(statisticsCategories.rejected, (state, action) => {
       state.isLoading = false;

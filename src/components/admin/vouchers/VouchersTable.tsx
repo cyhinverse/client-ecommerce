@@ -26,11 +26,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, MoreHorizontal, Eye, Edit, Trash2, Filter, Store } from "lucide-react";
+import { Search, MoreHorizontal, Eye, Edit, Trash2, Filter, Store, Globe } from "lucide-react";
 // Updated: Import from voucher types with backward compatibility alias
 import { Discount } from "@/types/voucher";
+import { Shop } from "@/types/product";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 interface DiscountsTableProps {
   discounts: Discount[];
@@ -44,8 +46,10 @@ interface DiscountsTableProps {
   onView: (discount: Discount) => void;
   onDiscountTypeFilterChange: (type: string) => void;
   onActiveFilterChange: (isActive: boolean | null) => void;
+  onScopeFilterChange?: (scope: string) => void;
   selectedDiscountType: string;
   selectedIsActive: boolean | null;
+  selectedScope?: string;
 }
 
 export function DiscountsTable({
@@ -59,8 +63,10 @@ export function DiscountsTable({
   onView,
   onDiscountTypeFilterChange,
   onActiveFilterChange,
+  onScopeFilterChange,
   selectedDiscountType,
   selectedIsActive,
+  selectedScope = "all",
   isLoading = false,
 }: DiscountsTableProps) {
   const [localSearch, setLocalSearch] = useState(searchTerm);
@@ -107,6 +113,46 @@ export function DiscountsTable({
     return discountType === "percent"
       ? `${discountValue}%`
       : `${discountValue.toLocaleString()}đ`;
+  };
+
+  const getShopInfo = (shopId: string | Shop | undefined): { name: string; logo?: string } => {
+    if (!shopId) return { name: "N/A" };
+    if (typeof shopId === "string") return { name: shopId };
+    return { name: shopId.name || "N/A", logo: shopId.logo };
+  };
+
+  const getScopeDisplay = (discount: Discount) => {
+    if (discount.scope === "platform" || !discount.shopId) {
+      return (
+        <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-100 border-0 rounded-lg px-2.5 py-0.5 shadow-none font-medium">
+          <Globe className="h-3 w-3 mr-1" />
+          Platform
+        </Badge>
+      );
+    }
+    const shopInfo = getShopInfo(discount.shopId);
+    return (
+      <div className="flex items-center gap-2 max-w-[140px]">
+        {shopInfo.logo ? (
+          <div className="relative h-6 w-6 rounded-md overflow-hidden bg-gray-100 shrink-0">
+            <Image
+              src={shopInfo.logo}
+              alt={shopInfo.name}
+              width={24}
+              height={24}
+              className="h-full w-full object-cover"
+            />
+          </div>
+        ) : (
+          <div className="h-6 w-6 rounded-md bg-gray-100 flex items-center justify-center shrink-0">
+            <Store className="h-3 w-3 text-muted-foreground" />
+          </div>
+        )}
+        <span className="text-sm text-muted-foreground truncate" title={shopInfo.name}>
+          {shopInfo.name}
+        </span>
+      </div>
+    );
   };
 
   return (
@@ -156,6 +202,22 @@ export function DiscountsTable({
                 <SelectItem value="false">Inactive</SelectItem>
                 </SelectContent>
             </Select>
+
+            {onScopeFilterChange && (
+              <Select
+                value={selectedScope}
+                onValueChange={onScopeFilterChange}
+              >
+                <SelectTrigger className="w-[140px] rounded-xl border-gray-200 bg-white/80 shadow-sm hover:bg-gray-50 h-10">
+                  <SelectValue placeholder="Scope" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-border/50 shadow-lg">
+                  <SelectItem value="all">All Scopes</SelectItem>
+                  <SelectItem value="platform">Platform</SelectItem>
+                  <SelectItem value="shop">Shop</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
           </div>
         </div>
 
@@ -184,6 +246,7 @@ export function DiscountsTable({
             <TableHeader className="bg-gray-50/50">
                 <TableRow className="border-border/50 hover:bg-transparent">
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground pl-6">Code</TableHead>
+                <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Scope/Shop</TableHead>
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Type</TableHead>
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Value</TableHead>
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Start Date</TableHead>
@@ -196,7 +259,7 @@ export function DiscountsTable({
             <TableBody>
                 {isLoading && (
                 <TableRow>
-                    <TableCell colSpan={8} className="h-32 text-center">
+                    <TableCell colSpan={9} className="h-32 text-center">
                     <div className="flex justify-center items-center">
                         <SpinnerLoading />
                     </div>
@@ -205,7 +268,7 @@ export function DiscountsTable({
                 )}
                 {!isLoading && discounts.length === 0 ? (
                 <TableRow>
-                    <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
+                    <TableCell colSpan={9} className="text-center py-12 text-muted-foreground">
                         <div className="flex flex-col items-center justify-center">
                             <span className="bg-gray-100 p-3 rounded-full mb-3">
                                 <Filter className="h-6 w-6 text-gray-400" />
@@ -230,6 +293,7 @@ export function DiscountsTable({
                         )}
                         </div>
                     </TableCell>
+                    <TableCell className="align-top py-4">{getScopeDisplay(discount)}</TableCell>
                     <TableCell className="text-muted-foreground font-medium align-top py-4">
                         {getDiscountTypeText(discount.discountType ?? (discount.type === "percentage" ? "percent" : "fixed"))}
                     </TableCell>

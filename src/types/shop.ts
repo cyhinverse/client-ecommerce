@@ -61,6 +61,7 @@ export interface UpdateShopPayload {
 export interface ShopState {
   myShop: Shop | null;
   currentShop: Shop | null;
+  shops: Shop[];  // List of all shops (for admin)
   isLoading: boolean;
   isRegistering: boolean;
   isUpdating: boolean;

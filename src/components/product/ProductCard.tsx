@@ -4,24 +4,30 @@ import { Star } from "lucide-react";
 import { Product } from "@/types/product";
 import WishlistButton from "@/components/common/WishlistButton";
 
-// Helper function to get price range from models
-const getPriceFromModels = (product: Product): { min: number; max: number } | null => {
-  if (!product.models || product.models.length === 0) return null;
-  
-  const prices = product.models.map(m => m.price).filter(p => p > 0);
-  if (prices.length === 0) return null;
-  
-  return {
-    min: Math.min(...prices),
-    max: Math.max(...prices),
-  };
+// Helper function to get price range from variants (new) or models (old)
+const getPriceRange = (product: Product): { min: number; max: number } | null => {
+  // New structure: variants with price
+  if (product.variants && product.variants.length > 0) {
+    const prices = product.variants.map(v => v.price).filter(p => p > 0);
+    if (prices.length > 0) {
+      return { min: Math.min(...prices), max: Math.max(...prices) };
+    }
+  }
+  // Old structure: models with price (backward compatibility)
+  if (product.models && product.models.length > 0) {
+    const prices = product.models.map(m => m.price).filter(p => p > 0);
+    if (prices.length > 0) {
+      return { min: Math.min(...prices), max: Math.max(...prices) };
+    }
+  }
+  return null;
 };
 
 // Helper function to get display price
 const getDisplayPrice = (product: Product): { current: number; discount?: number } => {
-  const modelPrices = getPriceFromModels(product);
-  if (modelPrices) {
-    return { current: modelPrices.min };
+  const priceRange = getPriceRange(product);
+  if (priceRange) {
+    return { current: priceRange.min };
   }
   
   return {
@@ -32,17 +38,17 @@ const getDisplayPrice = (product: Product): { current: number; discount?: number
 
 // Helper function to get product image
 const getProductImage = (product: Product): string | null => {
-  if (product.images?.[0]) return product.images[0];
+  // New structure: variants with images (primary source)
+  if (product.variants?.[0]?.images?.[0]) {
+    return product.variants[0].images[0];
+  }
+  // Old structure: tierVariations (backward compatibility)
   if (product.tierVariations?.[0]?.images?.[0]) {
     const firstImage = product.tierVariations[0].images[0];
-    // Handle both 2D array (new) and flat array (old) structure
     if (Array.isArray(firstImage)) {
       return firstImage[0] || null;
     }
     return typeof firstImage === 'string' ? firstImage : null;
-  }
-  if (product.variants?.[0]?.images?.[0]) {
-    return product.variants[0].images[0];
   }
   return null;
 };
@@ -74,7 +80,7 @@ const getDiscountPercent = (original: number, sale: number): number => {
 export const ProductCard = ({ product }: { product: Product }) => {
   const displayPrice = getDisplayPrice(product);
   const productImage = getProductImage(product);
-  const modelPrices = getPriceFromModels(product);
+  const priceRange = getPriceRange(product);
   
   const hasDiscount = product.onSale && 
     displayPrice.discount && 
@@ -140,14 +146,14 @@ export const ProductCard = ({ product }: { product: Product }) => {
           {/* Price Section */}
           <div className="flex flex-col gap-0.5 mt-auto">
             {/* Price Range */}
-            {modelPrices && modelPrices.min !== modelPrices.max ? (
+            {priceRange && priceRange.min !== priceRange.max ? (
               <div className="flex items-baseline gap-1">
                 <span className="text-[10px] text-[#E53935]">₫</span>
                 <span className="font-bold text-base text-[#E53935]">
-                  {modelPrices.min.toLocaleString('vi-VN')}
+                  {priceRange.min.toLocaleString('vi-VN')}
                 </span>
                 <span className="text-[11px] text-gray-500">
-                  - ₫{modelPrices.max.toLocaleString('vi-VN')}
+                  - ₫{priceRange.max.toLocaleString('vi-VN')}
                 </span>
               </div>
             ) : hasDiscount ? (

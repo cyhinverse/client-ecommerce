@@ -1,4 +1,4 @@
-import { Shop, Price } from "./product";
+import { Shop, Price, Variant } from "./product";
 
 // Product info in cart item
 interface CartProduct {
@@ -13,14 +13,29 @@ interface CartProduct {
   images: string[];
   price?: Price;
   isActive: boolean;
+  // NEW: variants for getting images
+  variants?: Variant[];
+}
+
+// Variant info in cart item (populated from server)
+interface CartVariant {
+  _id: string;
+  name: string;
+  color?: string;
+  images?: string[];
+  price?: number;
+  stock?: number;
 }
 
 // Cart item interface - Updated with new structure
 export interface CartItem {
   _id: string;
-  productId: CartProduct | string;
+  productId: CartProduct | string | null;  // Can be null if product was deleted
   shopId: Shop | string;      // NEW: for grouping by shop
   modelId?: string;           // NEW: replaces variantId
+  variantId?: string;         // Variant ID reference
+  variant?: CartVariant;      // Populated variant info
+  size?: string;              // Selected size
   quantity: number;
   price: {
     currentPrice: number;
@@ -30,18 +45,6 @@ export interface CartItem {
   // Variation info (derived from tierIndex)
   variationInfo?: string;     // e.g. "Color: Red, Size: M"
   selected?: boolean;
-  
-  // DEPRECATED: Old variant fields (kept for backward compatibility)
-  variantId?: string;
-  variant?: {
-    _id: string;
-    sku: string;
-    color: string;
-    size: string;
-    stock: number;
-    price?: Price;
-    images: string[];
-  };
 }
 
 // NEW: Cart items grouped by shop
@@ -81,25 +84,36 @@ export function groupCartItemsByShop(items: CartItem[]): CartItemsByShop[] {
   const DEFAULT_SHOP_ID = 'default-shop';
   
   items.forEach(item => {
-    // Try to get shopId from item.shopId or from productId.shop
     let shopId: string | undefined;
     let shop: Shop;
     
-    if (item.shopId) {
-      shopId = typeof item.shopId === 'string' ? item.shopId : item.shopId?._id;
-      shop = typeof item.shopId === 'object' ? item.shopId : { _id: shopId || DEFAULT_SHOP_ID, name: 'Shop' } as Shop;
-    } else if (typeof item.productId === 'object' && (item.productId as any).shop) {
-      // Fallback: try to get shop from productId
+    // Priority 1: Get shop from productId.shop (populated with full info)
+    if (typeof item.productId === 'object' && (item.productId as any).shop) {
       const productShop = (item.productId as any).shop;
-      shopId = typeof productShop === 'string' ? productShop : productShop?._id;
-      shop = typeof productShop === 'object' ? productShop : { _id: shopId || DEFAULT_SHOP_ID, name: 'Shop' } as Shop;
-    } else {
-      // Default shop for items without shopId
+      if (typeof productShop === 'object' && productShop?.name) {
+        shopId = productShop._id;
+        shop = productShop as Shop;
+      } else {
+        shopId = typeof productShop === 'string' ? productShop : productShop?._id;
+        shop = { _id: shopId || DEFAULT_SHOP_ID, name: 'Shop' } as Shop;
+      }
+    }
+    // Priority 2: Get from item.shopId (populated)
+    else if (item.shopId && typeof item.shopId === 'object' && (item.shopId as Shop)?.name) {
+      shopId = (item.shopId as Shop)._id;
+      shop = item.shopId as Shop;
+    }
+    // Priority 3: item.shopId is string
+    else if (item.shopId && typeof item.shopId === 'string') {
+      shopId = item.shopId;
+      shop = { _id: shopId, name: 'Shop' } as Shop;
+    }
+    // Default
+    else {
       shopId = DEFAULT_SHOP_ID;
       shop = { _id: DEFAULT_SHOP_ID, name: 'Shop' } as Shop;
     }
 
-    // Ensure shopId is always defined
     const resolvedShopId = shopId || DEFAULT_SHOP_ID;
     
     if (!shopMap.has(resolvedShopId)) {
@@ -126,6 +140,7 @@ export interface AddToCartPayload {
   shopId: string;
   modelId?: string;
   quantity: number;
+  size?: string;  // Product-level size selection
 }
 
 // Update cart item payload

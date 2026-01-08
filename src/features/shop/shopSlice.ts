@@ -1,10 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { ShopState } from "@/types/shop";
-import { registerShop, getMyShop, updateShop, getShopById, uploadShopImage, uploadRegisterImage } from "./shopAction";
+import { registerShop, getMyShop, updateShop, getShopById, uploadShopImage, uploadRegisterImage, getAllShops } from "./shopAction";
 
 const initialState: ShopState = {
   myShop: null,
   currentShop: null,
+  shops: [],
   isLoading: false,
   isRegistering: false,
   isUpdating: false,
@@ -153,6 +154,22 @@ export const shopSlice = createSlice({
           state.isUploadingBanner = false;
         }
         state.uploadError = payload?.message || "Upload thất bại";
+      });
+
+    // Get All Shops (admin)
+    builder
+      .addCase(getAllShops.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(getAllShops.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.shops = action.payload || [];
+        state.error = null;
+      })
+      .addCase(getAllShops.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = (action.payload as { message: string })?.message || "Không thể lấy danh sách shop";
       });
   },
 });

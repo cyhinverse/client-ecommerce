@@ -1,6 +1,7 @@
 import instance from "@/api/api";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { AddToCartPayload, UpdateCartItemPayload } from "@/types/cart";
+import { extractApiData, extractApiError } from "@/utils/api";
 
 // Add to cart - Updated to use modelId instead of variantId
 export const addToCart = createAsyncThunk(
@@ -10,79 +11,80 @@ export const addToCart = createAsyncThunk(
     shopId,
     modelId,
     quantity = 1,
+    size,
     // DEPRECATED: variantId kept for backward compatibility
     variantId,
-  }: AddToCartPayload & { variantId?: string | null }) => {
-    const response = await instance.post("/cart", {
-      productId,
-      shopId,
-      modelId: modelId || variantId, // Use modelId, fallback to variantId
-      quantity,
-    });
-    if (!response) {
-      throw new Error("Failed to add item to cart");
+  }: AddToCartPayload & { variantId?: string | null }, { rejectWithValue }) => {
+    try {
+      const response = await instance.post("/cart", {
+        productId,
+        shopId,
+        modelId: modelId || variantId, // Use modelId, fallback to variantId
+        quantity,
+        size,
+      });
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-
-    return response.data;
   }
 );
 
 // Remove item from cart
 export const removeFromCart = createAsyncThunk(
   "remove/cart",
-  async ({ itemId }: { itemId: string }) => {
-    const response = await instance.delete(`/cart/${itemId}`);
-    if (!response) {
-      throw new Error("Failed to remove item from cart");
+  async ({ itemId }: { itemId: string }, { rejectWithValue }) => {
+    try {
+      const response = await instance.delete(`/cart/${itemId}`);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-
-    return response.data;
   }
 );
 
 // Clear entire cart
-export const clearCart = createAsyncThunk("clear/cart", async () => {
-  const response = await instance.delete("/cart");
-  if (!response) {
-    throw new Error("Failed to clear cart");
+export const clearCart = createAsyncThunk("clear/cart", async (_, { rejectWithValue }) => {
+  try {
+    const response = await instance.delete("/cart");
+    return extractApiData(response);
+  } catch (error) {
+    return rejectWithValue(extractApiError(error));
   }
-  console.log("Cart cleared successfully", response);
-
-  return response.data;
 });
 
 // Update cart item quantity
 export const updateCartItem = createAsyncThunk(
   "update/cart",
-  async ({ itemId, quantity }: UpdateCartItemPayload) => {
-    const response = await instance.put(`/cart/${itemId}`, { quantity });
-    if (!response) {
-      throw new Error("Failed to update item in cart");
+  async ({ itemId, quantity }: UpdateCartItemPayload, { rejectWithValue }) => {
+    try {
+      const response = await instance.put(`/cart/${itemId}`, { quantity });
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-
-    return response.data;
   }
 );
 
 // Get cart
-export const getCart = createAsyncThunk("get/cart", async () => {
-  const response = await instance.get("/cart");
-  if (!response) {
-    throw new Error("Failed to get cart");
+export const getCart = createAsyncThunk("get/cart", async (_, { rejectWithValue }) => {
+  try {
+    const response = await instance.get("/cart");
+    return extractApiData(response);
+  } catch (error) {
+    return rejectWithValue(extractApiError(error));
   }
-
-  return response.data;
 });
 
 // NEW: Remove items by shop
 export const removeItemsByShop = createAsyncThunk(
   "remove/cart/shop",
-  async ({ shopId }: { shopId: string }) => {
-    const response = await instance.delete(`/cart/shop/${shopId}`);
-    if (!response) {
-      throw new Error("Failed to remove items by shop");
+  async ({ shopId }: { shopId: string }, { rejectWithValue }) => {
+    try {
+      const response = await instance.delete(`/cart/shop/${shopId}`);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-
-    return response.data;
   }
 );

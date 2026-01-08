@@ -49,14 +49,15 @@ export const authSlice = createSlice({
     builder.addCase(login.fulfilled, (state, action) => {
       state.loading = false;
       state.isAuthenticated = true;
+      // extractApiData already extracts the data
       // Note: We might not get a token payload here if the server only sets cookies.
       // If server returns token in body AND cookie, this still sets redux state, which is fine but unnecessary for security.
       // We keep it for now if other components use useAppSelector(state => state.auth.token).
-      state.token = action.payload?.data.accessToken;
+      state.token = action.payload?.accessToken;
 
       // Removed localStorage lines
 
-      state.data = action.payload?.data;
+      state.data = action.payload;
       if (state.data) {
         state.data = {
           ...state.data,

@@ -1,11 +1,7 @@
 import instance from "@/api/api";
 import { AuthLogin, AuthRegister } from "@/types/auth";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { AxiosError } from "axios";
-
-interface ApiErrorResponse {
-  message?: string;
-}
+import { extractApiData, extractApiError } from "@/utils/api";
 
 export const login = createAsyncThunk(
   "auth/login",
@@ -14,12 +10,9 @@ export const login = createAsyncThunk(
       const response = await instance.post("/auth/login", Credentials, {
         withCredentials: true,
       });
-      return response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message =
-        axiosError.response?.data?.message || "Đăng nhập thất bại";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -31,11 +24,9 @@ export const register = createAsyncThunk(
       const response = await instance.post("/auth/register", Credentials, {
         withCredentials: true,
       });
-      return response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Đăng ký thất bại";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -51,41 +42,45 @@ export const sendCode = createAsyncThunk(
           withCredentials: true,
         }
       );
-      return response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message =
-        axiosError.response?.data?.message || "Xác thực email thất bại";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
 
 export const verifyCode = createAsyncThunk(
   "auth/verify-email",
-  async (code: string) => {
-    const response = await instance.post("/auth/verify-code", { code });
-    return response.data;
+  async (code: string, { rejectWithValue }) => {
+    try {
+      const response = await instance.post("/auth/verify-code", { code });
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
+    }
   }
 );
 
-export const logout = createAsyncThunk("auth/logout", async () => {
-  const response = await instance.post("/auth/logout");
-  return response.data;
-});
+export const logout = createAsyncThunk(
+  "auth/logout",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await instance.post("/auth/logout");
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
+    }
+  }
+);
 
 export const forgotPassword = createAsyncThunk(
   "auth/forgot-password",
   async (email: string, { rejectWithValue }) => {
     try {
       const response = await instance.post("/auth/forgot-password", { email });
-      return response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message =
-        axiosError.response?.data?.message ||
-        "Yêu cầu đặt lại mật khẩu thất bại";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -106,13 +101,9 @@ export const resetPassword = createAsyncThunk(
         code,
         newPassword,
       });
-      return response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      console.error("Reset password error:", axiosError.response?.data);
-      return rejectWithValue(
-        axiosError.response?.data || { message: "Reset password failed" }
-      );
+      return rejectWithValue(extractApiError(error));
     }
   }
 );

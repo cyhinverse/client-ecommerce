@@ -172,9 +172,3 @@ export function isVoucherValid(voucher: Voucher): boolean {
   
   return true;
 }
-
-// Backward compatibility - Discount aliases
-export type Discount = Voucher;
-export type DiscountFilters = VoucherFilters;
-export type CreateDiscountData = CreateVoucherData;
-export type UpdateDiscountData = UpdateVoucherData;

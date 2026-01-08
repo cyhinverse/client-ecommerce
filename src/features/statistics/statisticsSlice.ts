@@ -62,7 +62,8 @@ export const statisticsSlice = createSlice({
     });
     builder.addCase(getDashboardStats.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.stats = action.payload?.data;
+      // extractApiData already extracts the data
+      state.stats = action.payload;
     });
     builder.addCase(getDashboardStats.rejected, (state, action) => {
       state.isLoading = false;

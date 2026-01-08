@@ -11,9 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Plus, X, Trash2, Upload, ImageIcon } from "lucide-react";
-import { Product, TierVariation, ProductModel, ProductAttribute } from "@/types/product";
-import { Category } from "@/types/category";
+import { Plus, X, Trash2, Upload } from "lucide-react";
+import { Product, ProductAttribute } from "@/types/product";
 import { TagItem } from "@/components/product/forms/TagItem";
 import {
   Select,
@@ -25,6 +24,9 @@ import {
 import Image from "next/image";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { getTreeCategories } from "@/features/category/categoryAction";
+import { getShopCategories } from "@/features/shopCategory/shopCategoryAction";
+import { flattenCategories } from "@/utils/category";
+import { STATUS_OPTIONS } from "@/constants/product";
 
 interface UpdateModelProductProps {
   open: boolean;
@@ -34,35 +36,16 @@ interface UpdateModelProductProps {
   isLoading?: boolean;
 }
 
-// Extended TierVariation with images per option
-interface TierVariationWithImages extends TierVariation {
-  optionImages: { 
-    existing: string[]; // URLs from server
-    newFiles: File[]; 
-    newPreviews: string[];
-  }[];
+// Variant for update form - simplified structure
+interface UpdateVariant {
+  _id: string;
+  name: string;
+  color: string;
+  price: number;
+  stock: number;
+  sold?: number;
+  images: { existing: string[]; newFiles: File[]; newPreviews: string[] };
 }
-
-const STATUS_OPTIONS = [
-  { value: "draft", label: "Bản nháp" },
-  { value: "published", label: "Đang bán" },
-  { value: "suspended", label: "Tạm ngưng" },
-];
-
-// Flatten categories tree for dropdown
-const flattenCategories = (categories: Category[], prefix = ""): { _id: string; name: string; displayName: string }[] => {
-  const result: { _id: string; name: string; displayName: string }[] = [];
-  categories.forEach((cat) => {
-    if (cat._id && cat.name) {
-      const displayName = prefix ? `${prefix} > ${cat.name}` : cat.name;
-      result.push({ _id: cat._id, name: cat.name, displayName });
-      if (cat.subcategories && cat.subcategories.length > 0) {
-        result.push(...flattenCategories(cat.subcategories, displayName));
-      }
-    }
-  });
-  return result;
-};
 
 export function UpdateModelProduct({
   open,
@@ -73,6 +56,7 @@ export function UpdateModelProduct({
 }: UpdateModelProductProps) {
   const dispatch = useAppDispatch();
   const { categories } = useAppSelector((state) => state.category);
+  const { categories: shopCategories } = useAppSelector((state) => state.shopCategory);
   const flatCategories = flattenCategories(categories);
 
   const [formData, setFormData] = useState({
@@ -80,6 +64,7 @@ export function UpdateModelProduct({
     description: "",
     slug: "",
     category: "",
+    shopCategory: "",
     brand: "",
     status: "published" as "draft" | "published" | "suspended" | "deleted",
     isNewArrival: false,
@@ -92,8 +77,8 @@ export function UpdateModelProduct({
     stock: 0,
     weight: 0,
     dimensions: { height: 0, width: 0, length: 0 },
-    tierVariations: [] as TierVariationWithImages[],
-    models: [] as ProductModel[],
+    sizes: [] as string[],  // Product-level sizes
+    variants: [] as UpdateVariant[],
     attributes: [] as ProductAttribute[],
     tags: [] as string[],
     descriptionImages: { 
@@ -105,54 +90,48 @@ export function UpdateModelProduct({
 
   const [newTag, setNewTag] = useState("");
   const [newAttribute, setNewAttribute] = useState({ name: "", value: "" });
-  const [newTierVariation, setNewTierVariation] = useState({ name: "", options: "" });
+  const [newSize, setNewSize] = useState("");
 
   // Fetch categories when dialog opens
   useEffect(() => {
-    if (open && categories.length === 0) {
-      dispatch(getTreeCategories());
+    if (open) {
+      if (categories.length === 0) {
+        dispatch(getTreeCategories());
+      }
+      // Fetch shop categories (seller's own)
+      dispatch(getShopCategories(undefined));
     }
   }, [open, categories.length, dispatch]);
 
+  // Load product data when product changes
   useEffect(() => {
     if (product) {
       const categoryValue = typeof product.category === "string" ? product.category : product.category?._id || "";
       const productPrice = product.price || { currentPrice: 0, discountPrice: 0, currency: "VND" };
 
-      // Convert tierVariations to include image structure
-      const tierVariationsWithImages: TierVariationWithImages[] = (product.tierVariations || []).map((tier, tierIdx) => {
-        if (tierIdx === 0) {
-          // First tier has images - map existing images to options
-          // tier.images can be string[] (flat) or string[][] (per option)
-          const tierImages = tier.images || [];
-          return {
-            name: tier.name,
-            options: tier.options,
-            optionImages: tier.options.map((_, optIdx) => {
-              // Check if images is array of arrays (per option) or flat array
-              const optionImgs = Array.isArray(tierImages[optIdx]) 
-                ? (tierImages[optIdx] as unknown as string[])
-                : (typeof tierImages[optIdx] === 'string' ? [tierImages[optIdx] as string] : []);
-              return {
-                existing: optionImgs,
-                newFiles: [] as File[],
-                newPreviews: [] as string[],
-              };
-            }),
-          };
-        }
-        return {
-          name: tier.name,
-          options: tier.options,
-          optionImages: [],
-        };
-      });
+      // Convert variants to include image structure for editing - simplified structure
+      const variantsWithFiles: UpdateVariant[] = (product.variants || []).map((v) => ({
+        _id: v._id,
+        name: v.name,
+        color: v.color || "",
+        price: v.price,
+        stock: v.stock,
+        sold: v.sold || 0,
+        images: {
+          existing: v.images || [],
+          newFiles: [],
+          newPreviews: [],
+        },
+      }));
 
+      const shopCategoryValue = product.shopCategory || "";
+      
       setFormData({
         name: product.name || "",
         description: product.description || "",
         slug: product.slug || "",
         category: categoryValue,
+        shopCategory: shopCategoryValue,
         brand: product.brand || "",
         status: product.status || "published",
         isNewArrival: product.isNewArrival || false,
@@ -169,8 +148,8 @@ export function UpdateModelProduct({
           width: product.dimensions?.width || 0,
           length: product.dimensions?.length || 0,
         },
-        tierVariations: tierVariationsWithImages,
-        models: product.models || [],
+        sizes: product.sizes || [],
+        variants: variantsWithFiles,
         attributes: product.attributes || [],
         tags: product.tags || [],
         descriptionImages: {
@@ -182,66 +161,121 @@ export function UpdateModelProduct({
     }
   }, [product]);
 
-  // Handle image upload for a specific option in first tierVariation
-  const handleOptionImageChange = (optionIndex: number, e: React.ChangeEvent<HTMLInputElement>) => {
+  // Add new variant
+  const addVariant = () => {
+    const newVariant: UpdateVariant = {
+      _id: `temp-${Date.now()}`,
+      name: "",
+      color: "",
+      price: formData.price.currentPrice,
+      stock: 0,
+      sold: 0,
+      images: { existing: [], newFiles: [], newPreviews: [] },
+    };
+    setFormData(prev => ({
+      ...prev,
+      variants: [...prev.variants, newVariant],
+    }));
+  };
+
+  // Update variant field
+  const updateVariant = (index: number, field: keyof UpdateVariant, value: unknown) => {
+    setFormData(prev => ({
+      ...prev,
+      variants: prev.variants.map((v, i) => {
+        if (i !== index) return v;
+        return { ...v, [field]: value };
+      }),
+    }));
+  };
+
+  // Add size to product
+  const addSize = () => {
+    if (newSize.trim() && !formData.sizes.includes(newSize.trim())) {
+      setFormData(prev => ({ ...prev, sizes: [...prev.sizes, newSize.trim()] }));
+      setNewSize("");
+    }
+  };
+
+  // Remove size from product
+  const removeSize = (sizeToRemove: string) => {
+    setFormData(prev => ({ ...prev, sizes: prev.sizes.filter(s => s !== sizeToRemove) }));
+  };
+
+  // Remove variant
+  const removeVariant = (index: number) => {
+    const variant = formData.variants[index];
+    variant.images.newPreviews.forEach(url => URL.revokeObjectURL(url));
+    setFormData(prev => ({
+      ...prev,
+      variants: prev.variants.filter((_, i) => i !== index),
+    }));
+  };
+
+  // Handle variant image upload
+  const handleVariantImageChange = (variantIndex: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    const currentImages = formData.tierVariations[0]?.optionImages?.[optionIndex];
-    const totalImages = (currentImages?.existing?.length || 0) + (currentImages?.newFiles?.length || 0) + files.length;
+    const currentImages = formData.variants[variantIndex]?.images;
+    const totalImages = (currentImages?.existing.length || 0) + (currentImages?.newFiles.length || 0) + files.length;
     if (totalImages > 8) {
-      alert("Mỗi phân loại tối đa 8 ảnh");
+      alert("Mỗi variant tối đa 8 ảnh");
       return;
     }
 
     const newPreviews = files.map(file => URL.createObjectURL(file));
     
-    setFormData(prev => {
-      const newTierVariations = [...prev.tierVariations];
-      if (newTierVariations[0]) {
-        const newOptionImages = [...(newTierVariations[0].optionImages || [])];
-        const current = newOptionImages[optionIndex] || { existing: [], newFiles: [], newPreviews: [] };
-        newOptionImages[optionIndex] = {
-          existing: current.existing,
-          newFiles: [...current.newFiles, ...files],
-          newPreviews: [...current.newPreviews, ...newPreviews],
+    setFormData(prev => ({
+      ...prev,
+      variants: prev.variants.map((v, i) => {
+        if (i !== variantIndex) return v;
+        return {
+          ...v,
+          images: {
+            ...v.images,
+            newFiles: [...v.images.newFiles, ...files],
+            newPreviews: [...v.images.newPreviews, ...newPreviews],
+          },
         };
-        newTierVariations[0] = { ...newTierVariations[0], optionImages: newOptionImages };
-      }
-      return { ...prev, tierVariations: newTierVariations };
-    });
+      }),
+    }));
   };
 
-  // Remove existing image from option
-  const removeExistingOptionImage = (optionIndex: number, imageIndex: number) => {
-    setFormData(prev => {
-      const newTierVariations = [...prev.tierVariations];
-      if (newTierVariations[0]?.optionImages?.[optionIndex]) {
-        const optImages = newTierVariations[0].optionImages[optionIndex];
-        newTierVariations[0].optionImages[optionIndex] = {
-          ...optImages,
-          existing: optImages.existing.filter((_, i) => i !== imageIndex),
+  // Remove existing variant image
+  const removeExistingVariantImage = (variantIndex: number, imageIndex: number) => {
+    setFormData(prev => ({
+      ...prev,
+      variants: prev.variants.map((v, i) => {
+        if (i !== variantIndex) return v;
+        return {
+          ...v,
+          images: {
+            ...v.images,
+            existing: v.images.existing.filter((_, idx) => idx !== imageIndex),
+          },
         };
-      }
-      return { ...prev, tierVariations: newTierVariations };
-    });
+      }),
+    }));
   };
 
-  // Remove new image from option
-  const removeNewOptionImage = (optionIndex: number, imageIndex: number) => {
-    setFormData(prev => {
-      const newTierVariations = [...prev.tierVariations];
-      if (newTierVariations[0]?.optionImages?.[optionIndex]) {
-        const optImages = newTierVariations[0].optionImages[optionIndex];
-        URL.revokeObjectURL(optImages.newPreviews[imageIndex]);
-        newTierVariations[0].optionImages[optionIndex] = {
-          ...optImages,
-          newFiles: optImages.newFiles.filter((_, i) => i !== imageIndex),
-          newPreviews: optImages.newPreviews.filter((_, i) => i !== imageIndex),
+  // Remove new variant image
+  const removeNewVariantImage = (variantIndex: number, imageIndex: number) => {
+    setFormData(prev => ({
+      ...prev,
+      variants: prev.variants.map((v, i) => {
+        if (i !== variantIndex) return v;
+        URL.revokeObjectURL(v.images.newPreviews[imageIndex]);
+        return {
+          ...v,
+          images: {
+            ...v.images,
+            newFiles: v.images.newFiles.filter((_, idx) => idx !== imageIndex),
+            newPreviews: v.images.newPreviews.filter((_, idx) => idx !== imageIndex),
+          },
         };
-      }
-      return { ...prev, tierVariations: newTierVariations };
-    });
+      }),
+    }));
   };
 
   // Handle description images upload
@@ -305,6 +339,10 @@ export function UpdateModelProduct({
 
     const originalCategory = typeof product.category === "string" ? product.category : product.category?._id || "";
     if (formData.category !== originalCategory) formDataToSend.append("category", formData.category);
+    
+    const originalShopCategory = product.shopCategory || "";
+    if (formData.shopCategory !== originalShopCategory) formDataToSend.append("shopCategory", formData.shopCategory);
+    
     if (formData.brand !== product.brand) formDataToSend.append("brand", formData.brand);
     if (formData.status !== product.status) formDataToSend.append("status", formData.status);
     if (formData.isNewArrival !== product.isNewArrival) formDataToSend.append("isNewArrival", formData.isNewArrival.toString());
@@ -323,52 +361,36 @@ export function UpdateModelProduct({
       formDataToSend.append("dimensions", JSON.stringify(formData.dimensions));
     }
 
-    // Tier Variations - convert back to server format
-    const tierVariationsForServer = formData.tierVariations.map((tier, tierIdx) => {
-      if (tierIdx === 0 && tier.optionImages) {
-        return {
-          name: tier.name,
-          options: tier.options,
-        };
-      }
-      return { name: tier.name, options: tier.options };
-    });
-    formDataToSend.append("tierVariations", JSON.stringify(tierVariationsForServer));
+    // Variants - simple structure with color only
+    const variantsForServer = formData.variants.map(v => ({
+      _id: v._id.startsWith('temp-') ? undefined : v._id,
+      name: v.name,
+      color: v.color,
+      price: v.price,
+      stock: v.stock,
+      sold: v.sold || 0,
+      // SKU will be auto-generated on server
+    }));
+    formDataToSend.append("variants", JSON.stringify(variantsForServer));
 
-    // Append variant images for first tier
-    if (formData.tierVariations[0]?.optionImages) {
-      // Send existing images mapping
-      const existingImagesMapping = formData.tierVariations[0].optionImages.map((opt, idx) => ({
-        optionIndex: idx,
-        existing: opt.existing,
-      }));
-      formDataToSend.append("existingVariantImages", JSON.stringify(existingImagesMapping));
-
-      // Send new files
-      formData.tierVariations[0].optionImages.forEach((optImages, optIdx) => {
-        optImages.newFiles.forEach((file) => {
-          formDataToSend.append(`variantImages_${optIdx}`, file);
-        });
-      });
-      
-      // Send new image mapping
-      const newImageMapping = formData.tierVariations[0].optionImages.map((opt, idx) => ({
-        optionIndex: idx,
-        count: opt.newFiles.length,
-      }));
-      formDataToSend.append("variantImageMapping", JSON.stringify(newImageMapping));
+    // Product-level sizes
+    if (JSON.stringify(formData.sizes) !== JSON.stringify(product.sizes || [])) {
+      formDataToSend.append("sizes", JSON.stringify(formData.sizes));
     }
 
-    // Models with SKU - remove temp _id for new models
-    const modelsForServer = formData.models.map(model => {
-      // If _id starts with 'temp-', it's a new model - don't send _id
-      if (model._id.startsWith('temp-')) {
-        const { _id, ...modelWithoutId } = model;
-        return modelWithoutId;
-      }
-      return model;
+    // Send existing variant images mapping
+    const existingVariantImagesMapping = formData.variants.map((v, idx) => ({
+      variantIndex: idx,
+      existing: v.images.existing,
+    }));
+    formDataToSend.append("existingVariantImages", JSON.stringify(existingVariantImagesMapping));
+
+    // Append new variant images
+    formData.variants.forEach((variant, idx) => {
+      variant.images.newFiles.forEach((file) => {
+        formDataToSend.append(`variantImages_${idx}`, file);
+      });
     });
-    formDataToSend.append("models", JSON.stringify(modelsForServer));
 
     // Attributes
     if (JSON.stringify(formData.attributes) !== JSON.stringify(product.attributes)) {
@@ -418,153 +440,6 @@ export function UpdateModelProduct({
     setFormData((prev) => ({ ...prev, attributes: prev.attributes.filter((_, i) => i !== index) }));
   };
 
-  const addTierVariation = () => {
-    if (newTierVariation.name.trim() && newTierVariation.options.trim()) {
-      const options = newTierVariation.options.split(",").map((o) => o.trim()).filter(Boolean);
-      if (options.length > 0) {
-        // Check if tier with same name already exists
-        const existingTierIndex = formData.tierVariations.findIndex(
-          t => t.name.toLowerCase() === newTierVariation.name.trim().toLowerCase()
-        );
-
-        if (existingTierIndex >= 0) {
-          // Add options to existing tier
-          setFormData((prev) => {
-            const newTierVariations = [...prev.tierVariations];
-            const existingTier = newTierVariations[existingTierIndex];
-            
-            // Filter out options that already exist
-            const newOptions = options.filter(opt => !existingTier.options.includes(opt));
-            if (newOptions.length === 0) return prev;
-
-            // Add new options
-            newTierVariations[existingTierIndex] = {
-              ...existingTier,
-              options: [...existingTier.options, ...newOptions],
-              // Add image slots for new options if this is the first tier
-              optionImages: existingTierIndex === 0 
-                ? [...(existingTier.optionImages || []), ...newOptions.map(() => ({ existing: [], newFiles: [], newPreviews: [] }))]
-                : existingTier.optionImages,
-            };
-
-            return {
-              ...prev,
-              tierVariations: newTierVariations,
-              models: [], // Reset models when options change
-            };
-          });
-        } else {
-          // Add new tier
-          const isFirstTier = formData.tierVariations.length === 0;
-          const newTier: TierVariationWithImages = {
-            name: newTierVariation.name.trim(),
-            options,
-            optionImages: isFirstTier ? options.map(() => ({ existing: [], newFiles: [], newPreviews: [] })) : [],
-          };
-          setFormData((prev) => ({
-            ...prev,
-            tierVariations: [...prev.tierVariations, newTier],
-            models: [],
-          }));
-        }
-        setNewTierVariation({ name: "", options: "" });
-      }
-    }
-  };
-
-  // Remove a single option from a tier
-  const removeOptionFromTier = (tierIndex: number, optionIndex: number) => {
-    setFormData((prev) => {
-      const newTierVariations = [...prev.tierVariations];
-      const tier = newTierVariations[tierIndex];
-      
-      // If only one option left, remove the entire tier
-      if (tier.options.length <= 1) {
-        // Cleanup images if removing first tier
-        if (tierIndex === 0) {
-          tier.optionImages?.forEach(opt => {
-            opt.newPreviews.forEach(url => URL.revokeObjectURL(url));
-          });
-        }
-        return {
-          ...prev,
-          tierVariations: prev.tierVariations.filter((_, i) => i !== tierIndex),
-          models: [],
-        };
-      }
-
-      // Remove the option and its images
-      if (tierIndex === 0 && tier.optionImages?.[optionIndex]) {
-        tier.optionImages[optionIndex].newPreviews.forEach(url => URL.revokeObjectURL(url));
-      }
-
-      newTierVariations[tierIndex] = {
-        ...tier,
-        options: tier.options.filter((_, i) => i !== optionIndex),
-        optionImages: tierIndex === 0 
-          ? (tier.optionImages || []).filter((_, i) => i !== optionIndex)
-          : tier.optionImages,
-      };
-
-      return {
-        ...prev,
-        tierVariations: newTierVariations,
-        models: [], // Reset models when options change
-      };
-    });
-  };
-
-  const removeTierVariation = (index: number) => {
-    // Cleanup images if removing first tier
-    if (index === 0) {
-      formData.tierVariations[0]?.optionImages?.forEach(opt => {
-        opt.newPreviews.forEach(url => URL.revokeObjectURL(url));
-      });
-    }
-    setFormData((prev) => ({
-      ...prev,
-      tierVariations: prev.tierVariations.filter((_, i) => i !== index),
-      models: [],
-    }));
-  };
-
-  const generateModels = () => {
-    if (formData.tierVariations.length === 0) return;
-
-    const generateCombinations = (tiers: TierVariationWithImages[], current: number[] = []): number[][] => {
-      if (current.length === tiers.length) return [current];
-      const tier = tiers[current.length];
-      const combinations: number[][] = [];
-      for (let i = 0; i < tier.options.length; i++) {
-        combinations.push(...generateCombinations(tiers, [...current, i]));
-      }
-      return combinations;
-    };
-
-    const combinations = generateCombinations(formData.tierVariations);
-    const newModels: ProductModel[] = combinations.map((tierIndex, idx) => ({
-      _id: `temp-${idx}`,
-      tierIndex,
-      price: formData.price.currentPrice,
-      stock: 0,
-      sold: 0,
-      sku: "",
-    }));
-
-    setFormData((prev) => ({ ...prev, models: newModels }));
-  };
-
-  const updateModel = (index: number, field: keyof ProductModel, value: number | string) => {
-    setFormData((prev) => ({
-      ...prev,
-      models: prev.models.map((m, i) => (i === index ? { ...m, [field]: value } : m)),
-    }));
-  };
-
-  const getModelLabel = (model: ProductModel): string => {
-    return model.tierIndex.map((idx, i) => formData.tierVariations[i]?.options[idx] || "").join(" / ");
-  };
-
   if (!product) return null;
 
   return (
@@ -583,21 +458,19 @@ export function UpdateModelProduct({
                 <Label className="text-sm font-medium">Tên sản phẩm <span className="text-red-500">*</span></Label>
                 <Input 
                   value={formData.name} 
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))} 
                   required 
                   disabled={isLoading} 
                   className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white" 
-                  placeholder="VD: Áo thun nam cotton" 
                 />
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Slug (URL)</Label>
                 <Input 
                   value={formData.slug} 
-                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })} 
+                  onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))} 
                   disabled={isLoading} 
                   className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white" 
-                  placeholder="Để trống sẽ tự tạo từ tên" 
                 />
               </div>
             </div>
@@ -606,7 +479,7 @@ export function UpdateModelProduct({
                 <Label className="text-sm font-medium">Danh mục</Label>
                 <Select 
                   value={formData.category} 
-                  onValueChange={(value) => setFormData({ ...formData, category: value })} 
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))} 
                   disabled={isLoading}
                 >
                   <SelectTrigger className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white">
@@ -620,13 +493,31 @@ export function UpdateModelProduct({
                 </Select>
               </div>
               <div className="space-y-2">
+                <Label className="text-sm font-medium">Danh mục Shop</Label>
+                <Select 
+                  value={formData.shopCategory} 
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, shopCategory: value }))} 
+                  disabled={isLoading}
+                >
+                  <SelectTrigger className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white">
+                    <SelectValue placeholder="Chọn danh mục của shop" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {shopCategories.filter(cat => cat.isActive).map((cat) => (
+                      <SelectItem key={cat._id} value={cat._id}>{cat.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
                 <Label className="text-sm font-medium">Thương hiệu</Label>
                 <Input 
                   value={formData.brand} 
-                  onChange={(e) => setFormData({ ...formData, brand: e.target.value })} 
+                  onChange={(e) => setFormData(prev => ({ ...prev, brand: e.target.value }))} 
                   disabled={isLoading} 
                   className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white" 
-                  placeholder="VD: Nike, Adidas, Uniqlo" 
                 />
               </div>
             </div>
@@ -634,11 +525,10 @@ export function UpdateModelProduct({
               <Label className="text-sm font-medium">Mô tả sản phẩm</Label>
               <Textarea 
                 value={formData.description} 
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })} 
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))} 
                 rows={3} 
                 disabled={isLoading} 
                 className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white resize-none" 
-                placeholder="Mô tả chi tiết về sản phẩm, chất liệu, công dụng..." 
               />
             </div>
           </div>
@@ -647,9 +537,7 @@ export function UpdateModelProduct({
           <div className="space-y-4">
             <div className="border-b pb-2">
               <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Ảnh mô tả chi tiết</h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                Thêm ảnh mô tả chi tiết sản phẩm (tối đa 20 ảnh). Ảnh này sẽ hiển thị trong phần mô tả chi tiết.
-              </p>
+              <p className="text-xs text-muted-foreground mt-1">Tối đa 20 ảnh.</p>
             </div>
             <div className="flex flex-wrap gap-3">
               {/* Existing images from server */}
@@ -694,11 +582,6 @@ export function UpdateModelProduct({
                 </label>
               )}
             </div>
-            {(formData.descriptionImages.existing.length + formData.descriptionImages.newFiles.length) > 0 && (
-              <p className="text-xs text-muted-foreground">
-                Đã chọn {formData.descriptionImages.existing.length + formData.descriptionImages.newFiles.length}/20 ảnh
-              </p>
-            )}
           </div>
 
           {/* Pricing & Status */}
@@ -706,14 +589,13 @@ export function UpdateModelProduct({
             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider border-b pb-2">Giá & Trạng thái</h3>
             <div className="grid grid-cols-4 gap-4">
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Giá bán (VND) <span className="text-red-500">*</span></Label>
+                <Label className="text-sm font-medium">Giá bán (VND)</Label>
                 <Input 
                   type="number" 
                   value={formData.price.currentPrice || ""} 
-                  onChange={(e) => setFormData({ ...formData, price: { ...formData.price, currentPrice: Number(e.target.value) } })} 
+                  onChange={(e) => setFormData(prev => ({ ...prev, price: { ...prev.price, currentPrice: Number(e.target.value) } }))} 
                   disabled={isLoading} 
                   className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white" 
-                  placeholder="150000" 
                 />
               </div>
               <div className="space-y-2">
@@ -721,10 +603,9 @@ export function UpdateModelProduct({
                 <Input 
                   type="number" 
                   value={formData.price.discountPrice || ""} 
-                  onChange={(e) => setFormData({ ...formData, price: { ...formData.price, discountPrice: Number(e.target.value) || 0 } })} 
+                  onChange={(e) => setFormData(prev => ({ ...prev, price: { ...prev.price, discountPrice: Number(e.target.value) || 0 } }))} 
                   disabled={isLoading} 
                   className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white" 
-                  placeholder="120000" 
                 />
               </div>
               <div className="space-y-2">
@@ -732,15 +613,14 @@ export function UpdateModelProduct({
                 <Input 
                   type="number" 
                   value={formData.stock || ""} 
-                  onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) })} 
+                  onChange={(e) => setFormData(prev => ({ ...prev, stock: Number(e.target.value) }))} 
                   disabled={isLoading} 
                   className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white" 
-                  placeholder="100" 
                 />
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Trạng thái</Label>
-                <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value as typeof formData.status })} disabled={isLoading}>
+                <Select value={formData.status} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as typeof formData.status }))} disabled={isLoading}>
                   <SelectTrigger className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white"><SelectValue /></SelectTrigger>
                   <SelectContent>{STATUS_OPTIONS.map((opt) => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}</SelectContent>
                 </Select>
@@ -748,11 +628,11 @@ export function UpdateModelProduct({
             </div>
             <div className="flex gap-6">
               <div className="flex items-center gap-3 p-3 bg-gray-50/50 rounded-xl border border-border/50">
-                <Switch checked={formData.isNewArrival} onCheckedChange={(checked) => setFormData({ ...formData, isNewArrival: checked })} disabled={isLoading} />
+                <Switch checked={formData.isNewArrival} onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isNewArrival: checked }))} disabled={isLoading} />
                 <Label className="text-sm font-medium cursor-pointer">Sản phẩm mới</Label>
               </div>
               <div className="flex items-center gap-3 p-3 bg-gray-50/50 rounded-xl border border-border/50">
-                <Switch checked={formData.isFeatured} onCheckedChange={(checked) => setFormData({ ...formData, isFeatured: checked })} disabled={isLoading} />
+                <Switch checked={formData.isFeatured} onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isFeatured: checked }))} disabled={isLoading} />
                 <Label className="text-sm font-medium cursor-pointer">Sản phẩm nổi bật</Label>
               </div>
             </div>
@@ -764,204 +644,189 @@ export function UpdateModelProduct({
             <div className="grid grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Cân nặng (gram)</Label>
-                <Input type="number" value={formData.weight || ""} onChange={(e) => setFormData({ ...formData, weight: Number(e.target.value) })} disabled={isLoading} className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white" placeholder="500" />
+                <Input type="number" value={formData.weight || ""} onChange={(e) => setFormData(prev => ({ ...prev, weight: Number(e.target.value) }))} disabled={isLoading} className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white" />
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Dài (cm)</Label>
-                <Input type="number" value={formData.dimensions.length || ""} onChange={(e) => setFormData({ ...formData, dimensions: { ...formData.dimensions, length: Number(e.target.value) } })} disabled={isLoading} className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white" placeholder="30" />
+                <Input type="number" value={formData.dimensions.length || ""} onChange={(e) => setFormData(prev => ({ ...prev, dimensions: { ...prev.dimensions, length: Number(e.target.value) } }))} disabled={isLoading} className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white" />
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Rộng (cm)</Label>
-                <Input type="number" value={formData.dimensions.width || ""} onChange={(e) => setFormData({ ...formData, dimensions: { ...formData.dimensions, width: Number(e.target.value) } })} disabled={isLoading} className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white" placeholder="20" />
+                <Input type="number" value={formData.dimensions.width || ""} onChange={(e) => setFormData(prev => ({ ...prev, dimensions: { ...prev.dimensions, width: Number(e.target.value) } }))} disabled={isLoading} className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white" />
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Cao (cm)</Label>
-                <Input type="number" value={formData.dimensions.height || ""} onChange={(e) => setFormData({ ...formData, dimensions: { ...formData.dimensions, height: Number(e.target.value) } })} disabled={isLoading} className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white" placeholder="5" />
+                <Input type="number" value={formData.dimensions.height || ""} onChange={(e) => setFormData(prev => ({ ...prev, dimensions: { ...prev.dimensions, height: Number(e.target.value) } }))} disabled={isLoading} className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white" />
               </div>
             </div>
           </div>
 
-          {/* Tier Variations */}
+          {/* Variants Section */}
           <div className="space-y-4">
-            <div className="border-b pb-2">
-              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Phân loại hàng</h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                Thêm phân loại đầu tiên (VD: Màu sắc) để upload ảnh cho từng tùy chọn. Ảnh của tùy chọn đầu tiên sẽ là ảnh chính của sản phẩm.
-              </p>
-            </div>
-            <div className="grid grid-cols-[1fr_2fr_auto] gap-2">
-              <Input 
-                value={newTierVariation.name} 
-                onChange={(e) => setNewTierVariation({ ...newTierVariation, name: e.target.value })} 
-                placeholder={formData.tierVariations.length === 0 ? "VD: Màu sắc" : "VD: Kích thước"} 
-                disabled={isLoading} 
-                className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white" 
-              />
-              <Input 
-                value={newTierVariation.options} 
-                onChange={(e) => setNewTierVariation({ ...newTierVariation, options: e.target.value })} 
-                placeholder={formData.tierVariations.length === 0 ? "VD: Đỏ, Xanh, Đen" : "VD: S, M, L, XL"} 
-                disabled={isLoading} 
-                className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white" 
-              />
-              <Button type="button" onClick={addTierVariation} disabled={isLoading || formData.tierVariations.length >= 3} className="rounded-xl bg-black text-white hover:bg-black/90">
-                <Plus className="h-4 w-4" />
+            <div className="border-b pb-2 flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Phân loại hàng (Variants)</h3>
+                <p className="text-xs text-muted-foreground mt-1">Các biến thể sản phẩm theo màu sắc. SKU tự động tạo.</p>
+              </div>
+              <Button type="button" onClick={addVariant} variant="outline" size="sm" disabled={isLoading} className="rounded-xl">
+                <Plus className="h-4 w-4 mr-1" /> Thêm variant
               </Button>
             </div>
 
-            {/* Display added tier variations */}
-            {formData.tierVariations.length > 0 && (
-              <div className="space-y-4">
-                {formData.tierVariations.map((tier, tierIndex) => (
-                  <div key={tierIndex} className="border rounded-xl p-4 bg-gray-50/30">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-gray-700">{tier.name}</span>
-                        {tierIndex === 0 && (
-                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Có ảnh</span>
-                        )}
-                      </div>
-                      <button type="button" onClick={() => removeTierVariation(tierIndex)} className="text-red-500 hover:text-red-700">
-                        <Trash2 className="h-4 w-4" />
+            {/* Product-level Sizes */}
+            <div className="p-4 bg-blue-50/50 rounded-xl border border-blue-100">
+              <Label className="text-sm font-medium text-blue-700">Kích thước sản phẩm (áp dụng cho tất cả variants)</Label>
+              <p className="text-xs text-blue-600 mb-2">VD: S, M, L, XL hoặc 36, 37, 38, 39, 40</p>
+              <div className="flex gap-2 mb-2">
+                <Input 
+                  value={newSize} 
+                  onChange={(e) => setNewSize(e.target.value)} 
+                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addSize())}
+                  placeholder="Nhập size và nhấn Enter" 
+                  disabled={isLoading} 
+                  className="rounded-lg text-sm h-9 bg-white" 
+                />
+                <Button type="button" onClick={addSize} disabled={isLoading} variant="outline" size="sm" className="rounded-lg">
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+              {formData.sizes.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {formData.sizes.map((size) => (
+                    <span key={size} className="inline-flex items-center gap-1 bg-blue-100 text-blue-700 px-2 py-1 rounded-lg text-sm">
+                      {size}
+                      <button type="button" onClick={() => removeSize(size)} className="text-blue-500 hover:text-red-500">
+                        <X className="h-3 w-3" />
                       </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {formData.variants.length === 0 ? (
+              <div className="text-center py-8 text-gray-400 border-2 border-dashed rounded-xl">
+                <p className="text-sm">Chưa có variant nào</p>
+                <p className="text-xs mt-1">Nhấn &quot;Thêm variant&quot; để tạo biến thể sản phẩm</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {formData.variants.map((variant, idx) => (
+                  <div key={variant._id} className="border rounded-xl p-4 space-y-4 bg-gray-50/30">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-700">
+                        Variant #{idx + 1}
+                        {!variant._id.startsWith('temp-') && <span className="text-xs text-gray-400 ml-2">(ID: {variant._id.slice(-6)})</span>}
+                      </span>
+                      <Button type="button" onClick={() => removeVariant(idx)} variant="ghost" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-50">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
 
-                    {/* Options with images (only for first tier) */}
-                    <div className="space-y-3">
-                      {tier.options.map((option, optIndex) => (
-                        <div key={optIndex} className="bg-white rounded-lg p-3 border">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium">{option}</span>
-                              {tierIndex === 0 && optIndex === 0 && (
-                                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Ảnh chính</span>
-                              )}
-                            </div>
+                    {/* Variant Basic Info - Name and Color only */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Tên hiển thị</Label>
+                        <Input 
+                          value={variant.name} 
+                          onChange={(e) => updateVariant(idx, 'name', e.target.value)} 
+                          placeholder="VD: Đỏ, Xanh Navy, Đen" 
+                          className="rounded-lg text-sm h-9"
+                          disabled={isLoading}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Màu sắc</Label>
+                        <Input 
+                          value={variant.color} 
+                          onChange={(e) => updateVariant(idx, 'color', e.target.value)} 
+                          placeholder="VD: Đỏ, Xanh, Đen" 
+                          className="rounded-lg text-sm h-9"
+                          disabled={isLoading}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Variant Price & Stock */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Giá (VND)</Label>
+                        <Input 
+                          type="number" 
+                          value={variant.price || ""} 
+                          onChange={(e) => updateVariant(idx, 'price', Number(e.target.value))} 
+                          className="rounded-lg text-sm h-9"
+                          disabled={isLoading}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Tồn kho</Label>
+                        <Input 
+                          type="number" 
+                          value={variant.stock || ""} 
+                          onChange={(e) => updateVariant(idx, 'stock', Number(e.target.value))} 
+                          className="rounded-lg text-sm h-9"
+                          disabled={isLoading}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Variant Images */}
+                    <div className="space-y-2">
+                      <Label className="text-xs">Ảnh variant (tối đa 8 ảnh)</Label>
+                      <div className="flex flex-wrap gap-2">
+                        {/* Existing images */}
+                        {variant.images.existing.map((url, imgIdx) => (
+                          <div key={`existing-${imgIdx}`} className="relative w-16 h-16 rounded-lg overflow-hidden border group">
+                            <Image src={url} alt={`Variant ${idx + 1} - ${imgIdx + 1}`} fill className="object-cover" />
                             <button 
                               type="button" 
-                              onClick={() => removeOptionFromTier(tierIndex, optIndex)} 
-                              className="text-red-400 hover:text-red-600 p-1"
-                              title="Xóa tùy chọn này"
+                              onClick={() => removeExistingVariantImage(idx, imgIdx)} 
+                              className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
                             >
-                              <X className="h-3.5 w-3.5" />
+                              <X className="h-2.5 w-2.5" />
                             </button>
                           </div>
-                          
-                          {/* Image upload for first tier only */}
-                          {tierIndex === 0 && (
-                            <div className="flex flex-wrap gap-2">
-                              {/* Existing images */}
-                              {tier.optionImages?.[optIndex]?.existing?.map((url, imgIndex) => (
-                                <div key={`existing-${imgIndex}`} className="relative w-16 h-16 rounded-lg overflow-hidden border group">
-                                  <Image src={url} alt={`${option} ${imgIndex}`} fill className="object-cover" />
-                                  <button 
-                                    type="button" 
-                                    onClick={() => removeExistingOptionImage(optIndex, imgIndex)} 
-                                    className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                                  >
-                                    <X className="h-2.5 w-2.5" />
-                                  </button>
-                                </div>
-                              ))}
-                              {/* New images */}
-                              {tier.optionImages?.[optIndex]?.newPreviews?.map((preview, imgIndex) => (
-                                <div key={`new-${imgIndex}`} className="relative w-16 h-16 rounded-lg overflow-hidden border group border-green-300">
-                                  <Image src={preview} alt={`${option} new ${imgIndex}`} fill className="object-cover" />
-                                  <span className="absolute bottom-0.5 left-0.5 text-[8px] bg-green-500 text-white px-1 rounded">Mới</span>
-                                  <button 
-                                    type="button" 
-                                    onClick={() => removeNewOptionImage(optIndex, imgIndex)} 
-                                    className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                                  >
-                                    <X className="h-2.5 w-2.5" />
-                                  </button>
-                                </div>
-                              ))}
-                              {/* Upload button */}
-                              {((tier.optionImages?.[optIndex]?.existing?.length || 0) + (tier.optionImages?.[optIndex]?.newFiles?.length || 0)) < 8 && (
-                                <label className="w-16 h-16 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:border-[#E53935] hover:bg-red-50/50 transition-colors">
-                                  <Upload className="h-4 w-4 text-gray-400" />
-                                  <span className="text-[10px] text-gray-400">Thêm</span>
-                                  <input 
-                                    type="file" 
-                                    accept="image/*" 
-                                    multiple 
-                                    onChange={(e) => handleOptionImageChange(optIndex, e)} 
-                                    className="hidden" 
-                                    disabled={isLoading} 
-                                  />
-                                </label>
-                              )}
-                              {((tier.optionImages?.[optIndex]?.existing?.length || 0) + (tier.optionImages?.[optIndex]?.newFiles?.length || 0)) === 0 && (
-                                <div className="flex items-center gap-1 text-xs text-gray-400">
-                                  <ImageIcon className="h-3 w-3" />
-                                  <span>Chưa có ảnh</span>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      ))}
+                        ))}
+                        {/* New images */}
+                        {variant.images.newPreviews.map((preview, imgIdx) => (
+                          <div key={`new-${imgIdx}`} className="relative w-16 h-16 rounded-lg overflow-hidden border border-green-300 group">
+                            <Image src={preview} alt={`New ${imgIdx + 1}`} fill className="object-cover" />
+                            <span className="absolute bottom-0.5 left-0.5 text-[8px] bg-green-500 text-white px-1 rounded">Mới</span>
+                            <button 
+                              type="button" 
+                              onClick={() => removeNewVariantImage(idx, imgIdx)} 
+                              className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="h-2.5 w-2.5" />
+                            </button>
+                          </div>
+                        ))}
+                        {(variant.images.existing.length + variant.images.newFiles.length) < 8 && (
+                          <label className="w-16 h-16 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:border-[#E53935] hover:bg-red-50/50 transition-colors">
+                            <Upload className="h-4 w-4 text-gray-400" />
+                            <input 
+                              type="file" 
+                              accept="image/*" 
+                              multiple 
+                              onChange={(e) => handleVariantImageChange(idx, e)} 
+                              className="hidden" 
+                              disabled={isLoading} 
+                            />
+                          </label>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
-
-                <Button 
-                  type="button" 
-                  onClick={generateModels} 
-                  variant="outline" 
-                  className="rounded-xl border-[#E53935] text-[#E53935] hover:bg-red-50"
-                >
-                  Tạo danh sách SKU ({formData.tierVariations.reduce((acc, t) => acc * t.options.length, 1)} phiên bản)
-                </Button>
               </div>
             )}
           </div>
 
-          {/* Models (SKU Table) */}
-          {formData.models.length > 0 && (
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider border-b pb-2">
-                Danh sách phiên bản ({formData.models.length} SKU)
-              </h3>
-              <div className="border rounded-xl overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left font-medium">Phân loại</th>
-                      <th className="px-4 py-3 text-left font-medium w-36">Giá (VND)</th>
-                      <th className="px-4 py-3 text-left font-medium w-28">Tồn kho</th>
-                      <th className="px-4 py-3 text-left font-medium w-36">SKU</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y">
-                    {formData.models.map((model, index) => (
-                      <tr key={model._id} className="hover:bg-gray-50/50">
-                        <td className="px-4 py-3 font-medium">{getModelLabel(model)}</td>
-                        <td className="px-4 py-3">
-                          <Input type="number" value={model.price || ""} onChange={(e) => updateModel(index, "price", Number(e.target.value))} className="h-8 rounded-lg" disabled={isLoading} placeholder="0" />
-                        </td>
-                        <td className="px-4 py-3">
-                          <Input type="number" value={model.stock || ""} onChange={(e) => updateModel(index, "stock", Number(e.target.value))} className="h-8 rounded-lg" disabled={isLoading} placeholder="0" />
-                        </td>
-                        <td className="px-4 py-3">
-                          <Input value={model.sku || ""} onChange={(e) => updateModel(index, "sku", e.target.value)} className="h-8 rounded-lg" disabled={isLoading} placeholder="SKU-001" />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* Attributes */}
+          {/* Attributes Section */}
           <div className="space-y-4">
-            <div className="border-b pb-2">
-              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Thông số kỹ thuật</h3>
-              <p className="text-xs text-muted-foreground mt-1">Thêm các thông số như Chất liệu, Xuất xứ, Bảo hành...</p>
-            </div>
-            <div className="grid grid-cols-[1fr_2fr_auto] gap-2">
+            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider border-b pb-2">Thông số kỹ thuật</h3>
+            <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
               <Input 
                 value={newAttribute.name} 
                 onChange={(e) => setNewAttribute({ ...newAttribute, name: e.target.value })} 
@@ -976,17 +841,17 @@ export function UpdateModelProduct({
                 disabled={isLoading} 
                 className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white" 
               />
-              <Button type="button" onClick={addAttribute} disabled={isLoading} className="rounded-xl bg-black text-white hover:bg-black/90">
+              <Button type="button" onClick={addAttribute} disabled={isLoading} variant="outline" className="rounded-xl">
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
             {formData.attributes.length > 0 && (
-              <div className="grid grid-cols-2 gap-2">
-                {formData.attributes.map((attr, index) => (
-                  <div key={index} className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-lg text-sm">
+              <div className="flex flex-wrap gap-2">
+                {formData.attributes.map((attr, i) => (
+                  <div key={i} className="flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-lg text-sm">
                     <span className="font-medium">{attr.name}:</span>
-                    <span className="text-muted-foreground">{attr.value}</span>
-                    <button type="button" onClick={() => removeAttribute(index)} className="ml-auto text-red-500 hover:text-red-700">
+                    <span>{attr.value}</span>
+                    <button type="button" onClick={() => removeAttribute(i)} className="text-gray-400 hover:text-red-500">
                       <X className="h-3 w-3" />
                     </button>
                   </div>
@@ -995,40 +860,37 @@ export function UpdateModelProduct({
             )}
           </div>
 
-          {/* Tags */}
+          {/* Tags Section */}
           <div className="space-y-4">
-            <div className="border-b pb-2">
-              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Tags</h3>
-              <p className="text-xs text-muted-foreground mt-1">Thêm tags để dễ tìm kiếm sản phẩm</p>
-            </div>
+            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider border-b pb-2">Tags</h3>
             <div className="flex gap-2">
               <Input 
                 value={newTag} 
                 onChange={(e) => setNewTag(e.target.value)} 
-                placeholder="Nhập tag và nhấn Enter hoặc nút +" 
+                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
+                placeholder="Nhập tag và nhấn Enter" 
                 disabled={isLoading} 
-                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }} 
                 className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white" 
               />
-              <Button type="button" onClick={addTag} disabled={isLoading} className="rounded-xl bg-black text-white hover:bg-black/90">
+              <Button type="button" onClick={addTag} disabled={isLoading} variant="outline" className="rounded-xl">
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
             {formData.tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
-                {formData.tags.map((tag, index) => (
-                  <TagItem key={index} tag={tag} onRemove={removeTag} />
+                {formData.tags.map((tag) => (
+                  <TagItem key={tag} tag={tag} onRemove={removeTag} />
                 ))}
               </div>
             )}
           </div>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-border/50">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading} className="rounded-xl border-gray-200">
+          {/* Submit Button */}
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading} className="rounded-xl">
               Hủy
             </Button>
-            <Button type="submit" className="rounded-xl bg-[#E53935] hover:bg-[#D32F2F] text-white px-8" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading} className="rounded-xl bg-[#E53935] hover:bg-[#D32F2F]">
               {isLoading ? "Đang cập nhật..." : "Cập nhật sản phẩm"}
             </Button>
           </div>

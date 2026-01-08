@@ -129,6 +129,8 @@ export default function CartPage() {
 
   const subtotal =
     cartData?.items?.reduce((sum, item) => {
+      // Skip items with null productId (deleted products)
+      if (item.productId === null) return sum;
       const discountPrice = item.price?.discountPrice ?? 0;
       const currentPrice = item.price?.currentPrice ?? 0;
       const effectivePrice =
@@ -149,19 +151,68 @@ export default function CartPage() {
   const hasCartItems = cartData?.items && cartData.items.length > 0;
   const hasSelectedItems = selectedItems && selectedItems.length > 0;
 
-  // Group cart items by shop for display
+  // Group cart items by shop for display (filter out items with null productId)
   const itemsByShop = useMemo(() => {
     if (!cartData?.items) return [];
-    return groupCartItemsByShop(cartData.items);
+    // Filter out items where productId is null (deleted products)
+    const validItems = cartData.items.filter(item => item.productId !== null);
+    return groupCartItemsByShop(validItems);
+  }, [cartData?.items]);
+
+  // Get deleted product items (productId is null)
+  const deletedItems = useMemo(() => {
+    if (!cartData?.items) return [];
+    return cartData.items.filter(item => item.productId === null);
   }, [cartData?.items]);
 
   // Helper to get item image
   const getItemImage = (item: CartItem): string | null => {
+    // 1. Try variant images first
     if (item.variant?.images?.[0]) return item.variant.images[0];
-    if (typeof item.productId === 'object' && item.productId.images?.[0]) {
+    
+    // 2. Try to find variant from product.variants using variantId or modelId
+    if (typeof item.productId === 'object' && item.productId?.variants) {
+      const variantId = item.variantId || item.modelId;
+      if (variantId) {
+        const variant = item.productId.variants.find(v => v._id === variantId);
+        if (variant?.images?.[0]) return variant.images[0];
+      }
+      // Fallback to first variant's image
+      if (item.productId.variants[0]?.images?.[0]) {
+        return item.productId.variants[0].images[0];
+      }
+    }
+    
+    // 3. Try product images
+    if (typeof item.productId === 'object' && item.productId?.images?.[0]) {
       return item.productId.images[0];
     }
+    
     return null;
+  };
+
+  // Helper to get variation display text
+  const getVariationText = (item: CartItem): string | null => {
+    const parts: string[] = [];
+    
+    // Get color from variant
+    if (item.variant?.color) {
+      parts.push(item.variant.color);
+    } else if (item.variant?.name) {
+      parts.push(item.variant.name);
+    }
+    
+    // Get size
+    if (item.size) {
+      parts.push(`Size: ${item.size}`);
+    }
+    
+    // Fallback to variationInfo
+    if (parts.length === 0 && item.variationInfo) {
+      return item.variationInfo;
+    }
+    
+    return parts.length > 0 ? parts.join(', ') : null;
   };
 
   // Helper to get effective price
@@ -243,6 +294,27 @@ export default function CartPage() {
               </div>
             )}
 
+            {/* Warning for deleted products */}
+            {deletedItems.length > 0 && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-sm p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-yellow-700">
+                    <span className="text-sm">
+                      ⚠️ Có {deletedItems.length} sản phẩm không còn tồn tại và đã bị xóa khỏi hiển thị.
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      deletedItems.forEach(item => handleRemoveItem(item._id));
+                    }}
+                    className="text-sm text-red-500 hover:text-red-600 font-medium"
+                  >
+                    Xóa tất cả sản phẩm không hợp lệ
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Items Grouped by Shop */}
             <AnimatePresence mode="popLayout">
               {itemsByShop.map((shopGroup) => (
@@ -277,25 +349,25 @@ export default function CartPage() {
                   {shopGroup.items.map((item) => (
                     <div
                       key={item._id}
-                      className="flex items-start gap-4 p-4 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors"
+                      className="flex items-center gap-4 p-4 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors"
                     >
                       {/* Checkbox */}
                       <Checkbox
                         checked={item.selected || false}
                         onCheckedChange={() => handleToggleSelect(item._id)}
-                        className="h-4 w-4 mt-4 rounded border-gray-300 data-[state=checked]:bg-[#E53935] data-[state=checked]:border-[#E53935]"
+                        className="h-4 w-4 rounded border-gray-300 data-[state=checked]:bg-[#E53935] data-[state=checked]:border-[#E53935]"
                       />
 
                       {/* Image */}
                       <Link
-                        href={`/products/${typeof item.productId === 'object' ? item.productId.slug || item.productId._id : item.productId}`}
+                        href={`/products/${typeof item.productId === 'object' && item.productId ? (item.productId.slug || item.productId._id) : item.productId || ''}`}
                         className="shrink-0"
                       >
                         <div className="relative w-20 h-20 bg-gray-100 rounded overflow-hidden">
                           {getItemImage(item) ? (
                             <Image
                               src={getItemImage(item)!}
-                              alt={typeof item.productId === 'object' ? item.productId.name : 'Product'}
+                              alt={typeof item.productId === 'object' && item.productId ? item.productId.name : 'Product'}
                               fill
                               className="object-cover"
                             />
@@ -310,77 +382,65 @@ export default function CartPage() {
                       {/* Product Info */}
                       <div className="flex-1 min-w-0">
                         <Link
-                          href={`/products/${typeof item.productId === 'object' ? item.productId.slug || item.productId._id : item.productId}`}
+                          href={`/products/${typeof item.productId === 'object' && item.productId ? (item.productId.slug || item.productId._id) : item.productId || ''}`}
                           className="hover:text-[#E53935] transition-colors"
                         >
                           <h3 className="text-sm text-gray-800 line-clamp-2 mb-1">
-                            {typeof item.productId === 'object' ? item.productId.name : 'Sản phẩm'}
+                            {typeof item.productId === 'object' && item.productId ? item.productId.name : 'Sản phẩm'}
                           </h3>
                         </Link>
                         
                         {/* Variation Info */}
-                        {(item.variationInfo || item.variant) && (
-                          <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded inline-block mb-2">
-                            {item.variationInfo || 
-                              [item.variant?.color, item.variant?.size && `Size: ${item.variant.size}`]
-                                .filter(Boolean)
-                                .join(', ')
-                            }
+                        {getVariationText(item) && (
+                          <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded inline-block mb-1">
+                            {getVariationText(item)}
                           </div>
                         )}
 
-                        {/* Price & Quantity Row */}
-                        <div className="flex items-center justify-between mt-2">
-                          {/* Price */}
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-[#E53935] font-bold">
-                              {formatPrice(getEffectivePrice(item))}
-                            </span>
-                            {(item.price?.discountPrice ?? 0) > 0 &&
-                              (item.price?.currentPrice ?? 0) > (item.price?.discountPrice ?? 0) && (
-                              <span className="text-xs text-gray-400 line-through">
-                                {formatPrice(item.price?.currentPrice ?? 0)}
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Quantity Controls */}
-                          <div className="flex items-center">
-                            <button
-                              onClick={() => updateQuantity(item._id, item.quantity - 1)}
-                              disabled={item.quantity <= 1}
-                              className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-l text-gray-500 hover:bg-gray-50 disabled:opacity-50"
-                            >
-                              <Minus className="h-3 w-3" />
-                            </button>
-                            <input
-                              type="text"
-                              value={item.quantity}
-                              readOnly
-                              className="w-10 h-7 text-center text-sm border-y border-gray-200 focus:outline-none"
-                            />
-                            <button
-                              onClick={() => updateQuantity(item._id, item.quantity + 1)}
-                              className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-r text-gray-500 hover:bg-gray-50"
-                            >
-                              <Plus className="h-3 w-3" />
-                            </button>
-                          </div>
-
-                          {/* Subtotal */}
-                          <span className="text-[#E53935] font-bold min-w-[100px] text-right">
-                            {formatPrice(getEffectivePrice(item) * item.quantity)}
+                        {/* Price */}
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-[#E53935] font-bold">
+                            {formatPrice(getEffectivePrice(item))}
                           </span>
-
-                          {/* Remove */}
-                          <button
-                            onClick={() => handleRemoveItem(item._id)}
-                            className="text-gray-400 hover:text-red-500 ml-4"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
+                          {(item.price?.discountPrice ?? 0) > 0 &&
+                            (item.price?.currentPrice ?? 0) > (item.price?.discountPrice ?? 0) && (
+                            <span className="text-xs text-gray-400 line-through">
+                              {formatPrice(item.price?.currentPrice ?? 0)}
+                            </span>
+                          )}
                         </div>
                       </div>
+
+                      {/* Quantity Controls */}
+                      <div className="flex items-center shrink-0">
+                        <button
+                          onClick={() => updateQuantity(item._id, item.quantity - 1)}
+                          disabled={item.quantity <= 1}
+                          className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-l text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                        >
+                          <Minus className="h-3 w-3" />
+                        </button>
+                        <input
+                          type="text"
+                          value={item.quantity}
+                          readOnly
+                          className="w-10 h-7 text-center text-sm border-y border-gray-200 focus:outline-none bg-white"
+                        />
+                        <button
+                          onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                          className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-r text-gray-500 hover:bg-gray-50"
+                        >
+                          <Plus className="h-3 w-3" />
+                        </button>
+                      </div>
+
+                      {/* Remove */}
+                      <button
+                        onClick={() => handleRemoveItem(item._id)}
+                        className="text-gray-400 hover:text-red-500 shrink-0 ml-2"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
                   ))}
                 </motion.div>

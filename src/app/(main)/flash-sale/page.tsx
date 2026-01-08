@@ -85,7 +85,7 @@ const FlashSaleProductCard = memo(function FlashSaleProductCard({
   product: any;
 }) {
   const { flashSaleInfo } = product;
-  const productImage = product.images?.[0] || "/images/placeholder.png";
+  const productImage = product.variants?.[0]?.images?.[0] || "/images/placeholder.png";
 
   return (
     <div className="bg-white rounded-xl overflow-hidden border border-gray-100 hover:shadow-lg transition-all group">

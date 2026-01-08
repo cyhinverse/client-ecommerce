@@ -1,10 +1,6 @@
 import instance from "@/api/api";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { AxiosError } from "axios";
-
-interface ApiErrorResponse {
-  message?: string;
-}
+import { extractApiData, extractApiError } from "@/utils/api";
 
 // Get personalized recommendations ("Guess You Like")
 export const getForYouRecommendations = createAsyncThunk(
@@ -14,11 +10,9 @@ export const getForYouRecommendations = createAsyncThunk(
       const response = await instance.get("/recommendations/for-you", {
         params: { limit },
       });
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể lấy gợi ý";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -31,11 +25,9 @@ export const getRecentlyViewed = createAsyncThunk(
       const response = await instance.get("/recommendations/recently-viewed", {
         params: { limit },
       });
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể lấy sản phẩm đã xem";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -48,9 +40,7 @@ export const trackProductView = createAsyncThunk(
       await instance.post(`/recommendations/track-view/${productId}`);
       return productId;
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể theo dõi";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -66,11 +56,9 @@ export const getFrequentlyBoughtTogether = createAsyncThunk(
       const response = await instance.get(`/recommendations/fbt/${productId}`, {
         params: { limit },
       });
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể lấy sản phẩm thường mua cùng";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -86,11 +74,9 @@ export const getSimilarProducts = createAsyncThunk(
       const response = await instance.get(`/recommendations/similar/${productId}`, {
         params: { limit },
       });
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể lấy sản phẩm tương tự";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -106,11 +92,9 @@ export const getCategoryRecommendations = createAsyncThunk(
       const response = await instance.get(`/recommendations/category/${categoryId}`, {
         params: { limit },
       });
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể lấy gợi ý theo danh mục";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -121,11 +105,9 @@ export const getHomepageRecommendations = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await instance.get("/recommendations/homepage");
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể lấy gợi ý trang chủ";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );

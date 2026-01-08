@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAppSelector, useAppDispatch } from "@/hooks/hooks";
-import { createProduct, updateProduct, deleteProduct, getProductsByShop } from "@/features/product/productAction";
+import { createProduct, updateSellerProduct, deleteSellerProduct, getProductsByShop } from "@/features/product/productAction";
 import { CreateModelProduct } from "@/components/product/forms/CreateModelProduct";
 import { UpdateModelProduct } from "@/components/product/forms/UpdateModelProduct";
 import { ViewModelProduct } from "@/components/product/forms/ViewModelProduct";
@@ -88,14 +88,15 @@ export default function SellerProductsPage() {
     if (!selectedProduct) return;
     setIsSubmitting(true);
     try {
-      await dispatch(updateProduct({ productId: selectedProduct._id, updateData: formData })).unwrap();
+      await dispatch(updateSellerProduct({ productId: selectedProduct._id, updateData: formData })).unwrap();
       toast.success("Cập nhật sản phẩm thành công!");
       setUpdateModalOpen(false);
       setSelectedProduct(null);
       fetchProducts();
     } catch (error: unknown) {
-      const err = error as { message?: string };
-      toast.error(err.message || "Không thể cập nhật sản phẩm");
+      const err = error as { message?: string } | string;
+      const message = typeof err === 'string' ? err : err.message;
+      toast.error(message || "Không thể cập nhật sản phẩm");
     } finally {
       setIsSubmitting(false);
     }
@@ -105,12 +106,13 @@ export default function SellerProductsPage() {
   const handleDeleteProduct = async (product: Product) => {
     if (!confirm("Bạn có chắc muốn xóa sản phẩm này?")) return;
     try {
-      await dispatch(deleteProduct(product._id)).unwrap();
+      await dispatch(deleteSellerProduct(product._id)).unwrap();
       toast.success("Xóa sản phẩm thành công!");
       fetchProducts();
     } catch (error: unknown) {
-      const err = error as { message?: string };
-      toast.error(err.message || "Không thể xóa sản phẩm");
+      const err = error as { message?: string } | string;
+      const message = typeof err === 'string' ? err : err.message;
+      toast.error(message || "Không thể xóa sản phẩm");
     }
   };
 
@@ -149,22 +151,28 @@ export default function SellerProductsPage() {
 
   // Get main image from product
   const getMainImage = (product: Product): string | null => {
+    // New structure: variants with images (primary source)
+    if (product.variants?.[0]?.images?.[0]) {
+      return product.variants[0].images[0];
+    }
+    // Old structure: tierVariations (backward compatibility)
     if (product.tierVariations?.[0]?.images?.[0]) {
       const firstImage = product.tierVariations[0].images[0];
-      // Handle both 2D array (new) and flat array (old) structure
       if (Array.isArray(firstImage)) {
         return firstImage[0] || null;
       }
       return typeof firstImage === 'string' ? firstImage : null;
-    }
-    if (product.images?.[0]) {
-      return product.images[0];
     }
     return null;
   };
 
   // Get stock count
   const getStockCount = (product: Product): number => {
+    // New structure: variants with stock
+    if (product.variants && product.variants.length > 0) {
+      return product.variants.reduce((total, v) => total + (v.stock || 0), 0);
+    }
+    // Old structure: models (backward compatibility)
     if (product.models && product.models.length > 0) {
       return product.models.reduce((total, model) => total + (model.stock || 0), 0);
     }

@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { category, price } from "@/types/product";
+import { category, price, Shop } from "@/types/product";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,6 +34,7 @@ import {
   Eye,
   Filter,
   Package,
+  Store,
 } from "lucide-react";
 import { Product } from "@/types/product";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
@@ -56,11 +57,14 @@ interface ProductsTableProps {
     max: number | undefined
   ) => void;
   onStatusFilterChange: (isActive: boolean | null) => void;
+  onShopFilterChange?: (shopId: string) => void;
   selectedCategory: string;
   selectedBrand: string;
   selectedMinPrice?: number;
   selectedMaxPrice?: number;
   selectedStatus: boolean | null;
+  selectedShop?: string;
+  shops?: Shop[];
 }
 
 export function ProductsTable({
@@ -76,11 +80,14 @@ export function ProductsTable({
   onBrandFilterChange,
   onPriceFilterChange,
   onStatusFilterChange,
+  onShopFilterChange,
   selectedCategory,
   selectedBrand,
   selectedMinPrice,
   selectedMaxPrice,
   selectedStatus,
+  selectedShop = "all",
+  shops = [],
   isLoading = false,
 }: ProductsTableProps) {
   const [localMinPrice, setLocalMinPrice] = useState(
@@ -141,6 +148,12 @@ export function ProductsTable({
     return typeof category === "string" ? category : category.name || "None";
   };
 
+  const getShopInfo = (shop: string | Shop | undefined): { name: string; logo?: string } => {
+    if (!shop) return { name: "N/A" };
+    if (typeof shop === "string") return { name: shop };
+    return { name: shop.name || "N/A", logo: shop.logo };
+  };
+
   const getPriceDisplay = (price: price | null) => {
     if (!price) return "0₫";
     const currentPrice = price.currentPrice || 0;
@@ -161,37 +174,31 @@ export function ProductsTable({
   };
 
   const getStockCount = (product: Product) => {
-    // New schema: use models
+    // New schema: variants with stock
+    if (product.variants && product.variants.length > 0) {
+      return product.variants.reduce((total, v) => total + (v.stock || 0), 0);
+    }
+    // Old schema: models (backward compatibility)
     if (product.models && product.models.length > 0) {
       return product.models.reduce((total, model) => total + (model.stock || 0), 0);
     }
     // Fallback to stock field
-    if (product.stock) return product.stock;
-    // Legacy: variants
-    if (product.variants && product.variants.length > 0) {
-      return product.variants.reduce((total, variant) => total + (variant.stock || 0), 0);
-    }
-    return 0;
+    return product.stock || 0;
   };
 
-  // Get main image from tierVariations or legacy variants
+  // Get main image from variants or legacy tierVariations
   const getMainImage = (product: Product): string | null => {
-    // New schema: tierVariations[0].images[0]
+    // New schema: variants with images (primary source)
+    if (product.variants?.[0]?.images?.[0]) {
+      return product.variants[0].images[0];
+    }
+    // Old schema: tierVariations (backward compatibility)
     if (product.tierVariations?.[0]?.images?.[0]) {
       const firstImage = product.tierVariations[0].images[0];
-      // Handle both 2D array (new) and flat array (old) structure
       if (Array.isArray(firstImage)) {
         return firstImage[0] || null;
       }
       return typeof firstImage === 'string' ? firstImage : null;
-    }
-    // Fallback to images array
-    if (product.images?.[0]) {
-      return product.images[0];
-    }
-    // Legacy: variants
-    if (product.variants?.[0]?.images?.[0]) {
-      return product.variants[0].images[0];
     }
     return null;
   };
@@ -305,6 +312,27 @@ export function ProductsTable({
               <SelectItem value="false">Inactive</SelectItem>
             </SelectContent>
           </Select>
+
+          {/* Shop Filter */}
+          {onShopFilterChange && shops.length > 0 && (
+            <Select
+              value={selectedShop}
+              onValueChange={onShopFilterChange}
+            >
+              <SelectTrigger className="w-[160px] rounded-xl border-0 bg-white focus:ring-0">
+                <Store className="h-4 w-4 mr-2 text-muted-foreground" />
+                <SelectValue placeholder="Shop" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-0">
+                <SelectItem value="all">All Shops</SelectItem>
+                {shops.map((shop) => (
+                  <SelectItem key={shop._id} value={shop._id}>
+                    {shop.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
 
         {/* Page Size Filter */}
@@ -331,28 +359,31 @@ export function ProductsTable({
               <TableHead className="w-[70px] uppercase text-xs font-bold tracking-wider text-muted-foreground pl-6">
                 Image
               </TableHead>
-              <TableHead className="w-[250px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
+              <TableHead className="w-[220px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
                 Product Name
               </TableHead>
               <TableHead className="w-[140px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
+                Shop
+              </TableHead>
+              <TableHead className="w-[120px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
                 Category
               </TableHead>
-              <TableHead className="w-[120px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
+              <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
                 Brand
               </TableHead>
-              <TableHead className="w-[120px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
+              <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
                 Price
               </TableHead>
-              <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
+              <TableHead className="w-[80px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
                 Stock
               </TableHead>
-              <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
+              <TableHead className="w-[80px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
                 Sold
               </TableHead>
-              <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
+              <TableHead className="w-[90px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
                 Status
               </TableHead>
-              <TableHead className="w-[120px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
+              <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
                 Created At
               </TableHead>
               <TableHead className="w-[50px] uppercase text-xs font-bold tracking-wider text-muted-foreground text-right pr-6">
@@ -363,7 +394,7 @@ export function ProductsTable({
           <TableBody>
             {isLoading && (
               <TableRow>
-                <TableCell colSpan={10} className="h-32 text-center">
+                <TableCell colSpan={11} className="h-32 text-center">
                   <div className="flex justify-center items-center">
                     <SpinnerLoading />
                   </div>
@@ -373,7 +404,7 @@ export function ProductsTable({
             {!isLoading && products.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={10}
+                  colSpan={11}
                   className="h-32 text-center text-muted-foreground"
                 >
                   No products found.
@@ -446,6 +477,31 @@ export function ProductsTable({
                       >
                         {product.slug}
                       </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2 max-w-[140px]">
+                      {getShopInfo(product.shop).logo ? (
+                        <div className="relative h-6 w-6 rounded-md overflow-hidden bg-[#f7f7f7] shrink-0">
+                          <Image
+                            src={getShopInfo(product.shop).logo!}
+                            alt={getShopInfo(product.shop).name}
+                            width={24}
+                            height={24}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-6 w-6 rounded-md bg-[#f7f7f7] flex items-center justify-center shrink-0">
+                          <Store className="h-3 w-3 text-muted-foreground" />
+                        </div>
+                      )}
+                      <span
+                        className="text-sm text-muted-foreground truncate"
+                        title={getShopInfo(product.shop).name}
+                      >
+                        {getShopInfo(product.shop).name}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">

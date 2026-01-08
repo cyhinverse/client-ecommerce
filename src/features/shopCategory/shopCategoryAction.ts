@@ -1,11 +1,7 @@
 import instance from "@/api/api";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { CreateShopCategoryPayload, UpdateShopCategoryPayload } from "@/types/shopCategory";
-import { AxiosError } from "axios";
-
-interface ApiErrorResponse {
-  message?: string;
-}
+import { extractApiData, extractApiError } from "@/utils/api";
 
 // Get shop categories (by shop ID for public, or seller's own)
 export const getShopCategories = createAsyncThunk(
@@ -15,11 +11,9 @@ export const getShopCategories = createAsyncThunk(
       // If shopId provided, get public shop categories; otherwise get seller's own
       const url = shopId ? `/shop-categories/${shopId}` : "/shop-categories/my";
       const response = await instance.get(url);
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể lấy danh mục shop";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -30,11 +24,9 @@ export const createShopCategory = createAsyncThunk(
   async (data: CreateShopCategoryPayload, { rejectWithValue }) => {
     try {
       const response = await instance.post("/shop-categories", data);
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Tạo danh mục thất bại";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -48,11 +40,9 @@ export const updateShopCategory = createAsyncThunk(
   ) => {
     try {
       const response = await instance.put(`/shop-categories/${categoryId}`, data);
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Cập nhật danh mục thất bại";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -65,9 +55,7 @@ export const deleteShopCategory = createAsyncThunk(
       await instance.delete(`/shop-categories/${categoryId}`);
       return categoryId;
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Xóa danh mục thất bại";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );

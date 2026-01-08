@@ -69,9 +69,11 @@ export const voucherSlice = createSlice({
       })
       .addCase(getAllVouchers.fulfilled, (state, action) => {
         state.loading = false;
-        const data = action.payload?.data?.data || action.payload?.data || [];
+        // extractApiData already extracts the data
+        const payload = action.payload;
+        const data = Array.isArray(payload) ? payload : (payload?.data || []);
         state.vouchers = data;
-        state.pagination = action.payload?.data?.pagination || null;
+        state.pagination = payload?.pagination || null;
       })
       .addCase(getAllVouchers.rejected, (state, action) => {
         state.loading = false;
@@ -84,7 +86,8 @@ export const voucherSlice = createSlice({
       })
       .addCase(createVoucher.fulfilled, (state, action) => {
         state.loading = false;
-        const newVoucher = action.payload?.data || action.payload;
+        // extractApiData already extracts the data
+        const newVoucher = action.payload;
         state.vouchers.unshift(newVoucher);
       })
       .addCase(createVoucher.rejected, (state, action) => {
@@ -98,7 +101,8 @@ export const voucherSlice = createSlice({
       })
       .addCase(updateVoucher.fulfilled, (state, action) => {
         state.loading = false;
-        const updated = action.payload?.data || action.payload;
+        // extractApiData already extracts the data
+        const updated = action.payload;
         const index = state.vouchers.findIndex((v) => v._id === updated._id);
         if (index !== -1) {
           state.vouchers[index] = updated;
@@ -128,7 +132,8 @@ export const voucherSlice = createSlice({
       })
       .addCase(applyVoucherCode.fulfilled, (state, action) => {
         state.loading = false;
-        const result = action.payload?.data || action.payload;
+        // extractApiData already extracts the data
+        const result = action.payload;
         if (result?.scope === 'shop') {
           state.appliedShopVoucher = result;
         } else if (result?.scope === 'platform') {
@@ -146,7 +151,8 @@ export const voucherSlice = createSlice({
       })
       .addCase(getVoucherStatistics.fulfilled, (state, action) => {
         state.loading = false;
-        state.statistics = action.payload?.data || action.payload;
+        // extractApiData already extracts the data
+        state.statistics = action.payload;
       })
       .addCase(getVoucherStatistics.rejected, (state, action) => {
         state.loading = false;

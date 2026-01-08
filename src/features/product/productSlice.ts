@@ -15,6 +15,8 @@ import {
   updateProduct,
   deleteVariantByVariantId,
   getRelatedProducts,
+  updateSellerProduct,
+  deleteSellerProduct,
 } from "./productAction";
 import { ProductState } from "@/types/product";
 
@@ -54,7 +56,8 @@ export const productSlice = createSlice({
     });
     builder.addCase(getProductBySlug.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.currentProduct = action.payload?.data;
+      // extractApiData already extracts the data
+      state.currentProduct = action.payload;
     });
     builder.addCase(getProductBySlug.rejected, (state, action) => {
       state.isLoading = false;
@@ -68,8 +71,10 @@ export const productSlice = createSlice({
     });
     builder.addCase(getAllProducts.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.all = action.payload.data.data || [];
-      state.pagination = action.payload.data.pagination || null;
+      // extractApiData already extracts the data
+      const payload = action.payload;
+      state.all = payload?.data || payload || [];
+      state.pagination = payload?.pagination || null;
     });
     builder.addCase(getAllProducts.rejected, (state, action) => {
       state.isLoading = false;
@@ -83,8 +88,8 @@ export const productSlice = createSlice({
     });
     builder.addCase(getFeaturedProducts.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.featured = action.payload?.data || [];
-      console.log("Check data from product features: ", state.featured);
+      // extractApiData already extracts the data
+      state.featured = Array.isArray(action.payload) ? action.payload : (action.payload?.data || []);
     });
     builder.addCase(getFeaturedProducts.rejected, (state, action) => {
       state.isLoading = false;
@@ -98,7 +103,8 @@ export const productSlice = createSlice({
     });
     builder.addCase(getNewArrivals.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.newArrivals = action.payload?.data || [];
+      // extractApiData already extracts the data
+      state.newArrivals = Array.isArray(action.payload) ? action.payload : (action.payload?.data || []);
     });
     builder.addCase(getNewArrivals.rejected, (state, action) => {
       state.isLoading = false;
@@ -112,7 +118,8 @@ export const productSlice = createSlice({
     });
     builder.addCase(getOnSaleProducts.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.onSale = action.payload?.data || [];
+      // extractApiData already extracts the data
+      state.onSale = Array.isArray(action.payload) ? action.payload : (action.payload?.data || []);
     });
     builder.addCase(getOnSaleProducts.rejected, (state, action) => {
       state.isLoading = false;
@@ -126,7 +133,8 @@ export const productSlice = createSlice({
     });
     builder.addCase(getProductsByCategory.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.byCategory = action.payload?.data || [];
+      // extractApiData already extracts the data
+      state.byCategory = Array.isArray(action.payload) ? action.payload : (action.payload?.data || []);
     });
     builder.addCase(getProductsByCategory.rejected, (state, action) => {
       state.isLoading = false;
@@ -140,7 +148,9 @@ export const productSlice = createSlice({
     });
     builder.addCase(getProductsBySlugOfCategory.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.byCategory = action.payload?.data.data || [];
+      // extractApiData already extracts the data
+      const payload = action.payload;
+      state.byCategory = Array.isArray(payload) ? payload : (payload?.data || []);
     });
     builder.addCase(getProductsBySlugOfCategory.rejected, (state, action) => {
       state.isLoading = false;
@@ -155,7 +165,8 @@ export const productSlice = createSlice({
     });
     builder.addCase(getProductById.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.currentProduct = action.payload?.data;
+      // extractApiData already extracts the data
+      state.currentProduct = action.payload;
     });
     builder.addCase(getProductById.rejected, (state, action) => {
       state.isLoading = false;
@@ -169,7 +180,10 @@ export const productSlice = createSlice({
     });
     builder.addCase(createProduct.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.all.push(action.payload?.data);
+      // extractApiData already extracts the data
+      if (action.payload) {
+        state.all.push(action.payload);
+      }
     });
     builder.addCase(createProduct.rejected, (state, action) => {
       state.isLoading = false;
@@ -216,7 +230,8 @@ export const productSlice = createSlice({
     });
     builder.addCase(updateProduct.fulfilled, (state, action) => {
       state.isLoading = false;
-      const updatedProduct = action.payload?.data;
+      // extractApiData already extracts the data
+      const updatedProduct = action.payload;
       if (updatedProduct) {
         state.all = state.all.map((p) =>
           p._id === updatedProduct._id ? updatedProduct : p
@@ -250,8 +265,9 @@ export const productSlice = createSlice({
     });
     builder.addCase(deleteVariantByVariantId.fulfilled, (state, action) => {
       state.isLoading = false;
-      if (action.payload?.data) {
-         state.currentProduct = action.payload.data;
+      // extractApiData already extracts the data
+      if (action.payload) {
+         state.currentProduct = action.payload;
       }
     });
     builder.addCase(deleteVariantByVariantId.rejected, (state, action) => {
@@ -284,6 +300,44 @@ export const productSlice = createSlice({
     builder.addCase(getProductsByShop.rejected, (state, action) => {
       state.isLoading = false;
       state.error = action.error.message || "Failed to fetch shop products";
+    });
+
+    // =========================== SELLER UPDATE PRODUCT ===========================
+    builder.addCase(updateSellerProduct.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(updateSellerProduct.fulfilled, (state, action) => {
+      state.isLoading = false;
+      // extractApiData already extracts the data
+      const updatedProduct = action.payload;
+      if (updatedProduct) {
+        state.all = state.all.map((p) =>
+          p._id === updatedProduct._id ? updatedProduct : p
+        );
+        if (state.currentProduct?._id === updatedProduct._id) {
+          state.currentProduct = updatedProduct;
+        }
+      }
+    });
+    builder.addCase(updateSellerProduct.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = (action.payload as string) || "Failed to update product";
+    });
+
+    // =========================== SELLER DELETE PRODUCT ===========================
+    builder.addCase(deleteSellerProduct.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(deleteSellerProduct.fulfilled, (state, action) => {
+      state.isLoading = false;
+      const deletedId = action.payload.productId;
+      state.all = state.all.filter((p) => p._id !== deletedId);
+    });
+    builder.addCase(deleteSellerProduct.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = (action.payload as string) || "Failed to delete product";
     });
   },
 });

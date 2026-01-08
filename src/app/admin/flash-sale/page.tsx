@@ -249,7 +249,7 @@ export default function AdminFlashSalePage() {
                 >
                   <div className="aspect-square relative bg-white dark:bg-black/20 m-3 rounded-xl overflow-hidden">
                     <Image
-                      src={product.images?.[0] || ""}
+                      src={product.variants?.[0]?.images?.[0] || "/images/placeholder.png"}
                       alt={product.name}
                       fill
                       className="object-cover"

@@ -1,9 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { toast } from "sonner";
 import { 
   ShoppingCart, Search, Filter, Eye, Loader2, MoreHorizontal,
-  Clock, Package, Truck, CheckCircle2, XCircle
+  Clock, Package, Truck, CheckCircle2, XCircle, RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,42 +13,45 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useAppSelector, useAppDispatch } from "@/hooks/hooks";
-import { getOrdersByShop } from "@/features/order/orderAction";
-
-interface OrderItem {
-  product: {
-    _id: string;
-    name: string;
-    images: string[];
-  };
-  quantity: number;
-  price: number;
-}
-
-interface Order {
-  _id: string;
-  orderNumber: string;
-  user: { name: string; email: string };
-  items: OrderItem[];
-  totalAmount: number;
-  status: string;
-  createdAt: string;
-  shippingAddress: {
-    fullName: string;
-    phone: string;
-    address: string;
-  };
-}
+import { getSellerOrders, updateSellerOrderStatus } from "@/features/order/orderAction";
+import { Order } from "@/types/order";
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; icon: React.ElementType }> = {
   pending: { label: "Chờ xác nhận", color: "text-yellow-600", bg: "bg-yellow-50", icon: Clock },
-  processing: { label: "Đang xử lý", color: "text-blue-600", bg: "bg-blue-50", icon: Package },
-  shipping: { label: "Đang giao", color: "text-purple-600", bg: "bg-purple-50", icon: Truck },
+  confirmed: { label: "Đã xác nhận", color: "text-blue-600", bg: "bg-blue-50", icon: CheckCircle2 },
+  processing: { label: "Đang xử lý", color: "text-indigo-600", bg: "bg-indigo-50", icon: Package },
+  shipped: { label: "Đang giao", color: "text-purple-600", bg: "bg-purple-50", icon: Truck },
   delivered: { label: "Hoàn thành", color: "text-green-600", bg: "bg-green-50", icon: CheckCircle2 },
   cancelled: { label: "Đã hủy", color: "text-red-600", bg: "bg-red-50", icon: XCircle },
+};
+
+// Allowed status transitions for seller
+const allowedTransitions: Record<string, string[]> = {
+  pending: ["confirmed", "cancelled"],
+  confirmed: ["processing", "cancelled"],
+  processing: ["shipped"],
+  shipped: ["delivered"],
+  delivered: [],
+  cancelled: [],
 };
 
 const formatPrice = (price: number): string => {
@@ -67,51 +71,95 @@ const formatDate = (date: string): string => {
 export default function SellerOrdersPage() {
   const dispatch = useAppDispatch();
   const { myShop } = useAppSelector((state) => state.shop);
-  const { shopOrders, shopOrdersPagination, isLoadingShopOrders } = useAppSelector((state) => state.order);
+  const { shopOrders, shopOrdersPagination, isLoadingShopOrders, isUpdating } = useAppSelector((state) => state.order);
   
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
   const limit = 10;
 
+  // Modal states
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [updateStatusModalOpen, setUpdateStatusModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [newStatus, setNewStatus] = useState<string>("");
+
   useEffect(() => {
-    if (myShop?._id) {
-      dispatch(getOrdersByShop({
-        shopId: myShop._id,
-        page,
-        limit,
-        status: statusFilter,
-        search: searchTerm,
-      }));
-    }
-  }, [dispatch, myShop, page, statusFilter]);
+    fetchOrders();
+  }, [page, statusFilter]);
+
+  const fetchOrders = () => {
+    dispatch(getSellerOrders({
+      page,
+      limit,
+      status: statusFilter !== "all" ? statusFilter : undefined,
+    }));
+  };
 
   const handleSearch = () => {
-    if (myShop?._id) {
-      setPage(1);
-      dispatch(getOrdersByShop({
-        shopId: myShop._id,
-        page: 1,
-        limit,
-        status: statusFilter,
-        search: searchTerm,
-      }));
+    setPage(1);
+    fetchOrders();
+  };
+
+  const handleOpenViewModal = (order: Order) => {
+    setSelectedOrder(order);
+    setViewModalOpen(true);
+  };
+
+  const handleOpenUpdateStatusModal = (order: Order) => {
+    setSelectedOrder(order);
+    setNewStatus("");
+    setUpdateStatusModalOpen(true);
+  };
+
+  const handleUpdateStatus = async () => {
+    if (!selectedOrder || !newStatus) return;
+    
+    try {
+      await dispatch(updateSellerOrderStatus({
+        orderId: selectedOrder._id,
+        status: newStatus as "confirmed" | "processing" | "shipped" | "delivered" | "cancelled",
+      })).unwrap();
+      toast.success("Cập nhật trạng thái đơn hàng thành công!");
+      setUpdateStatusModalOpen(false);
+      setSelectedOrder(null);
+      fetchOrders();
+    } catch (error: unknown) {
+      const err = error as string | { message?: string };
+      const message = typeof err === 'string' ? err : err.message;
+      toast.error(message || "Không thể cập nhật trạng thái đơn hàng");
     }
+  };
+
+  const getAvailableStatuses = (currentStatus: string) => {
+    return allowedTransitions[currentStatus] || [];
   };
 
   const statusTabs = [
     { key: "all", label: "Tất cả" },
     { key: "pending", label: "Chờ xác nhận" },
+    { key: "confirmed", label: "Đã xác nhận" },
     { key: "processing", label: "Đang xử lý" },
-    { key: "shipping", label: "Đang giao" },
+    { key: "shipped", label: "Đang giao" },
     { key: "delivered", label: "Hoàn thành" },
     { key: "cancelled", label: "Đã hủy" },
   ];
 
-  // Cast shopOrders to local Order type for rendering
-  const orders = shopOrders as unknown as Order[];
+  const orders = shopOrders;
   const total = shopOrdersPagination?.totalItems || 0;
   const totalPages = shopOrdersPagination?.totalPages || 0;
+
+  // Get customer name from order
+  const getCustomerName = (order: Order): string => {
+    if (order.shippingAddress?.fullName) return order.shippingAddress.fullName;
+    if (typeof order.userId === 'object' && order.userId?.username) return order.userId.username;
+    return "Khách hàng";
+  };
+
+  // Get customer phone from order
+  const getCustomerPhone = (order: Order): string => {
+    return order.shippingAddress?.phone || "";
+  };
 
   if (!myShop) return null;
 
@@ -130,7 +178,7 @@ export default function SellerOrdersPage() {
 
       {/* Status Tabs */}
       <div className="bg-[#f7f7f7] rounded-2xl p-2">
-        <div className="flex gap-1">
+        <div className="flex gap-1 flex-wrap">
           {statusTabs.map((tab) => (
             <button
               key={tab.key}
@@ -170,7 +218,6 @@ export default function SellerOrdersPage() {
         </div>
       </div>
 
-
       {/* Orders List */}
       <div className="bg-[#f7f7f7] rounded-2xl overflow-hidden">
         {isLoadingShopOrders ? (
@@ -191,12 +238,16 @@ export default function SellerOrdersPage() {
               {orders.map((order, idx) => {
                 const status = statusConfig[order.status] || statusConfig.pending;
                 const StatusIcon = status.icon;
+                const availableStatuses = getAvailableStatuses(order.status);
+                
                 return (
                   <div key={order._id} className={`p-5 ${idx % 2 === 0 ? "bg-white" : "bg-white/50"}`}>
                     <div className="flex items-start justify-between mb-4">
                       <div>
                         <div className="flex items-center gap-3">
-                          <span className="font-semibold text-gray-800">#{order.orderNumber}</span>
+                          <span className="font-semibold text-gray-800">
+                            #{order.orderCode || order._id.slice(-8).toUpperCase()}
+                          </span>
                           <Badge className={`${status.bg} ${status.color} hover:${status.bg} rounded-full`}>
                             <StatusIcon className="h-3 w-3 mr-1" />
                             {status.label}
@@ -210,11 +261,26 @@ export default function SellerOrdersPage() {
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-40">
-                          <DropdownMenuItem className="cursor-pointer">
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuItem 
+                            className="cursor-pointer"
+                            onClick={() => handleOpenViewModal(order)}
+                          >
                             <Eye className="h-4 w-4 mr-2" />
-                            Chi tiết
+                            Xem chi tiết
                           </DropdownMenuItem>
+                          {availableStatuses.length > 0 && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem 
+                                className="cursor-pointer"
+                                onClick={() => handleOpenUpdateStatusModal(order)}
+                              >
+                                <RefreshCw className="h-4 w-4 mr-2" />
+                                Cập nhật trạng thái
+                              </DropdownMenuItem>
+                            </>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
@@ -223,12 +289,12 @@ export default function SellerOrdersPage() {
                       {/* Products */}
                       <div className="flex-1">
                         <div className="flex items-center gap-3">
-                          {order.items.slice(0, 3).map((item, i) => (
+                          {order.products.slice(0, 3).map((item, i) => (
                             <div key={i} className="relative w-14 h-14 rounded-lg overflow-hidden bg-[#f7f7f7]">
-                              {item.product?.images?.[0] ? (
+                              {item.image ? (
                                 <Image
-                                  src={item.product.images[0]}
-                                  alt={item.product.name}
+                                  src={item.image}
+                                  alt={item.name}
                                   fill
                                   className="object-cover"
                                 />
@@ -244,21 +310,21 @@ export default function SellerOrdersPage() {
                               )}
                             </div>
                           ))}
-                          {order.items.length > 3 && (
+                          {order.products.length > 3 && (
                             <div className="w-14 h-14 rounded-lg bg-[#f7f7f7] flex items-center justify-center text-sm text-gray-500">
-                              +{order.items.length - 3}
+                              +{order.products.length - 3}
                             </div>
                           )}
                         </div>
                         <p className="text-sm text-gray-600 mt-2">
-                          {order.items.length} sản phẩm
+                          {order.products.length} sản phẩm
                         </p>
                       </div>
 
                       {/* Customer */}
                       <div className="w-48">
-                        <p className="text-sm font-medium text-gray-800">{order.shippingAddress?.fullName || order.user?.name}</p>
-                        <p className="text-xs text-gray-500 mt-0.5">{order.shippingAddress?.phone}</p>
+                        <p className="text-sm font-medium text-gray-800">{getCustomerName(order)}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">{getCustomerPhone(order)}</p>
                       </div>
 
                       {/* Total */}
@@ -302,6 +368,130 @@ export default function SellerOrdersPage() {
           </>
         )}
       </div>
+
+      {/* View Order Modal */}
+      <Dialog open={viewModalOpen} onOpenChange={setViewModalOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Chi tiết đơn hàng</DialogTitle>
+            <DialogDescription>
+              Mã đơn: #{selectedOrder?.orderCode || selectedOrder?._id.slice(-8).toUpperCase()}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedOrder && (
+            <div className="space-y-4">
+              {/* Order Status */}
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">Trạng thái:</span>
+                <Badge className={`${statusConfig[selectedOrder.status]?.bg} ${statusConfig[selectedOrder.status]?.color} rounded-full`}>
+                  {statusConfig[selectedOrder.status]?.label}
+                </Badge>
+              </div>
+
+              {/* Customer Info */}
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h4 className="font-medium mb-2">Thông tin khách hàng</h4>
+                <p className="text-sm">{getCustomerName(selectedOrder)}</p>
+                <p className="text-sm text-gray-500">{getCustomerPhone(selectedOrder)}</p>
+                <p className="text-sm text-gray-500">{selectedOrder.shippingAddress?.address}</p>
+              </div>
+
+              {/* Products */}
+              <div>
+                <h4 className="font-medium mb-2">Sản phẩm</h4>
+                <div className="space-y-2">
+                  {selectedOrder.products.map((item, i) => (
+                    <div key={i} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                      <div className="relative w-12 h-12 rounded overflow-hidden bg-white">
+                        {item.image ? (
+                          <Image src={item.image} alt={item.name} fill className="object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Package className="h-4 w-4 text-gray-400" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{item.name}</p>
+                        <p className="text-xs text-gray-500">x{item.quantity}</p>
+                      </div>
+                      <p className="text-sm font-medium">{formatPrice(item.price * item.quantity)}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Total */}
+              <div className="border-t pt-4">
+                <div className="flex justify-between text-sm">
+                  <span>Tạm tính:</span>
+                  <span>{formatPrice(selectedOrder.subtotal)}</span>
+                </div>
+                {selectedOrder.discountShop && selectedOrder.discountShop > 0 && (
+                  <div className="flex justify-between text-sm text-green-600">
+                    <span>Giảm giá shop:</span>
+                    <span>-{formatPrice(selectedOrder.discountShop)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between font-bold mt-2">
+                  <span>Tổng cộng:</span>
+                  <span className="text-primary">{formatPrice(selectedOrder.totalAmount)}</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Update Status Modal */}
+      <Dialog open={updateStatusModalOpen} onOpenChange={setUpdateStatusModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cập nhật trạng thái đơn hàng</DialogTitle>
+            <DialogDescription>
+              Chọn trạng thái mới cho đơn hàng #{selectedOrder?.orderCode || selectedOrder?._id.slice(-8).toUpperCase()}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedOrder && (
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-gray-500 mb-2">Trạng thái hiện tại:</p>
+                <Badge className={`${statusConfig[selectedOrder.status]?.bg} ${statusConfig[selectedOrder.status]?.color} rounded-full`}>
+                  {statusConfig[selectedOrder.status]?.label}
+                </Badge>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 mb-2">Chọn trạng thái mới:</p>
+                <Select value={newStatus} onValueChange={setNewStatus}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn trạng thái" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getAvailableStatuses(selectedOrder.status).map((status) => (
+                      <SelectItem key={status} value={status}>
+                        {statusConfig[status]?.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setUpdateStatusModalOpen(false)}>
+              Hủy
+            </Button>
+            <Button 
+              onClick={handleUpdateStatus} 
+              disabled={!newStatus || isUpdating}
+              className="bg-primary"
+            >
+              {isUpdating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Cập nhật
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

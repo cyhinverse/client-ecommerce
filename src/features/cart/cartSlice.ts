@@ -229,13 +229,8 @@ export const cartSlice = createSlice({
       state.isLoading = false;
       state.error = null;
 
-      // Handle different API response structures
-      let cartData = null;
-      if (action.payload.data) {
-        cartData = action.payload.data;
-      } else {
-        cartData = action.payload;
-      }
+      // extractApiData already extracts the data
+      const cartData = action.payload;
 
       if (cartData && cartData.items) {
         cartData.items = cartData.items.map((item: CartItem) => ({
@@ -271,12 +266,8 @@ export const cartSlice = createSlice({
       state.isLoading = false;
       state.error = null;
 
-      let cartData = null;
-      if (action.payload.data) {
-        cartData = action.payload.data;
-      } else {
-        cartData = action.payload;
-      }
+      // extractApiData already extracts the data
+      const cartData = action.payload;
 
       if (cartData && cartData.items) {
         cartData.items = cartData.items.map((item: CartItem) => ({
@@ -302,12 +293,8 @@ export const cartSlice = createSlice({
       state.isLoading = false;
       state.error = null;
 
-      let cartData = null;
-      if (action.payload.data) {
-        cartData = action.payload.data;
-      } else if (action.payload) {
-        cartData = action.payload;
-      }
+      // extractApiData already extracts the data
+      const cartData = action.payload;
 
       if (cartData && cartData.items) {
         cartData.items = cartData.items.map((item: CartItem) => ({
@@ -344,12 +331,8 @@ export const cartSlice = createSlice({
       state.isLoading = false;
       state.error = null;
 
-      let cartData = null;
-      if (action.payload.data) {
-        cartData = action.payload.data;
-      } else {
-        cartData = action.payload;
-      }
+      // extractApiData already extracts the data
+      const cartData = action.payload;
 
       state.data = cartData;
       state.selectedItems = [];
@@ -370,12 +353,8 @@ export const cartSlice = createSlice({
       state.error = null;
       const oldItemsWithVariants = state.data?.items || [];
 
-      let cartData = null;
-      if (action.payload.data) {
-        cartData = action.payload.data;
-      } else if (action.payload) {
-        cartData = action.payload;
-      }
+      // extractApiData already extracts the data
+      const cartData = action.payload;
 
       if (cartData) {
         // Optimize: Create map for O(1) lookup instead of O(N) find
@@ -423,12 +402,8 @@ export const cartSlice = createSlice({
       state.isLoading = false;
       state.error = null;
 
-      let cartData = null;
-      if (action.payload.data) {
-        cartData = action.payload.data;
-      } else if (action.payload) {
-        cartData = action.payload;
-      }
+      // extractApiData already extracts the data
+      const cartData = action.payload;
 
       if (cartData && cartData.items) {
         cartData.items = cartData.items.map((item: CartItem) => ({

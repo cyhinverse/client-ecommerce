@@ -55,10 +55,6 @@ export interface Order {
   discountPlatform?: number;   // NEW: platform voucher discount
   totalAmount: number;
   
-  // DEPRECATED: Old discount fields (kept for backward compatibility)
-  discountCode?: string;
-  discountAmount?: number;
-  
   // Status and tracking
   status: OrderStatus;
   trackingNumber?: string;
@@ -125,6 +121,34 @@ export interface OrderState {
   shopOrdersPagination: PaginationData | null;
   isLoadingShopOrders: boolean;
   shopOrdersError: string | null;
+  // Seller statistics
+  sellerStatistics: SellerOrderStatistics | null;
+  isLoadingSellerStats: boolean;
+  sellerStatsError: string | null;
+}
+
+// Seller order statistics interface
+export interface SellerOrderStatistics {
+  summary: {
+    totalOrders: number;
+    pendingOrders: number;
+    completedOrders: number;
+    cancelledOrders: number;
+    totalRevenue: number;
+    avgOrderValue: number;
+  };
+  ordersByStatus: Record<string, { count: number; totalAmount: number }>;
+  dailyOrders: Array<{
+    date: string;
+    orders: number;
+    revenue: number;
+  }>;
+  topProducts: Array<{
+    _id: string;
+    productName: string;
+    totalQuantity: number;
+    totalRevenue: number;
+  }>;
 }
 
 // Order status count for stats

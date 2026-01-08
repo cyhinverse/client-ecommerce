@@ -46,6 +46,7 @@ const createProduct = (overrides: Partial<Product> = {}): Product => ({
   soldCount: 50,
   onSale: false,
   isActive: true,
+  variants: [],
   tierVariations: [],
   models: [],
   createdAt: new Date().toISOString(),
@@ -339,10 +340,10 @@ describe("Property 8: Product Variation Display", () => {
 
     // Verify tier variations structure
     expect(productWithVariations.tierVariations).toHaveLength(2);
-    expect(productWithVariations.tierVariations[0].name).toBe("Màu sắc");
-    expect(productWithVariations.tierVariations[0].options).toContain("Đỏ");
-    expect(productWithVariations.tierVariations[1].name).toBe("Kích thước");
-    expect(productWithVariations.tierVariations[1].options).toContain("S");
+    expect(productWithVariations.tierVariations?.[0]?.name).toBe("Màu sắc");
+    expect(productWithVariations.tierVariations?.[0]?.options).toContain("Đỏ");
+    expect(productWithVariations.tierVariations?.[1]?.name).toBe("Kích thước");
+    expect(productWithVariations.tierVariations?.[1]?.options).toContain("S");
   });
 
   it("should have models with correct tierIndex mapping", () => {
@@ -402,7 +403,7 @@ describe("Property 8: Product Variation Display", () => {
       ],
     });
 
-    const model = product.models[0];
+    const model = product.models![0];
     
     const display = getVariationDisplay(product, model);
     expect(display).toContain("Màu");

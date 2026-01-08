@@ -1,14 +1,16 @@
 import instance from "@/api/api";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { extractApiData, extractApiError } from "@/utils/api";
 
 export const getProductBySlug = createAsyncThunk(
   "product/:slug",
-  async (slug: string) => {
-    const response = await instance.get(`/products/slug/${slug}`);
-    if (!response) {
-      throw new Error("Failed to fetch product");
+  async (slug: string, { rejectWithValue }) => {
+    try {
+      const response = await instance.get(`/products/slug/${slug}`);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data;
   }
 );
 
@@ -28,122 +30,123 @@ export const getAllProducts = createAsyncThunk(
     rating?: string;
     colors?: string;
     sizes?: string;
-  }) => {
-    const {
-      page,
-      limit,
-      sort,
-      category,
-      brand,
-      minPrice,
-      maxPrice,
-      tags,
-      search,
-      isActive,
-      rating,
-      colors,
-      sizes,
-    } = params;
+  }, { rejectWithValue }) => {
+    try {
+      const {
+        page,
+        limit,
+        sort,
+        category,
+        brand,
+        minPrice,
+        maxPrice,
+        tags,
+        search,
+        isActive,
+        rating,
+        colors,
+        sizes,
+      } = params;
 
-    // Lọc bỏ các giá trị undefined/null/empty
-    const queryParams: Record<string, string | number | boolean | string[]> = {
-      page,
-      limit,
-    };
+      // Lọc bỏ các giá trị undefined/null/empty
+      const queryParams: Record<string, string | number | boolean | string[]> = {
+        page,
+        limit,
+      };
 
-    // Chỉ thêm các param có giá trị
-    if (sort) queryParams.sort = sort;
-    if (category) queryParams.category = category;
-    if (brand) queryParams.brand = brand;
-    if (minPrice) queryParams.minPrice = minPrice;
-    if (maxPrice) queryParams.maxPrice = maxPrice;
-    if (tags && tags.length > 0) queryParams.tags = tags.join(",");
-    if (search) queryParams.search = search;
-    if (isActive !== undefined) queryParams.isActive = isActive;
-    if (rating) queryParams.rating = rating;
-    if (colors) queryParams.colors = colors;
-    if (sizes) queryParams.sizes = sizes;
+      // Chỉ thêm các param có giá trị
+      if (sort) queryParams.sort = sort;
+      if (category) queryParams.category = category;
+      if (brand) queryParams.brand = brand;
+      if (minPrice) queryParams.minPrice = minPrice;
+      if (maxPrice) queryParams.maxPrice = maxPrice;
+      if (tags && tags.length > 0) queryParams.tags = tags.join(",");
+      if (search) queryParams.search = search;
+      if (isActive !== undefined) queryParams.isActive = isActive;
+      if (rating) queryParams.rating = rating;
+      if (colors) queryParams.colors = colors;
+      if (sizes) queryParams.sizes = sizes;
 
-    console.log("Final query params:", queryParams);
+      const response = await instance.get("/products", {
+        params: queryParams,
+      });
 
-    const response = await instance.get("/products", {
-      params: queryParams,
-    });
-
-    if (!response) {
-      throw new Error("Failed to fetch products");
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data;
   }
 );
 
 export const getFeaturedProducts = createAsyncThunk(
   "product/featured",
-  async () => {
-    const response = await instance.get(`/products/featured`);
-    if (!response) {
-      throw new Error("Failed to fetch featured products");
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await instance.get(`/products/featured`);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    // API trả về { status, message, code, data } - ta cần lấy data.data
-    return response.data;
   }
 );
 
 export const getProductsByCategory = createAsyncThunk(
   "product/category/:categoryId",
-  async (category: string) => {
-    const response = await instance.get(`/products/category/${category}`);
-    if (!response) {
-      throw new Error("Failed to fetch products by category");
+  async (category: string, { rejectWithValue }) => {
+    try {
+      const response = await instance.get(`/products/category/${category}`);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data;
   }
 );
 
 export const getNewArrivals = createAsyncThunk(
   "product/new-arrivals",
-  async () => {
-    const response = await instance.get(`/products/new-arrivals`);
-    if (!response) {
-      throw new Error("Failed to fetch new arrivals");
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await instance.get(`/products/new-arrivals`);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    // API trả về { status, message, code, data } - ta cần lấy data.data
-    return response.data;
   }
 );
 
 export const getOnSaleProducts = createAsyncThunk(
   "product/on-sale",
-  async () => {
-    const response = await instance.get(`/products/on-sale`);
-    if (!response) {
-      throw new Error("Failed to fetch on sale products");
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await instance.get(`/products/on-sale`);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    // API trả về { status, message, code, data } - ta cần lấy data.data
-    return response.data;
   }
 );
 
 export const getProductsBySlugOfCategory = createAsyncThunk(
   "products/category/:slug",
-  async (categorySlug: string) => {
-    const response = await instance.get(`/products/category/${categorySlug}`);
-    if (!response) {
-      throw new Error("Failed to fetch products by category slug");
+  async (categorySlug: string, { rejectWithValue }) => {
+    try {
+      const response = await instance.get(`/products/category/${categorySlug}`);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    console.log(`Lay product by slug cua category`, response.data);
-    return response.data;
   }
 );
 
 export const getProductById = createAsyncThunk(
   "product/id",
-  async (productId: string) => {
-    const res = await instance.get(`/products/${productId}`);
-    if (!res) {
-      throw new Error("Failed to fetch product by ID");
+  async (productId: string, { rejectWithValue }) => {
+    try {
+      const res = await instance.get(`/products/${productId}`);
+      return extractApiData(res);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return res.data;
   }
 );
 
@@ -156,14 +159,9 @@ export const createProduct = createAsyncThunk(
           "Content-Type": "multipart/form-data",
         },
       });
-      return response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as {
-        response?: { data?: { message?: string } };
-      };
-      return rejectWithValue(
-        axiosError.response?.data?.message || "Failed to create product"
-      );
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -176,16 +174,17 @@ export const updateProduct = createAsyncThunk(
   }: {
     productId: string;
     updateData: FormData;
-  }) => {
-    const response = await instance.put(`/products/${productId}`, updateData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-    if (!response) {
-      throw new Error("Failed to update product");
+  }, { rejectWithValue }) => {
+    try {
+      const response = await instance.put(`/products/${productId}`, updateData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data;
   }
 );
 
@@ -196,24 +195,9 @@ export const deleteProduct = createAsyncThunk(
       const response = await instance.delete(
         `/products/${productId}/permanent`
       );
-
-      // Kiểm tra status code thành công (2xx)
-      if (response.status >= 200 && response.status < 300) {
-        return response.data; // Trả về data từ server
-      } else {
-        throw new Error(response.data?.message || "Xóa sản phẩm thất bại");
-      }
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as {
-        response?: { data?: { message?: string } };
-        message?: string;
-      };
-      // Sử dụng rejectWithValue để có structured error
-      return rejectWithValue(
-        axiosError.response?.data?.message ||
-          axiosError.message ||
-          "Xóa sản phẩm thất bại"
-      );
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -221,53 +205,57 @@ export const deleteProduct = createAsyncThunk(
 // DEPRECATED: Old variant actions (kept for backward compatibility)
 export const deleteVariantByVariantId = createAsyncThunk(
   "variant/delete/:variantId",
-  async ({ productId, variantId }: { productId: string; variantId: string }) => {
-    const res = await instance.delete(`/products/${productId}/variants/${variantId}`);
-    if (!res) {
-      throw new Error("Failed to delete variant");
+  async ({ productId, variantId }: { productId: string; variantId: string }, { rejectWithValue }) => {
+    try {
+      const res = await instance.delete(`/products/${productId}/variants/${variantId}`);
+      return extractApiData(res);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return res.data;
   }
 );
 
 export const updateVariant = createAsyncThunk(
   "variant/update",
-  async (data: { productId: string; variantId: string }) => {
-    const { productId, variantId } = data;
-    const response = await instance.put(
-      `/products/${productId}/variants/${variantId}`
-    );
-    if (!response) {
-      throw new Error("Failed to update variant");
+  async (data: { productId: string; variantId: string }, { rejectWithValue }) => {
+    try {
+      const { productId, variantId } = data;
+      const response = await instance.put(
+        `/products/${productId}/variants/${variantId}`
+      );
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data;
   }
 );
 
 // NEW: Model actions for tier variation structure
 export const deleteModelById = createAsyncThunk(
   "model/delete/:modelId",
-  async ({ productId, modelId }: { productId: string; modelId: string }) => {
-    const res = await instance.delete(`/products/${productId}/models/${modelId}`);
-    if (!res) {
-      throw new Error("Failed to delete model");
+  async ({ productId, modelId }: { productId: string; modelId: string }, { rejectWithValue }) => {
+    try {
+      const res = await instance.delete(`/products/${productId}/models/${modelId}`);
+      return extractApiData(res);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return res.data;
   }
 );
 
 export const updateModel = createAsyncThunk(
   "model/update",
-  async (data: { productId: string; modelId: string; updateData: { price?: number; stock?: number; sku?: string } }) => {
-    const { productId, modelId, updateData } = data;
-    const response = await instance.put(
-      `/products/${productId}/models/${modelId}`,
-      updateData
-    );
-    if (!response) {
-      throw new Error("Failed to update model");
+  async (data: { productId: string; modelId: string; updateData: { price?: number; stock?: number; sku?: string } }, { rejectWithValue }) => {
+    try {
+      const { productId, modelId, updateData } = data;
+      const response = await instance.put(
+        `/products/${productId}/models/${modelId}`,
+        updateData
+      );
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data;
   }
 );
 
@@ -285,14 +273,9 @@ export const searchProducts = createAsyncThunk(
           limit: limit,
         },
       });
-      return response.data.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as {
-        response?: { data?: { message?: string } };
-      };
-      return rejectWithValue(
-        axiosError.response?.data?.message || "Failed to search products"
-      );
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -307,14 +290,9 @@ export const getRelatedProducts = createAsyncThunk(
   ) => {
     try {
       const response = await instance.get(`/products/related/${productId}`);
-      return response.data.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as {
-        response?: { data?: { message?: string } };
-      };
-      return rejectWithValue(
-        axiosError.response?.data?.message || "Failed to fetch related products"
-      );
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -331,15 +309,44 @@ export const getProductsByShop = createAsyncThunk(
       const response = await instance.get(`/products`, {
         params: { shop: shopId, page, limit },
       });
-      // Response structure: { data: { data: [...], pagination: {...} } }
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as {
-        response?: { data?: { message?: string } };
-      };
-      return rejectWithValue(
-        axiosError.response?.data?.message || "Failed to fetch shop products"
+      return rejectWithValue(extractApiError(error));
+    }
+  }
+);
+
+// Seller: Update own product
+export const updateSellerProduct = createAsyncThunk(
+  "product/seller/update",
+  async (
+    { productId, updateData }: { productId: string; updateData: FormData },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await instance.put(
+        `/products/seller/${productId}`,
+        updateData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
       );
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
+    }
+  }
+);
+
+// Seller: Delete own product
+export const deleteSellerProduct = createAsyncThunk(
+  "product/seller/delete",
+  async (productId: string, { rejectWithValue }) => {
+    try {
+      const response = await instance.delete(`/products/seller/${productId}`);
+      return { productId, data: extractApiData(response) };
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
   }
 );

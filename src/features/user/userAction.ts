@@ -1,26 +1,32 @@
 import instance from "@/api/api";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { extractApiData, extractApiError } from "@/utils/api";
 
-export const getProfile = createAsyncThunk("user/profile", async () => {
-  const response = await instance.get("/users/profile");
-  if (!response) {
-    throw new Error("Failed to fetch user profile");
+export const getProfile = createAsyncThunk(
+  "user/profile",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await instance.get("/users/profile");
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
+    }
   }
-  return response.data;
-});
+);
 
 export const uploadAvatar = createAsyncThunk(
   "user/upload-avatar",
-  async (formData: FormData) => {
-    const response = await instance.post("/users/upload-avatar", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-    if (!response) {
-      throw new Error("Failed to upload avatar");
+  async (formData: FormData, { rejectWithValue }) => {
+    try {
+      const response = await instance.post("/users/upload-avatar", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data;
   }
 );
 
@@ -31,23 +37,25 @@ export const updateProfile = createAsyncThunk(
     email?: string;
     phone?: string;
     avatar?: string;
-  }) => {
-    const response = await instance.put("/users/profile", profileData);
-    if (!response) {
-      throw new Error("Failed to update profile");
+  }, { rejectWithValue }) => {
+    try {
+      const response = await instance.put("/users/profile", profileData);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data;
   }
 );
 
 export const deleteUser = createAsyncThunk(
   "user/delete-user",
-  async (userId: string) => {
-    const response = await instance.delete(`/users/${userId}`);
-    if (!response) {
-      throw new Error("Failed to delete user");
+  async (userId: string, { rejectWithValue }) => {
+    try {
+      const response = await instance.delete(`/users/${userId}`);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data;
   }
 );
 
@@ -59,12 +67,13 @@ export const createUser = createAsyncThunk(
     phone: string;
     roles: string;
     isVerifiedEmail: boolean;
-  }) => {
-    const response = await instance.post("/users/create", userData);
-    if (!response) {
-      throw new Error("Failed to create user");
+  }, { rejectWithValue }) => {
+    try {
+      const response = await instance.post("/users/create", userData);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data;
   }
 );
 
@@ -76,12 +85,13 @@ export const updateUser = createAsyncThunk(
     id: string;
     isVerifiedEmail: boolean;
     roles: string;
-  }) => {
-    const response = await instance.post("/users/update", userData);
-    if (!response) {
-      throw new Error("Failed to update user");
+  }, { rejectWithValue }) => {
+    try {
+      const response = await instance.post("/users/update", userData);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data;
   }
 );
 
@@ -93,25 +103,27 @@ export const getAllUsers = createAsyncThunk(
     search?: string;
     role?: string;
     isVerifiedEmail?: boolean;
-  }) => {
-    const {
-      page = 1,
-      limit = 10,
-      search = "",
-      role = "",
-      isVerifiedEmail,
-    } = params;
-    const response = await instance.get("/users", {
-      params: { page, limit, search, role, isVerifiedEmail },
-    });
+  }, { rejectWithValue }) => {
+    try {
+      const {
+        page = 1,
+        limit = 10,
+        search = "",
+        role = "",
+        isVerifiedEmail,
+      } = params;
+      const response = await instance.get("/users", {
+        params: { page, limit, search, role, isVerifiedEmail },
+      });
 
-    if (!response) {
-      throw new Error("Failed to fetch users");
+      const data = extractApiData<{ data?: unknown[]; pagination?: unknown }>(response);
+      return {
+        users: data?.data || [],
+        pagination: data?.pagination || null,
+      };
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return {
-      users: response.data.data?.data || [],
-      pagination: response.data.data?.pagination || null,
-    };
   }
 );
 
@@ -125,12 +137,13 @@ export const createAddress = createAsyncThunk(
     district: string;
     ward: string;
     isDefault?: boolean;
-  }) => {
-    const response = await instance.post("/users/address", addressData);
-    if (!response) {
-      throw new Error("Failed to create address");
+  }, { rejectWithValue }) => {
+    try {
+      const response = await instance.post("/users/address", addressData);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data;
   }
 );
 
@@ -147,37 +160,40 @@ export const updateAddress = createAsyncThunk(
       ward?: string;
       isDefault?: boolean;
     };
-  }) => {
-    const response = await instance.put(
-      `/users/address/${payload.addressId}`,
-      payload.addressData
-    );
-    if (!response) {
-      throw new Error("Failed to update address");
+  }, { rejectWithValue }) => {
+    try {
+      const response = await instance.put(
+        `/users/address/${payload.addressId}`,
+        payload.addressData
+      );
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data;
   }
 );
 
 export const deleteAddress = createAsyncThunk(
   "address/delete",
-  async (addressId: string) => {
-    const response = await instance.delete(`/users/address/${addressId}`);
-    if (!response.data) {
-      throw new Error("Failed to delete address");
+  async (addressId: string, { rejectWithValue }) => {
+    try {
+      const response = await instance.delete(`/users/address/${addressId}`);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data;
   }
 );
 
 export const setDefaultAddress = createAsyncThunk(
   "address/set-default",
-  async (addressId: string) => {
-    const response = await instance.put(`/users/address/${addressId}/default`);
-    if (!response) {
-      throw new Error("Failed to set default address");
+  async (addressId: string, { rejectWithValue }) => {
+    try {
+      const response = await instance.put(`/users/address/${addressId}/default`);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data;
   }
 );
 
@@ -187,11 +203,12 @@ export const changePassword = createAsyncThunk(
     oldPassword: string;
     newPassword: string;
     confirmPassword?: string;
-  }) => {
-    const response = await instance.put("/users/change-password", passwordData);
-    if (!response) {
-      throw new Error("Failed to change password");
+  }, { rejectWithValue }) => {
+    try {
+      const response = await instance.put("/users/change-password", passwordData);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data;
   }
 );

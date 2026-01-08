@@ -1,0 +1,172 @@
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
+import { cn } from "@/lib/utils";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
+interface ProductGalleryProps {
+  images: string[];
+  productName: string;
+  selectedIndex: number;
+  onIndexChange: (index: number) => void;
+}
+
+export function ProductGallery({ 
+  images, 
+  productName, 
+  selectedIndex, 
+  onIndexChange 
+}: ProductGalleryProps) {
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+
+  // Handle swipe on mobile
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStart === null) return;
+    
+    const touchEnd = e.changedTouches[0].clientX;
+    const diff = touchStart - touchEnd;
+    
+    if (Math.abs(diff) > 50) {
+      if (diff > 0 && selectedIndex < images.length - 1) {
+        onIndexChange(selectedIndex + 1);
+      } else if (diff < 0 && selectedIndex > 0) {
+        onIndexChange(selectedIndex - 1);
+      }
+    }
+    setTouchStart(null);
+  };
+
+  const handlePrev = () => {
+    if (selectedIndex > 0) {
+      onIndexChange(selectedIndex - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (selectedIndex < images.length - 1) {
+      onIndexChange(selectedIndex + 1);
+    }
+  };
+
+  if (!images.length) {
+    return (
+      <div className="w-full aspect-square bg-gray-100 flex items-center justify-center rounded-sm">
+        <span className="text-gray-400 text-sm">Không có ảnh</span>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {/* Desktop Gallery */}
+      <div className="hidden lg:flex gap-4 shrink-0">
+        {/* Vertical Thumbnails */}
+        <div className="flex flex-col gap-2 w-[60px]">
+          {images.map((img, idx) => (
+            <button
+              key={idx}
+              onMouseEnter={() => onIndexChange(idx)}
+              onClick={() => onIndexChange(idx)}
+              className={cn(
+                "w-[60px] h-[60px] border-2 rounded-sm overflow-hidden relative transition-all",
+                selectedIndex === idx ? "border-[#E53935]" : "border-transparent hover:border-gray-300"
+              )}
+            >
+              <Image 
+                src={img} 
+                alt={`${productName} - ${idx + 1}`} 
+                fill 
+                className="object-cover" 
+                sizes="60px"
+              />
+            </button>
+          ))}
+        </div>
+
+        {/* Main Image */}
+        <div className="w-[420px] h-[420px] relative border border-gray-100 rounded-sm overflow-hidden bg-white group">
+          <Image
+            src={images[selectedIndex] || ""}
+            alt={productName}
+            fill
+            className="object-contain p-2 transition-transform group-hover:scale-105"
+            priority
+            sizes="420px"
+          />
+        </div>
+      </div>
+
+      {/* Mobile Gallery - Swipeable */}
+      <div 
+        className="lg:hidden -mx-4 relative"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        <div className="relative aspect-square w-full overflow-hidden">
+          <Image
+            src={images[selectedIndex] || ""}
+            alt={productName}
+            fill
+            className="object-cover"
+            priority
+            sizes="100vw"
+          />
+          
+          {/* Navigation Arrows */}
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={handlePrev}
+                disabled={selectedIndex === 0}
+                className={cn(
+                  "absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/30 flex items-center justify-center text-white transition-opacity",
+                  selectedIndex === 0 ? "opacity-30" : "opacity-70 hover:opacity-100"
+                )}
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                onClick={handleNext}
+                disabled={selectedIndex === images.length - 1}
+                className={cn(
+                  "absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/30 flex items-center justify-center text-white transition-opacity",
+                  selectedIndex === images.length - 1 ? "opacity-30" : "opacity-70 hover:opacity-100"
+                )}
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </>
+          )}
+          
+          {/* Image Counter */}
+          <div className="absolute bottom-4 right-4 bg-black/30 text-white text-[10px] px-2 py-0.5 rounded-full">
+            {selectedIndex + 1} / {images.length}
+          </div>
+        </div>
+
+        {/* Dot Indicators */}
+        {images.length > 1 && images.length <= 10 && (
+          <div className="flex justify-center gap-1.5 mt-3">
+            {images.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => onIndexChange(idx)}
+                className={cn(
+                  "w-2 h-2 rounded-full transition-all",
+                  selectedIndex === idx ? "bg-[#E53935] w-4" : "bg-gray-300"
+                )}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+export default ProductGallery;

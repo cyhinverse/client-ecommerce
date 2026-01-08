@@ -1,8 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { reviews } from "../../types/product";
+import { Review } from "../../types/product";
 
 interface ReviewState {
-  reviews: reviews[];
+  reviews: Review[];
   isLoading: boolean;
   error: string | null;
 }

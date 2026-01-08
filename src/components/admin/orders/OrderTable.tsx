@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Order } from "@/types/order";
+import { Shop } from "@/types/product";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -25,8 +26,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, MoreHorizontal, Eye, Edit, Trash2 } from "lucide-react";
+import { Search, MoreHorizontal, Eye, Edit, Trash2, Store } from "lucide-react";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
+import Image from "next/image";
 
 export interface OrdersTableProps {
   orders: Order[];
@@ -47,6 +49,9 @@ export interface OrdersTableProps {
   onEdit: (order: Order) => void;
   onDelete: (order: Order) => void;
   onView: (order: Order) => void;
+  onShopFilterChange?: (shopId: string) => void;
+  selectedShop?: string;
+  shops?: Shop[];
 }
 
 export function OrdersTable({
@@ -60,6 +65,9 @@ export function OrdersTable({
   onEdit,
   onDelete,
   onView,
+  onShopFilterChange,
+  selectedShop = "all",
+  shops = [],
   isLoading = false,
 }: OrdersTableProps) {
   const [localSearch, setLocalSearch] = useState(searchTerm);
@@ -132,6 +140,12 @@ export function OrdersTable({
     }).format(amount);
   };
 
+  const getShopInfo = (shopId: string | Shop | undefined): { name: string; logo?: string } => {
+    if (!shopId) return { name: "N/A" };
+    if (typeof shopId === "string") return { name: shopId };
+    return { name: shopId.name || "N/A", logo: shopId.logo };
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-[#f7f7f7] p-4 rounded-2xl">
@@ -159,6 +173,24 @@ export function OrdersTable({
               <SelectItem value="cancelled">Cancelled</SelectItem>
             </SelectContent>
           </Select>
+
+          {/* Shop Filter */}
+          {onShopFilterChange && shops.length > 0 && (
+            <Select value={selectedShop} onValueChange={onShopFilterChange}>
+              <SelectTrigger className="w-[160px] rounded-xl border-0 bg-white focus:ring-0">
+                <Store className="h-4 w-4 mr-2 text-muted-foreground" />
+                <SelectValue placeholder="Shop" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-0">
+                <SelectItem value="all">All Shops</SelectItem>
+                {shops.map((shop) => (
+                  <SelectItem key={shop._id} value={shop._id}>
+                    {shop.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
         <Select
           value={pageSize.toString()}
@@ -181,6 +213,7 @@ export function OrdersTable({
             <TableRow className="border-0 hover:bg-transparent">
               <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground pl-6">Order ID</TableHead>
               <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Customer</TableHead>
+              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Shop</TableHead>
               <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Date</TableHead>
               <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Total</TableHead>
               <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Status</TableHead>
@@ -191,7 +224,7 @@ export function OrdersTable({
           <TableBody>
             {isLoading && (
               <TableRow>
-                <TableCell colSpan={7} className="h-32 text-center">
+                <TableCell colSpan={8} className="h-32 text-center">
                   <div className="flex justify-center items-center">
                     <SpinnerLoading />
                   </div>
@@ -201,7 +234,7 @@ export function OrdersTable({
             {!isLoading && orders.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={7}
+                  colSpan={8}
                   className="text-center py-12 text-muted-foreground"
                 >
                   No orders found
@@ -223,6 +256,31 @@ export function OrdersTable({
                       </span>
                       <span className="text-xs text-muted-foreground">
                         {order.shippingAddress.phone}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2 max-w-[140px]">
+                      {getShopInfo(order.shopId).logo ? (
+                        <div className="relative h-6 w-6 rounded-md overflow-hidden bg-[#f7f7f7] shrink-0">
+                          <Image
+                            src={getShopInfo(order.shopId).logo!}
+                            alt={getShopInfo(order.shopId).name}
+                            width={24}
+                            height={24}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-6 w-6 rounded-md bg-[#f7f7f7] flex items-center justify-center shrink-0">
+                          <Store className="h-3 w-3 text-muted-foreground" />
+                        </div>
+                      )}
+                      <span
+                        className="text-sm text-muted-foreground truncate"
+                        title={getShopInfo(order.shopId).name}
+                      >
+                        {getShopInfo(order.shopId).name}
                       </span>
                     </div>
                   </TableCell>

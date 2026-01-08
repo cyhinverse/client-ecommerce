@@ -1,5 +1,6 @@
 import instance from "@/api/api";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { extractApiData, extractApiError } from "@/utils/api";
 
 // Create new order - Updated to support shop/platform vouchers
 export const createOrder = createAsyncThunk(
@@ -22,92 +23,94 @@ export const createOrder = createAsyncThunk(
     // DEPRECATED: Old discount code (kept for backward compatibility)
     discountCode?: string;
     note?: string;
-  }) => {
-    const response = await instance.post("/orders", orderData);
-    if (!response.data) {
-      throw new Error("Failed to create order");
+  }, { rejectWithValue }) => {
+    try {
+      const response = await instance.post("/orders", orderData);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data;
   }
 );
 
 // Get user orders
 export const getUserOrders = createAsyncThunk(
   "order/user-orders",
-  async (params?: {
+  async (params: {
     page?: number;
     limit?: number;
     status?: "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
     paymentStatus?: "unpaid" | "paid" | "refunded";
     paymentMethod?: "cod" | "vnpay";
-  }) => {
-    const {
-      page = 1,
-      limit = 10,
-      status = "",
-      paymentStatus = "",
-      paymentMethod = ""
-    } = params || {};
+  } | undefined, { rejectWithValue }) => {
+    try {
+      const {
+        page = 1,
+        limit = 10,
+        status = "",
+        paymentStatus = "",
+        paymentMethod = ""
+      } = params || {};
 
-    const response = await instance.get("/orders", {
-      params: {
-        page,
-        limit,
-        ...(status && { status }),
-        ...(paymentStatus && { paymentStatus }),
-        ...(paymentMethod && { paymentMethod })
-      },
-    });
+      const response = await instance.get("/orders", {
+        params: {
+          page,
+          limit,
+          ...(status && { status }),
+          ...(paymentStatus && { paymentStatus }),
+          ...(paymentMethod && { paymentMethod })
+        },
+      });
 
-    if (!response.data) {
-      throw new Error("Failed to fetch user orders");
+      const responseData = extractApiData(response);
+      return {
+        orders: responseData.data || responseData.orders || [],
+        pagination: responseData.pagination || null,
+      };
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-
-    // Sửa lại theo cấu trúc API thực tế
-    const responseData = response.data.data || response.data;
-    return {
-      orders: responseData.data || responseData.orders || [],
-      pagination: responseData.pagination || null,
-    };
   }
 );
 
 // Get order by ID
 export const getOrderById = createAsyncThunk(
   "order/get-by-id",
-  async (orderId: string) => {
-    if (!/^[0-9a-fA-F]{24}$/.test(orderId)) {
-      throw new Error("Invalid order ID format");
-    }
+  async (orderId: string, { rejectWithValue }) => {
+    try {
+      if (!/^[0-9a-fA-F]{24}$/.test(orderId)) {
+        throw new Error("Invalid order ID format");
+      }
 
-    const response = await instance.get(`/orders/${orderId}`);
-    if (!response.data) {
-      throw new Error("Failed to fetch order");
+      const response = await instance.get(`/orders/${orderId}`);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data.data || response.data;
   }
 );
 
 // Cancel order
 export const cancelOrder = createAsyncThunk(
   "order/cancel",
-  async (orderId: string) => {
-    if (!/^[0-9a-fA-F]{24}$/.test(orderId)) {
-      throw new Error("Invalid order ID format");
-    }
+  async (orderId: string, { rejectWithValue }) => {
+    try {
+      if (!/^[0-9a-fA-F]{24}$/.test(orderId)) {
+        throw new Error("Invalid order ID format");
+      }
 
-    const response = await instance.delete(`/orders/${orderId}/cancel`);
-    if (!response.data) {
-      throw new Error("Failed to cancel order");
+      const response = await instance.delete(`/orders/${orderId}/cancel`);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data.data || response.data;
   }
 );
 
 // Admin: Get all orders
 export const getAllOrders = createAsyncThunk(
   "order/admin/all",
-  async (params?: {
+  async (params: {
     page?: number;
     limit?: number;
     status?: "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
@@ -117,39 +120,38 @@ export const getAllOrders = createAsyncThunk(
     search?: string;
     startDate?: string;
     endDate?: string;
-  }) => {
-    const {
-      page = 1,
-      limit = 10,
-      status = "",
-      paymentStatus = "",
-      paymentMethod = "",
-      userId = "",
-      search = "",
-      startDate = "",
-      endDate = "",
-    } = params || {};
+  } | undefined, { rejectWithValue }) => {
+    try {
+      const {
+        page = 1,
+        limit = 10,
+        status = "",
+        paymentStatus = "",
+        paymentMethod = "",
+        userId = "",
+        search = "",
+        startDate = "",
+        endDate = "",
+      } = params || {};
 
-    const response = await instance.get("/orders/all/list", {
-      params: {
-        page,
-        limit,
-        ...(status && { status }),
-        ...(paymentStatus && { paymentStatus }),
-        ...(paymentMethod && { paymentMethod }),
-        ...(userId && { userId }),
-        ...(search && { search }),
-        ...(startDate && { startDate }),
-        ...(endDate && { endDate })
-      },
-    });
+      const response = await instance.get("/orders/all/list", {
+        params: {
+          page,
+          limit,
+          ...(status && { status }),
+          ...(paymentStatus && { paymentStatus }),
+          ...(paymentMethod && { paymentMethod }),
+          ...(userId && { userId }),
+          ...(search && { search }),
+          ...(startDate && { startDate }),
+          ...(endDate && { endDate })
+        },
+      });
 
-    if (!response.data) {
-      throw new Error("Failed to fetch all orders");
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-
-    // Sửa lại để phù hợp với API structure
-    return response.data.data || response.data;
   }
 );
 
@@ -159,40 +161,42 @@ export const updateOrderStatus = createAsyncThunk(
   async (payload: {
     orderId: string;
     status: "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
-  }) => {
-    if (!/^[0-9a-fA-F]{24}$/.test(payload.orderId)) {
-      throw new Error("Invalid order ID format");
-    }
+  }, { rejectWithValue }) => {
+    try {
+      if (!/^[0-9a-fA-F]{24}$/.test(payload.orderId)) {
+        throw new Error("Invalid order ID format");
+      }
 
-    const response = await instance.put(`/orders/${payload.orderId}/status`, {
-      status: payload.status,
-    });
+      const response = await instance.put(`/orders/${payload.orderId}/status`, {
+        status: payload.status,
+      });
 
-    if (!response.data) {
-      throw new Error("Failed to update order status");
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data.data || response.data;
   }
 );
 
 // Admin: Get order statistics
 export const getOrderStatistics = createAsyncThunk(
   "order/admin/statistics",
-  async (params?: {
+  async (params: {
     period?: "day" | "week" | "month" | "year";
     startDate?: string;
     endDate?: string;
-  }) => {
-    const { period = "month", startDate = "", endDate = "" } = params || {};
+  } | undefined, { rejectWithValue }) => {
+    try {
+      const { period = "month", startDate = "", endDate = "" } = params || {};
 
-    const response = await instance.get("/orders/statistics/overview", {
-      params: { period, ...(startDate && { startDate }), ...(endDate && { endDate }) },
-    });
+      const response = await instance.get("/orders/statistics/overview", {
+        params: { period, ...(startDate && { startDate }), ...(endDate && { endDate }) },
+      });
 
-    if (!response.data) {
-      throw new Error("Failed to fetch order statistics");
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data.data || response.data;
   }
 );
 
@@ -205,17 +209,18 @@ export const applyDiscountCode = createAsyncThunk(
     cartItemIds: string[];
     totalAmount: number;
     shopId?: string; // NEW: For shop vouchers
-  }) => {
-    const response = await instance.post("/vouchers/apply", {
-      code: payload.discountCode,
-      orderTotal: payload.totalAmount,
-      productIds: payload.cartItemIds,
-      shopId: payload.shopId,
-    });
-    if (!response.data) {
-      throw new Error("Failed to apply voucher code");
+  }, { rejectWithValue }) => {
+    try {
+      const response = await instance.post("/vouchers/apply", {
+        code: payload.discountCode,
+        orderTotal: payload.totalAmount,
+        productIds: payload.cartItemIds,
+        shopId: payload.shopId,
+      });
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data.data || response.data;
   }
 );
 
@@ -226,12 +231,13 @@ export const applyVoucher = createAsyncThunk(
     code: string;
     orderTotal: number;
     shopId?: string;
-  }) => {
-    const response = await instance.post("/vouchers/apply", payload);
-    if (!response.data) {
-      throw new Error("Failed to apply voucher");
+  }, { rejectWithValue }) => {
+    try {
+      const response = await instance.post("/vouchers/apply", payload);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data.data || response.data;
   }
 );
 
@@ -239,17 +245,18 @@ export const applyVoucher = createAsyncThunk(
 // The backend checks if user is admin and returns full details
 export const getOrderByIdAdmin = createAsyncThunk(
   "order/admin/get-by-id",
-  async (orderId: string) => {
-    if (!/^[0-9a-fA-F]{24}$/.test(orderId)) {
-      throw new Error("Invalid order ID format");
-    }
+  async (orderId: string, { rejectWithValue }) => {
+    try {
+      if (!/^[0-9a-fA-F]{24}$/.test(orderId)) {
+        throw new Error("Invalid order ID format");
+      }
 
-    // Use the same endpoint - backend handles admin access
-    const response = await instance.get(`/orders/${orderId}`);
-    if (!response.data) {
-      throw new Error("Failed to fetch order details");
+      // Use the same endpoint - backend handles admin access
+      const response = await instance.get(`/orders/${orderId}`);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
-    return response.data.data || response.data;
   }
 );
 
@@ -281,20 +288,87 @@ export const getOrdersByShop = createAsyncThunk(
 
       const response = await instance.get("/orders/shop", { params: queryParams });
       
-      if (!response.data) {
-        throw new Error("Failed to fetch shop orders");
-      }
-      
-      const responseData = response.data.data || response.data;
+      const responseData = extractApiData(response);
       return {
         orders: responseData.orders || [],
         pagination: responseData.pagination || null,
       };
     } catch (error) {
-      const axiosError = error as { response?: { data?: { message?: string } }; message?: string };
-      return rejectWithValue(
-        axiosError.response?.data?.message || axiosError.message || "Failed to fetch shop orders"
+      return rejectWithValue(extractApiError(error));
+    }
+  }
+);
+
+// Seller: Get orders for seller's shop (uses seller endpoint)
+export const getSellerOrders = createAsyncThunk(
+  "order/seller/list",
+  async (
+    params: {
+      page?: number;
+      limit?: number;
+      status?: string;
+      paymentStatus?: string;
+    } | undefined,
+    { rejectWithValue }
+  ) => {
+    try {
+      const { page = 1, limit = 10, status, paymentStatus } = params || {};
+
+      const queryParams: Record<string, string | number> = { page, limit };
+      if (status && status !== "all") queryParams.status = status;
+      if (paymentStatus && paymentStatus !== "all") queryParams.paymentStatus = paymentStatus;
+
+      const response = await instance.get("/orders/seller/list", {
+        params: queryParams,
+      });
+
+      const responseData = extractApiData(response);
+      return {
+        orders: responseData.data || responseData.orders || responseData || [],
+        pagination: responseData.pagination || null,
+      };
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
+    }
+  }
+);
+
+// Seller: Update order status
+export const updateSellerOrderStatus = createAsyncThunk(
+  "order/seller/update-status",
+  async (
+    payload: {
+      orderId: string;
+      status: "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
+    },
+    { rejectWithValue }
+  ) => {
+    try {
+      if (!/^[0-9a-fA-F]{24}$/.test(payload.orderId)) {
+        throw new Error("Invalid order ID format");
+      }
+
+      const response = await instance.put(
+        `/orders/seller/${payload.orderId}/status`,
+        { status: payload.status }
       );
+
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
+    }
+  }
+);
+
+// Seller: Get order statistics for shop
+export const getSellerOrderStatistics = createAsyncThunk(
+  "order/seller/statistics",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await instance.get("/orders/seller/statistics");
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
     }
   }
 );

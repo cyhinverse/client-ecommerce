@@ -6,49 +6,70 @@ import {
   VoucherScope,
 } from "@/types/voucher";
 import instance from "@/api/api";
+import { extractApiData, extractApiError } from "@/utils/api";
 
 // Get all vouchers
 export const getAllVouchers = createAsyncThunk(
   "voucher/getAllVouchers",
-  async (params: Partial<VoucherFilters>) => {
-    const response = await instance.get("/vouchers", { params });
-    return response.data;
+  async (params: Partial<VoucherFilters>, { rejectWithValue }) => {
+    try {
+      const response = await instance.get("/vouchers", { params });
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
+    }
   }
 );
 
 // Get voucher by ID
 export const getVoucherById = createAsyncThunk(
   "voucher/getVoucherById",
-  async (voucherId: string) => {
-    const response = await instance.get(`/vouchers/${voucherId}`);
-    return response.data;
+  async (voucherId: string, { rejectWithValue }) => {
+    try {
+      const response = await instance.get(`/vouchers/${voucherId}`);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
+    }
   }
 );
 
 // Create voucher
 export const createVoucher = createAsyncThunk(
   "voucher/createVoucher",
-  async (voucherData: CreateVoucherData) => {
-    const response = await instance.post("/vouchers", voucherData);
-    return response.data;
+  async (voucherData: CreateVoucherData, { rejectWithValue }) => {
+    try {
+      const response = await instance.post("/vouchers", voucherData);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
+    }
   }
 );
 
 // Update voucher
 export const updateVoucher = createAsyncThunk(
   "voucher/updateVoucher",
-  async ({ id, ...updateData }: UpdateVoucherData & { id: string }) => {
-    const response = await instance.put(`/vouchers/${id}`, updateData);
-    return response.data;
+  async ({ id, ...updateData }: UpdateVoucherData & { id: string }, { rejectWithValue }) => {
+    try {
+      const response = await instance.put(`/vouchers/${id}`, updateData);
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
+    }
   }
 );
 
 // Delete voucher
 export const deleteVoucher = createAsyncThunk(
   "voucher/deleteVoucher",
-  async (voucherId: string) => {
-    await instance.delete(`/vouchers/${voucherId}`);
-    return voucherId;
+  async (voucherId: string, { rejectWithValue }) => {
+    try {
+      await instance.delete(`/vouchers/${voucherId}`);
+      return voucherId;
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
+    }
   }
 );
 
@@ -56,9 +77,13 @@ export const deleteVoucher = createAsyncThunk(
 // Get voucher statistics
 export const getVoucherStatistics = createAsyncThunk(
   "voucher/getVoucherStatistics",
-  async () => {
-    const response = await instance.get("/vouchers/statistics");
-    return response.data;
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await instance.get("/vouchers/statistics");
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
+    }
   }
 );
 
@@ -73,13 +98,17 @@ export const applyVoucherCode = createAsyncThunk(
     code: string;
     orderTotal: number;
     shopId?: string;
-  }) => {
-    const response = await instance.post("/vouchers/apply", {
-      code,
-      orderValue: orderTotal, // Server expects 'orderValue', not 'orderTotal'
-      shopId,
-    });
-    return response.data;
+  }, { rejectWithValue }) => {
+    try {
+      const response = await instance.post("/vouchers/apply", {
+        code,
+        orderValue: orderTotal, // Server expects 'orderValue', not 'orderTotal'
+        shopId,
+      });
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
+    }
   }
 );
 
@@ -94,10 +123,14 @@ export const getAvailableVouchers = createAsyncThunk(
     orderTotal: number;
     shopId?: string;
     scope?: VoucherScope;
-  }) => {
-    const response = await instance.get("/vouchers/available", {
-      params: { orderTotal, shopId, scope },
-    });
-    return response.data;
+  }, { rejectWithValue }) => {
+    try {
+      const response = await instance.get("/vouchers/available", {
+        params: { orderTotal, shopId, scope },
+      });
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
+    }
   }
 );

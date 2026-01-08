@@ -8,6 +8,9 @@ import {
   updateOrderStatus,
   getOrderStatistics,
   getOrdersByShop,
+  getSellerOrders,
+  updateSellerOrderStatus,
+  getSellerOrderStatistics,
 } from "./orderAction";
 import type { OrderState } from "@/types/order";
 
@@ -28,6 +31,10 @@ const initialState: OrderState = {
   shopOrdersPagination: null,
   isLoadingShopOrders: false,
   shopOrdersError: null,
+  // Seller statistics
+  sellerStatistics: null,
+  isLoadingSellerStats: false,
+  sellerStatsError: null,
 };
 
 export const orderSlice = createSlice({
@@ -132,16 +139,18 @@ export const orderSlice = createSlice({
       .addCase(getAllOrders.fulfilled, (state, action) => {
         state.isLoading = false;
         
+        // extractApiData already extracts the data
         // Xử lý cả hai trường hợp API response
-        if (action.payload && typeof action.payload === 'object') {
-          if (Array.isArray(action.payload)) {
+        const payload = action.payload;
+        if (payload && typeof payload === 'object') {
+          if (Array.isArray(payload)) {
             // Nếu payload là mảng orders
-            state.allOrders = action.payload;
+            state.allOrders = payload;
             state.pagination = null;
           } else {
-            // Nếu payload là object { data, pagination }
-            state.allOrders = action.payload.data || [];
-            state.pagination = action.payload.pagination || null;
+            // Nếu payload là object { data, pagination } hoặc trực tiếp
+            state.allOrders = payload?.data || payload?.orders || [];
+            state.pagination = payload?.pagination || null;
           }
         } else {
           state.allOrders = [];
@@ -217,6 +226,65 @@ export const orderSlice = createSlice({
       .addCase(getOrdersByShop.rejected, (state, action) => {
         state.isLoadingShopOrders = false;
         state.shopOrdersError = action.payload as string || "Failed to fetch shop orders";
+      });
+
+    // Seller: Get Seller Orders (via seller endpoint)
+    builder
+      .addCase(getSellerOrders.pending, (state) => {
+        state.isLoadingShopOrders = true;
+        state.shopOrdersError = null;
+      })
+      .addCase(getSellerOrders.fulfilled, (state, action) => {
+        state.isLoadingShopOrders = false;
+        state.shopOrders = action.payload.orders || [];
+        state.shopOrdersPagination = action.payload.pagination;
+      })
+      .addCase(getSellerOrders.rejected, (state, action) => {
+        state.isLoadingShopOrders = false;
+        state.shopOrdersError = action.payload as string || "Failed to fetch seller orders";
+      });
+
+    // Seller: Update Order Status
+    builder
+      .addCase(updateSellerOrderStatus.pending, (state) => {
+        state.isUpdating = true;
+        state.error = null;
+      })
+      .addCase(updateSellerOrderStatus.fulfilled, (state, action) => {
+        state.isUpdating = false;
+        const updatedOrder = action.payload;
+        if (updatedOrder) {
+          // Update in shopOrders
+          const shopIndex = state.shopOrders.findIndex(
+            (order) => order._id === updatedOrder._id
+          );
+          if (shopIndex !== -1) {
+            state.shopOrders[shopIndex] = updatedOrder;
+          }
+          // Update currentOrder if viewing
+          if (state.currentOrder && state.currentOrder._id === updatedOrder._id) {
+            state.currentOrder = updatedOrder;
+          }
+        }
+      })
+      .addCase(updateSellerOrderStatus.rejected, (state, action) => {
+        state.isUpdating = false;
+        state.error = action.payload as string || "Failed to update order status";
+      });
+
+    // Seller: Get Order Statistics
+    builder
+      .addCase(getSellerOrderStatistics.pending, (state) => {
+        state.isLoadingSellerStats = true;
+        state.sellerStatsError = null;
+      })
+      .addCase(getSellerOrderStatistics.fulfilled, (state, action) => {
+        state.isLoadingSellerStats = false;
+        state.sellerStatistics = action.payload;
+      })
+      .addCase(getSellerOrderStatistics.rejected, (state, action) => {
+        state.isLoadingSellerStats = false;
+        state.sellerStatsError = action.payload as string || "Failed to fetch seller statistics";
       });
   },
 });

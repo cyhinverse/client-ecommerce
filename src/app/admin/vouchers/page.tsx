@@ -37,6 +37,7 @@ export default function VouchersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedType, setSelectedType] = useState("all");
   const [selectedIsActive, setSelectedIsActive] = useState<boolean | null>(null);
+  const [selectedScope, setSelectedScope] = useState("all");
 
   // Fetch vouchers
   const fetchVouchers = useCallback(() => {
@@ -47,9 +48,10 @@ export default function VouchersPage() {
     if (searchTerm) params.search = searchTerm;
     if (selectedType !== "all") params.type = selectedType === "percent" ? "percentage" : "fixed_amount";
     if (selectedIsActive !== null) params.isActive = selectedIsActive;
+    if (selectedScope !== "all") params.scope = selectedScope;
 
     dispatch(getAllVouchers(params));
-  }, [dispatch, currentPage, pageSize, searchTerm, selectedType, selectedIsActive]);
+  }, [dispatch, currentPage, pageSize, searchTerm, selectedType, selectedIsActive, selectedScope]);
 
 
   useEffect(() => {
@@ -132,8 +134,10 @@ export default function VouchersPage() {
         onView={handleView}
         onDiscountTypeFilterChange={setSelectedType}
         onActiveFilterChange={setSelectedIsActive}
+        onScopeFilterChange={setSelectedScope}
         selectedDiscountType={selectedType}
         selectedIsActive={selectedIsActive}
+        selectedScope={selectedScope}
       />
 
       {pagination && pagination.totalPages > 1 && (

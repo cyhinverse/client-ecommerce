@@ -23,12 +23,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import instance from "@/api/api";
 import { toast } from "sonner";
+import { ViewShopModal } from "@/components/admin/shops/ViewShopModal";
 
 interface Shop {
   _id: string;
   name: string;
   slug: string;
   logo?: string;
+  banner?: string;
   description?: string;
   owner: { _id: string; username: string; email: string };
   status: "pending" | "active" | "suspended";
@@ -42,6 +44,8 @@ export default function AdminShopsPage() {
   const [shops, setShops] = useState<Shop[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchShops = async () => {
     try {
@@ -72,6 +76,16 @@ export default function AdminShopsPage() {
       console.error("Failed to update shop status:", error);
       toast.error("Failed to update shop status");
     }
+  };
+
+  const handleViewDetails = (shop: Shop) => {
+    setSelectedShop(shop);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedShop(null);
   };
 
   const getStatusBadge = (status: string) => {
@@ -206,7 +220,7 @@ export default function AdminShopsPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleViewDetails(shop)}>
                           <Eye className="h-4 w-4 mr-2" /> View Details
                         </DropdownMenuItem>
                         {shop.status === "pending" && (
@@ -236,6 +250,13 @@ export default function AdminShopsPage() {
           </TableBody>
         </Table>
       </div>
+
+      {/* View Shop Modal */}
+      <ViewShopModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        shop={selectedShop}
+      />
     </div>
   );
 }

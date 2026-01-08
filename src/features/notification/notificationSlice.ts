@@ -52,8 +52,14 @@ export const notificationSlice = createSlice({
     });
     builder.addCase(getListNotification.fulfilled, (state, action) => {
       state.loading = false;
-      const { data, pagination, unreadCount } = action.payload.data;
-      state.notifications = data; // data is now the notifications array
+      // extractApiData already extracts the data
+      const payload = action.payload;
+      // Handle both nested and flat response structures
+      const data = payload?.data || payload?.notifications || [];
+      const pagination = payload?.pagination || null;
+      const unreadCount = payload?.unreadCount;
+      
+      state.notifications = Array.isArray(data) ? data : [];
       state.pagination = pagination;
 
       // Also sync unread count
@@ -111,7 +117,8 @@ export const notificationSlice = createSlice({
 
     // =========================== COUNT UNREAD NOTIFICATION ===========================
     builder.addCase(countUnreadNotification.fulfilled, (state, action) => {
-      state.unreadCount = action.payload.data.count;
+      // extractApiData already extracts the data, so access count directly
+      state.unreadCount = action.payload?.count ?? action.payload ?? 0;
     });
   },
 });

@@ -53,7 +53,8 @@ export const userSlice = createSlice({
       })
       .addCase(getProfile.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = [action.payload.data];
+        // extractApiData already extracts the data
+        state.user = [action.payload];
       })
       .addCase(getProfile.rejected, (state, action) => {
         state.isLoading = false;
@@ -68,12 +69,13 @@ export const userSlice = createSlice({
       })
       .addCase(uploadAvatar.fulfilled, (state, action) => {
         state.isUploadingAvatar = false;
+        // extractApiData already extracts the data
         // Cập nhật avatar ngay lập tức trong state
         if (state.user.length > 0) {
           state.user[0].avatar =
-            action.payload.data?.avatar ||
-            action.payload.avatarUrl ||
-            action.payload.data?.user?.avatar;
+            action.payload?.avatar ||
+            action.payload?.avatarUrl ||
+            action.payload?.user?.avatar;
         }
       })
       .addCase(uploadAvatar.rejected, (state, action) => {
@@ -89,8 +91,9 @@ export const userSlice = createSlice({
       })
       .addCase(updateProfile.fulfilled, (state, action) => {
         state.isUpdatingProfile = false;
-        if (state.user.length > 0 && action.payload.data) {
-          state.user[0] = { ...state.user[0], ...action.payload.data };
+        // extractApiData already extracts the data
+        if (state.user.length > 0 && action.payload) {
+          state.user[0] = { ...state.user[0], ...action.payload };
         }
       })
       .addCase(updateProfile.rejected, (state, action) => {
@@ -122,12 +125,13 @@ export const userSlice = createSlice({
       })
       .addCase(updateUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        if (state.user.length > 0) {
+        // extractApiData already extracts the data
+        if (state.user.length > 0 && action.payload) {
           const index = state.user.findIndex(
-            (u) => u._id === action.payload.data?._id
+            (u) => u._id === action.payload?._id
           );
           if (index !== -1) {
-            state.user[index] = action.payload.data;
+            state.user[index] = action.payload;
           }
         }
       })
@@ -153,17 +157,19 @@ export const userSlice = createSlice({
     // Address Management
     builder
       .addCase(createAddress.fulfilled, (state, action) => {
-        if (state.user.length > 0 && action.payload.data) {
-          state.user[0].addresses.push(action.payload.data);
+        // extractApiData already extracts the data
+        if (state.user.length > 0 && action.payload) {
+          state.user[0].addresses.push(action.payload);
         }
       })
       .addCase(updateAddress.fulfilled, (state, action) => {
-        if (state.user.length > 0 && action.payload.data) {
+        // extractApiData already extracts the data
+        if (state.user.length > 0 && action.payload) {
           const index = state.user[0].addresses.findIndex(
-            (addr) => addr._id === action.payload.data?._id
+            (addr) => addr._id === action.payload?._id
           );
           if (index !== -1) {
-            state.user[0].addresses[index] = action.payload.data;
+            state.user[0].addresses[index] = action.payload;
           }
         }
       })
@@ -175,14 +181,15 @@ export const userSlice = createSlice({
         }
       })
       .addCase(setDefaultAddress.fulfilled, (state, action) => {
-        if (state.user.length > 0 && action.payload.data) {
+        // extractApiData already extracts the data
+        if (state.user.length > 0 && action.payload) {
           // Set all addresses to non-default first
           state.user[0].addresses.forEach((addr) => {
             addr.isDefault = false;
           });
           // Set the specified address as default
           const index = state.user[0].addresses.findIndex(
-            (addr) => addr._id === action.payload.data?._id
+            (addr) => addr._id === action.payload?._id
           );
           if (index !== -1) {
             state.user[0].addresses[index].isDefault = true;

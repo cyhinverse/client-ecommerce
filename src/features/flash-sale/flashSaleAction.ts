@@ -1,11 +1,7 @@
 import instance from "@/api/api";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { AxiosError } from "axios";
 import { AddToFlashSalePayload } from "@/types/flash-sale";
-
-interface ApiErrorResponse {
-  message?: string;
-}
+import { extractApiData, extractApiError } from "@/utils/api";
 
 // Get active flash sale products
 export const getActiveFlashSale = createAsyncThunk(
@@ -13,11 +9,9 @@ export const getActiveFlashSale = createAsyncThunk(
   async (params: { page?: number; limit?: number } = {}, { rejectWithValue }) => {
     try {
       const response = await instance.get("/flash-sale", { params });
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể lấy flash sale";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -28,11 +22,9 @@ export const getFlashSaleSchedule = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await instance.get("/flash-sale/schedule");
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể lấy lịch flash sale";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -43,11 +35,9 @@ export const getFlashSaleBySlot = createAsyncThunk(
   async (timeSlot: string, { rejectWithValue }) => {
     try {
       const response = await instance.get(`/flash-sale/slot/${timeSlot}`);
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể lấy flash sale theo khung giờ";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -61,11 +51,9 @@ export const addToFlashSale = createAsyncThunk(
   ) => {
     try {
       const response = await instance.post(`/flash-sale/${productId}`, data);
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể thêm vào flash sale";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -78,9 +66,7 @@ export const removeFromFlashSale = createAsyncThunk(
       await instance.delete(`/flash-sale/${productId}`);
       return productId;
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể xóa khỏi flash sale";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -91,11 +77,9 @@ export const getFlashSaleStats = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await instance.get("/flash-sale/stats");
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể lấy thống kê";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );

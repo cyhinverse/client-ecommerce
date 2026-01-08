@@ -1,10 +1,6 @@
 import instance from "@/api/api";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { AxiosError } from "axios";
-
-interface ApiErrorResponse {
-  message?: string;
-}
+import { extractApiData, extractApiError } from "@/utils/api";
 
 // Get user's wishlist
 export const getWishlist = createAsyncThunk(
@@ -15,11 +11,9 @@ export const getWishlist = createAsyncThunk(
   ) => {
     try {
       const response = await instance.get("/wishlist", { params });
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể lấy danh sách yêu thích";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -30,11 +24,9 @@ export const addToWishlist = createAsyncThunk(
   async (productId: string, { rejectWithValue }) => {
     try {
       const response = await instance.post(`/wishlist/${productId}`);
-      return { ...(response.data.data || response.data), productId };
+      return { ...extractApiData(response), productId };
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể thêm vào yêu thích";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -47,9 +39,7 @@ export const removeFromWishlist = createAsyncThunk(
       await instance.delete(`/wishlist/${productId}`);
       return productId;
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể xóa khỏi yêu thích";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -60,11 +50,10 @@ export const getWishlistCount = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await instance.get("/wishlist/count");
-      return response.data.data?.count || 0;
+      const data = extractApiData<{ count?: number }>(response);
+      return data?.count || 0;
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể lấy số lượng";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -75,11 +64,10 @@ export const checkInWishlist = createAsyncThunk(
   async (productId: string, { rejectWithValue }) => {
     try {
       const response = await instance.get(`/wishlist/check/${productId}`);
-      return { productId, isInWishlist: response.data.data?.isInWishlist || false };
+      const data = extractApiData<{ isInWishlist?: boolean }>(response);
+      return { productId, isInWishlist: data?.isInWishlist || false };
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể kiểm tra";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -90,11 +78,9 @@ export const checkMultipleInWishlist = createAsyncThunk(
   async (productIds: string[], { rejectWithValue }) => {
     try {
       const response = await instance.post("/wishlist/check-multiple", { productIds });
-      return response.data.data || {};
+      return extractApiData(response) || {};
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể kiểm tra";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -107,9 +93,7 @@ export const clearWishlist = createAsyncThunk(
       await instance.delete("/wishlist");
       return true;
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể xóa danh sách";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );

@@ -1,9 +1,32 @@
 import instance from "@/api/api";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { extractApiData, extractApiError } from "@/utils/api";
 
-interface ApiErrorResponse {
-  message?: string;
-}
+// Get reviews for a product
+export const getProductReviews = createAsyncThunk(
+  "review/getByProduct",
+  async (
+    { 
+      productId, 
+      page = 1, 
+      limit = 10 
+    }: { 
+      productId: string; 
+      page?: number; 
+      limit?: number 
+    },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await instance.get(`/reviews/product/${productId}`, {
+        params: { page, limit }
+      });
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
+    }
+  }
+);
 
 export const createReview = createAsyncThunk(
   "review/create",
@@ -23,12 +46,9 @@ export const createReview = createAsyncThunk(
           withCredentials: true,
         }
       );
-      return response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as { response?: { data?: ApiErrorResponse } };
-      const message =
-        axiosError.response?.data?.message || "Failed to create review";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );

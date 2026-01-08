@@ -26,7 +26,9 @@ export const bannerSlice = createSlice({
     });
     builder.addCase(getBanners.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.banners = action.payload?.data?.banners || [];
+      // extractApiData already extracts the data
+      const payload = action.payload;
+      state.banners = payload?.banners || (Array.isArray(payload) ? payload : []);
     });
     builder.addCase(getBanners.rejected, (state, action) => {
       state.isLoading = false;
@@ -40,7 +42,9 @@ export const bannerSlice = createSlice({
     });
     builder.addCase(getBannersAdmin.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.banners = action.payload?.data?.banners || [];
+      // extractApiData already extracts the data
+      const payload = action.payload;
+      state.banners = payload?.banners || (Array.isArray(payload) ? payload : []);
     });
     builder.addCase(getBannersAdmin.rejected, (state, action) => {
       state.isLoading = false;

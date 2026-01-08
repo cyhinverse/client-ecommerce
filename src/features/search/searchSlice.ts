@@ -80,9 +80,11 @@ export const searchSlice = createSlice({
     });
     builder.addCase(advancedSearch.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.results = action.payload.data || [];
-      state.facets = action.payload.facets || null;
-      state.pagination = action.payload.pagination || null;
+      // extractApiData already extracts the data
+      const payload = action.payload;
+      state.results = Array.isArray(payload) ? payload : (payload?.data || []);
+      state.facets = payload?.facets || null;
+      state.pagination = payload?.pagination || null;
     });
     builder.addCase(advancedSearch.rejected, (state, action) => {
       state.isLoading = false;

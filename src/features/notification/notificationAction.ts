@@ -1,10 +1,6 @@
 import instance from "@/api/api";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { AxiosError } from "axios";
-
-interface ApiErrorResponse {
-  message?: string;
-}
+import { extractApiData, extractApiError } from "@/utils/api";
 
 export interface CreateNotificationData {
   title: string;
@@ -35,13 +31,9 @@ export const getListNotification = createAsyncThunk(
         params: { page, limit },
         withCredentials: true,
       });
-      return response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message =
-        axiosError.response?.data?.message ||
-        "Lấy danh sách thông báo thất bại";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -58,13 +50,9 @@ export const markAsReadNotification = createAsyncThunk(
           withCredentials: true,
         }
       );
-      return response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message =
-        axiosError.response?.data?.message ||
-        "Đánh dấu thông báo là đã đọc thất bại";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -81,13 +69,9 @@ export const markAllAsReadNotification = createAsyncThunk(
           withCredentials: true,
         }
       );
-      return response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message =
-        axiosError.response?.data?.message ||
-        "Đánh dấu tất cả thông báo là đã đọc thất bại";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -100,12 +84,9 @@ export const cleanNotification = createAsyncThunk(
       const response = await instance.delete(`/notifications`, {
         withCredentials: true,
       });
-      return response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message =
-        axiosError.response?.data?.message || "Xóa tất cả thông báo thất bại";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -118,13 +99,9 @@ export const countUnreadNotification = createAsyncThunk(
       const response = await instance.get(`/notifications/count`, {
         withCredentials: true,
       });
-      return response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message =
-        axiosError.response?.data?.message ||
-        "Lấy số lượng thông báo chưa đọc thất bại";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -136,12 +113,9 @@ export const createNotification = createAsyncThunk(
       const response = await instance.post(`/notifications`, data, {
         withCredentials: true,
       });
-      return response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message =
-        axiosError.response?.data?.message || "Tạo thông báo thất bại";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -153,14 +127,9 @@ export const getNotificationById = createAsyncThunk(
       const response = await instance.get(`/notifications/${id}`, {
         withCredentials: true,
       });
-      return response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      return rejectWithValue({
-        message:
-          axiosError.response?.data?.message ||
-          "Lấy chi tiết thông báo thất bại",
-      });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -175,13 +144,9 @@ export const updateNotification = createAsyncThunk(
       const response = await instance.patch(`/notifications/${id}`, data, {
         withCredentials: true,
       });
-      return response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      return rejectWithValue({
-        message:
-          axiosError.response?.data?.message || "Cập nhật thông báo thất bại",
-      });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );

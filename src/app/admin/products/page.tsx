@@ -8,7 +8,8 @@ import {
   updateProduct,
   deleteProduct,
 } from "@/features/product/productAction";
-import { Product, AdminProductFilters } from "@/types/product";
+import { getAllShops } from "@/features/shop/shopAction";
+import { Product, AdminProductFilters, Shop } from "@/types/product";
 import { ProductsHeader } from "@/components/admin/products/ProductHeader";
 import { ProductsStats } from "@/components/admin/products/ProductStats";
 import { ProductsTable } from "@/components/admin/products/ProductTable";
@@ -19,6 +20,10 @@ import { ViewModelProduct } from "@/components/product/forms/ViewModelProduct";
 export default function AdminProductsPage() {
   const dispatch = useAppDispatch();
   const productState = useAppSelector((state) => state.product);
+  const shopState = useAppSelector((state) => state.shop);
+
+  // Get shops list for filter
+  const shops: Shop[] = shopState.shops || [];
 
   const defaultFilters = useMemo(() => ({
     page: 1,
@@ -26,6 +31,7 @@ export default function AdminProductsPage() {
     search: "",
     category: "",
     brand: "",
+    shop: "",
     minPrice: null,
     maxPrice: null,
     isActive: null,
@@ -51,6 +57,7 @@ export default function AdminProductsPage() {
   const [isUpdating, setIsUpdating] = useState(false);
 
   const selectedBrand = filters.brand as string || "";
+  const selectedShop = filters.shop as string || "";
   const selectedMinPrice = filters.minPrice as number | null;
   const selectedMaxPrice = filters.maxPrice as number | null;
   const selectedStatus = filters.isActive as boolean | null;
@@ -64,17 +71,23 @@ export default function AdminProductsPage() {
     if (searchTerm) params.search = searchTerm;
     if (selectedCategory) params.category = selectedCategory;
     if (selectedBrand) params.brand = selectedBrand;
+    if (selectedShop) params.shop = selectedShop;
     if (selectedMinPrice !== null) params.minPrice = selectedMinPrice;
     if (selectedMaxPrice !== null) params.maxPrice = selectedMaxPrice;
     if (selectedStatus !== null) params.isActive = selectedStatus;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     dispatch(getAllProducts(params as any));
-  }, [dispatch, currentPage, pageSize, searchTerm, selectedCategory, selectedBrand, selectedMinPrice, selectedMaxPrice, selectedStatus]);
+  }, [dispatch, currentPage, pageSize, searchTerm, selectedCategory, selectedBrand, selectedShop, selectedMinPrice, selectedMaxPrice, selectedStatus]);
 
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
+
+  // Fetch shops for filter dropdown
+  useEffect(() => {
+    dispatch(getAllShops());
+  }, [dispatch]);
 
   const handleUpdateProduct = async (id: string, productData: FormData) => {
     setIsUpdating(true);
@@ -158,6 +171,10 @@ export default function AdminProductsPage() {
       updateFilters({ isActive: status, page: 1 });
   };
 
+  const handleShopFilterChange = (shop: string) => {
+      updateFilters({ shop: shop === 'all' ? '' : shop, page: 1 });
+  };
+
 
   return (
     <div className="space-y-8 p-1">
@@ -185,11 +202,14 @@ export default function AdminProductsPage() {
           onBrandFilterChange={handleBrandFilterChange}
           onPriceFilterChange={handlePriceFilterChange}
           onStatusFilterChange={handleStatusFilterChange}
+          onShopFilterChange={handleShopFilterChange}
           selectedCategory={selectedCategory}
           selectedBrand={filters.brand as string || ""}
+          selectedShop={selectedShop || "all"}
           selectedMinPrice={filters.minPrice as number | undefined}
           selectedMaxPrice={filters.maxPrice as number | undefined}
           selectedStatus={filters.isActive as boolean | null}
+          shops={shops}
         />
 
         <div className="mt-6 flex justify-center">

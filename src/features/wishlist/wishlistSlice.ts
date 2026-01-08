@@ -36,12 +36,15 @@ export const wishlistSlice = createSlice({
     });
     builder.addCase(getWishlist.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.items = action.payload.data || [];
-      state.pagination = action.payload.pagination || null;
-      state.count = action.payload.pagination?.totalItems || 0;
+      // extractApiData already extracts the data
+      const payload = action.payload;
+      const items = payload?.data || payload || [];
+      state.items = Array.isArray(items) ? items : [];
+      state.pagination = payload?.pagination || null;
+      state.count = payload?.pagination?.totalItems || state.items.length;
       // Update wishlist map
       const map: Record<string, boolean> = {};
-      (action.payload.data || []).forEach((item: { _id: string }) => {
+      state.items.forEach((item: { _id: string }) => {
         map[item._id] = true;
       });
       state.wishlistMap = map;

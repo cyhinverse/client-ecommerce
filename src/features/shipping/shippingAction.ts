@@ -1,11 +1,7 @@
 import instance from "@/api/api";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { CreateShippingTemplatePayload, UpdateShippingTemplatePayload } from "@/types/shipping";
-import { AxiosError } from "axios";
-
-interface ApiErrorResponse {
-  message?: string;
-}
+import { extractApiData, extractApiError } from "@/utils/api";
 
 // Get seller's shipping templates
 export const getMyShippingTemplates = createAsyncThunk(
@@ -13,11 +9,9 @@ export const getMyShippingTemplates = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await instance.get("/shipping");
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể lấy danh sách shipping templates";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -28,11 +22,9 @@ export const createShippingTemplate = createAsyncThunk(
   async (data: CreateShippingTemplatePayload, { rejectWithValue }) => {
     try {
       const response = await instance.post("/shipping", data);
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Tạo shipping template thất bại";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -46,11 +38,9 @@ export const updateShippingTemplate = createAsyncThunk(
   ) => {
     try {
       const response = await instance.put(`/shipping/${templateId}`, data);
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Cập nhật shipping template thất bại";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -63,9 +53,7 @@ export const deleteShippingTemplate = createAsyncThunk(
       await instance.delete(`/shipping/${templateId}`);
       return templateId;
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Xóa shipping template thất bại";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );

@@ -1,4 +1,5 @@
 import { Order } from "@/types/order";
+import { Shop } from "@/types/product";
 import {
   Dialog,
   DialogContent,
@@ -7,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Package } from "lucide-react";
+import { Edit, Package, Store } from "lucide-react";
 import Image from "next/image";
 
 interface ViewOrderModalProps {
@@ -79,6 +80,12 @@ export  function ViewOrderModal({
     });
   };
 
+  const getShopInfo = (shopId: string | Shop | undefined): { name: string; logo?: string; slug?: string } => {
+    if (!shopId) return { name: "N/A" };
+    if (typeof shopId === "string") return { name: shopId };
+    return { name: shopId.name || "N/A", logo: shopId.logo, slug: shopId.slug };
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto no-scrollbar rounded-[2rem] border-border/50 bg-white/80 dark:bg-[#1C1C1E]/80 backdrop-blur-xl shadow-2xl p-6">
@@ -119,6 +126,35 @@ export  function ViewOrderModal({
               </div>
             </div>
           </div>
+
+          {/* Shop Information */}
+          {order.shopId && (
+            <div className="p-5 rounded-2xl bg-gray-50/50 dark:bg-white/5 border border-border/50 space-y-4">
+              <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Shop Information</h3>
+              <div className="flex items-center gap-3">
+                {getShopInfo(order.shopId).logo ? (
+                  <div className="relative h-12 w-12 rounded-xl overflow-hidden bg-gray-100 border border-border/50">
+                    <Image
+                      src={getShopInfo(order.shopId).logo!}
+                      alt={getShopInfo(order.shopId).name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="h-12 w-12 rounded-xl bg-gray-100 flex items-center justify-center border border-border/50">
+                    <Store className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                )}
+                <div>
+                  <p className="font-medium text-foreground">{getShopInfo(order.shopId).name}</p>
+                  {getShopInfo(order.shopId).slug && (
+                    <p className="text-xs text-muted-foreground">@{getShopInfo(order.shopId).slug}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Thông tin khách hàng & Địa chỉ */}
           <div className="space-y-4">

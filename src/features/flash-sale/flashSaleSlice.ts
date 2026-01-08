@@ -45,9 +45,11 @@ export const flashSaleSlice = createSlice({
     });
     builder.addCase(getActiveFlashSale.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.products = action.payload.data || [];
-      state.pagination = action.payload.pagination || null;
-      state.nextSaleTime = action.payload.saleInfo?.nextSaleTime || null;
+      // extractApiData already extracts the data
+      const payload = action.payload;
+      state.products = Array.isArray(payload) ? payload : (payload?.data || []);
+      state.pagination = payload?.pagination || null;
+      state.nextSaleTime = payload?.saleInfo?.nextSaleTime || null;
     });
     builder.addCase(getActiveFlashSale.rejected, (state, action) => {
       state.isLoading = false;

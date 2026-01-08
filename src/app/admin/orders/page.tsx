@@ -9,6 +9,7 @@ import {
   updateOrderStatus,
   getOrderStatistics,
 } from "@/features/order/orderAction";
+import { getAllShops } from "@/features/shop/shopAction";
 import { toast } from "sonner";
 import { PaginationControls } from "@/components/common/Pagination";
 import {
@@ -17,6 +18,7 @@ import {
   OrderStatistics,
   OrderFilters,
 } from "@/types/order";
+import { Shop } from "@/types/product";
 import { OrdersHeader } from "@/components/admin/orders/OrdersHeader";
 import { OrdersStats } from "@/components/admin/orders/OrderStats";
 import { OrdersTable } from "@/components/admin/orders/OrderTable";
@@ -28,6 +30,10 @@ import SpinnerLoading from "@/components/common/SpinnerLoading";
 export default function OrdersAdminPage() {
   const dispatch = useAppDispatch();
   const orderState = useAppSelector((state) => state.order);
+  const shopState = useAppSelector((state) => state.shop);
+
+  // Get shops list for filter
+  const shops: Shop[] = shopState.shops || [];
 
   // Use URL filters hook
   const { filters, updateFilter, updateFilters, resetFilters } =
@@ -40,6 +46,7 @@ export default function OrdersAdminPage() {
         paymentStatus: "",
         paymentMethod: "",
         userId: "",
+        shop: "",
       },
       basePath: "/admin/orders",
     });
@@ -52,6 +59,7 @@ export default function OrdersAdminPage() {
   const paymentStatusFilter = filters.paymentStatus as string;
   const paymentMethodFilter = filters.paymentMethod as string;
   const userIdFilter = filters.userId as string;
+  const shopFilter = filters.shop as string;
 
   const [statistics, setStatistics] = useState<OrderStatistics | null>(null);
 
@@ -75,6 +83,7 @@ export default function OrdersAdminPage() {
     if (paymentStatusFilter) params.paymentStatus = paymentStatusFilter;
     if (paymentMethodFilter) params.paymentMethod = paymentMethodFilter;
     if (userIdFilter) params.userId = userIdFilter;
+    if (shopFilter && shopFilter !== "all") params.shop = shopFilter;
 
     dispatch(getAllOrders(params));
   }, [
@@ -86,7 +95,13 @@ export default function OrdersAdminPage() {
     paymentStatusFilter,
     paymentMethodFilter,
     userIdFilter,
+    shopFilter,
   ]);
+
+  // Fetch shops for filter dropdown
+  useEffect(() => {
+    dispatch(getAllShops());
+  }, [dispatch]);
 
   const refreshData = () => {
     const params: Record<string, string | number | boolean> = {
@@ -99,6 +114,7 @@ export default function OrdersAdminPage() {
     if (paymentStatusFilter) params.paymentStatus = paymentStatusFilter;
     if (paymentMethodFilter) params.paymentMethod = paymentMethodFilter;
     if (userIdFilter) params.userId = userIdFilter;
+    if (shopFilter && shopFilter !== "all") params.shop = shopFilter;
 
     dispatch(getAllOrders(params));
   };
@@ -209,6 +225,10 @@ export default function OrdersAdminPage() {
 
   const handleUserIdFilter = (userId: string) => {
     updateFilters({ userId: userId, page: 1 });
+  };
+
+  const handleShopFilter = (shop: string) => {
+    updateFilters({ shop: shop === "all" ? "" : shop, page: 1 });
   };
 
   const handleCloseModals = () => {
@@ -330,6 +350,9 @@ export default function OrdersAdminPage() {
             onEdit={handleEditOrder}
             onDelete={handleDeleteOrder}
             onView={handleViewOrder}
+            onShopFilterChange={handleShopFilter}
+            selectedShop={shopFilter || "all"}
+            shops={shops}
           />
           
           <div className="flex justify-center">

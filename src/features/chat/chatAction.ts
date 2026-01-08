@@ -1,11 +1,7 @@
 import instance from "@/api/api";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { SendMessagePayload, StartConversationPayload } from "@/types/chat";
-import { AxiosError } from "axios";
-
-interface ApiErrorResponse {
-  message?: string;
-}
+import { extractApiData, extractApiError } from "@/utils/api";
 
 // Start a new conversation with a shop
 export const startConversation = createAsyncThunk(
@@ -13,11 +9,9 @@ export const startConversation = createAsyncThunk(
   async (data: StartConversationPayload, { rejectWithValue }) => {
     try {
       const response = await instance.post("/chat/conversations", data);
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể bắt đầu cuộc trò chuyện";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -28,11 +22,9 @@ export const getMyConversations = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await instance.get("/chat/conversations");
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể lấy danh sách cuộc trò chuyện";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -50,13 +42,11 @@ export const getMessages = createAsyncThunk(
       );
       return {
         conversationId,
-        messages: response.data.data || response.data,
+        messages: extractApiData(response),
         pagination: response.data.pagination,
       };
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể lấy tin nhắn";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -71,11 +61,9 @@ export const sendMessage = createAsyncThunk(
         `/chat/conversations/${conversationId}/messages`,
         messageData
       );
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể gửi tin nhắn";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -88,9 +76,7 @@ export const markMessagesAsRead = createAsyncThunk(
       await instance.put(`/chat/conversations/${conversationId}/read`);
       return conversationId;
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể đánh dấu đã đọc";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );

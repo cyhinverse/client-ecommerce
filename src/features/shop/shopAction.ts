@@ -1,11 +1,20 @@
 import instance from "@/api/api";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { CreateShopPayload, UpdateShopPayload } from "@/types/shop";
-import { AxiosError } from "axios";
+import { extractApiData, extractApiError } from "@/utils/api";
 
-interface ApiErrorResponse {
-  message?: string;
-}
+// Get all shops (admin only)
+export const getAllShops = createAsyncThunk(
+  "shop/getAllShops",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await instance.get("/shops");
+      return extractApiData(response);
+    } catch (error) {
+      return rejectWithValue(extractApiError(error));
+    }
+  }
+);
 
 // Register a new shop (become a seller)
 export const registerShop = createAsyncThunk(
@@ -13,11 +22,9 @@ export const registerShop = createAsyncThunk(
   async (data: CreateShopPayload, { rejectWithValue }) => {
     try {
       const response = await instance.post("/shops/register", data);
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Đăng ký shop thất bại";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -28,11 +35,9 @@ export const getMyShop = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await instance.get("/shops/me");
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không thể lấy thông tin shop";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -43,11 +48,9 @@ export const updateShop = createAsyncThunk(
   async (data: UpdateShopPayload, { rejectWithValue }) => {
     try {
       const response = await instance.put("/shops", data);
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Cập nhật shop thất bại";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -61,11 +64,9 @@ export const getShopById = createAsyncThunk(
       const isObjectId = /^[0-9a-fA-F]{24}$/.test(shopIdOrSlug);
       const url = isObjectId ? `/shops/${shopIdOrSlug}` : `/shops/slug/${shopIdOrSlug}`;
       const response = await instance.get(url);
-      return response.data.data || response.data;
+      return extractApiData(response);
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || "Không tìm thấy shop";
-      return rejectWithValue({ message });
+      return rejectWithValue(extractApiError(error));
     }
   }
 );
@@ -83,14 +84,14 @@ export const uploadShopImage = createAsyncThunk(
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      if (response.data?.data?.url) {
-        return { type: params.type, url: response.data.data.url };
+      const data = extractApiData<{ url?: string }>(response);
+      if (data?.url) {
+        return { type: params.type, url: data.url };
       }
       throw new Error("Upload failed - no URL returned");
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || `Upload ${params.type} thất bại`;
-      return rejectWithValue({ message, type: params.type });
+      const apiError = extractApiError(error);
+      return rejectWithValue({ ...apiError, type: params.type });
     }
   }
 );
@@ -108,14 +109,14 @@ export const uploadRegisterImage = createAsyncThunk(
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      if (response.data?.data?.url) {
-        return { type: params.type, url: response.data.data.url };
+      const data = extractApiData<{ url?: string }>(response);
+      if (data?.url) {
+        return { type: params.type, url: data.url };
       }
       throw new Error("Upload failed - no URL returned");
     } catch (error) {
-      const axiosError = error as AxiosError<ApiErrorResponse>;
-      const message = axiosError.response?.data?.message || `Upload ${params.type} thất bại`;
-      return rejectWithValue({ message, type: params.type });
+      const apiError = extractApiError(error);
+      return rejectWithValue({ ...apiError, type: params.type });
     }
   }
 );
