@@ -98,19 +98,19 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-background -mt-4 -mx-4 px-4 py-4">
+    <div className="w-full min-h-screen bg-background px-4 py-6">
       {(loading || isLoading) && (
         <SpinnerLoading className="fixed inset-0 z-50 m-auto" />
       )}
       
-      <div className={cn("max-w-[1200px] mx-auto transition-opacity duration-300", (loading || isLoading) && "opacity-50 pointer-events-none")}>
-        <div className="flex flex-col md:flex-row gap-4">
+      <div className={cn("max-w-[1200px] mx-auto transition-opacity duration-200", (loading || isLoading) && "opacity-50 pointer-events-none")}>
+        <div className="flex flex-col md:flex-row gap-6">
           {/* Sidebar */}
           <div className="w-full md:w-[240px] shrink-0 space-y-4">
             {/* User Card */}
-            <div className="bg-card rounded-sm p-4 border border-border">
-              <div className="flex items-center gap-3 pb-4 border-b border-border">
-                <Avatar className="h-14 w-14 border-2 border-primary/20">
+            <div className="bg-card rounded-md p-4 border border-border/50">
+              <div className="flex items-center gap-3 pb-4 border-b border-border/30">
+                <Avatar className="h-14 w-14 ring-2 ring-primary/10">
                   <AvatarImage src={currentUser?.avatar ?? undefined} className="object-cover" />
                   <AvatarFallback className="text-lg bg-primary/10 text-primary">
                     {currentUser?.username?.charAt(0).toUpperCase() || "U"}
@@ -133,7 +133,7 @@ export default function ProfilePage() {
                   const Icon = stat.icon;
                   return (
                     <div key={stat.label} className="text-center">
-                      <p className="font-bold text-primary">{stat.value}</p>
+                      <p className="font-semibold text-primary text-sm">{stat.value}</p>
                       <p className="text-[10px] text-muted-foreground">{stat.label}</p>
                     </div>
                   );
@@ -142,7 +142,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Navigation Tabs */}
-            <div className="bg-card rounded-sm overflow-hidden border border-border">
+            <div className="bg-card rounded-md overflow-hidden border border-border/50">
               <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="w-full">
                 <TabsList className="flex flex-col h-auto w-full bg-transparent p-0">
                   {tabs.map((tab) => {
@@ -152,15 +152,16 @@ export default function ProfilePage() {
                         key={tab.value}
                         value={tab.value}
                         className={cn(
-                          "w-full justify-start px-4 py-3 rounded-none transition-all duration-200 text-sm font-medium border-l-2",
-                          "hover:bg-muted text-muted-foreground hover:text-foreground",
+                          "w-full justify-start px-4 py-3 rounded-none text-sm font-medium border-l-2",
+                          "transition-all duration-200",
+                          "hover:bg-muted/50 text-muted-foreground hover:text-foreground",
                           "data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:border-l-primary",
                           "data-[state=inactive]:border-l-transparent"
                         )}
                       >
                         <Icon className="h-4 w-4 mr-3 shrink-0" />
                         <span className="flex-1 text-left">{tab.label}</span>
-                        <ChevronRight className="h-4 w-4 text-muted-foreground data-[state=active]:text-primary" />
+                        <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
                       </TabsTrigger>
                     );
                   })}
@@ -181,19 +182,19 @@ export default function ProfilePage() {
             </div>
 
             {/* Wallet Card */}
-            <div className="bg-primary rounded-sm p-4 text-white">
+            <div className="bg-linear-to-br from-primary/90 to-primary rounded-md p-4 text-white">
               <div className="flex items-center gap-2 mb-3">
-                <Wallet className="h-5 w-5" />
-                <span className="font-medium">Ví của tôi</span>
+                <Wallet className="h-5 w-5 opacity-90" />
+                <span className="font-medium text-sm">Ví của tôi</span>
               </div>
               <p className="text-2xl font-bold">₫0</p>
-              <p className="text-xs text-white/70 mt-1">Số dư khả dụng</p>
+              <p className="text-xs text-white/60 mt-1">Số dư khả dụng</p>
             </div>
           </div>
 
           {/* Main Content Area */}
           <div className="flex-1 min-w-0">
-            <div className="bg-card rounded-sm min-h-[500px] border border-border">
+            <div className="bg-card rounded-md min-h-[500px] border border-border/50">
               <Tabs value={activeTab} className="w-full">
                 <TabsContent value="profile" className="mt-0 focus-visible:ring-0 p-4">
                   {currentUser && <ProfileTab user={currentUser} />}

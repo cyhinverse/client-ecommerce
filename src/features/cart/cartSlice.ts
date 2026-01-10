@@ -21,7 +21,8 @@ const initialState: CartState = {
 const calculateCartTotals = (items: CartItem[], selectedItems: CartItem[]) => {
   const totalAmount = items.reduce((sum, item) => {
     const price =
-      item.price?.discountPrice && item.price.discountPrice > 0 &&
+      item.price?.discountPrice &&
+      item.price.discountPrice > 0 &&
       item.price.discountPrice < item.price.currentPrice
         ? item.price.discountPrice
         : item.price?.currentPrice || 0;
@@ -30,7 +31,8 @@ const calculateCartTotals = (items: CartItem[], selectedItems: CartItem[]) => {
 
   const checkoutTotal = selectedItems.reduce((sum, item) => {
     const price =
-      item.price?.discountPrice && item.price.discountPrice > 0 &&
+      item.price?.discountPrice &&
+      item.price.discountPrice > 0 &&
       item.price.discountPrice < item.price.currentPrice
         ? item.price.discountPrice
         : item.price?.currentPrice || 0;
@@ -56,8 +58,10 @@ export const cartSlice = createSlice({
         const existingItemIndex = state.data.items.findIndex(
           (item) =>
             item._id === action.payload._id ||
-            (typeof item.productId === 'object' && item.productId._id === action.payload.productId._id &&
-              (item.modelId === action.payload.modelId || item.variantId === action.payload.variantId))
+            (typeof item.productId === "object" &&
+              item.productId._id === action.payload.productId._id &&
+              (item.modelId === action.payload.modelId ||
+                item.variantId === action.payload.variantId))
         );
 
         if (existingItemIndex > -1) {

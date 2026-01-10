@@ -5,6 +5,7 @@ import { PersistGate } from "redux-persist/integration/react";
 import { Toaster } from "@/components/ui/sonner";
 import { useAuthPersistence } from "@/hooks/useAuthPersistence";
 import { store, persistor } from "@/store/configStore";
+import { PermissionProvider } from "@/context/PermissionContext";
 
 function AppInitializer({ children }: { children: React.ReactNode }) {
   useAuthPersistence();
@@ -15,7 +16,9 @@ export const ReduxProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <AppInitializer>{children}</AppInitializer>
+        <PermissionProvider>
+          <AppInitializer>{children}</AppInitializer>
+        </PermissionProvider>
         <Toaster position="top-right" richColors />
       </PersistGate>
     </Provider>

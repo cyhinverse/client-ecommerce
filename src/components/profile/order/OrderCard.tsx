@@ -50,33 +50,33 @@ export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancell
     const displayId = order.orderCode ? `#${order.orderCode}` : `#${order._id?.slice(-8).toUpperCase()}`;
 
     return (
-        <div className="group relative bg-card rounded-2xl border border-border/50 p-6 transition-all hover:shadow-md hover:border-primary/20">
+        <div className="group relative bg-card rounded-md border border-border/50 p-5 transition-all duration-200 hover:border-border">
             {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between md:items-start gap-4 mb-6">
+            <div className="flex flex-col md:flex-row justify-between md:items-start gap-4 mb-5">
                 <div>
                     <div className="flex items-center gap-3 mb-1">
-                        <span className="font-bold text-lg tracking-tight">{displayId}</span>
-                        <div className={cn("flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium", statusConfig.bg, statusConfig.color)}>
+                        <span className="font-semibold text-base tracking-tight">{displayId}</span>
+                        <div className={cn("flex items-center gap-1.5 px-2 py-0.5 rounded-sm text-xs font-medium", statusConfig.bg, statusConfig.color)}>
                             <StatusIcon className="h-3.5 w-3.5" />
                             {statusConfig.label}
                         </div>
                     </div>
-                    <p className="text-sm text-muted-foreground font-medium">
+                    <p className="text-sm text-muted-foreground">
                         Ordered on {formatDate(order.createdAt)}
                     </p>
                 </div>
                 <div className="text-left md:text-right">
-                    <p className="text-2xl font-bold tracking-tight">{formatCurrency(order.totalAmount)}</p>
-                    <p className="text-xs text-muted-foreground uppercase tracking-widest font-semibold mt-1">
+                    <p className="text-xl font-semibold tracking-tight">{formatCurrency(order.totalAmount)}</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
                         {order.paymentStatus}
                     </p>
                 </div>
             </div>
 
             {/* Product Preview */}
-            <div className="flex items-center gap-3 mb-6 bg-muted/30 p-3 rounded-xl">
+            <div className="flex items-center gap-3 mb-5 bg-muted/30 p-3 rounded-md">
                 {order.products?.slice(0, 3).map((product, i) => (
-                    <div key={i} className="relative h-12 w-12 rounded-lg overflow-hidden border border-border bg-white">
+                    <div key={i} className="relative h-12 w-12 rounded-sm overflow-hidden border border-border bg-background">
                         <Image 
                             src={getProductImage(product)} 
                             alt={product.name}
@@ -85,14 +85,14 @@ export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancell
                             unoptimized
                         />
                         {product.quantity > 1 && (
-                            <span className="absolute bottom-0 right-0 bg-black text-white text-[10px] px-1 rounded-tl-sm">
+                            <span className="absolute bottom-0 right-0 bg-foreground text-background text-[10px] px-1 rounded-tl-sm">
                                 x{product.quantity}
                             </span>
                         )}
                     </div>
                 ))}
                 {(order.products?.length || 0) > 3 && (
-                    <div className="h-12 w-12 rounded-lg bg-muted flex items-center justify-center border border-border text-xs font-medium text-muted-foreground">
+                    <div className="h-12 w-12 rounded-sm bg-muted flex items-center justify-center border border-border text-xs font-medium text-muted-foreground">
                         +{order.products!.length - 3}
                     </div>
                 )}
@@ -107,8 +107,8 @@ export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancell
             </div>
 
             {/* Address Summary (Collapsed) */}
-            <div className="flex items-start gap-2 text-sm text-muted-foreground mb-6 pl-1">
-                <MapPin className="h-4 w-4 mt-0.5 text-foreground/50" />
+            <div className="flex items-start gap-2 text-sm text-muted-foreground mb-5 pl-1">
+                <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground" />
                 <p className="line-clamp-1">
                     <span className="text-foreground font-medium">{order.shippingAddress?.fullName}</span>
                     <span className="mx-2">•</span>
@@ -120,7 +120,7 @@ export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancell
             <div className="flex flex-wrap gap-3 pt-4 border-t border-border/50">
                 <Button 
                     onClick={() => onViewOrder(order._id!)} 
-                    className="rounded-full flex-1 md:flex-none"
+                    className="rounded-sm flex-1 md:flex-none"
                     variant="secondary"
                 >
                    View Details
@@ -131,7 +131,7 @@ export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancell
                         variant="ghost"
                         onClick={() => onCancelOrder(order._id!)}
                         disabled={isCancelling}
-                        className="rounded-full text-red-500 hover:text-red-600 hover:bg-red-50 md:flex-none flex-1"
+                        className="rounded-sm text-red-500 hover:text-red-600 hover:bg-red-50 md:flex-none flex-1"
                     >
                         {isCancelling ? "Cancelling..." : "Cancel Order"}
                     </Button>

@@ -10,19 +10,45 @@ import { useAppDispatch } from "@/hooks/hooks";
 import { Button } from "@/components/ui/button";
 import { verifyCode } from "@/features/auth/authAction";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 export default function VerifyCodePage() {
   const dispatch = useAppDispatch();
-  const [otp, setOtp] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const emailParam = searchParams.get("email");
+  const codeParam = searchParams.get("code");
+
+  const [otp, setOtp] = useState<string>(codeParam || "");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  // Auto-submit if code is present in URL
+  React.useEffect(() => {
+    if (codeParam && codeParam.length === 6) {
+      handleAutoSubmit(codeParam);
+    }
+  }, [codeParam]);
+
+  const handleAutoSubmit = async (code: string) => {
+    setIsLoading(true);
+    try {
+      await dispatch(verifyCode(code)).unwrap();
+      toast.success("Xác thực email thành công!");
+      router.push("/login");
+    } catch {
+      toast.error("Xác thực email thất bại");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (otp.length !== 6) return;
 
     setIsLoading(true);
     try {
@@ -48,7 +74,12 @@ export default function VerifyCodePage() {
           Kiểm tra email
         </h1>
         <p className="text-sm text-muted-foreground">
-          Chúng tôi đã gửi mã xác nhận đến email của bạn
+          Chúng tôi đã gửi mã xác nhận đến{" "}
+          {emailParam ? (
+            <span className="font-medium text-gray-900">{emailParam}</span>
+          ) : (
+            "email của bạn"
+          )}
         </p>
       </div>
 

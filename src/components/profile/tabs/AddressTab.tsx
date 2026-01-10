@@ -75,11 +75,11 @@ export default function AddressTab({ user }: AddressTabProps) {
   };
 
   const renderEmptyState = () => (
-    <div className="flex flex-col items-center justify-center py-20 text-center border-2 border-dashed border-muted rounded-3xl bg-muted/20">
-      <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mb-4">
-        <MapPin className="h-8 w-8 text-muted-foreground" />
+    <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-border rounded-md bg-muted/20">
+      <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
+        <MapPin className="h-6 w-6 text-muted-foreground/50" />
       </div>
-      <h3 className="text-lg font-bold tracking-tight mb-2">
+      <h3 className="text-lg font-medium mb-2">
         No addresses found
       </h3>
       <p className="text-muted-foreground mb-6 max-w-xs text-sm">
@@ -87,7 +87,7 @@ export default function AddressTab({ user }: AddressTabProps) {
       </p>
       <Button
         onClick={openAddDialog}
-        className="rounded-full px-6"
+        className="rounded-sm px-6"
       >
         <Plus className="h-4 w-4 mr-2" />
         Add New Address
@@ -99,19 +99,19 @@ export default function AddressTab({ user }: AddressTabProps) {
     <div
       key={address._id}
       className={cn(
-        "group relative flex flex-col md:flex-row justify-between p-6 rounded-2xl border transition-all duration-200",
+        "group relative flex flex-col md:flex-row justify-between p-5 rounded-md border transition-all duration-200",
         address.isDefault
-          ? "border-primary bg-primary/5"
-          : "border-border hover:border-foreground/20 bg-[#f7f7f7]"
+          ? "border-primary/30 bg-primary/5"
+          : "border-border/50 bg-muted/30 hover:bg-muted/50"
       )}
     >
       <div className="flex-1 space-y-3">
         <div className="flex items-center gap-3">
-          <h4 className="font-bold text-lg tracking-tight">
+          <h4 className="font-semibold text-base tracking-tight">
             {address.fullName}
           </h4>
           {address.isDefault && (
-            <Badge className="rounded-full bg-primary text-primary-foreground border-0">
+            <Badge className="rounded-sm bg-primary/10 text-primary text-xs px-2 py-0.5 border-0">
               <Star className="h-3 w-3 mr-1 fill-current" />
               Default
             </Badge>
@@ -130,7 +130,7 @@ export default function AddressTab({ user }: AddressTabProps) {
           variant="ghost"
           size="sm"
           onClick={() => openEditDialog(address)}
-          className="rounded-full h-8 px-3 text-xs md:opacity-0 group-hover:opacity-100 transition-opacity"
+          className="rounded-sm h-8 px-3 text-xs md:opacity-0 group-hover:opacity-100 transition-opacity duration-200"
         >
           <Edit className="h-3.5 w-3.5 mr-1.5" />
           Edit
@@ -142,7 +142,7 @@ export default function AddressTab({ user }: AddressTabProps) {
             size="sm"
             onClick={() => handleDeleteAddress(address._id)}
             disabled={isDeleting === address._id || isLoading}
-            className="rounded-full h-8 px-3 text-xs text-red-500 hover:text-red-600 hover:bg-red-50 md:opacity-0 group-hover:opacity-100 transition-opacity"
+            className="rounded-sm h-8 px-3 text-xs text-red-500 hover:text-red-600 hover:bg-red-50 md:opacity-0 group-hover:opacity-100 transition-opacity duration-200"
           >
             {isDeleting === address._id ? (
                 <span className="animate-pulse">Deleting...</span>
@@ -159,16 +159,16 @@ export default function AddressTab({ user }: AddressTabProps) {
   );
 
   return (
-    <div className="space-y-8 relative min-h-[200px]">
+    <div className="space-y-6 relative min-h-[200px]">
       {isLoading && <SpinnerLoading className="absolute inset-0 m-auto" />}
       <div className={isLoading ? "opacity-50 pointer-events-none" : ""}>
         <div className="flex justify-between items-center">
             <div>
-                <h2 className="text-2xl font-bold tracking-tight">Address Book</h2>
+                <h2 className="text-xl font-semibold tracking-tight">Address Book</h2>
                 <p className="text-muted-foreground text-sm">Manage your shipping destinations</p>
             </div>
             {addresses.length > 0 && (
-                <Button onClick={openAddDialog} className="rounded-full">
+                <Button onClick={openAddDialog} className="rounded-sm">
                     <Plus className="h-4 w-4 mr-2" />
                     Add Address
                 </Button>

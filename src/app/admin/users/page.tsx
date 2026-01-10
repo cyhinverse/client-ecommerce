@@ -124,7 +124,7 @@ export default function AdminUsersPage() {
     setIsUpdating(false);
   };
 
-  const handleUpdateUser = async (userData: Partial<User>) => {
+  const handleUpdateUser = async (userData: Partial<User> & { permissions?: string[] }) => {
     if (!selectedUser) return;
 
     setIsUpdating(true);
@@ -132,13 +132,11 @@ export default function AdminUsersPage() {
       await dispatch(
         updateUser({
           id: selectedUser._id,
-          ...userData,
-        } as {
-          username: string;
-          email: string;
-          id: string;
-          isVerifiedEmail: boolean;
-          roles: string;
+          username: userData.username || selectedUser.username,
+          email: userData.email || selectedUser.email,
+          isVerifiedEmail: userData.isVerifiedEmail ?? selectedUser.isVerifiedEmail,
+          roles: userData.roles || selectedUser.roles,
+          permissions: userData.permissions,
         })
       ).unwrap();
       fetchUsers();

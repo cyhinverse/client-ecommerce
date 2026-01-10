@@ -19,6 +19,7 @@ import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { getMyShop } from "@/features/shop/shopAction";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { RequireRole } from "@/components/common/PermissionGate";
 
 const menuItems = [
   {
@@ -100,7 +101,8 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
   }
 
   return (
-    <div className="min-h-screen bg-white -mt-4 -mx-4">
+    <RequireRole roles={["seller", "admin"]} redirectTo="/">
+      <div className="min-h-screen bg-white -mt-4 -mx-4">
       <div className="max-w-[1400px] mx-auto flex gap-6 p-6">
         {/* Sidebar */}
         <aside className="w-[240px] shrink-0">
@@ -168,5 +170,6 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
         </main>
       </div>
     </div>
+    </RequireRole>
   );
 }

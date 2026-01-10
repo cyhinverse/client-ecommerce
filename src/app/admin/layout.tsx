@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LogOut, Menu, ChevronLeft, ChevronRight, Bell } from "lucide-react";
@@ -15,6 +15,8 @@ import { ADMIN_NAVIGATION } from "@/constants";
 import NotificationModel from "@/components/notifications/NotificationModel";
 import { countUnreadNotification } from "@/features/notification/notificationAction";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { RequireRole } from "@/components/common/PermissionGate";
+import { usePermissions } from "@/context/PermissionContext";
 
 export default function AdminLayout({
   children,
@@ -29,18 +31,25 @@ export default function AdminLayout({
   const dispatch = useAppDispatch();
   const { data } = useAppSelector((state) => state.auth);
   const { unreadCount } = useAppSelector((state) => state.notification);
+  const { hasPermission } = usePermissions();
+
+  // Filter navigation items based on user permissions
+  const filteredNavigation = useMemo(() => {
+    return ADMIN_NAVIGATION.filter((item) => {
+      // If no permission required, show the item
+      if (!item.permission) return true;
+      // Admin role has all permissions
+      if (data?.roles === "admin") return true;
+      // Check if user has the required permission
+      return hasPermission(item.permission);
+    });
+  }, [data?.roles, hasPermission]);
 
   useEffect(() => {
     if (data) {
       dispatch(countUnreadNotification());
     }
   }, [data, dispatch]);
-
-  useEffect(() => {
-    if (data?.roles !== "admin") {
-      router.replace("/");
-    }
-  }, [data, router]);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -49,12 +58,13 @@ export default function AdminLayout({
   };
 
   // Get current page title
-  const currentPage = ADMIN_NAVIGATION.find(
+  const currentPage = filteredNavigation.find(
     (item) => pathname === item.href || pathname.startsWith(item.href + "/")
   );
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#000000] flex">
+    <RequireRole roles="admin" redirectTo="/">
+      <div className="min-h-screen bg-white dark:bg-[#000000] flex">
       {/* Mobile Sidebar */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <SheetContent
@@ -75,7 +85,7 @@ export default function AdminLayout({
             
             <ScrollArea className="flex-1 px-3 py-4">
               <nav className="flex flex-col gap-1">
-                {ADMIN_NAVIGATION.map((item) => {
+                {filteredNavigation.map((item) => {
                   const isActive =
                     pathname === item.href ||
                     pathname.startsWith(item.href + "/");
@@ -147,7 +157,7 @@ export default function AdminLayout({
         {/* Navigation */}
         <ScrollArea className="flex-1 py-4 px-3">
           <nav className="flex flex-col gap-1">
-            {ADMIN_NAVIGATION.map((item) => {
+            {filteredNavigation.map((item) => {
               const isActive =
                 pathname === item.href || pathname.startsWith(item.href + "/");
               return (
@@ -296,5 +306,6 @@ export default function AdminLayout({
         </main>
       </div>
     </div>
+    </RequireRole>
   );
 }

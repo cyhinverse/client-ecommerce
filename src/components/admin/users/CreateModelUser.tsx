@@ -15,8 +15,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { useState, useEffect, useCallback } from "react";
+import { Plus, ChevronDown, ChevronUp, Shield } from "lucide-react";
+import { RESOURCES, ACTIONS } from "@/constants/permissions";
+import { getRolePermissions } from "@/api/permission";
 
 interface CreateUserData {
   username: string;
@@ -24,6 +28,7 @@ interface CreateUserData {
   password: string;
   roles: string;
   isVerifiedEmail: boolean;
+  permissions?: string[];
 }
 
 interface CreateModelUserProps {
@@ -46,11 +51,66 @@ export function CreateModelUser({
     roles: "user",
     isVerifiedEmail: false,
     password: "",
+    permissions: [] as string[],
   });
+  const [showPermissions, setShowPermissions] = useState(false);
+  const [rolePermissions, setRolePermissions] = useState<Record<string, string[]>>({});
+
+  // Load role permissions on mount
+  useEffect(() => {
+    const loadRolePermissions = async () => {
+      try {
+        const perms = await getRolePermissions();
+        setRolePermissions(perms?.rolePermissions || {});
+      } catch (error) {
+        console.error("Failed to load role permissions:", error);
+      }
+    };
+    if (open) {
+      loadRolePermissions();
+    }
+  }, [open]);
+
+  // Get default permissions for selected role
+  const defaultRolePerms = rolePermissions[formData.roles] || [];
+
+  const handleTogglePermission = (permission: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      permissions: prev.permissions.includes(permission)
+        ? prev.permissions.filter((p) => p !== permission)
+        : [...prev.permissions, permission],
+    }));
+  };
+
+  const handleSelectAllResource = (resource: string, checked: boolean) => {
+    const resourcePermissions = Object.values(ACTIONS).map(
+      (action) => `${resource}:${action}`
+    );
+    if (checked) {
+      setFormData((prev) => ({
+        ...prev,
+        permissions: [...new Set([...prev.permissions, ...resourcePermissions])],
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        permissions: prev.permissions.filter((p) => !resourcePermissions.includes(p)),
+      }));
+    }
+  };
+
+  const isAllResourceSelected = (resource: string) => {
+    const resourcePerms = Object.values(ACTIONS).map((action) => `${resource}:${action}`);
+    return resourcePerms.every((p) => formData.permissions.includes(p));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onCreate(formData);
+    onCreate({
+      ...formData,
+      permissions: formData.permissions.length > 0 ? formData.permissions : undefined,
+    });
   };
 
   const handleClose = () => {
@@ -62,7 +122,9 @@ export function CreateModelUser({
       roles: "user",
       isVerifiedEmail: false,
       password: "",
+      permissions: [],
     });
+    setShowPermissions(false);
   };
 
   return (
@@ -191,6 +253,70 @@ export function CreateModelUser({
                     </SelectContent>
                     </Select>
                 </div>
+            </div>
+
+            {/* Permissions Section */}
+            <div className="space-y-3 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowPermissions(!showPermissions)}
+                className="w-full justify-between rounded-xl border-gray-200 h-10"
+              >
+                <span className="flex items-center gap-2">
+                  <Shield className="h-4 w-4" />
+                  Permissions bổ sung
+                  {formData.permissions.length > 0 && (
+                    <Badge variant="secondary" className="ml-2">
+                      {formData.permissions.length}
+                    </Badge>
+                  )}
+                </span>
+                {showPermissions ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </Button>
+
+              {showPermissions && (
+                <div className="border rounded-xl p-3 max-h-[200px] overflow-y-auto space-y-3">
+                  <p className="text-xs text-muted-foreground">
+                    Role <Badge variant="outline">{formData.roles}</Badge> đã có {defaultRolePerms.length} quyền mặc định.
+                    Chọn thêm quyền bổ sung bên dưới:
+                  </p>
+                  {Object.values(RESOURCES).slice(0, 8).map((resource) => (
+                    <div key={resource} className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          checked={isAllResourceSelected(resource)}
+                          onCheckedChange={(checked) =>
+                            handleSelectAllResource(resource, checked as boolean)
+                          }
+                        />
+                        <span className="text-sm font-medium capitalize">{resource}</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1 ml-6">
+                        {Object.values(ACTIONS).map((action) => {
+                          const perm = `${resource}:${action}`;
+                          const isFromRole = defaultRolePerms.includes(perm);
+                          return (
+                            <Badge
+                              key={perm}
+                              variant={formData.permissions.includes(perm) ? "default" : "outline"}
+                              className={`cursor-pointer text-xs ${isFromRole ? "border-primary" : ""}`}
+                              onClick={() => handleTogglePermission(perm)}
+                            >
+                              {action}
+                              {isFromRole && <span className="ml-1 text-primary">*</span>}
+                            </Badge>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

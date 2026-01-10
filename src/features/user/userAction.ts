@@ -67,6 +67,7 @@ export const createUser = createAsyncThunk(
     phone: string;
     roles: string;
     isVerifiedEmail: boolean;
+    permissions?: string[];
   }, { rejectWithValue }) => {
     try {
       const response = await instance.post("/users/create", userData);
@@ -85,6 +86,7 @@ export const updateUser = createAsyncThunk(
     id: string;
     isVerifiedEmail: boolean;
     roles: string;
+    permissions?: string[];
   }, { rejectWithValue }) => {
     try {
       const response = await instance.post("/users/update", userData);

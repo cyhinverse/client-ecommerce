@@ -20,7 +20,9 @@ const registerSchema = z
     username: z.string().min(3, "Tên người dùng phải có ít nhất 3 ký tự"),
     email: z.string().email("Email không hợp lệ"),
     password: z.string().min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
-    confirmPassword: z.string().min(6, "Xác nhận mật khẩu phải có ít nhất 6 ký tự"),
+    confirmPassword: z
+      .string()
+      .min(6, "Xác nhận mật khẩu phải có ít nhất 6 ký tự"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Mật khẩu không khớp",
@@ -50,11 +52,14 @@ export default function RegisterPage() {
     try {
       const result = await dispatch(register(data));
       if (register.fulfilled.match(result)) {
-        toast.success("Tạo tài khoản thành công! Vui lòng xác thực email.");
-        router.push("/send-code");
+        toast.success(
+          "Tạo tài khoản thành công! Vui lòng kiểm tra email để lấy mã xác thực."
+        );
+        router.push(`/verify-code?email=${encodeURIComponent(data.email)}`);
       } else {
         const errorMessage =
-          (result.payload as { message: string })?.message || "Đăng ký thất bại";
+          (result.payload as { message: string })?.message ||
+          "Đăng ký thất bại";
         toast.error(errorMessage);
       }
     } catch {
@@ -62,7 +67,13 @@ export default function RegisterPage() {
     }
   }
 
-  const PasswordRequirement = ({ met, text }: { met: boolean; text: string }) => (
+  const PasswordRequirement = ({
+    met,
+    text,
+  }: {
+    met: boolean;
+    text: string;
+  }) => (
     <div
       className={cn(
         "flex items-center gap-1.5 text-xs transition-colors",
@@ -167,8 +178,14 @@ export default function RegisterPage() {
           {password && (
             <div className="grid grid-cols-2 gap-x-4 gap-y-1 pt-1">
               <PasswordRequirement met={password.length >= 6} text="6+ ký tự" />
-              <PasswordRequirement met={/[A-Z]/.test(password)} text="Chữ hoa" />
-              <PasswordRequirement met={/[a-z]/.test(password)} text="Chữ thường" />
+              <PasswordRequirement
+                met={/[A-Z]/.test(password)}
+                text="Chữ hoa"
+              />
+              <PasswordRequirement
+                met={/[a-z]/.test(password)}
+                text="Chữ thường"
+              />
               <PasswordRequirement met={/\d/.test(password)} text="Số" />
             </div>
           )}

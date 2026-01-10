@@ -95,14 +95,14 @@ export default function OrdersTab() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="h-20 w-20 rounded-full bg-red-50 flex items-center justify-center mb-6">
-            <Package className="h-10 w-10 text-red-500" />
+        <div className="h-16 w-16 rounded-full bg-red-50 flex items-center justify-center mb-6">
+            <Package className="h-8 w-8 text-red-500" />
         </div>
-        <h3 className="text-xl font-bold tracking-tight mb-2">Something went wrong</h3>
-        <p className="text-muted-foreground mb-8 max-w-sm">
+        <h3 className="text-lg font-semibold tracking-tight mb-2">Something went wrong</h3>
+        <p className="text-muted-foreground mb-8 max-w-sm text-sm">
           We couldn&apos;t load your orders. This might be a temporary issue.
         </p>
-        <Button onClick={() => dispatch(getUserOrders({ limit: 50 }))} size="lg" className="rounded-full">
+        <Button onClick={() => dispatch(getUserOrders({ limit: 50 }))} size="lg" className="rounded-sm">
           Try Again
         </Button>
       </div>
@@ -114,23 +114,23 @@ export default function OrdersTab() {
       {isLoading && <SpinnerLoading className="absolute inset-0 m-auto" />}
       <div className={isLoading ? "opacity-50 pointer-events-none" : ""}>
         {!userOrders || userOrders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="h-24 w-24 rounded-full bg-muted/50 flex items-center justify-center mb-6">
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="h-20 w-20 rounded-full bg-muted/50 flex items-center justify-center mb-6">
                 <Package className="h-10 w-10 text-muted-foreground/50" />
             </div>
-            <h3 className="text-2xl font-bold tracking-tight mb-2">No orders yet</h3>
-            <p className="text-muted-foreground mb-8 max-w-sm">
+            <h3 className="text-xl font-semibold tracking-tight mb-2">No orders yet</h3>
+            <p className="text-muted-foreground mb-8 max-w-sm text-sm">
               It looks like you haven&apos;t placed any orders yet. Start shopping to fill this page!
             </p>
-            <Button onClick={() => router.push("/products")} size="lg" className="rounded-full px-8">
+            <Button onClick={() => router.push("/products")} size="lg" className="rounded-sm px-8">
               Start Shopping
             </Button>
           </div>
         ) : (
           <>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <h2 className="text-2xl font-bold tracking-tight">Order History</h2>
-              <Button variant="outline" size="sm" onClick={() => router.push("/products")} className="rounded-full">
+              <h2 className="text-xl font-semibold tracking-tight">Order History</h2>
+              <Button variant="outline" size="sm" onClick={() => router.push("/products")} className="rounded-sm">
                 Continue Shopping
               </Button>
             </div>
@@ -141,13 +141,13 @@ export default function OrdersTab() {
               className="w-full"
             >
               <div className="w-full overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
-                <TabsList className="h-auto p-1 bg-muted/50 rounded-full inline-flex w-auto min-w-full sm:min-w-0">
+                <TabsList className="h-auto p-1 bg-muted/30 rounded-md inline-flex w-auto min-w-full sm:min-w-0">
                     {statusTabs.map((tab) => (
                     <TabsTrigger
                         key={tab.value}
                         value={tab.value}
                         className={cn(
-                            "rounded-full px-4 py-2 text-xs font-medium transition-all data-[state=active]:bg-white data-[state=active]:text-black",
+                            "rounded-sm px-4 py-2 text-xs font-medium transition-all duration-200 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
                             tab.count === 0 && "text-muted-foreground/60"
                         )}
                     >
@@ -158,9 +158,9 @@ export default function OrdersTab() {
                 </TabsList>
               </div>
 
-              <TabsContent value={activeStatus} className="mt-6 space-y-6">
+              <TabsContent value={activeStatus} className="mt-6 space-y-4">
                 {filteredOrders.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-16 text-center border-2 border-dashed border-border/50 rounded-2xl bg-muted/20">
+                  <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-border rounded-md bg-muted/20">
                     <Filter className="h-10 w-10 text-muted-foreground/40 mb-4" />
                     <h3 className="text-lg font-medium mb-1">
                       No {activeStatus === "all" ? "" : activeStatus} orders

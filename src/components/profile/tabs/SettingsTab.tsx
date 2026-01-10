@@ -170,8 +170,8 @@ export default function SettingsTab({ user }: SettingsTabProps) {
     title: string;
     description: string;
   }) => (
-    <div className="mb-6">
-      <h3 className="text-lg font-semibold tracking-tight">{title}</h3>
+    <div className="mb-4">
+      <h3 className="text-lg font-medium tracking-tight">{title}</h3>
       <p className="text-sm text-muted-foreground">{description}</p>
     </div>
   );
@@ -179,13 +179,13 @@ export default function SettingsTab({ user }: SettingsTabProps) {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
-        <p className="text-muted-foreground">
+        <h2 className="text-xl font-semibold tracking-tight">Settings</h2>
+        <p className="text-muted-foreground text-sm">
           Manage your account preferences and security.
         </p>
       </div>
 
-      <div className="space-y-12">
+      <div className="space-y-8">
         {/* Account Security */}
         <div>
           <SectionHeader
@@ -193,15 +193,15 @@ export default function SettingsTab({ user }: SettingsTabProps) {
             description="Manage your password and security preferences"
           />
 
-          <div className="space-y-6">
-            <div className="bg-muted/30 p-6 rounded-2xl border border-border/50">
-              <div className="flex items-start justify-between mb-6">
+          <div className="space-y-4">
+            <div className="bg-muted/20 p-5 rounded-md border border-border/30">
+              <div className="flex items-start justify-between mb-5">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
                     <Key className="h-5 w-5" />
                   </div>
                   <div>
-                    <h4 className="font-medium">Change Password</h4>
+                    <h4 className="font-medium text-base">Change Password</h4>
                     <p className="text-xs text-muted-foreground">
                       Ensure your account is using a long, random password.
                     </p>
@@ -212,7 +212,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
               <form onSubmit={handlePasswordChange} className="space-y-4">
                 <div className="grid gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="currentPassword">Current Password</Label>
+                    <Label htmlFor="currentPassword" className="text-sm font-medium">Current Password</Label>
                     <div className="relative">
                       <Input
                         id="currentPassword"
@@ -224,11 +224,11 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                             currentPassword: e.target.value,
                           })
                         }
-                        className="pr-10"
+                        className="pr-10 rounded-sm"
                       />
                       <button
                         type="button"
-                        className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
+                        className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground transition-colors duration-200"
                         onClick={() => togglePasswordVisibility("current")}
                       >
                         {showPasswords.current ? (
@@ -241,7 +241,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="newPassword">New Password</Label>
+                      <Label htmlFor="newPassword" className="text-sm font-medium">New Password</Label>
                       <div className="relative">
                         <Input
                           id="newPassword"
@@ -253,11 +253,11 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                               newPassword: e.target.value,
                             })
                           }
-                          className="pr-10"
+                          className="pr-10 rounded-sm"
                         />
                         <button
                           type="button"
-                          className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
+                          className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground transition-colors duration-200"
                           onClick={() => togglePasswordVisibility("new")}
                         >
                           {showPasswords.new ? (
@@ -269,7 +269,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="confirmPassword">Confirm Password</Label>
+                      <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirm Password</Label>
                       <div className="relative">
                         <Input
                           id="confirmPassword"
@@ -281,11 +281,11 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                               confirmPassword: e.target.value,
                             })
                           }
-                          className="pr-10"
+                          className="pr-10 rounded-sm"
                         />
                         <button
                           type="button"
-                          className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
+                          className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground transition-colors duration-200"
                           onClick={() => togglePasswordVisibility("confirm")}
                         >
                           {showPasswords.confirm ? (
@@ -301,19 +301,19 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                 <Button
                   type="submit"
                   disabled={isChangingPassword}
-                  className="mt-2 text-white"
+                  className="mt-2 text-white rounded-sm"
                 >
                   {isChangingPassword ? "Updating..." : "Update Password"}
                 </Button>
               </form>
             </div>
 
-            <div className="bg-muted/30 p-6 rounded-2xl border border-border/50">
+            <div className="bg-muted/20 p-5 rounded-md border border-border/30">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div
                     className={cn(
-                      "h-10 w-10 rounded-full flex items-center justify-center transition-colors",
+                      "h-10 w-10 rounded-full flex items-center justify-center transition-colors duration-200",
                       twoFactorEnabled
                         ? "bg-green-50 text-green-600"
                         : "bg-muted text-muted-foreground"
@@ -322,7 +322,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                     <Shield className="h-5 w-5" />
                   </div>
                   <div>
-                    <h4 className="font-medium">Two-Factor Authentication</h4>
+                    <h4 className="font-medium text-base">Two-Factor Authentication</h4>
                     <p className="text-xs text-muted-foreground">
                       Add an extra layer of security to your account.
                     </p>
@@ -335,8 +335,8 @@ export default function SettingsTab({ user }: SettingsTabProps) {
               </div>
 
               {showVerificationInput && (
-                <div className="mt-6 p-4 bg-background rounded-xl border border-border animate-in slide-in-from-top-2">
-                  <Label htmlFor="verificationCode" className="mb-2 block">
+                <div className="mt-5 p-4 bg-background rounded-md border border-border">
+                  <Label htmlFor="verificationCode" className="mb-2 block text-sm font-medium">
                     Enter the 6-digit code from your app
                   </Label>
                   <div className="flex gap-2">
@@ -350,11 +350,12 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                           e.target.value.replace(/\D/g, "").slice(0, 6)
                         )
                       }
-                      className="font-mono tracking-widest text-center text-lg max-w-[200px]"
+                      className="font-mono tracking-widest text-center text-lg max-w-[200px] rounded-sm"
                     />
                     <Button
                       onClick={handleVerifyTwoFactor}
                       disabled={verificationCode.length !== 6}
+                      className="rounded-sm"
                     >
                       Verify Code
                     </Button>
@@ -363,12 +364,12 @@ export default function SettingsTab({ user }: SettingsTabProps) {
               )}
             </div>
 
-            <div className="bg-muted/30 p-6 rounded-2xl border border-border/50">
+            <div className="bg-muted/20 p-5 rounded-md border border-border/30">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div
                     className={cn(
-                      "h-10 w-10 rounded-full flex items-center justify-center transition-colors",
+                      "h-10 w-10 rounded-full flex items-center justify-center transition-colors duration-200",
                       user?.isVerifiedEmail
                         ? "bg-blue-50 text-blue-600"
                         : "bg-amber-50 text-amber-600"
@@ -378,7 +379,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h4 className="font-medium">Email Verification</h4>
+                      <h4 className="font-medium text-base">Email Verification</h4>
                       {user?.isVerifiedEmail ? (
                         <Badge
                           variant="secondary"
@@ -407,6 +408,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                     variant="outline"
                     size="sm"
                     onClick={handleEmailVerification}
+                    className="rounded-sm"
                   >
                     Verify Now
                   </Button>

@@ -4,9 +4,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   User as UserIcon,
   Mail,
@@ -16,9 +18,13 @@ import {
   XCircle,
   Edit,
   Shield,
+  Key,
+  Phone,
 } from "lucide-react";
 import { User } from "@/types/user";
 import Image from "next/image";
+import UserPermissions from "./UserPermissions";
+import { cn } from "@/lib/utils";
 
 interface ViewModelUserProps {
   open: boolean;
@@ -35,32 +41,21 @@ export function ViewModelUser({
 }: ViewModelUserProps) {
   if (!user) return null;
 
-  const getVerifiedBadge = (isVerified: boolean) => {
-    return isVerified ? (
-      <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-0 rounded-lg px-2.5 py-0.5 shadow-none flex items-center gap-1 w-fit">
-        <CheckCircle className="h-3 w-3" />
-        Verified
-      </Badge>
-    ) : (
-      <Badge variant="outline" className="bg-gray-100 text-gray-600 border-0 rounded-lg px-2.5 py-0.5 shadow-none flex items-center gap-1 w-fit">
-        <XCircle className="h-3 w-3" />
-        Unverified
-      </Badge>
-    );
+  const statusConfig = {
+    verified: { bg: "bg-green-100 dark:bg-green-900/30", text: "text-green-600 dark:text-green-400", label: "Verified" },
+    unverified: { bg: "bg-gray-100 dark:bg-gray-800", text: "text-gray-600 dark:text-gray-400", label: "Unverified" },
   };
-  
-  const getRoleBadge = (roles: string) => {
-      const colors: { [key: string]: string } = {
-          admin: "bg-purple-100 text-purple-700 hover:bg-purple-100 border-0",
-          user: "bg-blue-50 text-blue-700 hover:bg-blue-50 border-0",
-      };
-      
-      return (
-          <Badge className={`${colors[roles] || "bg-gray-100"} rounded-lg px-2.5 py-0.5 shadow-none border-0`}>
-              {roles.charAt(0).toUpperCase() + roles.slice(1)}
-          </Badge>
-      );
+
+  const roleConfig: Record<string, { bg: string; text: string }> = {
+    admin: { bg: "bg-purple-100 dark:bg-purple-900/30", text: "text-purple-600 dark:text-purple-400" },
+    user: { bg: "bg-blue-100 dark:bg-blue-900/30", text: "text-blue-600 dark:text-blue-400" },
+    moderator: { bg: "bg-orange-100 dark:bg-orange-900/30", text: "text-orange-600 dark:text-orange-400" },
   };
+
+  const getStatus = () => user.isVerifiedEmail ? statusConfig.verified : statusConfig.unverified;
+  const getRoleStyle = () => roleConfig[user.roles] || roleConfig.user;
+  const status = getStatus();
+  const roleStyle = getRoleStyle();
 
   const handleEdit = () => {
     if (onEdit && user) {
@@ -70,118 +65,160 @@ export function ViewModelUser({
   };
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' });
+    return new Date(date).toLocaleDateString("en-US", { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-[2rem] border-border/50 bg-white/80 backdrop-blur-xl shadow-2xl p-6 max-w-lg max-h-[90vh] overflow-y-auto no-scrollbar">
-        <DialogHeader className="border-b border-border/50 pb-6 mb-6">
-            <div className="flex items-center justify-between">
-                <div>
-                     <DialogTitle className="text-2xl font-bold tracking-tight">User Profile</DialogTitle>
-                     <DialogDescription className="text-muted-foreground mt-1">
-                        Detailed information about {user.username}
-                    </DialogDescription>
-                </div>
-                {user.roles && getRoleBadge(user.roles)}
+      <DialogContent className="sm:max-w-[600px] rounded-3xl border-border/50 bg-white/80 dark:bg-[#1C1C1E]/80 backdrop-blur-xl shadow-2xl p-0 overflow-hidden max-h-[90vh]">
+        <DialogHeader className="p-6 pb-4 border-b border-border/50">
+          <div className="flex justify-between items-start">
+            <div className="space-y-1">
+              <DialogTitle className="text-xl font-semibold tracking-tight">User Profile</DialogTitle>
+              <DialogDescription className="text-muted-foreground">
+                Detailed information about {user.username}
+              </DialogDescription>
             </div>
+            <div className={cn("px-3 py-1 rounded-full text-xs font-medium border border-transparent", status.bg, status.text)}>
+              {status.label}
+            </div>
+          </div>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* User Info Card */}
-          <div className="rounded-2xl bg-gradient-to-br from-gray-50/80 to-gray-100/50 border border-border/50 p-6 flex flex-col items-center text-center">
-             <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-sm mb-4">
+        <div className="overflow-y-auto no-scrollbar max-h-[calc(90vh-180px)]">
+          <Tabs defaultValue="profile" className="w-full">
+            <div className="px-6 pt-4">
+              <TabsList className="grid w-full grid-cols-2 rounded-xl bg-gray-100/80 dark:bg-white/5 p-1">
+                <TabsTrigger value="profile" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-white/10">
+                  <UserIcon className="h-4 w-4" />
+                  Profile
+                </TabsTrigger>
+                <TabsTrigger value="permissions" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-white/10">
+                  <Key className="h-4 w-4" />
+                  Permissions
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            <TabsContent value="profile" className="p-6 pt-4 space-y-6">
+              {/* User Avatar & Basic Info */}
+              <div className="flex items-center gap-4">
+                <div className="relative w-20 h-20 rounded-2xl overflow-hidden border-2 border-border/50 bg-gray-100 flex-shrink-0">
                   {user.avatar ? (
                     <Image
                       src={user.avatar}
                       alt={user.username}
                       fill
                       className="object-cover"
-                      sizes="96px"
+                      sizes="80px"
                     />
                   ) : (
-                     <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                        <UserIcon className="h-10 w-10 text-muted-foreground" />
-                     </div>
+                    <div className="w-full h-full flex items-center justify-center">
+                      <UserIcon className="h-8 w-8 text-muted-foreground" />
+                    </div>
                   )}
-             </div>
-             <h3 className="text-xl font-bold text-foreground mb-1">
-                 {user.username}
-             </h3>
-             <div className="flex items-center gap-1.5 text-muted-foreground text-sm mb-4">
-                 <Mail className="h-3 w-3" />
-                 {user.email}
-             </div>
-             {getVerifiedBadge(user.isVerifiedEmail)}
-          </div>
-
-          {/* Details Grid */}
-          <div className="grid grid-cols-2 gap-4">
-               <div className="p-4 rounded-xl bg-gray-50/50 border border-border/50">
-                    <div className="flex items-center gap-2 mb-2 text-muted-foreground">
-                        <Calendar className="h-4 w-4" />
-                        <span className="text-xs font-medium uppercase tracking-wider">Joined Date</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-semibold text-foreground truncate">{user.username}</h3>
+                  <div className="flex items-center gap-1.5 text-muted-foreground text-sm mt-1">
+                    <Mail className="h-3.5 w-3.5 flex-shrink-0" />
+                    <span className="truncate">{user.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className={cn("px-2.5 py-0.5 rounded-lg text-xs font-medium", roleStyle.bg, roleStyle.text)}>
+                      {(user.roles || "user").charAt(0).toUpperCase() + (user.roles || "user").slice(1)}
                     </div>
-                    <p className="font-medium text-sm">{formatDate(user.createdAt)}</p>
-               </div>
-               <div className="p-4 rounded-xl bg-gray-50/50 border border-border/50">
-                    <div className="flex items-center gap-2 mb-2 text-muted-foreground">
-                        <Shield className="h-4 w-4" />
-                        <span className="text-xs font-medium uppercase tracking-wider">Account Role</span>
-                    </div>
-                    <p className="font-medium text-sm capitalize">{user.roles || "User"}</p>
-               </div>
-          </div>
+                    {user.isVerifiedEmail ? (
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-gray-400" />
+                    )}
+                  </div>
+                </div>
+              </div>
 
-          {/* Contact & Address */}
-          <div>
-            <h4 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">
-                 <MapPin className="h-4 w-4" />
-                 Addresses
-            </h4>
-            
-            <div className="space-y-3">
-              {user.addresses && user.addresses.length > 0 ? (
-                 user.addresses.map((addr, index) => (
-                    <div key={index} className="p-4 rounded-xl bg-white/50 border border-border/50 hover:bg-gray-50/50 transition-colors">
-                        <div className="flex justify-between items-start mb-1">
-                             <span className="font-bold text-sm text-foreground">{addr.fullName}</span>
-                             <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md">{addr.phone}</span>
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 rounded-2xl bg-gray-50/50 dark:bg-white/5 border border-border/50 space-y-2">
+                  <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5" />
+                    Joined
+                  </div>
+                  <div className="text-sm font-semibold">{formatDate(user.createdAt)}</div>
+                </div>
+                <div className="p-4 rounded-2xl bg-gray-50/50 dark:bg-white/5 border border-border/50 space-y-2">
+                  <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-1.5">
+                    <Shield className="w-3.5 h-3.5" />
+                    Role
+                  </div>
+                  <div className="text-sm font-semibold capitalize">{user.roles || "User"}</div>
+                </div>
+              </div>
+
+              {/* Addresses */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider pl-1 flex items-center gap-1.5">
+                  <MapPin className="h-3.5 w-3.5" />
+                  Addresses
+                </h4>
+                {user.addresses && user.addresses.length > 0 ? (
+                  <div className="space-y-3">
+                    {user.addresses.map((addr, index) => (
+                      <div key={index} className="p-4 rounded-2xl bg-gray-50/50 dark:bg-white/5 border border-border/50">
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="font-medium text-sm text-foreground">{addr.fullName}</span>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground bg-gray-100 dark:bg-white/10 px-2 py-0.5 rounded-md">
+                            <Phone className="h-3 w-3" />
+                            {addr.phone}
+                          </div>
                         </div>
                         <p className="text-sm text-muted-foreground leading-relaxed">
-                            {addr.address}, {addr.ward}, {addr.district}, {addr.city}
+                          {addr.address}, {addr.ward}, {addr.district}, {addr.city}
                         </p>
-                    </div>
-                 ))
-              ) : (
-                <div className="p-6 rounded-xl border border-dashed border-border/50 text-center bg-gray-50/30">
-                     <p className="text-sm text-muted-foreground">No addresses registered for this user.</p>
-                </div>
-              )}
-            </div>
-          </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-6 rounded-2xl border border-dashed border-border/50 text-center bg-gray-50/30 dark:bg-white/5">
+                    <MapPin className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">No addresses registered</p>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="permissions" className="p-6 pt-4">
+              <UserPermissions
+                userId={user._id}
+                userRole={user.roles || "user"}
+                username={user.username}
+              />
+            </TabsContent>
+          </Tabs>
         </div>
-        
-         {/* Footer Actions */}
-         <div className="flex justify-end gap-3 pt-6 border-t border-border/50 mt-2">
+
+        <DialogFooter className="p-6 pt-4 border-t border-border/50 gap-2 sm:gap-0 bg-transparent">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="rounded-xl border-gray-200"
+          >
+            Close
+          </Button>
+          {onEdit && (
             <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="rounded-xl h-10 border-gray-200 px-5"
+              onClick={handleEdit}
+              className="rounded-xl bg-black hover:bg-black/90 text-white dark:bg-[#0071e3] dark:hover:bg-[#0077ED] gap-2"
             >
-              Close
+              <Edit className="h-4 w-4" />
+              Edit User
             </Button>
-            {onEdit && (
-              <Button
-                onClick={handleEdit}
-                className="rounded-xl h-10 bg-black text-white hover:bg-black/90 gap-2 px-5"
-              >
-                <Edit className="h-4 w-4" />
-                Edit User
-              </Button>
-            )}
-        </div>
+          )}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

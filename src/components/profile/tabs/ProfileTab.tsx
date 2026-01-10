@@ -43,11 +43,11 @@ export default function ProfileTab({ user }: ProfileTabProps) {
   if (!user) return null;
 
   return (
-    <div className="max-w-2xl mx-auto space-y-10 py-4">
+    <div className="max-w-2xl mx-auto space-y-8 py-4">
       {/* Avatar Section */}
-      <div className="flex flex-col items-center gap-6 text-center">
+      <div className="flex flex-col items-center gap-4 text-center">
         <div className="relative group">
-          <div className="w-32 h-32 rounded-full ring-4 ring-white shadow-2xl overflow-hidden transition-transform duration-300 group-hover:scale-105 relative">
+          <div className="w-28 h-28 rounded-full ring-2 ring-border overflow-hidden transition-transform duration-200 group-hover:scale-105 relative">
             <Image
               src={user.avatar || "/placeholder-avatar.jpg"}
               alt={user.username}
@@ -57,27 +57,27 @@ export default function ProfileTab({ user }: ProfileTabProps) {
           </div>
           <Button
             size="icon"
-            className="absolute bottom-1 right-1 h-9 w-9 rounded-full shadow-lg bg-black text-white hover:bg-black/90 transition-transform hover:scale-110"
+            className="absolute bottom-0 right-0 h-8 w-8 rounded-full shadow-sm bg-primary text-white hover:bg-primary/90 transition-colors duration-200"
             onClick={handleUploadAvatar}
             disabled={isUploadingAvatar}
           >
             {isUploadingAvatar ? (
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
             ) : (
-              <Plus className="h-5 w-5" />
+              <Plus className="h-4 w-4" />
             )}
           </Button>
         </div>
         <div className="space-y-1">
-          <h2 className="text-3xl font-bold tracking-tight">{user.username}</h2>
-          <p className="text-muted-foreground text-sm font-medium">
+          <h2 className="text-2xl font-semibold tracking-tight">{user.username}</h2>
+          <p className="text-muted-foreground text-sm">
             Member since {new Date(user.createdAt).getFullYear()}
           </p>
         </div>
       </div>
 
       {/* Info Grid */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         <InfoRow 
             icon={User} 
             label="Username" 
@@ -126,15 +126,15 @@ interface InfoRowProps {
 }
 
 const InfoRow = ({ icon: Icon, label, value, sublabel, action }: InfoRowProps) => (
-  <div className="flex items-center justify-between p-4 bg-[#f7f7f7] rounded-2xl group transition-all hover:bg-[#f0f0f0]">
+  <div className="flex items-center justify-between p-4 bg-muted/50 rounded-md transition-colors duration-200 hover:bg-muted">
       <div className="flex items-center gap-4">
-          <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center text-muted-foreground group-hover:text-primary transition-colors">
+          <div className="h-10 w-10 rounded-full bg-background flex items-center justify-center text-muted-foreground">
               <Icon className="h-5 w-5" />
           </div>
           <div>
-              <p className="text-sm font-medium text-muted-foreground">{label}</p>
+              <p className="text-sm text-muted-foreground">{label}</p>
               <div className="flex items-center gap-2">
-                  <p className="font-semibold text-foreground">{value}</p>
+                  <p className="font-medium text-foreground">{value}</p>
                   {action}
               </div>
               {sublabel && <p className="text-xs text-muted-foreground mt-0.5">{sublabel}</p>}
