@@ -176,7 +176,7 @@ export function useShopCategories(
  */
 export function useAllShops(params?: ShopListParams) {
   return useQuery({
-    queryKey: [...shopKeys.all, "list", params] as const,
+    queryKey: shopKeys.list(params),
     queryFn: () => shopApi.getAll(params),
     staleTime: STALE_TIME.LONG,
   });

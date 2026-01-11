@@ -8,15 +8,17 @@ const promoItems = [
     id: 1,
     title: "Mã giảm giá",
     subtitle: "Giảm đến 50%",
-    image: "https://images.unsplash.com/photo-1696446701796-da61225697cc?w=200&h=200&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1696446701796-da61225697cc?w=200&h=200&fit=crop",
     bgColor: "from-rose-500 to-pink-500",
-    href: "/coupons",
+    href: "/vouchers",
   },
   {
     id: 2,
     title: "Hàng mới về",
     subtitle: "Cập nhật mỗi ngày",
-    image: "https://images.unsplash.com/photo-1505797149-43b007662c21?w=200&h=200&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1505797149-43b007662c21?w=200&h=200&fit=crop",
     bgColor: "from-blue-500 to-cyan-500",
     href: "/new-arrivals",
   },
@@ -24,7 +26,8 @@ const promoItems = [
     id: 3,
     title: "Freeship",
     subtitle: "Đơn từ 0đ",
-    image: "https://images.unsplash.com/photo-1627384113743-6bd5a479fffd?w=200&h=200&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1627384113743-6bd5a479fffd?w=200&h=200&fit=crop",
     bgColor: "from-emerald-500 to-teal-500",
     href: "/free-shipping",
   },
@@ -32,7 +35,8 @@ const promoItems = [
     id: 4,
     title: "Flash Sale",
     subtitle: "Giá sốc mỗi giờ",
-    image: "https://images.unsplash.com/photo-1567113463300-102a7eb3cb26?w=200&h=200&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1567113463300-102a7eb3cb26?w=200&h=200&fit=crop",
     bgColor: "from-amber-500 to-orange-500",
     href: "/flash-sale",
   },
@@ -52,9 +56,7 @@ export default function PromoGrid() {
             <h3 className="text-sm font-bold text-gray-900 group-hover:text-[#E53935] transition-colors">
               {item.title}
             </h3>
-            <p className="text-[11px] text-gray-500 mt-0.5">
-              {item.subtitle}
-            </p>
+            <p className="text-[11px] text-gray-500 mt-0.5">{item.subtitle}</p>
             <span className="inline-flex items-center gap-0.5 text-[10px] text-[#E53935] mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
               Xem ngay <ArrowRight className="w-3 h-3" />
             </span>

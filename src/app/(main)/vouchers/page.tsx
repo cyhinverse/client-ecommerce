@@ -1,339 +1,294 @@
-// VoucherPage - Taobao Light Style
+// VoucherPage - Taobao Gentle Style
 "use client";
-import { useState } from "react";
+
+import { useState, useMemo } from "react";
 import {
+  Loader2,
+  Gift,
+  Sparkles,
+  Search,
+  Clock,
+  Tag,
   Ticket,
   Store,
-  Clock,
-  Check,
+  Crown,
+  Timer,
   ChevronRight,
-  Filter,
-  Loader2,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useVouchers } from "@/hooks/queries";
-import { useAppSelector } from "@/hooks/hooks";
-import { Voucher as VoucherType } from "@/types/voucher";
-import { Shop } from "@/types/shop";
-
-// Extended voucher interface for UI state
-interface Voucher extends Omit<VoucherType, "shopId"> {
-  shopId?: { _id: string; name: string; logo?: string } | string | Shop;
-  isCollected?: boolean;
-}
-
-// Helper to get shop info from voucher
-const getShopInfo = (
-  shopId: Voucher["shopId"]
-): { _id: string; name: string; logo?: string } | undefined => {
-  if (!shopId) return undefined;
-  if (typeof shopId === "string")
-    return { _id: shopId, name: "Shop", logo: undefined };
-  if ("name" in shopId)
-    return { _id: shopId._id, name: shopId.name, logo: (shopId as any).logo };
-  return undefined;
-};
+import { VoucherCard } from "@/components/vouchers/VoucherCard";
+import { Input } from "@/components/ui/input";
 
 export default function VouchersPage() {
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
-
   const [collectedIds, setCollectedIds] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<
     "all" | "percentage" | "fixed_amount"
   >("all");
 
   // Fetch vouchers using React Query
   const { data: vouchersData, isLoading } = useVouchers({ isActive: true });
-  const reduxVouchers = vouchersData?.vouchers || [];
-
-  // Map redux vouchers to UI vouchers with collected state
-  const vouchers: Voucher[] = reduxVouchers.map((v) => ({
-    ...v,
-    isCollected: collectedIds.has(v._id),
-  }));
+  const allVouchers = useMemo(
+    () => vouchersData?.vouchers || [],
+    [vouchersData]
+  );
 
   const handleCollectVoucher = (voucherId: string) => {
     setCollectedIds((prev) => new Set(prev).add(voucherId));
-    toast.success("Đã lưu voucher thành công!");
+    toast.success("Đã lưu voucher vào ví của bạn!");
   };
 
-  const filteredVouchers = vouchers.filter((v) => {
-    if (activeTab === "platform" && v.scope !== "platform") return false;
-    if (activeTab === "shop" && v.scope !== "shop") return false;
-    if (filterType !== "all" && v.type !== filterType) return false;
-    return true;
-  });
+  // Get current time for countdown display
+  const now = new Date();
+  const hoursLeft = 24 - now.getHours();
+  const minutesLeft = 60 - now.getMinutes();
 
-  const platformVouchers = filteredVouchers.filter(
-    (v) => v.scope === "platform"
-  );
-  const shopVouchers = filteredVouchers.filter((v) => v.scope === "shop");
+  // Vouchers of the Day - Top featured vouchers
+  const dailyVouchers = useMemo(() => {
+    return [...allVouchers]
+      .sort((a, b) => {
+        if (a.scope === "platform" && b.scope !== "platform") return -1;
+        if (a.scope !== "platform" && b.scope === "platform") return 1;
+        return b.value - a.value;
+      })
+      .slice(0, 6);
+  }, [allVouchers]);
 
-  // Group shop vouchers by shop
-  const shopVouchersByShop = shopVouchers.reduce((acc, voucher) => {
-    const shopInfo = getShopInfo(voucher.shopId);
-    const shopId = shopInfo?._id || "unknown";
-    if (!acc[shopId]) {
-      acc[shopId] = {
-        shop: shopInfo,
-        vouchers: [],
-      };
-    }
-    acc[shopId].vouchers.push(voucher);
-    return acc;
-  }, {} as Record<string, { shop: ReturnType<typeof getShopInfo>; vouchers: Voucher[] }>);
+  const filteredVouchers = useMemo(() => {
+    return allVouchers.filter((v) => {
+      if (activeTab === "platform" && v.scope !== "platform") return false;
+      if (activeTab === "shop" && v.scope !== "shop") return false;
+      if (filterType !== "all" && v.type !== filterType) return false;
+      if (
+        searchQuery &&
+        !v.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        !v.code.toLowerCase().includes(searchQuery.toLowerCase())
+      ) {
+        return false;
+      }
+      return true;
+    });
+  }, [allVouchers, activeTab, filterType, searchQuery]);
 
-  // Loading state
-  if (isLoading && vouchers.length === 0) {
+  if (isLoading && allVouchers.length === 0) {
     return (
-      <div className="min-h-screen bg-background py-4 -mt-4 -mx-4 px-4 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-[#E53935]" />
+      <div className="min-h-[80vh] flex flex-col items-center justify-center gap-4 bg-white">
+        <div className="w-16 h-16 rounded-full bg-[#f7f7f7] flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+        <p className="text-muted-foreground text-sm">Đang tải ưu đãi...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background py-4 -mt-4 -mx-4 px-4">
-      <div className="max-w-[1200px] mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded border border-[#f0f0f0] mb-4 p-4">
+    <div className="min-h-screen bg-white pb-16">
+      {/* Simple Header */}
+      <div className="bg-[#f7f7f7] py-8 px-4">
+        <div className="max-w-[1200px] mx-auto">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Ticket className="h-5 w-5 text-[#E53935]" />
-              <h1 className="text-xl font-bold text-gray-800">Kho Voucher</h1>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+                <Gift className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-gray-800 text-xl font-semibold">
+                  Trung tâm Voucher
+                </h1>
+                <p className="text-muted-foreground text-xs">
+                  Săn mã giảm giá mỗi ngày
+                </p>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-gray-400" />
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value as any)}
-                className="text-sm border border-gray-200 rounded px-2 py-1 focus:outline-none focus:border-[#E53935]"
-              >
-                <option value="all">Tất cả loại</option>
-                <option value="percentage">Giảm %</option>
-                <option value="fixed_amount">Giảm tiền</option>
-              </select>
+            <div className="hidden md:flex items-center gap-2 bg-white rounded-full px-4 py-2">
+              <Timer className="w-4 h-4 text-primary" />
+              <span className="text-gray-600 text-sm font-medium">
+                Còn {hoursLeft}h {minutesLeft}m
+              </span>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="bg-white rounded border border-[#f0f0f0] p-1 mb-4 w-full justify-start">
-            <TabsTrigger
-              value="all"
-              className="data-[state=active]:bg-[#FFEBEE] data-[state=active]:text-[#E53935]"
-            >
-              Tất cả
-            </TabsTrigger>
-            <TabsTrigger
-              value="platform"
-              className="data-[state=active]:bg-[#FFEBEE] data-[state=active]:text-[#E53935]"
-            >
-              Voucher nền tảng
-            </TabsTrigger>
-            <TabsTrigger
-              value="shop"
-              className="data-[state=active]:bg-[#FFEBEE] data-[state=active]:text-[#E53935]"
-            >
-              Voucher Shop
-            </TabsTrigger>
-          </TabsList>
+      {/* Daily Vouchers Section */}
+      <div className="max-w-[1200px] mx-auto px-4 mt-6">
+        <div className="bg-[#f7f7f7] rounded-2xl overflow-hidden">
+          {/* Section Header */}
+          <div className="flex items-center justify-between px-5 py-4">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              <span className="font-semibold text-gray-800">
+                Ưu đãi hôm nay
+              </span>
+              <span className="text-xs text-muted-foreground bg-white px-2 py-0.5 rounded-full">
+                {dailyVouchers.length} mã
+              </span>
+            </div>
+            <button className="flex items-center gap-1 text-primary text-sm hover:opacity-80 transition-opacity">
+              Xem tất cả <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
 
-          <TabsContent value="all" className="mt-0 space-y-4">
-            {/* Platform Vouchers */}
-            {platformVouchers.length > 0 && (
-              <div>
-                <h2 className="text-sm font-medium text-gray-600 mb-2 flex items-center gap-1">
-                  <Ticket className="h-4 w-4" />
-                  Voucher nền tảng
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {platformVouchers.map((voucher) => (
-                    <VoucherCard
-                      key={voucher._id}
-                      voucher={voucher}
-                      onCollect={handleCollectVoucher}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Shop Vouchers */}
-            {Object.keys(shopVouchersByShop).length > 0 && (
-              <div>
-                <h2 className="text-sm font-medium text-gray-600 mb-2 flex items-center gap-1">
-                  <Store className="h-4 w-4" />
-                  Voucher từ Shop
-                </h2>
-                {Object.values(shopVouchersByShop).map((group) => (
-                  <div key={group.shop?._id} className="mb-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm text-gray-800 font-medium">
-                        {group.shop?.name}
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {group.vouchers.map((voucher) => (
-                        <VoucherCard
-                          key={voucher._id}
-                          voucher={voucher}
-                          onCollect={handleCollectVoucher}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="platform" className="mt-0">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {platformVouchers.map((voucher) => (
+          {/* Daily Vouchers Grid */}
+          <div className="p-4 pt-0">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+              {dailyVouchers.map((v) => (
                 <VoucherCard
-                  key={voucher._id}
-                  voucher={voucher}
+                  key={v._id}
+                  variant="compact"
+                  voucher={v}
+                  isCollected={collectedIds.has(v._id)}
                   onCollect={handleCollectVoucher}
                 />
               ))}
             </div>
-          </TabsContent>
+          </div>
+        </div>
+      </div>
 
-          <TabsContent value="shop" className="mt-0">
-            {Object.values(shopVouchersByShop).map((group) => (
-              <div key={group.shop?._id} className="mb-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-sm text-gray-800 font-medium">
-                    {group.shop?.name}
-                  </span>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {group.vouchers.map((voucher) => (
-                    <VoucherCard
-                      key={voucher._id}
-                      voucher={voucher}
-                      onCollect={handleCollectVoucher}
-                    />
-                  ))}
-                </div>
+      {/* Main Content */}
+      <div className="max-w-[1200px] mx-auto px-4 mt-4">
+        <div className="bg-[#f7f7f7] rounded-2xl overflow-hidden">
+          {/* Search and Filter Bar */}
+          <div className="p-4">
+            <div className="flex flex-col md:flex-row gap-3">
+              {/* Search Input */}
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Tìm mã giảm giá..."
+                  className="pl-10 h-10 bg-white border-none rounded-xl text-sm focus-visible:ring-0"
+                />
               </div>
-            ))}
-          </TabsContent>
-        </Tabs>
+
+              {/* Filter Buttons */}
+              <div className="flex gap-2">
+                <select
+                  value={filterType}
+                  onChange={(e) =>
+                    setFilterType(e.target.value as typeof filterType)
+                  }
+                  className="h-10 px-4 bg-white border-none rounded-xl text-sm text-gray-600 focus:outline-none"
+                >
+                  <option value="all">Tất cả loại</option>
+                  <option value="percentage">Giảm %</option>
+                  <option value="fixed_amount">Giảm tiền</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Tabs Navigation */}
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
+            <div className="px-4">
+              <TabsList className="bg-white h-11 p-1 rounded-xl gap-1">
+                <TabsTrigger
+                  value="all"
+                  className="h-9 px-5 rounded-lg text-sm font-medium text-gray-500 data-[state=active]:bg-[#f7f7f7] data-[state=active]:text-gray-800 transition-colors"
+                >
+                  <Tag className="w-4 h-4 mr-2" />
+                  Tất cả
+                </TabsTrigger>
+                <TabsTrigger
+                  value="platform"
+                  className="h-9 px-5 rounded-lg text-sm font-medium text-gray-500 data-[state=active]:bg-[#f7f7f7] data-[state=active]:text-primary transition-colors"
+                >
+                  <Crown className="w-4 h-4 mr-2" />
+                  Toàn sàn
+                </TabsTrigger>
+                <TabsTrigger
+                  value="shop"
+                  className="h-9 px-5 rounded-lg text-sm font-medium text-gray-500 data-[state=active]:bg-[#f7f7f7] data-[state=active]:text-blue-500 transition-colors"
+                >
+                  <Store className="w-4 h-4 mr-2" />
+                  Cửa hàng
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab + searchQuery + filterType}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <TabsContent
+                  value={activeTab}
+                  className="mt-0 p-4 focus-visible:outline-none"
+                >
+                  {filteredVouchers.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                      {filteredVouchers.map((voucher) => (
+                        <VoucherCard
+                          key={voucher._id}
+                          voucher={voucher}
+                          isCollected={collectedIds.has(voucher._id)}
+                          onCollect={handleCollectVoucher}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="py-16 flex flex-col items-center justify-center text-center">
+                      <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center mb-4">
+                        <Ticket className="w-8 h-8 text-gray-300" />
+                      </div>
+                      <h3 className="text-base font-medium text-gray-800 mb-2">
+                        Không tìm thấy voucher
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-6">
+                        Thử thay đổi bộ lọc hoặc quay lại sau nhé!
+                      </p>
+                      <button
+                        className="px-6 py-2.5 bg-white text-gray-600 text-sm font-medium rounded-xl hover:bg-gray-50 transition-colors"
+                        onClick={() => {
+                          setSearchQuery("");
+                          setFilterType("all");
+                          setActiveTab("all");
+                        }}
+                      >
+                        Xóa bộ lọc
+                      </button>
+                    </div>
+                  )}
+                </TabsContent>
+              </motion.div>
+            </AnimatePresence>
+          </Tabs>
+        </div>
+      </div>
+
+      {/* Tips Section */}
+      <div className="max-w-[1200px] mx-auto px-4 mt-4">
+        <div className="bg-[#f7f7f7] rounded-2xl p-5">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0">
+              <Clock className="w-4 h-4 text-amber-500" />
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-800 text-sm mb-1">
+                Mẹo săn voucher
+              </h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Voucher mới sẽ được cập nhật mỗi ngày lúc 00:00. Hãy lưu voucher
+                vào ví để sử dụng khi thanh toán. Mỗi voucher có giới hạn số
+                lượng, hãy nhanh tay nhé!
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  );
-}
-
-// VoucherCard Component
-function VoucherCard({
-  voucher,
-  onCollect,
-}: {
-  voucher: Voucher;
-  onCollect: (id: string) => void;
-}) {
-  const formatValue = () => {
-    if (voucher.type === "percentage") {
-      return `${voucher.value}%`;
-    }
-    return `₫${voucher.value.toLocaleString("vi-VN")}`;
-  };
-
-  const usagePercent = Math.round(
-    (voucher.usageCount / voucher.usageLimit) * 100
-  );
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded border border-[#f0f0f0] overflow-hidden flex"
-    >
-      {/* Left - Value */}
-      <div className="w-[100px] bg-[#FFEBEE] flex flex-col items-center justify-center p-3 border-r border-dashed border-[#FFCDD2]">
-        <span className="text-2xl font-bold text-[#E53935]">
-          {formatValue()}
-        </span>
-        <span className="text-[10px] text-[#E53935] mt-0.5">
-          {voucher.type === "percentage"
-            ? `Tối đa ₫${(voucher.maxValue || 0).toLocaleString("vi-VN")}`
-            : "Giảm trực tiếp"}
-        </span>
-      </div>
-
-      {/* Right - Info */}
-      <div className="flex-1 p-3 flex flex-col">
-        <div className="flex items-start justify-between">
-          <div>
-            <h3 className="font-medium text-gray-800 text-sm">
-              {voucher.name}
-            </h3>
-            <p className="text-xs text-gray-500 mt-0.5">
-              {voucher.description}
-            </p>
-          </div>
-          {voucher.scope === "shop" && (
-            <span className="text-[10px] text-[#E53935] border border-[#E53935] px-1 py-0.5 rounded shrink-0">
-              Shop
-            </span>
-          )}
-        </div>
-
-        <div className="mt-auto pt-2">
-          <div className="flex items-center justify-between text-[11px] text-gray-400 mb-1">
-            <span>
-              Đơn tối thiểu ₫{voucher.minOrderValue.toLocaleString("vi-VN")}
-            </span>
-            <span className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              HSD: {new Date(voucher.endDate).toLocaleDateString("vi-VN")}
-            </span>
-          </div>
-
-          {/* Usage Progress */}
-          <div className="flex items-center gap-2">
-            <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-[#E53935] rounded-full transition-all"
-                style={{ width: `${usagePercent}%` }}
-              />
-            </div>
-            <span className="text-[10px] text-gray-400">
-              Đã dùng {usagePercent}%
-            </span>
-          </div>
-        </div>
-
-        {/* Collect Button */}
-        <div className="mt-2 pt-2 border-t border-border">
-          {voucher.isCollected ? (
-            <Button
-              disabled
-              variant="outline"
-              size="sm"
-              className="w-full h-7 text-xs border-gray-200 text-gray-400"
-            >
-              <Check className="h-3 w-3 mr-1" />
-              Đã lưu
-            </Button>
-          ) : (
-            <Button
-              onClick={() => onCollect(voucher._id)}
-              size="sm"
-              className="w-full h-7 text-xs bg-[#E53935] hover:bg-[#D32F2F]"
-            >
-              Lưu ngay
-            </Button>
-          )}
-        </div>
-      </div>
-    </motion.div>
   );
 }

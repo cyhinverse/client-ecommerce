@@ -47,7 +47,7 @@ export function usePaymentByOrder(
   options?: { enabled?: boolean }
 ) {
   return useQuery({
-    queryKey: [...paymentKeys.all, "order", orderId] as const,
+    queryKey: paymentKeys.byOrder(orderId),
     queryFn: () => paymentApi.getByOrder(orderId),
     enabled: options?.enabled ?? !!orderId,
   });

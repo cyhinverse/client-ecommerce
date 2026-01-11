@@ -23,6 +23,10 @@ export const productKeys = {
     [...productKeys.all, "category", categorySlug] as const,
   shopProducts: (shopId: string, filters?: unknown) =>
     [...productKeys.all, "shop", shopId, filters] as const,
+  related: (productId: string) =>
+    [...productKeys.all, "related", productId] as const,
+  search: (keyword: string, limit?: number) =>
+    [...productKeys.all, "search", keyword, limit] as const,
 };
 
 // Category query keys
@@ -87,6 +91,8 @@ export const orderKeys = {
   detail: (orderId: string) => [...orderKeys.all, "detail", orderId] as const,
   shopOrders: (shopId: string, params?: unknown) =>
     [...orderKeys.all, "shop", shopId, params] as const,
+  admin: (params?: unknown) => [...orderKeys.all, "admin", params] as const,
+  statistics: () => [...orderKeys.all, "statistics"] as const,
 };
 
 // User/Profile query keys
@@ -96,6 +102,7 @@ export const userKeys = {
   addresses: () => [...userKeys.all, "addresses"] as const,
   address: (addressId: string) =>
     [...userKeys.all, "address", addressId] as const,
+  list: (params?: unknown) => [...userKeys.all, "list", params] as const,
 };
 
 // Profile query keys (alias for userKeys with current() for compatibility)
@@ -113,6 +120,7 @@ export const shopKeys = {
   detailBySlug: (slug: string) => [...shopKeys.all, "slug", slug] as const,
   categories: (shopId: string) =>
     [...shopKeys.all, "categories", shopId] as const,
+  list: (params?: unknown) => [...shopKeys.all, "list", params] as const,
 };
 
 // Shop Category query keys
@@ -160,7 +168,8 @@ export const voucherKeys = {
   list: (params?: unknown) => [...voucherKeys.lists(), params] as const,
   detail: (voucherId: string) =>
     [...voucherKeys.all, "detail", voucherId] as const,
-  available: (params?: unknown) => [...voucherKeys.all, "available", params] as const,
+  available: (params?: unknown) =>
+    [...voucherKeys.all, "available", params] as const,
   validate: (code: string) => [...voucherKeys.all, "validate", code] as const,
   statistics: () => [...voucherKeys.all, "statistics"] as const,
 };
@@ -191,8 +200,8 @@ export const chatKeys = {
 // Search query keys
 export const searchKeys = {
   all: ["search"] as const,
-  suggestions: (query: string) =>
-    [...searchKeys.all, "suggestions", query] as const,
+  suggestions: (query: string, limit?: number) =>
+    [...searchKeys.all, "suggestions", query, limit] as const,
   results: (params: unknown) => [...searchKeys.all, "results", params] as const,
 };
 
@@ -200,4 +209,5 @@ export const searchKeys = {
 export const paymentKeys = {
   all: ["payment"] as const,
   methods: () => [...paymentKeys.all, "methods"] as const,
+  byOrder: (orderId: string) => [...paymentKeys.all, "order", orderId] as const,
 };

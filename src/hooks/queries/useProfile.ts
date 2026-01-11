@@ -181,7 +181,7 @@ export function useAddresses(options?: { enabled?: boolean }) {
  */
 export function useAllUsers(params?: UserListParams) {
   return useQuery({
-    queryKey: [...userKeys.all, "list", params] as const,
+    queryKey: userKeys.list(params),
     queryFn: () => userApi.getAll(params),
     staleTime: STALE_TIME.LONG,
   });

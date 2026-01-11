@@ -7,11 +7,7 @@ import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import instance from "@/api/api";
-import {
-  extractApiData,
-  extractApiError,
-  PaginatedResponse,
-} from "@/api";
+import { extractApiData, extractApiError, PaginatedResponse } from "@/api";
 import { errorHandler } from "@/services/errorHandler";
 import { STALE_TIME } from "@/constants/cache";
 import { productKeys } from "@/lib/queryKeys";
@@ -85,15 +81,18 @@ const productApi = {
 
     const response = await instance.get("/products", { params: queryParams });
     const serverData = extractApiData<ServerProductListResponse>(response);
-    
+
     // Normalize server response to client interface
     // Server returns { data: [...], pagination: {...} } but client expects { products: [...], pagination: {...} }
     return {
       products: serverData.data || serverData.products || [],
       pagination: {
-        page: serverData.pagination.currentPage || serverData.pagination.page || 1,
-        limit: serverData.pagination.pageSize || serverData.pagination.limit || 10,
-        total: serverData.pagination.totalItems || serverData.pagination.total || 0,
+        page:
+          serverData.pagination.currentPage || serverData.pagination.page || 1,
+        limit:
+          serverData.pagination.pageSize || serverData.pagination.limit || 10,
+        total:
+          serverData.pagination.totalItems || serverData.pagination.total || 0,
         totalPages: serverData.pagination.totalPages || 1,
       },
     };
@@ -312,7 +311,7 @@ export function useRelatedProducts(
   options?: { enabled?: boolean }
 ) {
   return useQuery({
-    queryKey: [...productKeys.all, "related", productId] as const,
+    queryKey: productKeys.related(productId),
     queryFn: () => productApi.getRelated(productId),
     enabled: options?.enabled ?? !!productId,
     staleTime: STALE_TIME.STATIC,
@@ -338,7 +337,7 @@ export function useShopProducts(
  */
 export function useProductSearch(keyword: string, limit?: number) {
   return useQuery({
-    queryKey: [...productKeys.all, "search", keyword, limit] as const,
+    queryKey: productKeys.search(keyword, limit),
     queryFn: () => productApi.search({ keyword, limit }),
     enabled: keyword.length >= 2,
     staleTime: STALE_TIME.MEDIUM,

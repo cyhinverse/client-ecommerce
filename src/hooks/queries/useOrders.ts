@@ -207,7 +207,7 @@ export function useOrder(orderId: string, options?: { enabled?: boolean }) {
  */
 export function useAllOrders(params?: OrderListParams) {
   return useQuery({
-    queryKey: [...orderKeys.all, "admin", params] as const,
+    queryKey: orderKeys.admin(params),
     queryFn: () => orderApi.getAllOrders(params),
     staleTime: STALE_TIME.MEDIUM,
   });
@@ -230,7 +230,7 @@ export function useShopOrders(shopId: string, params?: OrderListParams) {
  */
 export function useOrderStatistics() {
   return useQuery({
-    queryKey: [...orderKeys.all, "statistics"] as const,
+    queryKey: orderKeys.statistics(),
     queryFn: orderApi.getStatistics,
     staleTime: STALE_TIME.VERY_LONG,
   });

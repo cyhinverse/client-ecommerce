@@ -15,12 +15,13 @@ import {
   Search,
   Loader2,
   Heart,
+  Store,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import NotificationModel from "@/components/notifications/NotificationModel";
 import { useUnreadNotificationCount } from "@/hooks/queries/useNotifications";
 import { toggleChat } from "@/features/chat/chatSlice";
-import { useProductSearch } from "@/hooks/queries/useProducts";
+import { useSearchSuggestions } from "@/hooks/queries/useSearch";
 import { formatCurrency } from "@/utils/format";
 import { pathArray } from "@/constants/PathArray";
 import {
@@ -90,7 +91,7 @@ export default function HeaderLayout() {
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   // Use React Query for search
-  const { data: searchResults, isLoading: isSearching } = useProductSearch(
+  const { data: searchResults, isLoading: isSearching } = useSearchSuggestions(
     debouncedSearchQuery.trim(),
     8
   );
@@ -143,6 +144,12 @@ export default function HeaderLayout() {
     router.push(`/products/${slug}`);
   };
 
+  const handleShopClick = (slug: string) => {
+    setIsSearchFocused(false);
+    setSearchQuery("");
+    router.push(`/shop/${slug}`);
+  };
+
   const removeRecentSearch = (e: React.MouseEvent) => {
     e.stopPropagation();
     setRecentSearches([]);
@@ -153,6 +160,10 @@ export default function HeaderLayout() {
     cartData?.items?.reduce((total, item) => total + item.quantity, 0) || 0;
 
   if (pathArray.includes(path)) return null;
+
+  const hasResults =
+    (searchResults?.products?.length || 0) > 0 ||
+    (searchResults?.shops?.length || 0) > 0;
 
   return (
     <>
@@ -273,7 +284,7 @@ export default function HeaderLayout() {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         onFocus={() => setIsSearchFocused(true)}
-                        placeholder="Tìm kiếm sản phẩm..."
+                        placeholder="Tìm kiếm sản phẩm, Shop..."
                         className="w-full h-full text-sm bg-transparent outline-none placeholder:text-gray-400 font-medium"
                       />
                       {/* Loading or Camera Icon */}
@@ -327,90 +338,145 @@ export default function HeaderLayout() {
                                 Đang tìm kiếm...
                               </span>
                             </div>
-                          ) : searchResults && searchResults.length > 0 ? (
-                            <>
-                              <div className="flex items-center justify-between mb-3">
-                                <h4 className="text-xs font-bold text-gray-500">
-                                  Kết quả tìm kiếm
-                                </h4>
-                                <span className="text-xs text-gray-400">
-                                  {searchResults.length} sản phẩm
-                                </span>
-                              </div>
-                              <div className="space-y-2">
-                                {searchResults
-                                  .slice(0, 6)
-                                  .map((product) => (
-                                    <div
-                                      key={product._id}
-                                      onClick={() =>
-                                        handleProductClick(product.slug)
-                                      }
-                                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors group"
-                                    >
-                                      {/* Product Image */}
-                                      <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 shrink-0">
-                                        {product.variants?.[0]?.images?.[0] ? (
-                                          <Image
-                                            src={
-                                              product.variants?.[0]?.images?.[0]
-                                            }
-                                            alt={product.name}
-                                            fill
-                                            className="object-cover"
-                                            onError={(e) => {
-                                              const target =
-                                                e.target as HTMLImageElement;
-                                              target.style.display = "none";
-                                            }}
-                                          />
-                                        ) : (
-                                          <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-                                            <Search className="w-5 h-5 text-gray-300" />
-                                          </div>
-                                        )}
-                                      </div>
-                                      {/* Product Info */}
-                                      <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-medium text-gray-800 truncate group-hover:text-[#E53935]">
-                                          {product.name}
-                                        </p>
-                                        <div className="flex items-center gap-2 mt-0.5">
-                                          <span className="text-sm font-bold text-[#E53935]">
-                                            {formatCurrency(
-                                              product.price?.discountPrice ||
-                                                product.price?.currentPrice ||
-                                                0
-                                            )}
+                          ) : hasResults ? (
+                            <div className="space-y-4">
+                              {/* Shops Section */}
+                              {searchResults?.shops &&
+                                searchResults.shops.length > 0 && (
+                                  <div className="space-y-2">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <h4 className="text-xs font-bold text-gray-500 flex items-center gap-1">
+                                        <Store className="w-3.5 h-3.5" /> Shop
+                                        liên quan
+                                      </h4>
+                                    </div>
+                                    {searchResults.shops.map((shop) => (
+                                      <div
+                                        key={shop._id}
+                                        onClick={() =>
+                                          handleShopClick(shop.slug)
+                                        }
+                                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors group"
+                                      >
+                                        {/* Shop Logo */}
+                                        <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
+                                          {shop.logo ? (
+                                            <Image
+                                              src={shop.logo}
+                                              alt={shop.name}
+                                              fill
+                                              className="object-cover"
+                                            />
+                                          ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                                              <Store className="w-5 h-5 text-gray-300" />
+                                            </div>
+                                          )}
+                                        </div>
+                                        {/* Shop Info */}
+                                        <div className="flex-1 min-w-0">
+                                          <p className="text-sm font-medium text-gray-800 truncate group-hover:text-[#E53935]">
+                                            {shop.name}
+                                          </p>
+                                          <span className="text-xs text-gray-400">
+                                            Ghé thăm shop
                                           </span>
-                                          {product.price?.discountPrice &&
-                                            product.price?.currentPrice >
-                                              product.price?.discountPrice && (
-                                              <span className="text-xs text-gray-400 line-through">
-                                                {formatCurrency(
-                                                  product.price.currentPrice
-                                                )}
-                                              </span>
-                                            )}
                                         </div>
                                       </div>
-                                      <Search className="w-4 h-4 text-gray-300 group-hover:text-[#E53935]" />
+                                    ))}
+                                  </div>
+                                )}
+
+                              {/* Products Section */}
+                              {searchResults?.products &&
+                                searchResults.products.length > 0 && (
+                                  <div className="space-y-2">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <h4 className="text-xs font-bold text-gray-500 flex items-center gap-1">
+                                        <Search className="w-3.5 h-3.5" /> Sản
+                                        phẩm
+                                      </h4>
+                                      <span className="text-xs text-gray-400">
+                                        {searchResults.products.length} kết quả
+                                      </span>
                                     </div>
-                                  ))}
-                              </div>
+                                    {searchResults.products
+                                      .slice(0, 6)
+                                      .map((product) => (
+                                        <div
+                                          key={product._id}
+                                          onClick={() =>
+                                            handleProductClick(product.slug)
+                                          }
+                                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors group"
+                                        >
+                                          {/* Product Image */}
+                                          <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+                                            {product.images?.[0] ? (
+                                              <Image
+                                                src={product.images[0]}
+                                                alt={product.name}
+                                                fill
+                                                className="object-cover"
+                                                onError={(e) => {
+                                                  const target =
+                                                    e.target as HTMLImageElement;
+                                                  target.style.display = "none";
+                                                }}
+                                              />
+                                            ) : (
+                                              <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                                                <Search className="w-5 h-5 text-gray-300" />
+                                              </div>
+                                            )}
+                                          </div>
+                                          {/* Product Info */}
+                                          <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium text-gray-800 truncate group-hover:text-[#E53935]">
+                                              {product.name}
+                                            </p>
+                                            <div className="flex items-center gap-2 mt-0.5">
+                                              <span className="text-sm font-bold text-[#E53935]">
+                                                {formatCurrency(
+                                                  product.price
+                                                    ?.discountPrice ||
+                                                    product.price
+                                                      ?.currentPrice ||
+                                                    0
+                                                )}
+                                              </span>
+                                              {product.price?.discountPrice &&
+                                                product.price?.currentPrice >
+                                                  product.price
+                                                    ?.discountPrice && (
+                                                  <span className="text-xs text-gray-400 line-through">
+                                                    {formatCurrency(
+                                                      product.price.currentPrice
+                                                    )}
+                                                  </span>
+                                                )}
+                                            </div>
+                                          </div>
+                                          <Search className="w-4 h-4 text-gray-300 group-hover:text-[#E53935]" />
+                                        </div>
+                                      ))}
+                                  </div>
+                                )}
+
                               {/* View All Results */}
                               <button
                                 onClick={() => handleSearchSubmit()}
                                 className="w-full mt-3 py-2 text-sm font-medium text-[#E53935] hover:bg-[#E53935]/5 rounded-lg transition-colors"
                               >
-                                Xem tất cả kết quả cho "{searchQuery}"
+                                Xem tất cả kết quả cho &quot;{searchQuery}&quot;
                               </button>
-                            </>
+                            </div>
                           ) : (
                             <div className="py-8 text-center">
                               <Search className="w-10 h-10 text-gray-200 mx-auto mb-2" />
                               <p className="text-sm text-gray-500">
-                                Không tìm thấy sản phẩm nào cho "{searchQuery}"
+                                Không tìm thấy sản phẩm hoặc shop nào cho &quot;
+                                {searchQuery}&quot;
                               </p>
                               <p className="text-xs text-gray-400 mt-1">
                                 Thử tìm kiếm với từ khóa khác
