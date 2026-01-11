@@ -3,14 +3,14 @@ import { memo, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Zap, ChevronRight } from "lucide-react";
-import { useFlashSale } from "@/hooks/useFlashSale";
+import { useFlashSaleWithCountdown } from "@/hooks/queries/useFlashSale";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 // Countdown Timer Component
-const CountdownTimer = memo(function CountdownTimer({ 
-  seconds 
-}: { 
-  seconds: number 
+const CountdownTimer = memo(function CountdownTimer({
+  seconds,
+}: {
+  seconds: number;
 }) {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
@@ -36,14 +36,14 @@ const TimeBox = memo(function TimeBox({ value }: { value: number }) {
 });
 
 // Progress Bar Component
-const SoldProgress = memo(function SoldProgress({ 
-  percent 
-}: { 
-  percent: number 
+const SoldProgress = memo(function SoldProgress({
+  percent,
+}: {
+  percent: number;
 }) {
   return (
     <div className="relative h-4 bg-[#FFCDD2] rounded-full overflow-hidden">
-      <div 
+      <div
         className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#FF5722] to-[#E53935] rounded-full transition-all duration-300"
         style={{ width: `${Math.min(percent, 100)}%` }}
       />
@@ -55,16 +55,17 @@ const SoldProgress = memo(function SoldProgress({
 });
 
 // Flash Sale Product Card
-const FlashSaleCard = memo(function FlashSaleCard({ 
-  product 
-}: { 
-  product: any 
+const FlashSaleCard = memo(function FlashSaleCard({
+  product,
+}: {
+  product: any;
 }) {
   const { flashSaleInfo } = product;
-  const productImage = product.variants?.[0]?.images?.[0] || "/images/placeholder.png";
+  const productImage =
+    product.variants?.[0]?.images?.[0] || "/images/placeholder.png";
 
   return (
-    <Link 
+    <Link
       href={`/products/${product.slug || product._id}`}
       className="flex-shrink-0 w-[140px] sm:w-[160px] bg-white rounded-lg overflow-hidden border border-transparent hover:border-[#FFCDD2] transition-all group"
     >
@@ -111,15 +112,10 @@ const FlashSaleCard = memo(function FlashSaleCard({
 
 // Main Flash Sale Section
 export const FlashSaleSection = memo(function FlashSaleSection() {
-  const { products, isLoading, error } = useFlashSale(true);
+  const { products, isLoading, error, countdown } = useFlashSaleWithCountdown();
 
-  // Get first product's remaining time for header countdown
-  const remainingSeconds = useMemo(() => {
-    if (products.length > 0) {
-      return products[0].flashSaleInfo?.remainingSeconds || 0;
-    }
-    return 0;
-  }, [products]);
+  // Use countdown from the hook directly
+  const remainingSeconds = countdown;
 
   if (error || (!isLoading && products.length === 0)) {
     return null; // Don't show section if no flash sale
@@ -134,7 +130,7 @@ export const FlashSaleSection = memo(function FlashSaleSection() {
             <Zap className="h-5 w-5 fill-current" />
             <span className="font-bold text-lg">FLASH SALE</span>
           </div>
-          
+
           {remainingSeconds > 0 && (
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-600">Kết thúc trong</span>
@@ -143,7 +139,7 @@ export const FlashSaleSection = memo(function FlashSaleSection() {
           )}
         </div>
 
-        <Link 
+        <Link
           href="/flash-sale"
           className="flex items-center gap-1 text-sm text-[#E53935] hover:underline"
         >

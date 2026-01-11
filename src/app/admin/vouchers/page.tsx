@@ -1,30 +1,30 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { useState, useMemo } from "react";
 import {
-  getAllVouchers,
-  createVoucher,
-  updateVoucher,
-  deleteVoucher,
-  getVoucherStatistics,
-} from "@/features/voucher/voucherAction";
+  useVouchers,
+  useVoucherStatistics,
+  useCreateVoucher,
+  useUpdateVoucher,
+  useDeleteVoucher,
+} from "@/hooks/queries";
 import { VouchersHeader } from "@/components/admin/vouchers/VouchersHeader";
 import { VouchersStats } from "@/components/admin/vouchers/VouchersStats";
 import { DiscountsTable } from "@/components/admin/vouchers/VouchersTable";
 import { CreateModelDiscount } from "@/components/admin/vouchers/CreateVoucherModal";
 import { UpdateModelDiscount } from "@/components/admin/vouchers/UpdateVoucherModal";
 import { ViewModelDiscount } from "@/components/admin/vouchers/ViewVoucherModal";
-import { Voucher, CreateVoucherData, UpdateVoucherData, VoucherFilters } from "@/types/voucher";
+import {
+  Voucher,
+  CreateVoucherData,
+  UpdateVoucherData,
+  VoucherFilters,
+  VoucherScope,
+} from "@/types/voucher";
 import { toast } from "sonner";
-import {PaginationControls} from "@/components/common/Pagination";
+import { PaginationControls } from "@/components/common/Pagination";
 
 export default function VouchersPage() {
-  const dispatch = useAppDispatch();
-  const { vouchers, loading, pagination, statistics } = useAppSelector(
-    (state) => state.voucher
-  );
-
   // Modal states
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
@@ -36,37 +36,67 @@ export default function VouchersPage() {
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedType, setSelectedType] = useState("all");
-  const [selectedIsActive, setSelectedIsActive] = useState<boolean | null>(null);
+  const [selectedIsActive, setSelectedIsActive] = useState<boolean | null>(
+    null
+  );
   const [selectedScope, setSelectedScope] = useState("all");
 
-  // Fetch vouchers
-  const fetchVouchers = useCallback(() => {
+  // Build query params
+  const queryParams = useMemo((): Partial<VoucherFilters> => {
     const params: Partial<VoucherFilters> = {
       page: currentPage,
       limit: pageSize,
     };
     if (searchTerm) params.search = searchTerm;
-    if (selectedType !== "all") params.type = selectedType === "percent" ? "percentage" : "fixed_amount";
+    if (selectedType !== "all")
+      params.type = selectedType === "percent" ? "percentage" : "fixed_amount";
     if (selectedIsActive !== null) params.isActive = selectedIsActive;
-    if (selectedScope !== "all") params.scope = selectedScope;
+    if (selectedScope !== "all") params.scope = selectedScope as VoucherScope;
+    return params;
+  }, [
+    currentPage,
+    pageSize,
+    searchTerm,
+    selectedType,
+    selectedIsActive,
+    selectedScope,
+  ]);
 
-    dispatch(getAllVouchers(params));
-  }, [dispatch, currentPage, pageSize, searchTerm, selectedType, selectedIsActive, selectedScope]);
+  // React Query hooks
+  const { data: vouchersData, isLoading } = useVouchers(queryParams);
+  const { data: statistics } = useVoucherStatistics();
+  const createMutation = useCreateVoucher();
+  const updateMutation = useUpdateVoucher();
+  const deleteMutation = useDeleteVoucher();
 
+  const vouchers = vouchersData?.vouchers || [];
 
-  useEffect(() => {
-    fetchVouchers();
-    dispatch(getVoucherStatistics());
-  }, [fetchVouchers, dispatch]);
+  // Transform pagination to match PaginationData interface
+  const pagination = useMemo(() => {
+    const paginationRaw = vouchersData?.pagination;
+    if (!paginationRaw) return null;
+    return {
+      currentPage: paginationRaw.page,
+      pageSize: paginationRaw.limit,
+      totalPages: paginationRaw.totalPages,
+      totalItems: paginationRaw.total,
+      hasNextPage: paginationRaw.page < paginationRaw.totalPages,
+      hasPrevPage: paginationRaw.page > 1,
+      nextPage:
+        paginationRaw.page < paginationRaw.totalPages
+          ? paginationRaw.page + 1
+          : null,
+      prevPage: paginationRaw.page > 1 ? paginationRaw.page - 1 : null,
+    };
+  }, [vouchersData?.pagination]);
 
   // Handlers
   const handleCreate = async (data: CreateVoucherData) => {
     try {
-      await dispatch(createVoucher(data)).unwrap();
+      await createMutation.mutateAsync(data);
       toast.success("Voucher created successfully");
       setIsCreateOpen(false);
-      fetchVouchers();
-    } catch (error) {
+    } catch {
       toast.error("Failed to create voucher");
     }
   };
@@ -74,23 +104,22 @@ export default function VouchersPage() {
   const handleUpdate = async (data: UpdateVoucherData) => {
     if (!selectedVoucher) return;
     try {
-      await dispatch(updateVoucher({ id: selectedVoucher._id, ...data })).unwrap();
+      await updateMutation.mutateAsync({ id: selectedVoucher._id, ...data });
       toast.success("Voucher updated successfully");
       setIsUpdateOpen(false);
       setSelectedVoucher(null);
-      fetchVouchers();
-    } catch (error) {
+    } catch {
       toast.error("Failed to update voucher");
     }
   };
 
   const handleDelete = async (voucher: Voucher) => {
-    if (!confirm(`Are you sure you want to delete voucher "${voucher.code}"?`)) return;
+    if (!confirm(`Are you sure you want to delete voucher "${voucher.code}"?`))
+      return;
     try {
-      await dispatch(deleteVoucher(voucher._id)).unwrap();
+      await deleteMutation.mutateAsync(voucher._id);
       toast.success("Voucher deleted successfully");
-      fetchVouchers();
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete voucher");
     }
   };
@@ -107,9 +136,19 @@ export default function VouchersPage() {
 
   // Calculate stats
   const totalVouchers = statistics?.totalVouchers || vouchers.length;
-  const activeVouchers = statistics?.activeVouchers || vouchers.filter((v) => v.isActive).length;
-  const expiredVouchers = statistics?.expiredVouchers || vouchers.filter((v) => new Date(v.endDate) < new Date()).length;
-  const highUsageVouchers = vouchers.filter((v) => (v.usageCount / v.usageLimit) > 0.8).length;
+  const activeVouchers =
+    statistics?.activeVouchers || vouchers.filter((v) => v.isActive).length;
+  const expiredVouchers =
+    statistics?.expiredVouchers ||
+    vouchers.filter((v) => new Date(v.endDate) < new Date()).length;
+  const highUsageVouchers = vouchers.filter(
+    (v) => v.usageCount / v.usageLimit > 0.8
+  ).length;
+
+  const isMutating =
+    createMutation.isPending ||
+    updateMutation.isPending ||
+    deleteMutation.isPending;
 
   return (
     <div className="space-y-8">
@@ -126,7 +165,7 @@ export default function VouchersPage() {
         discounts={vouchers}
         searchTerm={searchTerm}
         pageSize={pageSize}
-        isLoading={loading}
+        isLoading={isLoading}
         onSearch={setSearchTerm}
         onPageSizeChange={setPageSize}
         onEdit={handleEdit}
@@ -151,7 +190,7 @@ export default function VouchersPage() {
         open={isCreateOpen}
         onOpenChange={setIsCreateOpen}
         onCreate={handleCreate}
-        isLoading={loading}
+        isLoading={isMutating}
       />
 
       <UpdateModelDiscount
@@ -160,7 +199,7 @@ export default function VouchersPage() {
         onOpenChange={setIsUpdateOpen}
         discount={selectedVoucher}
         onUpdate={handleUpdate}
-        isLoading={loading}
+        isLoading={isMutating}
       />
 
       <ViewModelDiscount

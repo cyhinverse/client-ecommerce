@@ -11,32 +11,20 @@ import { Button } from "@/components/ui/button";
 import { Store, Package, ShoppingCart, Star, ExternalLink } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { Shop, ShopOwner, ShopStatus } from "@/types/shop";
 
-interface ShopOwner {
-  _id: string;
-  username: string;
-  email: string;
-}
-
-interface Shop {
-  _id: string;
-  name: string;
-  slug: string;
-  logo?: string;
-  banner?: string;
-  description?: string;
+// Extended shop interface for admin view with additional computed fields
+interface AdminShopView extends Omit<Shop, 'owner' | 'status'> {
   owner: ShopOwner;
-  status: "pending" | "active" | "suspended";
-  rating: number;
-  totalProducts: number;
-  totalOrders: number;
-  createdAt: string;
+  status: ShopStatus | "pending"; // Admin may see pending status
+  totalProducts?: number;
+  totalOrders?: number;
 }
 
 interface ViewShopModalProps {
   isOpen: boolean;
   onClose: () => void;
-  shop: Shop | null;
+  shop: AdminShopView | null;
 }
 
 export function ViewShopModal({ isOpen, onClose, shop }: ViewShopModalProps) {

@@ -2,15 +2,13 @@
 
 import Link from "next/link";
 
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { useNewArrivals } from "@/hooks/queries/useProducts";
 import { ProductCard } from "./ProductCard";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { toast } from "sonner";
 import { useEffect, useMemo } from "react";
-import { getNewArrivals } from "@/features/product/productAction";
 
 import { motion } from "framer-motion";
-
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -26,16 +24,10 @@ const itemVariants = {
 };
 
 export default function NewArrivals() {
-  const dispatch = useAppDispatch();
-  const { isLoading, newArrivals, error } = useAppSelector(
-    (state) => state.product
-  );
+  const { data: newArrivals, isLoading, error } = useNewArrivals();
 
   useEffect(() => {
-    dispatch(getNewArrivals());
-  }, [dispatch]);
-  useEffect(() => {
-    if (error) toast.error(error);
+    if (error) toast.error(String(error));
   }, [error]);
 
   // Dùng useMemo để tối ưu việc lọc

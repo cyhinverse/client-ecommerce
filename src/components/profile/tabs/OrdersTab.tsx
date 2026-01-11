@@ -3,9 +3,8 @@ import { Package, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useAppSelector, useAppDispatch } from "@/hooks/hooks";
-import { getUserOrders, cancelOrder } from "@/features/order/orderAction";
+import { useState } from "react";
+import { useUserOrders, useCancelOrder } from "@/hooks/queries/useOrders";
 import { toast } from "sonner";
 import { Order } from "@/types/order";
 import OrderCard from "../order/OrderCard";
@@ -24,18 +23,14 @@ type OrderStatus =
 
 export default function OrdersTab() {
   const router = useRouter();
-  const dispatch = useAppDispatch();
-  const { userOrders, isLoading, error } = useAppSelector(
-    (state) => state.order
-  );
+  const { data, isLoading, error, refetch } = useUserOrders({ limit: 50 });
+  const cancelOrderMutation = useCancelOrder();
+
+  const userOrders = data?.orders || [];
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [cancellingOrder, setCancellingOrder] = useState<string | null>(null);
   const [activeStatus, setActiveStatus] = useState<OrderStatus>("all");
-
-  useEffect(() => {
-    dispatch(getUserOrders({ limit: 50 }));
-  }, [dispatch]);
 
   const handleViewOrder = (orderId: string) => {
     const order = userOrders.find((order) => order._id === orderId);
@@ -57,9 +52,8 @@ export default function OrdersTab() {
 
     setCancellingOrder(orderId);
     try {
-      await dispatch(cancelOrder(orderId)).unwrap();
+      await cancelOrderMutation.mutateAsync(orderId);
       toast.success("Order cancelled successfully");
-      dispatch(getUserOrders({ limit: 50 }));
     } catch (error: unknown) {
       console.error("Error cancelling order:", error);
       const err = error as { response?: { data?: { message?: string } } };
@@ -79,30 +73,50 @@ export default function OrdersTab() {
 
   const getOrderCount = (status: OrderStatus) => {
     if (status === "all") return userOrders.length;
-    return userOrders.filter((order) => order.status?.toLowerCase() === status.toLowerCase()).length;
+    return userOrders.filter(
+      (order) => order.status?.toLowerCase() === status.toLowerCase()
+    ).length;
   };
 
   const statusTabs: { value: OrderStatus; label: string; count: number }[] = [
     { value: "all", label: "All", count: getOrderCount("all") },
     { value: "pending", label: "Pending", count: getOrderCount("pending") },
-    { value: "confirmed", label: "Confirmed", count: getOrderCount("confirmed") },
-    { value: "processing", label: "Processing", count: getOrderCount("processing") },
+    {
+      value: "confirmed",
+      label: "Confirmed",
+      count: getOrderCount("confirmed"),
+    },
+    {
+      value: "processing",
+      label: "Processing",
+      count: getOrderCount("processing"),
+    },
     { value: "shipped", label: "Shipping", count: getOrderCount("shipped") },
-    { value: "delivered", label: "Delivered", count: getOrderCount("delivered") },
-    { value: "cancelled", label: "Cancelled", count: getOrderCount("cancelled") },
+    {
+      value: "delivered",
+      label: "Delivered",
+      count: getOrderCount("delivered"),
+    },
+    {
+      value: "cancelled",
+      label: "Cancelled",
+      count: getOrderCount("cancelled"),
+    },
   ];
 
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <div className="h-16 w-16 rounded-full bg-red-50 flex items-center justify-center mb-6">
-            <Package className="h-8 w-8 text-red-500" />
+          <Package className="h-8 w-8 text-red-500" />
         </div>
-        <h3 className="text-lg font-semibold tracking-tight mb-2">Something went wrong</h3>
+        <h3 className="text-lg font-semibold tracking-tight mb-2">
+          Something went wrong
+        </h3>
         <p className="text-muted-foreground mb-8 max-w-sm text-sm">
           We couldn&apos;t load your orders. This might be a temporary issue.
         </p>
-        <Button onClick={() => dispatch(getUserOrders({ limit: 50 }))} size="lg" className="rounded-sm">
+        <Button onClick={() => refetch()} size="lg" className="rounded-sm">
           Try Again
         </Button>
       </div>
@@ -116,21 +130,35 @@ export default function OrdersTab() {
         {!userOrders || userOrders.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="h-20 w-20 rounded-full bg-muted/50 flex items-center justify-center mb-6">
-                <Package className="h-10 w-10 text-muted-foreground/50" />
+              <Package className="h-10 w-10 text-muted-foreground/50" />
             </div>
-            <h3 className="text-xl font-semibold tracking-tight mb-2">No orders yet</h3>
+            <h3 className="text-xl font-semibold tracking-tight mb-2">
+              No orders yet
+            </h3>
             <p className="text-muted-foreground mb-8 max-w-sm text-sm">
-              It looks like you haven&apos;t placed any orders yet. Start shopping to fill this page!
+              It looks like you haven&apos;t placed any orders yet. Start
+              shopping to fill this page!
             </p>
-            <Button onClick={() => router.push("/products")} size="lg" className="rounded-sm px-8">
+            <Button
+              onClick={() => router.push("/products")}
+              size="lg"
+              className="rounded-sm px-8"
+            >
               Start Shopping
             </Button>
           </div>
         ) : (
           <>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <h2 className="text-xl font-semibold tracking-tight">Order History</h2>
-              <Button variant="outline" size="sm" onClick={() => router.push("/products")} className="rounded-sm">
+              <h2 className="text-xl font-semibold tracking-tight">
+                Order History
+              </h2>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push("/products")}
+                className="rounded-sm"
+              >
                 Continue Shopping
               </Button>
             </div>
@@ -142,19 +170,21 @@ export default function OrdersTab() {
             >
               <div className="w-full overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
                 <TabsList className="h-auto p-1 bg-muted/30 rounded-md inline-flex w-auto min-w-full sm:min-w-0">
-                    {statusTabs.map((tab) => (
+                  {statusTabs.map((tab) => (
                     <TabsTrigger
-                        key={tab.value}
-                        value={tab.value}
-                        className={cn(
-                            "rounded-sm px-4 py-2 text-xs font-medium transition-all duration-200 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
-                            tab.count === 0 && "text-muted-foreground/60"
-                        )}
+                      key={tab.value}
+                      value={tab.value}
+                      className={cn(
+                        "rounded-sm px-4 py-2 text-xs font-medium transition-all duration-200 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
+                        tab.count === 0 && "text-muted-foreground/60"
+                      )}
                     >
-                        {tab.label}
-                        {tab.count > 0 && <span className="ml-1.5 opacity-70">({tab.count})</span>}
+                      {tab.label}
+                      {tab.count > 0 && (
+                        <span className="ml-1.5 opacity-70">({tab.count})</span>
+                      )}
                     </TabsTrigger>
-                    ))}
+                  ))}
                 </TabsList>
               </div>
 
@@ -166,7 +196,7 @@ export default function OrdersTab() {
                       No {activeStatus === "all" ? "" : activeStatus} orders
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                        We couldn&apos;t find any orders with this status.
+                      We couldn&apos;t find any orders with this status.
                     </p>
                   </div>
                 ) : (

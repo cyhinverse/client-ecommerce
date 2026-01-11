@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 
 // Custom hook
-import { useProductDetail } from "@/hooks/useProductDetail";
+import { useProductDetail } from "@/hooks/queries";
 
 // Local components
 import { ProductGallery } from "./_components/ProductGallery";
@@ -25,7 +25,7 @@ import RelatedProducts from "@/components/product/RelatedProducts";
 export default function ProductDetailPage() {
   const params = useParams();
   const slug = params.slug as string;
-  
+
   const {
     product,
     selectedVariant,
@@ -58,7 +58,7 @@ export default function ProductDetailPage() {
     const handleScroll = () => {
       const sections = ["reviews", "specs", "description", "related"] as const;
       const headerOffset = 150;
-      
+
       for (const sectionId of sections) {
         const element = document.getElementById(`section-${sectionId}`);
         if (element) {
@@ -187,7 +187,7 @@ function ProductDetailSkeleton() {
           <div className="lg:hidden">
             <Skeleton className="aspect-square w-full" />
           </div>
-          
+
           {/* Info Skeleton */}
           <div className="flex-1 space-y-4">
             <Skeleton className="h-8 w-3/4" />

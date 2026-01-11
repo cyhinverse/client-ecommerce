@@ -1,13 +1,21 @@
 "use client";
-import { useEffect } from "react";
 import Link from "next/link";
-import { 
-  Package, ShoppingCart, DollarSign, TrendingUp,
-  Eye, Star, Users, ArrowRight, Clock, CheckCircle2,
-  XCircle, Truck
+import {
+  Package,
+  ShoppingCart,
+  DollarSign,
+  TrendingUp,
+  Eye,
+  Star,
+  Users,
+  ArrowRight,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  Truck,
 } from "lucide-react";
-import { useAppSelector, useAppDispatch } from "@/hooks/hooks";
-import { getProductsByShop } from "@/features/product/productAction";
+import { useMyShop } from "@/hooks/queries/useShop";
+import { useShopProducts } from "@/hooks/queries/useProducts";
 
 const formatPrice = (price: number): string => {
   if (price >= 1000000) {
@@ -20,24 +28,50 @@ const formatPrice = (price: number): string => {
 };
 
 export default function SellerDashboardPage() {
-  const dispatch = useAppDispatch();
-  const { myShop } = useAppSelector((state) => state.shop);
-  const { pagination: productPagination } = useAppSelector((state) => state.product);
+  const { data: myShop } = useMyShop();
+  const { data: productsData } = useShopProducts(myShop?._id || "", {
+    page: 1,
+    limit: 1,
+  });
 
-  const totalProducts = productPagination?.totalItems || 0;
-
-  useEffect(() => {
-    if (myShop?._id) {
-      dispatch(getProductsByShop({ shopId: myShop._id, page: 1, limit: 1 }));
-    }
-  }, [myShop, dispatch]);
+  const totalProducts = productsData?.pagination?.total || 0;
 
   const orderStats = [
-    { label: "Chờ xác nhận", value: 0, icon: Clock, color: "text-yellow-600", bg: "bg-yellow-50" },
-    { label: "Đang xử lý", value: 0, icon: Package, color: "text-blue-600", bg: "bg-blue-50" },
-    { label: "Đang giao", value: 0, icon: Truck, color: "text-purple-600", bg: "bg-purple-50" },
-    { label: "Hoàn thành", value: 0, icon: CheckCircle2, color: "text-green-600", bg: "bg-green-50" },
-    { label: "Đã hủy", value: 0, icon: XCircle, color: "text-red-600", bg: "bg-red-50" },
+    {
+      label: "Chờ xác nhận",
+      value: 0,
+      icon: Clock,
+      color: "text-yellow-600",
+      bg: "bg-yellow-50",
+    },
+    {
+      label: "Đang xử lý",
+      value: 0,
+      icon: Package,
+      color: "text-blue-600",
+      bg: "bg-blue-50",
+    },
+    {
+      label: "Đang giao",
+      value: 0,
+      icon: Truck,
+      color: "text-purple-600",
+      bg: "bg-purple-50",
+    },
+    {
+      label: "Hoàn thành",
+      value: 0,
+      icon: CheckCircle2,
+      color: "text-green-600",
+      bg: "bg-green-50",
+    },
+    {
+      label: "Đã hủy",
+      value: 0,
+      icon: XCircle,
+      color: "text-red-600",
+      bg: "bg-red-50",
+    },
   ];
 
   return (
@@ -78,19 +112,17 @@ export default function SellerDashboardPage() {
           icon={DollarSign}
           color="yellow"
         />
-        <StatCard
-          title="Lượt xem"
-          value="0"
-          icon={Eye}
-          color="purple"
-        />
+        <StatCard title="Lượt xem" value="0" icon={Eye} color="purple" />
       </div>
 
       {/* Order Status */}
       <div className="bg-[#f7f7f7] rounded-2xl p-6">
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-semibold text-gray-800">Trạng thái đơn hàng</h2>
-          <Link href="/seller/orders" className="text-sm text-primary hover:underline flex items-center gap-1">
+          <Link
+            href="/seller/orders"
+            className="text-sm text-primary hover:underline flex items-center gap-1"
+          >
             Xem tất cả <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -98,7 +130,10 @@ export default function SellerDashboardPage() {
           {orderStats.map((stat) => {
             const Icon = stat.icon;
             return (
-              <div key={stat.label} className="bg-white rounded-xl p-4 text-center">
+              <div
+                key={stat.label}
+                className="bg-white rounded-xl p-4 text-center"
+              >
                 <Icon className={`h-6 w-6 mx-auto mb-2 ${stat.color}`} />
                 <p className="text-2xl font-bold text-gray-800">{stat.value}</p>
                 <p className="text-xs text-gray-500 mt-1">{stat.label}</p>
@@ -117,12 +152,14 @@ export default function SellerDashboardPage() {
             </div>
             <div>
               <p className="text-sm text-gray-500">Đánh giá</p>
-              <p className="text-xl font-bold">{myShop?.rating?.toFixed(1) || "0.0"}</p>
+              <p className="text-xl font-bold">
+                {myShop?.rating?.toFixed(1) || "0.0"}
+              </p>
             </div>
           </div>
           <div className="h-1.5 bg-white rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-yellow-500 rounded-full" 
+            <div
+              className="h-full bg-yellow-500 rounded-full"
               style={{ width: `${((myShop?.rating || 0) / 5) * 100}%` }}
             />
           </div>
@@ -148,7 +185,9 @@ export default function SellerDashboardPage() {
             </div>
             <div>
               <p className="text-sm text-gray-500">Tỷ lệ phản hồi</p>
-              <p className="text-xl font-bold">{myShop?.metrics?.responseRate || 0}%</p>
+              <p className="text-xl font-bold">
+                {myShop?.metrics?.responseRate || 0}%
+              </p>
             </div>
           </div>
           <p className="text-xs text-gray-400">Trong 24 giờ qua</p>
@@ -160,15 +199,33 @@ export default function SellerDashboardPage() {
         <div className="bg-[#f7f7f7] rounded-2xl p-6">
           <h3 className="font-semibold text-gray-800 mb-4">Thao tác nhanh</h3>
           <div className="grid grid-cols-2 gap-3">
-            <QuickAction href="/seller/products" icon={Package} label="Thêm sản phẩm" />
-            <QuickAction href="/seller/orders" icon={ShoppingCart} label="Xem đơn hàng" />
-            <QuickAction href="/seller/shipping" icon={Truck} label="Vận chuyển" />
-            <QuickAction href="/seller/settings" icon={Star} label="Cài đặt shop" />
+            <QuickAction
+              href="/seller/products"
+              icon={Package}
+              label="Thêm sản phẩm"
+            />
+            <QuickAction
+              href="/seller/orders"
+              icon={ShoppingCart}
+              label="Xem đơn hàng"
+            />
+            <QuickAction
+              href="/seller/shipping"
+              icon={Truck}
+              label="Vận chuyển"
+            />
+            <QuickAction
+              href="/seller/settings"
+              icon={Star}
+              label="Cài đặt shop"
+            />
           </div>
         </div>
 
         <div className="bg-[#f7f7f7] rounded-2xl p-6">
-          <h3 className="font-semibold text-gray-800 mb-4">Sản phẩm bán chạy</h3>
+          <h3 className="font-semibold text-gray-800 mb-4">
+            Sản phẩm bán chạy
+          </h3>
           <div className="flex items-center justify-center py-8 text-gray-400">
             <div className="text-center">
               <Package className="h-10 w-10 mx-auto mb-2 opacity-50" />
@@ -192,8 +249,16 @@ interface StatCardProps {
 const colorMap = {
   blue: { bg: "bg-blue-50", text: "text-blue-600", icon: "bg-blue-100" },
   green: { bg: "bg-green-50", text: "text-green-600", icon: "bg-green-100" },
-  yellow: { bg: "bg-yellow-50", text: "text-yellow-600", icon: "bg-yellow-100" },
-  purple: { bg: "bg-purple-50", text: "text-purple-600", icon: "bg-purple-100" },
+  yellow: {
+    bg: "bg-yellow-50",
+    text: "text-yellow-600",
+    icon: "bg-yellow-100",
+  },
+  purple: {
+    bg: "bg-purple-50",
+    text: "text-purple-600",
+    icon: "bg-purple-100",
+  },
 };
 
 const StatCard = ({ title, value, icon: Icon, color, href }: StatCardProps) => {
@@ -201,7 +266,9 @@ const StatCard = ({ title, value, icon: Icon, color, href }: StatCardProps) => {
   const content = (
     <div className="bg-[#f7f7f7] rounded-2xl p-5 transition-all hover:bg-[#f0f0f0] cursor-pointer">
       <div className="flex items-center justify-between mb-3">
-        <div className={`w-10 h-10 ${colors.icon} rounded-xl flex items-center justify-center`}>
+        <div
+          className={`w-10 h-10 ${colors.icon} rounded-xl flex items-center justify-center`}
+        >
           <Icon className={`h-5 w-5 ${colors.text}`} />
         </div>
         {href && <ArrowRight className="h-4 w-4 text-gray-400" />}
@@ -217,7 +284,15 @@ const StatCard = ({ title, value, icon: Icon, color, href }: StatCardProps) => {
   return content;
 };
 
-const QuickAction = ({ href, icon: Icon, label }: { href: string; icon: React.ElementType; label: string }) => (
+const QuickAction = ({
+  href,
+  icon: Icon,
+  label,
+}: {
+  href: string;
+  icon: React.ElementType;
+  label: string;
+}) => (
   <Link
     href={href}
     className="flex items-center gap-3 p-3 rounded-xl bg-white hover:bg-gray-50 transition-all"

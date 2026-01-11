@@ -5,23 +5,17 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import { ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { getBanners } from "@/features/banner/bannerAction";
+import { useActiveBanners } from "@/hooks/queries";
 import { useRouter } from "next/navigation";
 
 export default function Banner() {
-  const dispatch = useAppDispatch();
   const router = useRouter();
-  const { banners, isLoading } = useAppSelector((state) => state.banner);
+  const { data: banners = [], isLoading } = useActiveBanners();
 
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [direction, setDirection] = useState(0);
   const autoplayRef = useRef<number | null>(null);
   const isHoveringRef = useRef(false);
-
-  useEffect(() => {
-    dispatch(getBanners({ isActive: true }));
-  }, [dispatch]);
 
   const length = banners.length;
 
@@ -87,8 +81,21 @@ export default function Banner() {
   if (isLoading || length === 0) {
     return (
       <div className="w-full h-full bg-[#f7f7f7] animate-pulse flex items-center justify-center rounded-lg">
+        <span className="text-gray-400 text-sm font-medium">Đang tải...</span>
+      </div>
+    );
+  }
+
+  // Ensure index is valid
+  const safeIndex =
+    currentIndex >= 0 && currentIndex < length ? currentIndex : 0;
+  const banner = banners[safeIndex];
+
+  if (!banner) {
+    return (
+      <div className="w-full h-full bg-[#f7f7f7] animate-pulse flex items-center justify-center rounded-lg">
         <span className="text-gray-400 text-sm font-medium">
-          Đang tải...
+          Đang tải banner...
         </span>
       </div>
     );
@@ -102,7 +109,7 @@ export default function Banner() {
     >
       <AnimatePresence initial={false} custom={direction}>
         <motion.div
-          key={currentIndex}
+          key={safeIndex}
           custom={direction}
           variants={variants}
           initial="enter"
@@ -117,8 +124,8 @@ export default function Banner() {
         >
           <div className="relative w-full h-full overflow-hidden">
             <Image
-              src={banners[currentIndex].imageUrl}
-              alt={banners[currentIndex].title}
+              src={banner.imageUrl}
+              alt={banner.title}
               fill
               className="object-cover w-full h-full select-none"
               priority
@@ -147,12 +154,10 @@ export default function Banner() {
                   variants={textVariants}
                   className={cn(
                     "text-xl md:text-2xl lg:text-3xl font-bold tracking-tighter drop-shadow-md leading-tight",
-                    banners[currentIndex].theme === "light"
-                      ? "text-black"
-                      : "text-white"
+                    banner.theme === "light" ? "text-black" : "text-white"
                   )}
                 >
-                  {banners[currentIndex].title}
+                  {banner.title}
                 </motion.h2>
 
                 <motion.p
@@ -162,12 +167,10 @@ export default function Banner() {
                   variants={textVariants}
                   className={cn(
                     "text-xs md:text-sm font-medium max-w-xs mx-auto",
-                    banners[currentIndex].theme === "light"
-                      ? "text-black/80"
-                      : "text-white/80"
+                    banner.theme === "light" ? "text-black/80" : "text-white/80"
                   )}
                 >
-                  {banners[currentIndex].subtitle}
+                  {banner.subtitle}
                 </motion.p>
 
                 <motion.div
@@ -180,14 +183,14 @@ export default function Banner() {
                   <Button
                     size="sm"
                     onClick={() => {
-                      const link = banners[currentIndex].link;
+                      const link = banner.link;
                       if (link) {
                         router.push(link);
                       }
                     }}
                     className={cn(
                       "rounded-full px-5 py-2 text-xs font-bold transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg",
-                      banners[currentIndex].theme === "light"
+                      banner.theme === "light"
                         ? "bg-[#E53935] text-white hover:bg-[#D32F2F]"
                         : "bg-white text-[#E53935] hover:bg-gray-100"
                     )}

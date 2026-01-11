@@ -1,10 +1,18 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
-import { 
-  Package, Plus, Search, Edit, Trash2, Eye, 
-  Loader2, MoreHorizontal, Filter, Tag
+import {
+  Package,
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  Eye,
+  Loader2,
+  MoreHorizontal,
+  Filter,
+  Tag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,8 +23,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAppSelector, useAppDispatch } from "@/hooks/hooks";
-import { createProduct, updateSellerProduct, deleteSellerProduct, getProductsByShop } from "@/features/product/productAction";
+import { useMyShop } from "@/hooks/queries/useShop";
+import {
+  useShopProducts,
+  useCreateProduct,
+  useUpdateSellerProduct,
+  useDeleteSellerProduct,
+} from "@/hooks/queries/useProducts";
 import { CreateModelProduct } from "@/components/product/forms/CreateModelProduct";
 import { UpdateModelProduct } from "@/components/product/forms/UpdateModelProduct";
 import { ViewModelProduct } from "@/components/product/forms/ViewModelProduct";
@@ -30,13 +43,23 @@ const formatPrice = (price: number): string => {
 };
 
 export default function SellerProductsPage() {
-  const dispatch = useAppDispatch();
-  const { myShop } = useAppSelector((state) => state.shop);
-  const { all: products, pagination: productPagination, isLoading } = useAppSelector((state) => state.product);
-
-  const [searchTerm, setSearchTerm] = useState("");
+  const { data: myShop } = useMyShop();
   const [page, setPage] = useState(1);
   const limit = 10;
+
+  const {
+    data: productsData,
+    isLoading,
+    refetch: fetchProducts,
+  } = useShopProducts(myShop?._id || "", { page, limit });
+  const products = productsData?.products || [];
+  const productPagination = productsData?.pagination;
+
+  const createProductMutation = useCreateProduct();
+  const updateProductMutation = useUpdateSellerProduct();
+  const deleteProductMutation = useDeleteSellerProduct();
+
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Modal states
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -45,33 +68,11 @@ export default function SellerProductsPage() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (myShop?._id) {
-      dispatch(getProductsByShop({ shopId: myShop._id, page, limit }));
-    }
-  }, [myShop, page, dispatch]);
-
-  // Handle search with debounce effect
-  useEffect(() => {
-    if (myShop?._id && searchTerm) {
-      const timer = setTimeout(() => {
-        dispatch(getProductsByShop({ shopId: myShop._id, page: 1, limit }));
-      }, 300);
-      return () => clearTimeout(timer);
-    }
-  }, [searchTerm, myShop, dispatch]);
-
-  const fetchProducts = () => {
-    if (myShop?._id) {
-      dispatch(getProductsByShop({ shopId: myShop._id, page, limit }));
-    }
-  };
-
   // Create product handler
   const handleCreateProduct = async (formData: FormData) => {
     setIsSubmitting(true);
     try {
-      await dispatch(createProduct(formData)).unwrap();
+      await createProductMutation.mutateAsync(formData);
       toast.success("Tạo sản phẩm thành công!");
       setCreateModalOpen(false);
       fetchProducts();
@@ -88,14 +89,17 @@ export default function SellerProductsPage() {
     if (!selectedProduct) return;
     setIsSubmitting(true);
     try {
-      await dispatch(updateSellerProduct({ productId: selectedProduct._id, updateData: formData })).unwrap();
+      await updateProductMutation.mutateAsync({
+        productId: selectedProduct._id,
+        formData,
+      });
       toast.success("Cập nhật sản phẩm thành công!");
       setUpdateModalOpen(false);
       setSelectedProduct(null);
       fetchProducts();
     } catch (error: unknown) {
       const err = error as { message?: string } | string;
-      const message = typeof err === 'string' ? err : err.message;
+      const message = typeof err === "string" ? err : err.message;
       toast.error(message || "Không thể cập nhật sản phẩm");
     } finally {
       setIsSubmitting(false);
@@ -106,19 +110,19 @@ export default function SellerProductsPage() {
   const handleDeleteProduct = async (product: Product) => {
     if (!confirm("Bạn có chắc muốn xóa sản phẩm này?")) return;
     try {
-      await dispatch(deleteSellerProduct(product._id)).unwrap();
+      await deleteProductMutation.mutateAsync(product._id);
       toast.success("Xóa sản phẩm thành công!");
       fetchProducts();
     } catch (error: unknown) {
       const err = error as { message?: string } | string;
-      const message = typeof err === 'string' ? err : err.message;
+      const message = typeof err === "string" ? err : err.message;
       toast.error(message || "Không thể xóa sản phẩm");
     }
   };
 
   // Modal handlers
   const handleOpenCreate = () => setCreateModalOpen(true);
-  
+
   const handleOpenEdit = (product: Product) => {
     setSelectedProduct(product);
     setUpdateModalOpen(true);
@@ -155,14 +159,6 @@ export default function SellerProductsPage() {
     if (product.variants?.[0]?.images?.[0]) {
       return product.variants[0].images[0];
     }
-    // Old structure: tierVariations (backward compatibility)
-    if (product.tierVariations?.[0]?.images?.[0]) {
-      const firstImage = product.tierVariations[0].images[0];
-      if (Array.isArray(firstImage)) {
-        return firstImage[0] || null;
-      }
-      return typeof firstImage === 'string' ? firstImage : null;
-    }
     return null;
   };
 
@@ -171,10 +167,6 @@ export default function SellerProductsPage() {
     // New structure: variants with stock
     if (product.variants && product.variants.length > 0) {
       return product.variants.reduce((total, v) => total + (v.stock || 0), 0);
-    }
-    // Old structure: models (backward compatibility)
-    if (product.models && product.models.length > 0) {
-      return product.models.reduce((total, model) => total + (model.stock || 0), 0);
     }
     return product.stock || 0;
   };
@@ -190,13 +182,15 @@ export default function SellerProductsPage() {
             <Package className="h-6 w-6 text-blue-600" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gray-800">Quản lý sản phẩm</h1>
+            <h1 className="text-xl font-bold text-gray-800">
+              Quản lý sản phẩm
+            </h1>
             <p className="text-sm text-gray-500">
-              {productPagination?.totalItems || 0} sản phẩm trong shop của bạn
+              {productPagination?.total || 0} sản phẩm trong shop của bạn
             </p>
           </div>
         </div>
-        <Button 
+        <Button
           onClick={handleOpenCreate}
           className="bg-[#E53935] hover:bg-[#D32F2F] rounded-xl h-11 px-5"
         >
@@ -217,7 +211,10 @@ export default function SellerProductsPage() {
               className="pl-11 h-11 rounded-xl border-0 bg-white"
             />
           </div>
-          <Button variant="outline" className="h-11 rounded-xl px-4 bg-white border-0">
+          <Button
+            variant="outline"
+            className="h-11 rounded-xl px-4 bg-white border-0"
+          >
             <Filter className="h-4 w-4 mr-2" />
             Bộ lọc
           </Button>
@@ -235,9 +232,13 @@ export default function SellerProductsPage() {
             <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
               <Package className="h-10 w-10 text-gray-400" />
             </div>
-            <h3 className="font-semibold text-gray-800 mb-2">Chưa có sản phẩm nào</h3>
-            <p className="text-gray-500 text-sm mb-6">Bắt đầu thêm sản phẩm để bán hàng</p>
-            <Button 
+            <h3 className="font-semibold text-gray-800 mb-2">
+              Chưa có sản phẩm nào
+            </h3>
+            <p className="text-gray-500 text-sm mb-6">
+              Bắt đầu thêm sản phẩm để bán hàng
+            </p>
+            <Button
               onClick={handleOpenCreate}
               className="bg-[#E53935] hover:bg-[#D32F2F] rounded-xl"
             >
@@ -269,7 +270,10 @@ export default function SellerProductsPage() {
               </thead>
               <tbody>
                 {products.map((product, idx) => (
-                  <tr key={product._id} className={idx % 2 === 0 ? "bg-white" : "bg-white/50"}>
+                  <tr
+                    key={product._id}
+                    className={idx % 2 === 0 ? "bg-white" : "bg-white/50"}
+                  >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
                         <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-[#f7f7f7] shrink-0">
@@ -293,7 +297,9 @@ export default function SellerProductsPage() {
                           <div className="flex items-center gap-1.5 mt-1">
                             <Tag className="h-3 w-3 text-gray-400" />
                             <span className="text-xs text-gray-500">
-                              {typeof product.category === 'object' ? product.category?.name : "Chưa phân loại"}
+                              {typeof product.category === "object"
+                                ? product.category?.name
+                                : "Chưa phân loại"}
                             </span>
                           </div>
                         </div>
@@ -303,29 +309,32 @@ export default function SellerProductsPage() {
                       <p className="font-semibold text-[#E53935]">
                         {formatPrice(product.price?.currentPrice || 0)}
                       </p>
-                      {product.price?.discountPrice && product.price.discountPrice > 0 && (
-                        <p className="text-xs text-gray-400 line-through">
-                          {formatPrice(product.price.discountPrice)}
-                        </p>
-                      )}
+                      {product.price?.discountPrice &&
+                        product.price.discountPrice > 0 && (
+                          <p className="text-xs text-gray-400 line-through">
+                            {formatPrice(product.price.discountPrice)}
+                          </p>
+                        )}
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`font-medium ${
-                        getStockCount(product) > 10 
-                          ? "text-green-600" 
-                          : getStockCount(product) > 0 
-                            ? "text-yellow-600" 
+                      <span
+                        className={`font-medium ${
+                          getStockCount(product) > 10
+                            ? "text-green-600"
+                            : getStockCount(product) > 0
+                            ? "text-yellow-600"
                             : "text-red-500"
-                      }`}>
+                        }`}
+                      >
                         {getStockCount(product)}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <Badge 
+                      <Badge
                         variant={product.isActive ? "default" : "secondary"}
                         className={`rounded-full px-3 ${
-                          product.isActive 
-                            ? "bg-green-100 text-green-700 hover:bg-green-100" 
+                          product.isActive
+                            ? "bg-green-100 text-green-700 hover:bg-green-100"
                             : "bg-gray-100 text-gray-600"
                         }`}
                       >
@@ -335,26 +344,33 @@ export default function SellerProductsPage() {
                     <td className="px-6 py-4 text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-9 w-9 rounded-lg"
+                          >
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-40 rounded-xl">
-                          <DropdownMenuItem 
+                        <DropdownMenuContent
+                          align="end"
+                          className="w-40 rounded-xl"
+                        >
+                          <DropdownMenuItem
                             onClick={() => handleOpenView(product)}
                             className="cursor-pointer"
                           >
                             <Eye className="h-4 w-4 mr-2" />
                             Xem chi tiết
                           </DropdownMenuItem>
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             onClick={() => handleOpenEdit(product)}
                             className="cursor-pointer"
                           >
                             <Edit className="h-4 w-4 mr-2" />
                             Chỉnh sửa
                           </DropdownMenuItem>
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             onClick={() => handleDeleteProduct(product)}
                             className="cursor-pointer text-red-600 focus:text-red-600"
                           >
@@ -373,14 +389,15 @@ export default function SellerProductsPage() {
             {(productPagination?.totalPages || 0) > 1 && (
               <div className="flex items-center justify-between px-6 py-4 bg-white/50">
                 <p className="text-sm text-gray-500">
-                  Hiển thị {products.length} / {productPagination?.totalItems || 0} sản phẩm
+                  Hiển thị {products.length} / {productPagination?.total || 0}{" "}
+                  sản phẩm
                 </p>
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
                     size="sm"
                     disabled={page <= 1}
-                    onClick={() => setPage(p => p - 1)}
+                    onClick={() => setPage((p) => p - 1)}
                     className="rounded-lg border-0 bg-white"
                   >
                     Trước
@@ -389,7 +406,7 @@ export default function SellerProductsPage() {
                     variant="outline"
                     size="sm"
                     disabled={page >= (productPagination?.totalPages || 0)}
-                    onClick={() => setPage(p => p + 1)}
+                    onClick={() => setPage((p) => p + 1)}
                     className="rounded-lg border-0 bg-white"
                   >
                     Sau

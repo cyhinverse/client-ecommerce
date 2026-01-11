@@ -1,10 +1,10 @@
 "use client";
-import React, { useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import React from "react";
+import { useAppSelector } from "@/hooks/hooks";
 import {
-  getAllProducts,
-  getProductsBySlugOfCategory,
-} from "@/features/product/productAction";
+  useProducts,
+  useProductsByCategory,
+} from "@/hooks/queries/useProducts";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { ProductCard } from "@/components/product/ProductCard";
 import { motion } from "framer-motion";
@@ -17,24 +17,30 @@ interface HomeProductListProps {
 export default function HomeProductList({
   selectedCategorySlug,
 }: HomeProductListProps) {
-  const dispatch = useAppDispatch();
-  const { all, byCategory, isLoading, error } = useAppSelector(
-    (state) => state.product
-  );
   const { isOpen: isChatOpen } = useAppSelector((state) => state.chat);
 
-  // Determine which list to show
-  const products = selectedCategorySlug ? byCategory : all;
+  // Use category hook when a category is selected
+  const {
+    data: byCategory = [],
+    isLoading: categoryLoading,
+    error: categoryError,
+  } = useProductsByCategory(selectedCategorySlug || "", {
+    enabled: !!selectedCategorySlug,
+  });
 
-  useEffect(() => {
-    if (selectedCategorySlug) {
-      // Fetch products for the selected category
-      dispatch(getProductsBySlugOfCategory(selectedCategorySlug));
-    } else {
-      // Fetch all products (or recommendations)
-      dispatch(getAllProducts({ page: 1, limit: 20 }));
-    }
-  }, [dispatch, selectedCategorySlug]);
+  // Use all products when no category is selected
+  const {
+    data: allProducts,
+    isLoading: allLoading,
+    error: allError,
+  } = useProducts({ page: 1, limit: 20 });
+
+  // Determine which list to show
+  const isLoading = selectedCategorySlug ? categoryLoading : allLoading;
+  const error = selectedCategorySlug ? categoryError : allError;
+  const products = selectedCategorySlug
+    ? byCategory
+    : allProducts?.products || [];
 
   const container = {
     hidden: { opacity: 0 },
@@ -54,7 +60,7 @@ export default function HomeProductList({
   if (error) {
     return (
       <div className="text-center py-20 text-red-500">
-        Something went wrong: {error}
+        Something went wrong: {(error as Error).message}
       </div>
     );
   }
@@ -77,8 +83,8 @@ export default function HomeProductList({
           transition={{ duration: 0.3 }}
           className={cn(
             "grid gap-3 transition-all duration-300",
-            isChatOpen 
-              ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5" 
+            isChatOpen
+              ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
               : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
           )}
         >

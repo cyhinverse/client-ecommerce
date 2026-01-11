@@ -1,14 +1,13 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { useState } from "react";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
 import {
-  deleteCategory,
-  getAllCategories,
-  updateCategory,
-  creatCategory,
-} from "@/features/category/categoryAction";
-import { Category, PaginationData, CategoryFilters } from "@/types/category";
+  useCategories,
+  useCreateCategory,
+  useUpdateCategory,
+  useDeleteCategory,
+} from "@/hooks/queries";
+import { Category, CategoryFilters } from "@/types/category";
 import { CategoriesHeader } from "@/components/admin/categories/CategoriesHeader";
 import { CategoriesStats } from "@/components/admin/categories/CategoriesStats";
 import { CategoriesTable } from "@/components/admin/categories/CategoriesTable";
@@ -18,12 +17,8 @@ import { EditCategoryModal } from "@/components/admin/categories/UpdateModel";
 import { ViewCategoryModal } from "@/components/admin/categories/ViewModal";
 import { CreateCategoryModal } from "@/components/admin/categories/CreateModel";
 import { toast } from "sonner";
-import { Params } from "@/types/product";
 
 export default function CategoriesAdminPage() {
-  const dispatch = useAppDispatch();
-  const categoryState = useAppSelector((state) => state.category);
-
   // Use URL filters hook
   const { filters, updateFilter, updateFilters } =
     useUrlFilters<CategoryFilters>({
@@ -40,32 +35,30 @@ export default function CategoriesAdminPage() {
   const pageSize = Number(filters.limit);
   const searchTerm = filters.search as string;
 
-  const categories: Category[] = categoryState.categories || [];
-  const pagination: PaginationData | null = categoryState.pagination;
+  // Build query params
+  const queryParams = {
+    page: currentPage,
+    limit: pageSize,
+    ...(searchTerm && searchTerm.trim() !== ""
+      ? { search: searchTerm.trim() }
+      : { parentCategory: "null" }),
+  };
+
+  // React Query hooks
+  const { data: categoriesData, isLoading, error } = useCategories(queryParams);
+  const createMutation = useCreateCategory();
+  const updateMutation = useUpdateCategory();
+  const deleteMutation = useDeleteCategory();
+
+  const categories: Category[] = categoriesData?.data || [];
+  const pagination = categoriesData?.pagination || null;
 
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null
   );
   const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
-
-  // Fetch categories when filters change
-  useEffect(() => {
-    const params: Record<string, string | number> = {
-      page: currentPage,
-      limit: pageSize,
-    };
-    if (searchTerm && searchTerm.trim() !== "") {
-      params.search = searchTerm.trim();
-    } else {
-      params.parentCategory = "null";
-    }
-
-    dispatch(getAllCategories(params));
-  }, [dispatch, currentPage, pageSize, searchTerm]);
 
   const handleOpenCreateModal = () => {
     setCreateModalOpen(true);
@@ -79,31 +72,19 @@ export default function CategoriesAdminPage() {
     parentCategory: string;
     images: string[];
   }) => {
-    setIsCreating(true);
     try {
-      await dispatch(
-        creatCategory({
-          ...categoryData,
-          parentCategory:
-            categoryData.parentCategory === ""
-              ? undefined
-              : categoryData.parentCategory,
-        })
-      ).unwrap();
-
-      // Refresh list
-      const params: Params = { page: currentPage, limit: pageSize };
-      if (searchTerm && searchTerm.trim() !== "") {
-        params.search = searchTerm.trim();
-      }
-      dispatch(getAllCategories(params));
+      await createMutation.mutateAsync({
+        ...categoryData,
+        parentCategory:
+          categoryData.parentCategory === ""
+            ? undefined
+            : categoryData.parentCategory,
+      });
 
       setCreateModalOpen(false);
       toast.success("Category created successfully");
     } catch {
       toast.error("Error creating category. Please try again.");
-    } finally {
-      setIsCreating(false);
     }
   };
 
@@ -121,42 +102,29 @@ export default function CategoriesAdminPage() {
   const handleCloseEditModal = () => {
     setEditModalOpen(false);
     setSelectedCategory(null);
-    setIsUpdating(false);
   };
 
   const handleSaveCategory = async (categoryData: Partial<Category>) => {
     if (!selectedCategory) return;
 
-    setIsUpdating(true);
     try {
-      await dispatch(
-        updateCategory({
-          id: selectedCategory._id,
-          ...categoryData,
-        } as {
-          id: string;
-          name: string;
-          slug: string;
-          description?: string;
-          isActive: boolean;
-          isFeatured?: boolean;
-        })
-      ).unwrap();
-
-      // Refresh list
-      const params: Params = { page: currentPage, limit: pageSize };
-      if (searchTerm && searchTerm.trim() !== "") {
-        params.search = searchTerm.trim();
-      }
-      dispatch(getAllCategories(params));
+      await updateMutation.mutateAsync({
+        id: selectedCategory._id,
+        ...categoryData,
+      } as {
+        id: string;
+        name: string;
+        slug: string;
+        description?: string;
+        isActive: boolean;
+        isFeatured?: boolean;
+      });
 
       handleCloseEditModal();
 
       toast.success("Category updated successfully");
     } catch {
       toast.error("Failed to update category. Please try again.");
-    } finally {
-      setIsUpdating(false);
     }
   };
 
@@ -174,17 +142,23 @@ export default function CategoriesAdminPage() {
   };
 
   const getParentName = (category: Category) => {
-    if (category.parentCategory && category.parentCategory.name) {
+    if (
+      category.parentCategory &&
+      typeof category.parentCategory === "object"
+    ) {
       return category.parentCategory.name;
     }
     return "-";
   };
 
   const getChildCategories = (parentId: string) => {
-    return categories.filter(
-      (category) =>
-        category.parentCategory && category.parentCategory._id === parentId
-    );
+    return categories.filter((category) => {
+      if (!category.parentCategory) return false;
+      if (typeof category.parentCategory === "string") {
+        return category.parentCategory === parentId;
+      }
+      return category.parentCategory._id === parentId;
+    });
   };
 
   const getProductCount = (category: Category) => {
@@ -198,7 +172,7 @@ export default function CategoriesAdminPage() {
   };
 
   const handleDeleteCategory = (category: Category) => {
-    dispatch(deleteCategory(category._id as string));
+    deleteMutation.mutate(category._id as string);
   };
 
   const handleViewCategory = (category: Category) => {
@@ -214,10 +188,10 @@ export default function CategoriesAdminPage() {
     0
   );
 
-  if (categoryState.error) {
+  if (error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-red-500">Error: {categoryState.error}</div>
+        <div className="text-red-500">Error: {(error as Error).message}</div>
       </div>
     );
   }
@@ -241,7 +215,7 @@ export default function CategoriesAdminPage() {
           categories={categories}
           searchTerm={searchTerm}
           pageSize={pageSize}
-          isLoading={categoryState.isLoading}
+          isLoading={isLoading}
           onSearch={handleSearch}
           onPageSizeChange={handlePageSizeChange}
           onEdit={handleEditCategory}
@@ -253,9 +227,9 @@ export default function CategoriesAdminPage() {
 
         <div className="mt-6">
           <PaginationControls
-             pagination={pagination}
-             onPageChange={handlePageChange}
-             itemName="categories"
+            pagination={pagination}
+            onPageChange={handlePageChange}
+            itemName="categories"
           />
         </div>
 
@@ -264,7 +238,7 @@ export default function CategoriesAdminPage() {
           onClose={() => setCreateModalOpen(false)}
           onCreate={handleCreateCategory}
           categories={categories}
-          isLoading={isCreating}
+          isLoading={createMutation.isPending}
         />
 
         <ViewCategoryModal
@@ -279,17 +253,21 @@ export default function CategoriesAdminPage() {
           onClose={handleCloseEditModal}
           onSave={handleSaveCategory}
           category={selectedCategory}
-          isLoading={isUpdating}
+          isLoading={updateMutation.isPending}
         />
       </div>
 
       {/* Tree View Section */}
       <div className="rounded-2xl bg-[#f7f7f7] dark:bg-[#1C1C1E] p-6">
-         <div className="mb-6">
-            <h2 className="text-xl font-semibold tracking-tight text-foreground">Structure View</h2>
-            <p className="text-sm text-muted-foreground mt-1">Hierarchical view of categories</p>
-         </div>
-         <CategoryTreeView
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold tracking-tight text-foreground">
+            Structure View
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Hierarchical view of categories
+          </p>
+        </div>
+        <CategoryTreeView
           categories={categories}
           getChildCategories={getChildCategories}
           getProductCount={getProductCount}

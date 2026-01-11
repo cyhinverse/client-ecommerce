@@ -1,26 +1,60 @@
 import { Address } from "./address";
+import { BaseEntity, PaginationData } from "./common";
 
-export interface User {
-  _id: string;
+export type UserRole = "user" | "admin" | "seller";
+export type AuthProvider = "local" | "google";
+
+export interface User extends BaseEntity {
   username: string;
   email: string;
-  roles: string;
+  roles: UserRole;
   permissions: string[];
-  phone: string;
+  phone?: string;
   avatar: string | null;
+
+  // Relations
+  shop?: string | null; // Shop ID if user is a seller, null by default
+  wishlist: string[]; // Product IDs - has default [] in schema
+  followingShops: string[]; // Shop IDs - has default [] in schema
+
+  // Verification
   isVerifiedEmail: boolean;
-  provider: string;
+  provider: AuthProvider;
+
+  // Addresses
   addresses: Address[];
-  createdAt: string;
-  updatedAt: string;
-  __v: number;
+
+  // Internal/Transient - verification codes
   codeVerifiEmail?: string;
   expiresCodeVerifiEmail?: string;
-  isTwoFactorEnabled?: boolean;
+  codeVerifiPassword?: string;
+  expiresCodeVerifiPassword?: string; // Added - matches backend schema
 }
 
-import { PaginationData } from "./common";
 export type { PaginationData };
+
+// ============ Admin/Form Types ============
+
+// Create user data for admin
+export interface CreateUserData {
+  username: string;
+  email: string;
+  password: string;
+  roles: UserRole;
+  permissions?: string[];
+}
+
+// Update user data for admin
+export interface UpdateUserData {
+  id: string;
+  username?: string;
+  email?: string;
+  roles?: UserRole;
+  permissions?: string[];
+  isVerifiedEmail?: boolean;
+}
+
+// ============ State & Filters ============
 
 export interface UserState {
   user: User[];

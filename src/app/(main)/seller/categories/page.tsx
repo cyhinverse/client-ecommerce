@@ -1,26 +1,35 @@
 "use client";
-import { useState, useEffect } from "react";
-import { Tag, Plus, Edit2, Trash2, Loader2, Save, X, GripVertical } from "lucide-react";
+import { useState } from "react";
+import {
+  Tag,
+  Plus,
+  Edit2,
+  Trash2,
+  Loader2,
+  Save,
+  X,
+  GripVertical,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import {
-  getShopCategories,
-  createShopCategory,
-  updateShopCategory,
-  deleteShopCategory,
-} from "@/features/shopCategory/shopCategoryAction";
+  useMyShopCategories,
+  useCreateShopCategory,
+  useUpdateShopCategory,
+  useDeleteShopCategory,
+} from "@/hooks/queries";
 import { ShopCategory, CreateShopCategoryPayload } from "@/types/shopCategory";
 
 export default function SellerCategoriesPage() {
-  const dispatch = useAppDispatch();
-  const { categories, isLoading, isCreating, isUpdating, isDeleting } = useAppSelector(
-    (state) => state.shopCategory
-  );
+  // React Query hooks
+  const { data: categories = [], isLoading } = useMyShopCategories();
+  const createMutation = useCreateShopCategory();
+  const updateMutation = useUpdateShopCategory();
+  const deleteMutation = useDeleteShopCategory();
 
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -31,10 +40,6 @@ export default function SellerCategoriesPage() {
     sortOrder: 0,
   });
 
-  useEffect(() => {
-    dispatch(getShopCategories(undefined));
-  }, [dispatch]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim()) {
@@ -44,10 +49,13 @@ export default function SellerCategoriesPage() {
 
     try {
       if (editingId) {
-        await dispatch(updateShopCategory({ categoryId: editingId, data: formData })).unwrap();
+        await updateMutation.mutateAsync({
+          categoryId: editingId,
+          data: formData,
+        });
         toast.success("Cập nhật danh mục thành công!");
       } else {
-        await dispatch(createShopCategory(formData)).unwrap();
+        await createMutation.mutateAsync(formData);
         toast.success("Tạo danh mục thành công!");
       }
       resetForm();
@@ -70,7 +78,7 @@ export default function SellerCategoriesPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Bạn có chắc muốn xóa danh mục này?")) return;
     try {
-      await dispatch(deleteShopCategory(id)).unwrap();
+      await deleteMutation.mutateAsync(id);
       toast.success("Xóa danh mục thành công!");
     } catch {
       toast.error("Xóa danh mục thất bại");
@@ -79,12 +87,10 @@ export default function SellerCategoriesPage() {
 
   const handleToggleActive = async (category: ShopCategory) => {
     try {
-      await dispatch(
-        updateShopCategory({
-          categoryId: category._id,
-          data: { isActive: !category.isActive },
-        })
-      ).unwrap();
+      await updateMutation.mutateAsync({
+        categoryId: category._id,
+        data: { isActive: !category.isActive },
+      });
       toast.success(category.isActive ? "Đã ẩn danh mục" : "Đã hiện danh mục");
     } catch {
       toast.error("Cập nhật thất bại");
@@ -107,12 +113,14 @@ export default function SellerCategoriesPage() {
           </div>
           <div>
             <h1 className="text-xl font-bold text-gray-800">Danh mục Shop</h1>
-            <p className="text-sm text-gray-500">Quản lý danh mục sản phẩm của shop</p>
+            <p className="text-sm text-gray-500">
+              Quản lý danh mục sản phẩm của shop
+            </p>
           </div>
         </div>
         {!showForm && (
-          <Button 
-            onClick={() => setShowForm(true)} 
+          <Button
+            onClick={() => setShowForm(true)}
             className="bg-primary hover:bg-primary/90 rounded-xl h-11 px-5"
           >
             <Plus className="h-4 w-4 mr-2" />
@@ -128,7 +136,13 @@ export default function SellerCategoriesPage() {
             <h3 className="font-semibold text-gray-800">
               {editingId ? "Chỉnh sửa danh mục" : "Thêm danh mục mới"}
             </h3>
-            <Button type="button" variant="ghost" size="icon" onClick={resetForm} className="rounded-lg">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={resetForm}
+              className="rounded-lg"
+            >
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -138,7 +152,9 @@ export default function SellerCategoriesPage() {
                 <Label className="text-gray-600">Tên danh mục *</Label>
                 <Input
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   placeholder="VD: Điện thoại"
                   className="mt-1.5 h-11 rounded-xl border-0 bg-white"
                 />
@@ -148,7 +164,12 @@ export default function SellerCategoriesPage() {
                 <Input
                   type="number"
                   value={formData.sortOrder}
-                  onChange={(e) => setFormData({ ...formData, sortOrder: Number(e.target.value) })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      sortOrder: Number(e.target.value),
+                    })
+                  }
                   className="mt-1.5 h-11 rounded-xl border-0 bg-white"
                 />
               </div>
@@ -157,7 +178,9 @@ export default function SellerCategoriesPage() {
               <Label className="text-gray-600">Mô tả</Label>
               <Textarea
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 placeholder="Mô tả ngắn về danh mục"
                 rows={2}
                 className="mt-1.5 rounded-xl resize-none border-0 bg-white"
@@ -167,27 +190,29 @@ export default function SellerCategoriesPage() {
               <Label className="text-gray-600">URL hình ảnh</Label>
               <Input
                 value={formData.image}
-                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, image: e.target.value })
+                }
                 placeholder="https://..."
                 className="mt-1.5 h-11 rounded-xl border-0 bg-white"
               />
             </div>
             <div className="flex gap-3 pt-2">
-              <Button 
-                type="submit" 
-                disabled={isCreating || isUpdating} 
+              <Button
+                type="submit"
+                disabled={createMutation.isPending || updateMutation.isPending}
                 className="bg-primary hover:bg-primary/90 rounded-xl h-11 px-5"
               >
-                {(isCreating || isUpdating) ? (
+                {createMutation.isPending || updateMutation.isPending ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 ) : (
                   <Save className="h-4 w-4 mr-2" />
                 )}
                 {editingId ? "Cập nhật" : "Tạo danh mục"}
               </Button>
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={resetForm}
                 className="rounded-xl h-11 border-0 bg-white"
               >
@@ -209,9 +234,13 @@ export default function SellerCategoriesPage() {
             <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
               <Tag className="h-10 w-10 text-gray-400" />
             </div>
-            <h3 className="font-semibold text-gray-800 mb-2">Chưa có danh mục nào</h3>
-            <p className="text-gray-500 text-sm mb-6">Tạo danh mục để phân loại sản phẩm</p>
-            <Button 
+            <h3 className="font-semibold text-gray-800 mb-2">
+              Chưa có danh mục nào
+            </h3>
+            <p className="text-gray-500 text-sm mb-6">
+              Tạo danh mục để phân loại sản phẩm
+            </p>
+            <Button
               onClick={() => setShowForm(true)}
               className="bg-primary hover:bg-primary/90 rounded-xl"
             >
@@ -234,14 +263,22 @@ export default function SellerCategoriesPage() {
                     {category.sortOrder}
                   </div>
                   <div>
-                    <h3 className={`font-medium ${category.isActive ? "text-gray-800" : "text-gray-400"}`}>
+                    <h3
+                      className={`font-medium ${
+                        category.isActive ? "text-gray-800" : "text-gray-400"
+                      }`}
+                    >
                       {category.name}
                     </h3>
                     <div className="flex items-center gap-2 mt-0.5">
                       {category.description && (
-                        <span className="text-xs text-gray-500">{category.description}</span>
+                        <span className="text-xs text-gray-500">
+                          {category.description}
+                        </span>
                       )}
-                      <span className="text-xs text-gray-400">• {category.productCount} sản phẩm</span>
+                      <span className="text-xs text-gray-400">
+                        • {category.productCount} sản phẩm
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -256,9 +293,9 @@ export default function SellerCategoriesPage() {
                     />
                   </div>
                   <div className="flex items-center gap-1">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => handleEdit(category)}
                       className="h-9 w-9 rounded-lg"
                     >
@@ -268,7 +305,7 @@ export default function SellerCategoriesPage() {
                       variant="ghost"
                       size="icon"
                       onClick={() => handleDelete(category._id)}
-                      disabled={isDeleting}
+                      disabled={deleteMutation.isPending}
                       className="h-9 w-9 rounded-lg"
                     >
                       <Trash2 className="h-4 w-4 text-red-500" />

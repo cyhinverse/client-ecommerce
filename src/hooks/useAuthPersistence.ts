@@ -1,10 +1,13 @@
 import { useEffect, useRef } from "react";
 import { useAppDispatch } from "@/hooks/hooks";
 import { authSlice } from "@/features/auth/authSlice";
-import { getProfile } from "@/features/user/userAction";
+import { useQueryClient } from "@tanstack/react-query";
+import { profileKeys } from "@/lib/queryKeys";
+import instance from "@/api/api";
 
 export const useAuthPersistence = () => {
   const dispatch = useAppDispatch();
+  const queryClient = useQueryClient();
   const initialized = useRef(false);
 
   useEffect(() => {
@@ -15,15 +18,14 @@ export const useAuthPersistence = () => {
     const checkAuthStatus = async () => {
       try {
         // Attempt to fetch profile. If cookies are valid, this will succeed.
-        const result = await dispatch(getProfile()).unwrap();
+        const response = await instance.get("/users/profile");
+        const result = response?.data?.data;
 
         if (result) {
           dispatch(authSlice.actions.setIsAuthenticated(true));
-          // Note: userData is handled by userSlice via getProfile.fulfilled
-          // But we might want to sync basic user info to authSlice if needed
-          if (result.data) {
-            dispatch(authSlice.actions.setUserData(result.data));
-          }
+          dispatch(authSlice.actions.setUserData(result));
+          // Pre-populate React Query cache
+          queryClient.setQueryData(profileKeys.current(), result);
         }
       } catch (error) {
         // If 401/403 or network error, assume not authenticated via cookies
@@ -33,5 +35,5 @@ export const useAuthPersistence = () => {
     };
 
     checkAuthStatus();
-  }, [dispatch]);
+  }, [dispatch, queryClient]);
 };

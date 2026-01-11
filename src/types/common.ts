@@ -1,3 +1,9 @@
+export interface BaseEntity {
+  _id: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface PaginationData {
   currentPage: number;
   pageSize: number;

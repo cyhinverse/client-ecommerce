@@ -1,217 +1,319 @@
 "use client";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Order } from "@/types/order";
-import { Package, Clock, Truck, CheckCircle, XCircle, RefreshCw, MapPin, CreditCard, Calendar } from "lucide-react";
+import {
+  Package,
+  Clock,
+  Truck,
+  CheckCircle,
+  XCircle,
+  RefreshCw,
+  MapPin,
+  CreditCard,
+  Calendar,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAppDispatch } from "@/hooks/hooks";
-import { createPaymentUrl } from "@/features/payment/paymentAction";
+import { useCreatePaymentUrl } from "@/hooks/queries";
 import { toast } from "sonner";
-import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 
 interface OrderDialogProps {
-    order: Order | null;
-    open: boolean;
-    onClose: () => void;
+  order: Order | null;
+  open: boolean;
+  onClose: () => void;
 }
 
-export default function OrderDialog({ order, open, onClose }: OrderDialogProps) {
-    const dispatch = useAppDispatch();
-    const [isPaying, setIsPaying] = useState(false);
+export default function OrderDialog({
+  order,
+  open,
+  onClose,
+}: OrderDialogProps) {
+  const paymentMutation = useCreatePaymentUrl();
+  const isPaying = paymentMutation.isPending;
 
-    if (!order) return null;
+  if (!order) return null;
 
-    const handlePayment = async () => {
-        if (!order) return;
-        setIsPaying(true);
-        try {
-            toast.loading("Redirecting to VNPay...");
-            const result = await dispatch(createPaymentUrl(order._id)).unwrap();
-            if (result.paymentUrl) {
-                window.location.href = result.paymentUrl;
-            }
-        } catch (error) {
-            console.error("Payment error:", error);
-            toast.error("Unable to create payment. Please try again.");
-        } finally {
-            setIsPaying(false);
-        }
-    };
+  const handlePayment = async () => {
+    if (!order) return;
+    try {
+      toast.loading("Redirecting to VNPay...");
+      const result = await paymentMutation.mutateAsync(order._id);
+      if (result.paymentUrl) {
+        window.location.href = result.paymentUrl;
+      }
+    } catch (error) {
+      console.error("Payment error:", error);
+      toast.error("Unable to create payment. Please try again.");
+    }
+  };
 
-    const getStatusConfig = (status: Order["status"]) => {
-        switch (status) {
-            case "pending": return { icon: Clock, color: "text-amber-500", bg: "bg-amber-50", label: "Pending" };
-            case "confirmed":
-            case "processing": return { icon: RefreshCw, color: "text-blue-500", bg: "bg-blue-50", label: "Processing" };
-            case "shipped": return { icon: Truck, color: "text-purple-500", bg: "bg-purple-50", label: "On the way" };
-            case "delivered": return { icon: CheckCircle, color: "text-green-500", bg: "bg-green-50", label: "Delivered" };
-            case "cancelled": return { icon: XCircle, color: "text-red-500", bg: "bg-red-50", label: "Cancelled" };
-            default: return { icon: Package, color: "text-gray-500", bg: "bg-gray-50", label: status };
-        }
-    };
+  const getStatusConfig = (status: Order["status"]) => {
+    switch (status) {
+      case "pending":
+        return {
+          icon: Clock,
+          color: "text-amber-500",
+          bg: "bg-amber-50",
+          label: "Pending",
+        };
+      case "confirmed":
+      case "processing":
+        return {
+          icon: RefreshCw,
+          color: "text-blue-500",
+          bg: "bg-blue-50",
+          label: "Processing",
+        };
+      case "shipped":
+        return {
+          icon: Truck,
+          color: "text-purple-500",
+          bg: "bg-purple-50",
+          label: "On the way",
+        };
+      case "delivered":
+        return {
+          icon: CheckCircle,
+          color: "text-green-500",
+          bg: "bg-green-50",
+          label: "Delivered",
+        };
+      case "cancelled":
+        return {
+          icon: XCircle,
+          color: "text-red-500",
+          bg: "bg-red-50",
+          label: "Cancelled",
+        };
+      default:
+        return {
+          icon: Package,
+          color: "text-gray-500",
+          bg: "bg-gray-50",
+          label: status,
+        };
+    }
+  };
 
-    const statusConfig = getStatusConfig(order.status);
-    const StatusIcon = statusConfig.icon;
+  const statusConfig = getStatusConfig(order.status);
+  const StatusIcon = statusConfig.icon;
 
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: "VND",
-        }).format(amount);
-    };
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+  };
 
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString("en-US", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-        });
-    };
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
-    const displayId = order.orderCode ? `#${order.orderCode}` : `#${order._id?.slice(-8).toUpperCase()}`;
+  const displayId = order.orderCode
+    ? `#${order.orderCode}`
+    : `#${order._id?.slice(-8).toUpperCase()}`;
 
-    return (
-        <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="max-w-[95vw] sm:max-w-7xl w-full overflow-hidden p-0 gap-0 rounded-2xl">
-                <DialogHeader className="p-6 border-b border-border/50 bg-muted/20">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div>
-                            <DialogTitle className="text-xl font-bold tracking-tight flex items-center gap-2">
-                                Order {displayId}
-                            </DialogTitle>
-                            <DialogDescription className="mt-1.5 flex items-center gap-2 text-sm">
-                                <Calendar className="h-4 w-4" />
-                                {formatDate(order.createdAt)}
-                            </DialogDescription>
-                        </div>
-                        <div className={cn("flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium w-fit", statusConfig.bg, statusConfig.color)}>
-                            <StatusIcon className="h-4 w-4" />
-                            {statusConfig.label}
-                        </div>
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-[95vw] sm:max-w-7xl w-full overflow-hidden p-0 gap-0 rounded-2xl">
+        <DialogHeader className="p-6 border-b border-border/50 bg-muted/20">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <DialogTitle className="text-xl font-bold tracking-tight flex items-center gap-2">
+                Order {displayId}
+              </DialogTitle>
+              <DialogDescription className="mt-1.5 flex items-center gap-2 text-sm">
+                <Calendar className="h-4 w-4" />
+                {formatDate(order.createdAt)}
+              </DialogDescription>
+            </div>
+            <div
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium w-fit",
+                statusConfig.bg,
+                statusConfig.color
+              )}
+            >
+              <StatusIcon className="h-4 w-4" />
+              {statusConfig.label}
+            </div>
+          </div>
+        </DialogHeader>
+
+        <div className="grid lg:grid-cols-[1fr_340px] h-full max-h-[80vh]">
+          {/* Main Content: Products */}
+          <div className="overflow-y-auto p-6 lg:p-8 space-y-8 bg-background">
+            <div>
+              <h3 className="text-sm font-semibold mb-6 text-muted-foreground uppercase tracking-wider">
+                Items ({order.products.length})
+              </h3>
+              <div className="space-y-6">
+                {order.products.map((product, index) => (
+                  <div
+                    key={product.productId + index}
+                    className="flex gap-4 sm:gap-6 items-center group"
+                  >
+                    <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-2xl overflow-hidden border border-border/60 bg-[#f7f7f7] flex-shrink-0">
+                      <Image
+                        src={product.image || "/images/placeholder-product.jpg"}
+                        alt={product.name}
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
                     </div>
-                </DialogHeader>
-
-                <div className="grid lg:grid-cols-[1fr_340px] h-full max-h-[80vh]">
-                    {/* Main Content: Products */}
-                    <div className="overflow-y-auto p-6 lg:p-8 space-y-8 bg-background">
-                        <div>
-                            <h3 className="text-sm font-semibold mb-6 text-muted-foreground uppercase tracking-wider">Items ({order.products.length})</h3>
-                            <div className="space-y-6">
-                                {order.products.map((product, index) => (
-                                    <div key={product.productId + index} className="flex gap-4 sm:gap-6 items-center group">
-                                        <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-2xl overflow-hidden border border-border/60 bg-[#f7f7f7] flex-shrink-0">
-                                            <Image
-                                                src={product.image || "/images/placeholder-product.jpg"}
-                                                alt={product.name}
-                                                fill
-                                                className="object-cover"
-                                                unoptimized
-                                            />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
-                                                <div className="space-y-1">
-                                                    <p className="font-semibold text-base text-foreground line-clamp-2 leading-tight">{product.name}</p>
-                                                    {(product.color || product.size) && (
-                                                        <p className="text-sm text-muted-foreground">
-                                                            {[product.color, product.size].filter(Boolean).join(" • ")}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                                <div className="text-left sm:text-right flex-shrink-0">
-                                                    <p className="font-semibold text-base">{formatCurrency(product.price)}</p>
-                                                    <p className="text-sm text-muted-foreground mt-0.5">x{product.quantity}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                        <div className="space-y-1">
+                          <p className="font-semibold text-base text-foreground line-clamp-2 leading-tight">
+                            {product.name}
+                          </p>
+                          {(product.color || product.size) && (
+                            <p className="text-sm text-muted-foreground">
+                              {[product.color, product.size]
+                                .filter(Boolean)
+                                .join(" • ")}
+                            </p>
+                          )}
                         </div>
+                        <div className="text-left sm:text-right flex-shrink-0">
+                          <p className="font-semibold text-base">
+                            {formatCurrency(product.price)}
+                          </p>
+                          <p className="text-sm text-muted-foreground mt-0.5">
+                            x{product.quantity}
+                          </p>
+                        </div>
+                      </div>
                     </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
 
-                    {/* Sidebar: Summary & Details */}
-                    <div className="bg-muted/30 border-t lg:border-t-0 lg:border-l border-border/50 p-6 lg:p-8 space-y-8 overflow-y-auto">
-                        
-                        {/* Payment & Actions */}
-                        <div>
-                             <h3 className="text-sm font-semibold mb-4 flex items-center gap-2 text-foreground">
-                                <CreditCard className="h-4 w-4 text-muted-foreground" />
-                                Payment
-                            </h3>
-                             <div className="bg-[#f7f7f7] rounded-2xl p-4 border border-border/60 space-y-4">
-                                <div className="flex justify-between text-sm items-center">
-                                    <span className="text-muted-foreground">Method</span>
-                                    <span className="font-medium">{order.paymentMethod === "cod" ? "Cash on Delivery" : "VNPay Wallet"}</span>
-                                </div>
-                                <Separator className="bg-border/50" />
-                                <div className="flex justify-between text-sm items-center">
-                                    <span className="text-muted-foreground">Status</span>
-                                    <Badge variant={order.paymentStatus === "paid" ? "outline" : "secondary"} className={cn("rounded-lg px-2.5 font-medium border-0", order.paymentStatus === "paid" ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-900")}>
-                                        {order.paymentStatus === "paid" ? "Paid" : "Unpaid"}
-                                    </Badge>
-                                </div>
-                                {order.paymentMethod === "vnpay" && order.paymentStatus === "unpaid" && (
-                                    <Button onClick={handlePayment} disabled={isPaying} className="w-full rounded-xl mt-2" size="sm">
-                                        {isPaying ? "Processing..." : "Pay Now"}
-                                    </Button>
-                                )}
-                             </div>
-                        </div>
-
-                        {/* Shipping Address */}
-                        <div>
-                            <h3 className="text-sm font-semibold mb-4 flex items-center gap-2 text-foreground">
-                                <MapPin className="h-4 w-4 text-muted-foreground" />
-                                Shipping
-                            </h3>
-                            <div className="text-sm space-y-1.5 text-muted-foreground bg-background/50 p-4 rounded-2xl border border-border/40">
-                                <p className="font-semibold text-foreground text-base">{order.shippingAddress.fullName}</p>
-                                <p className="font-mono text-xs text-muted-foreground/80">{order.shippingAddress.phone}</p>
-                                <p className="leading-relaxed mt-2 text-[13px]">
-                                    {[
-                                        order.shippingAddress.address,
-                                        order.shippingAddress.ward,
-                                        order.shippingAddress.district,
-                                        order.shippingAddress.city
-                                    ].filter(Boolean).join(", ")}
-                                </p>
-                            </div>
-                        </div>
-
-                         <Separator className="bg-border/60" />
-
-                        {/* Order Calculation */}
-                        <div className="space-y-3">
-                             <div className="flex justify-between text-sm text-muted-foreground">
-                                <span>Subtotal</span>
-                                <span>{formatCurrency(order.subtotal)}</span>
-                            </div>
-                            {(order.discountAmount ?? 0) > 0 && (
-                                <div className="flex justify-between text-sm text-emerald-600 font-medium">
-                                    <span>Discount</span>
-                                    <span>-{formatCurrency(order.discountAmount ?? 0)}</span>
-                                </div>
-                            )}
-                            <div className="flex justify-between text-sm text-muted-foreground">
-                                <span>Shipping</span>
-                                <span>Free</span>
-                            </div>
-                            <Separator className="my-2 bg-border/60" />
-                            <div className="flex justify-between text-lg font-bold tracking-tight text-foreground">
-                                <span>Total</span>
-                                <span>{formatCurrency(order.totalAmount)}</span>
-                            </div>
-                        </div>
-
-                    </div>
+          {/* Sidebar: Summary & Details */}
+          <div className="bg-muted/30 border-t lg:border-t-0 lg:border-l border-border/50 p-6 lg:p-8 space-y-8 overflow-y-auto">
+            {/* Payment & Actions */}
+            <div>
+              <h3 className="text-sm font-semibold mb-4 flex items-center gap-2 text-foreground">
+                <CreditCard className="h-4 w-4 text-muted-foreground" />
+                Payment
+              </h3>
+              <div className="bg-[#f7f7f7] rounded-2xl p-4 border border-border/60 space-y-4">
+                <div className="flex justify-between text-sm items-center">
+                  <span className="text-muted-foreground">Method</span>
+                  <span className="font-medium">
+                    {order.paymentMethod === "cod"
+                      ? "Cash on Delivery"
+                      : "VNPay Wallet"}
+                  </span>
                 </div>
-            </DialogContent>
-        </Dialog >
-    );
+                <Separator className="bg-border/50" />
+                <div className="flex justify-between text-sm items-center">
+                  <span className="text-muted-foreground">Status</span>
+                  <Badge
+                    variant={
+                      order.paymentStatus === "paid" ? "outline" : "secondary"
+                    }
+                    className={cn(
+                      "rounded-lg px-2.5 font-medium border-0",
+                      order.paymentStatus === "paid"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-zinc-100 text-zinc-900"
+                    )}
+                  >
+                    {order.paymentStatus === "paid" ? "Paid" : "Unpaid"}
+                  </Badge>
+                </div>
+                {order.paymentMethod === "vnpay" &&
+                  order.paymentStatus === "unpaid" && (
+                    <Button
+                      onClick={handlePayment}
+                      disabled={isPaying}
+                      className="w-full rounded-xl mt-2"
+                      size="sm"
+                    >
+                      {isPaying ? "Processing..." : "Pay Now"}
+                    </Button>
+                  )}
+              </div>
+            </div>
+
+            {/* Shipping Address */}
+            <div>
+              <h3 className="text-sm font-semibold mb-4 flex items-center gap-2 text-foreground">
+                <MapPin className="h-4 w-4 text-muted-foreground" />
+                Shipping
+              </h3>
+              <div className="text-sm space-y-1.5 text-muted-foreground bg-background/50 p-4 rounded-2xl border border-border/40">
+                <p className="font-semibold text-foreground text-base">
+                  {order.shippingAddress.fullName}
+                </p>
+                <p className="font-mono text-xs text-muted-foreground/80">
+                  {order.shippingAddress.phone}
+                </p>
+                <p className="leading-relaxed mt-2 text-[13px]">
+                  {[
+                    order.shippingAddress.address,
+                    order.shippingAddress.ward,
+                    order.shippingAddress.district,
+                    order.shippingAddress.city,
+                  ]
+                    .filter(Boolean)
+                    .join(", ")}
+                </p>
+              </div>
+            </div>
+
+            <Separator className="bg-border/60" />
+
+            {/* Order Calculation */}
+            <div className="space-y-3">
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>Subtotal</span>
+                <span>{formatCurrency(order.subtotal)}</span>
+              </div>
+              {(order.discountShop ?? 0) + (order.discountPlatform ?? 0) >
+                0 && (
+                <div className="flex justify-between text-sm text-emerald-600 font-medium">
+                  <span>Discount</span>
+                  <span>
+                    -
+                    {formatCurrency(
+                      (order.discountShop ?? 0) + (order.discountPlatform ?? 0)
+                    )}
+                  </span>
+                </div>
+              )}
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>Shipping</span>
+                <span>Free</span>
+              </div>
+              <Separator className="my-2 bg-border/60" />
+              <div className="flex justify-between text-lg font-bold tracking-tight text-foreground">
+                <span>Total</span>
+                <span>{formatCurrency(order.totalAmount)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 }

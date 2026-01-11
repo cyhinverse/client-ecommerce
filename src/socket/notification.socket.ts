@@ -1,14 +1,11 @@
 import { Socket } from "socket.io-client";
-import { AppDispatch } from "@/store/configStore";
-import {
-  addNotification,
-  setUnreadCount,
-} from "@/features/notification/notificationSlice";
+import { QueryClient } from "@tanstack/react-query";
+import { notificationKeys } from "@/lib/queryKeys";
 import { toast } from "sonner";
 
 export const handleNotificationEvents = (
   socket: Socket,
-  dispatch: AppDispatch
+  queryClient: QueryClient
 ) => {
   if (!socket) return;
 
@@ -23,10 +20,12 @@ export const handleNotificationEvents = (
     toast.message(title, {
       description: message,
     });
-    dispatch(addNotification(notification));
+    // Invalidate notification queries to refetch
+    queryClient.invalidateQueries({ queryKey: notificationKeys.all });
   });
 
   socket.on("unread_count", (count) => {
-    dispatch(setUnreadCount(count));
+    // Update unread count in cache
+    queryClient.setQueryData(notificationKeys.unreadCount(), count);
   });
 };

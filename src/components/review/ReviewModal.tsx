@@ -15,8 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Star, MessageSquare } from "lucide-react";
-import { useAppDispatch } from "@/hooks/hooks";
-import { createReview } from "@/features/reviews/reviewAction";
+import { useCreateReview } from "@/hooks/queries/useReviews";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -39,8 +38,7 @@ export default function ReviewDialog({
   productId,
   onReviewSubmitted,
 }: ReviewDialogProps) {
-  const dispatch = useAppDispatch();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const createReviewMutation = useCreateReview();
   const [hoverRating, setHoverRating] = useState(0);
   const [open, setOpen] = useState(false);
 
@@ -68,15 +66,12 @@ export default function ReviewDialog({
       return;
     }
 
-    setIsSubmitting(true);
     try {
-      await dispatch(
-        createReview({
-          productId,
-          rating: data.rating,
-          comment: data.comment,
-        })
-      ).unwrap();
+      await createReviewMutation.mutateAsync({
+        productId,
+        rating: data.rating,
+        comment: data.comment,
+      });
 
       toast.success("Review submitted successfully!");
       reset();
@@ -86,10 +81,10 @@ export default function ReviewDialog({
       const err = error as { message?: string };
       const errorMessage = err?.message || "Failed to submit review";
       toast.error(errorMessage);
-    } finally {
-      setIsSubmitting(false);
     }
   };
+
+  const isSubmitting = createReviewMutation.isPending;
 
   const handleRatingClick = (selectedRating: number) => {
     setValue("rating", selectedRating, { shouldValidate: true });
@@ -106,14 +101,19 @@ export default function ReviewDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2 rounded-full">
+        <Button
+          variant="outline"
+          className="flex items-center gap-2 rounded-full"
+        >
           <MessageSquare className="h-4 w-4" />
           Write a Review
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md rounded-2xl">
         <DialogHeader className="text-center">
-          <DialogTitle className="text-xl font-bold tracking-tight">Write a Review</DialogTitle>
+          <DialogTitle className="text-xl font-bold tracking-tight">
+            Write a Review
+          </DialogTitle>
           <DialogDescription>
             Share your experience with this product
           </DialogDescription>
@@ -123,55 +123,64 @@ export default function ReviewDialog({
           {/* Rating Stars */}
           <div className="flex flex-col items-center gap-3">
             <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
+              {[1, 2, 3, 4, 5].map((star) => (
                 <button
-                    key={star}
-                    type="button"
-                    className="p-1 focus:outline-none transition-transform hover:scale-110 active:scale-95"
-                    onClick={() => handleRatingClick(star)}
-                    onMouseEnter={() => setHoverRating(star)}
-                    onMouseLeave={() => setHoverRating(0)}
-                    disabled={isSubmitting}
+                  key={star}
+                  type="button"
+                  className="p-1 focus:outline-none transition-transform hover:scale-110 active:scale-95"
+                  onClick={() => handleRatingClick(star)}
+                  onMouseEnter={() => setHoverRating(star)}
+                  onMouseLeave={() => setHoverRating(0)}
+                  disabled={isSubmitting}
                 >
-                    <Star
+                  <Star
                     className={cn(
-                        "h-8 w-8 transition-colors duration-200",
-                        star <= (hoverRating || rating)
+                      "h-8 w-8 transition-colors duration-200",
+                      star <= (hoverRating || rating)
                         ? "fill-amber-400 text-amber-400"
                         : "text-muted-foreground/20 fill-muted-foreground/5"
                     )}
-                    />
+                  />
                 </button>
-                ))}
+              ))}
             </div>
             <span className="text-sm font-medium text-muted-foreground h-5">
-                {rating > 0 ? (
-                    rating === 5 ? "Excellent!" :
-                    rating === 4 ? "Good" :
-                    rating === 3 ? "Average" :
-                    rating === 2 ? "Poor" : "Terrible"
-                ) : "Select a rating"}
+              {rating > 0
+                ? rating === 5
+                  ? "Excellent!"
+                  : rating === 4
+                  ? "Good"
+                  : rating === 3
+                  ? "Average"
+                  : rating === 2
+                  ? "Poor"
+                  : "Terrible"
+                : "Select a rating"}
             </span>
             {errors.rating && (
-                <p className="text-xs text-destructive font-medium animate-in slide-in-from-top-1">
+              <p className="text-xs text-destructive font-medium animate-in slide-in-from-top-1">
                 {errors.rating.message}
-                </p>
+              </p>
             )}
           </div>
 
           {/* Comment */}
           <div className="space-y-2">
-            <Label htmlFor="comment" className="sr-only">Comment</Label>
+            <Label htmlFor="comment" className="sr-only">
+              Comment
+            </Label>
             <Textarea
-                {...register("comment")}
-                id="comment"
-                placeholder="What did you like or dislike? What did you use this product for?"
-                className="min-h-[120px] resize-none border-border/50 bg-muted/30 focus:bg-background transition-colors"
-                disabled={isSubmitting}
+              {...register("comment")}
+              id="comment"
+              placeholder="What did you like or dislike? What did you use this product for?"
+              className="min-h-[120px] resize-none border-border/50 bg-muted/30 focus:bg-background transition-colors"
+              disabled={isSubmitting}
             />
             <div className="flex justify-between text-xs text-muted-foreground px-1">
-                <span className="text-destructive font-medium">{errors.comment?.message}</span>
-                <span>{comment.length}/500</span>
+              <span className="text-destructive font-medium">
+                {errors.comment?.message}
+              </span>
+              <span>{comment.length}/500</span>
             </div>
           </div>
 

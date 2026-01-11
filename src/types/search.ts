@@ -4,7 +4,13 @@ import { PaginationData } from "./common";
 
 // Search suggestions response
 export interface SearchSuggestions {
-  products: Pick<Product, "_id" | "name" | "slug" | "images" | "price">[];
+  products: {
+    _id: string;
+    name: string;
+    slug: string;
+    images: string[];
+    price: Product["price"];
+  }[];
   categories: Pick<Category, "_id" | "name" | "slug">[];
   shops: Pick<Shop, "_id" | "name" | "slug" | "logo">[];
 }
@@ -47,7 +53,13 @@ export interface SearchParams {
   minPrice?: number;
   maxPrice?: number;
   rating?: number;
-  sort?: "relevance" | "price_asc" | "price_desc" | "newest" | "bestselling" | "rating";
+  sort?:
+    | "relevance"
+    | "price_asc"
+    | "price_desc"
+    | "newest"
+    | "bestselling"
+    | "rating";
   page?: number;
   limit?: number;
 }

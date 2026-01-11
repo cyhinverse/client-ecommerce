@@ -18,9 +18,9 @@ import {
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import NotificationModel from "@/components/notifications/NotificationModel";
-import { countUnreadNotification } from "@/features/notification/notificationAction";
+import { useUnreadNotificationCount } from "@/hooks/queries/useNotifications";
 import { toggleChat } from "@/features/chat/chatSlice";
-import { searchProducts } from "@/features/product/productAction";
+import { useProductSearch } from "@/hooks/queries/useProducts";
 import { pathArray } from "@/constants/PathArray";
 import {
   Sheet,
@@ -57,16 +57,24 @@ const categories = [
 ];
 
 // Hot search keywords
-const HOT_KEYWORDS = ["iPhone 16 Pro", "Váy hè", "Nike Air Max", "Mỹ phẩm", "Đồ ăn vặt"];
+const HOT_KEYWORDS = [
+  "iPhone 16 Pro",
+  "Váy hè",
+  "Nike Air Max",
+  "Mỹ phẩm",
+  "Đồ ăn vặt",
+];
 const SUGGESTIONS = ["Ốp iPhone 16", "Giày nam", "Áo khoác", "Bàn phím gaming"];
 
 export default function HeaderLayout() {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { isAuthenticated, token, data } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, token, data } = useAppSelector(
+    (state) => state.auth
+  );
   const { data: cartData } = useAppSelector((state) => state.cart);
-  const { unreadCount } = useAppSelector((state) => state.notification);
-  const { searchResults, isSearching } = useAppSelector((state) => state.product);
+  const { data: unreadCountData } = useUnreadNotificationCount();
+  const unreadCount = unreadCountData || 0;
   const [isOpen, setIsOpen] = useState(false);
 
   // Search State
@@ -80,11 +88,11 @@ export default function HeaderLayout() {
   // Debounced search query
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
-  useEffect(() => {
-    if (isAuthenticated && token) {
-      dispatch(countUnreadNotification());
-    }
-  }, [isAuthenticated, token, dispatch]);
+  // Use React Query for search
+  const { data: searchResults, isLoading: isSearching } = useProductSearch(
+    debouncedSearchQuery.trim(),
+    8
+  );
 
   // Load recent searches
   useEffect(() => {
@@ -97,13 +105,6 @@ export default function HeaderLayout() {
       }
     }
   }, []);
-
-  // Debounced search API call using custom hook
-  useEffect(() => {
-    if (debouncedSearchQuery.trim().length >= 2) {
-      dispatch(searchProducts({ keyword: debouncedSearchQuery.trim(), limit: 8 }));
-    }
-  }, [debouncedSearchQuery, dispatch]);
 
   // Handle outside click to close search dropdown
   useEffect(() => {
@@ -185,7 +186,10 @@ export default function HeaderLayout() {
                         <span className="sr-only">Toggle menu</span>
                       </Button>
                     </SheetTrigger>
-                    <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+                    <SheetContent
+                      side="left"
+                      className="w-[300px] sm:w-[400px]"
+                    >
                       <SheetHeader>
                         <SheetTitle className="text-left text-lg font-bold text-[#E53935]">
                           Store
@@ -204,7 +208,9 @@ export default function HeaderLayout() {
                               {category.subcategories.map((sub) => (
                                 <Link
                                   key={sub}
-                                  href={`/products?category=${category.slug}&subcategory=${sub.toLowerCase()}`}
+                                  href={`/products?category=${
+                                    category.slug
+                                  }&subcategory=${sub.toLowerCase()}`}
                                   className="text-sm text-muted-foreground hover:text-foreground py-1 block"
                                 >
                                   {sub}
@@ -218,7 +224,10 @@ export default function HeaderLayout() {
                   </Sheet>
 
                   {/* Logo */}
-                  <Link href="/" className="shrink-0 flex flex-col items-center">
+                  <Link
+                    href="/"
+                    className="shrink-0 flex flex-col items-center"
+                  >
                     <div className="relative w-[210px] h-[70px] overflow-hidden">
                       <Image
                         src="/images/logo.png"
@@ -301,7 +310,9 @@ export default function HeaderLayout() {
                         key={i}
                         className={cn(
                           "cursor-pointer hover:text-[#E53935] transition-colors",
-                          i === 0 ? "text-[#E53935] font-medium" : "text-gray-500"
+                          i === 0
+                            ? "text-[#E53935] font-medium"
+                            : "text-gray-500"
                         )}
                         onClick={() => handleSearchSubmit(undefined, text)}
                       >
@@ -319,7 +330,9 @@ export default function HeaderLayout() {
                           {isSearching ? (
                             <div className="flex items-center justify-center py-8">
                               <Loader2 className="w-6 h-6 text-[#E53935] animate-spin" />
-                              <span className="ml-2 text-sm text-gray-500">Đang tìm kiếm...</span>
+                              <span className="ml-2 text-sm text-gray-500">
+                                Đang tìm kiếm...
+                              </span>
                             </div>
                           ) : searchResults && searchResults.length > 0 ? (
                             <>
@@ -332,50 +345,67 @@ export default function HeaderLayout() {
                                 </span>
                               </div>
                               <div className="space-y-2">
-                                {searchResults.slice(0, 6).map((product: any) => (
-                                  <div
-                                    key={product._id}
-                                    onClick={() => handleProductClick(product.slug)}
-                                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors group"
-                                  >
-                                    {/* Product Image */}
-                                    <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 shrink-0">
-                                      {(product.image || product.variants?.[0]?.images?.[0]) ? (
-                                        <Image
-                                          src={product.image || product.variants?.[0]?.images?.[0]}
-                                          alt={product.name}
-                                          fill
-                                          className="object-cover"
-                                          onError={(e) => {
-                                            const target = e.target as HTMLImageElement;
-                                            target.style.display = 'none';
-                                          }}
-                                        />
-                                      ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-                                          <Search className="w-5 h-5 text-gray-300" />
-                                        </div>
-                                      )}
-                                    </div>
-                                    {/* Product Info */}
-                                    <div className="flex-1 min-w-0">
-                                      <p className="text-sm font-medium text-gray-800 truncate group-hover:text-[#E53935]">
-                                        {product.name}
-                                      </p>
-                                      <div className="flex items-center gap-2 mt-0.5">
-                                        <span className="text-sm font-bold text-[#E53935]">
-                                          {formatPrice(product.price?.discountPrice || product.price?.currentPrice || 0)}
-                                        </span>
-                                        {product.price?.discountPrice && product.price?.currentPrice > product.price?.discountPrice && (
-                                          <span className="text-xs text-gray-400 line-through">
-                                            {formatPrice(product.price.currentPrice)}
-                                          </span>
+                                {searchResults
+                                  .slice(0, 6)
+                                  .map((product: any) => (
+                                    <div
+                                      key={product._id}
+                                      onClick={() =>
+                                        handleProductClick(product.slug)
+                                      }
+                                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors group"
+                                    >
+                                      {/* Product Image */}
+                                      <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+                                        {product.image ||
+                                        product.variants?.[0]?.images?.[0] ? (
+                                          <Image
+                                            src={
+                                              product.image ||
+                                              product.variants?.[0]?.images?.[0]
+                                            }
+                                            alt={product.name}
+                                            fill
+                                            className="object-cover"
+                                            onError={(e) => {
+                                              const target =
+                                                e.target as HTMLImageElement;
+                                              target.style.display = "none";
+                                            }}
+                                          />
+                                        ) : (
+                                          <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                                            <Search className="w-5 h-5 text-gray-300" />
+                                          </div>
                                         )}
                                       </div>
+                                      {/* Product Info */}
+                                      <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-gray-800 truncate group-hover:text-[#E53935]">
+                                          {product.name}
+                                        </p>
+                                        <div className="flex items-center gap-2 mt-0.5">
+                                          <span className="text-sm font-bold text-[#E53935]">
+                                            {formatPrice(
+                                              product.price?.discountPrice ||
+                                                product.price?.currentPrice ||
+                                                0
+                                            )}
+                                          </span>
+                                          {product.price?.discountPrice &&
+                                            product.price?.currentPrice >
+                                              product.price?.discountPrice && (
+                                              <span className="text-xs text-gray-400 line-through">
+                                                {formatPrice(
+                                                  product.price.currentPrice
+                                                )}
+                                              </span>
+                                            )}
+                                        </div>
+                                      </div>
+                                      <Search className="w-4 h-4 text-gray-300 group-hover:text-[#E53935]" />
                                     </div>
-                                    <Search className="w-4 h-4 text-gray-300 group-hover:text-[#E53935]" />
-                                  </div>
-                                ))}
+                                  ))}
                               </div>
                               {/* View All Results */}
                               <button
@@ -419,7 +449,9 @@ export default function HeaderLayout() {
                                   <div
                                     key={i}
                                     className="px-3 py-1 bg-gray-50 hover:bg-gray-100 text-xs text-gray-600 rounded-full cursor-pointer transition-colors"
-                                    onClick={() => handleSearchSubmit(undefined, term)}
+                                    onClick={() =>
+                                      handleSearchSubmit(undefined, term)
+                                    }
                                   >
                                     {term}
                                   </div>
@@ -438,7 +470,9 @@ export default function HeaderLayout() {
                                 <div
                                   key={term}
                                   className="px-3 py-1 bg-white border border-gray-200 hover:border-[#E53935] hover:text-[#E53935] text-xs text-gray-600 rounded-full cursor-pointer transition-colors"
-                                  onClick={() => handleSearchSubmit(undefined, term)}
+                                  onClick={() =>
+                                    handleSearchSubmit(undefined, term)
+                                  }
                                 >
                                   {term}
                                 </div>
@@ -481,7 +515,9 @@ export default function HeaderLayout() {
                         onClick={() => setIsOpen((prev) => !prev)}
                         className={cn(
                           "group flex flex-col items-center gap-0.5 transition-colors relative",
-                          isOpen ? "text-[#E53935]" : "text-gray-500 hover:text-[#E53935]"
+                          isOpen
+                            ? "text-[#E53935]"
+                            : "text-gray-500 hover:text-[#E53935]"
                         )}
                       >
                         <div className="relative">

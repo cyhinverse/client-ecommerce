@@ -2,7 +2,8 @@
 import { memo, useCallback } from "react";
 import { Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useWishlist } from "@/hooks/useWishlist";
+import { useWishlistManager } from "@/hooks/queries/useWishlist";
+import { useAppSelector } from "@/hooks/hooks";
 
 interface WishlistButtonProps {
   productId: string;
@@ -25,14 +26,18 @@ export const WishlistButton = memo(function WishlistButton({
   variant = "icon",
   showText = false,
 }: WishlistButtonProps) {
-  const { isInWishlist, toggleWishlist, isAuthenticated } = useWishlist();
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const { isInWishlist, toggleWishlist } = useWishlistManager(isAuthenticated);
   const isWishlisted = isInWishlist(productId);
 
-  const handleClick = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    toggleWishlist(productId, productName);
-  }, [productId, productName, toggleWishlist]);
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleWishlist(productId, productName);
+    },
+    [productId, productName, toggleWishlist]
+  );
 
   const sizeClasses = {
     sm: "w-6 h-6",
@@ -59,10 +64,7 @@ export const WishlistButton = memo(function WishlistButton({
         )}
       >
         <Heart
-          className={cn(
-            iconSizes[size],
-            isWishlisted && "fill-current"
-          )}
+          className={cn(iconSizes[size], isWishlisted && "fill-current")}
         />
         {showText && (
           <span className="text-sm font-medium">
@@ -86,12 +88,7 @@ export const WishlistButton = memo(function WishlistButton({
       )}
       title={isWishlisted ? "Bỏ yêu thích" : "Thêm vào yêu thích"}
     >
-      <Heart
-        className={cn(
-          iconSizes[size],
-          isWishlisted && "fill-current"
-        )}
-      />
+      <Heart className={cn(iconSizes[size], isWishlisted && "fill-current")} />
     </button>
   );
 });

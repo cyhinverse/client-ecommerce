@@ -1,17 +1,10 @@
 "use client";
-import {
-  MapPin,
-  Plus,
-  Star,
-  Edit,
-  Trash2,
-} from "lucide-react";
+import { MapPin, Plus, Star, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import AddressDialog from "../address/AddressDialog";
 import { useState } from "react";
-import { useAppSelector, useAppDispatch } from "@/hooks/hooks";
-import { deleteAddress, getProfile } from "@/features/user/userAction";
+import { useDeleteAddress, useProfile } from "@/hooks/queries/useProfile";
 import { toast } from "sonner";
 import { Address, AddressTabProps } from "@/types/address";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
@@ -22,8 +15,8 @@ export default function AddressTab({ user }: AddressTabProps) {
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-  const dispatch = useAppDispatch();
-  const { isLoading } = useAppSelector((state) => state.user);
+  const deleteAddressMutation = useDeleteAddress();
+  const { isLoading, refetch } = useProfile();
 
   const addresses = user?.addresses || [];
 
@@ -44,7 +37,7 @@ export default function AddressTab({ user }: AddressTabProps) {
 
   const handleSuccess = async () => {
     try {
-      await dispatch(getProfile()).unwrap();
+      await refetch();
     } catch (error) {
       console.error("Error refreshing profile:", error);
       toast.error("Unable to update data");
@@ -59,8 +52,7 @@ export default function AddressTab({ user }: AddressTabProps) {
     setIsDeleting(addressId);
 
     try {
-      await dispatch(deleteAddress(addressId)).unwrap();
-      await dispatch(getProfile()).unwrap();
+      await deleteAddressMutation.mutateAsync(addressId);
       toast.success("Address deleted successfully");
     } catch (error) {
       console.error("Error deleting address:", error);
@@ -79,16 +71,11 @@ export default function AddressTab({ user }: AddressTabProps) {
       <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
         <MapPin className="h-6 w-6 text-muted-foreground/50" />
       </div>
-      <h3 className="text-lg font-medium mb-2">
-        No addresses found
-      </h3>
+      <h3 className="text-lg font-medium mb-2">No addresses found</h3>
       <p className="text-muted-foreground mb-6 max-w-xs text-sm">
         Add a delivery address to ensure faster checkout.
       </p>
-      <Button
-        onClick={openAddDialog}
-        className="rounded-sm px-6"
-      >
+      <Button onClick={openAddDialog} className="rounded-sm px-6">
         <Plus className="h-4 w-4 mr-2" />
         Add New Address
       </Button>
@@ -121,7 +108,9 @@ export default function AddressTab({ user }: AddressTabProps) {
         <div className="space-y-1 text-sm text-muted-foreground leading-relaxed">
           <p className="text-foreground/80 font-medium">{address.phone}</p>
           <p>{address.address}</p>
-          <p>{address.district}, {address.city}</p>
+          <p>
+            {address.district}, {address.city}
+          </p>
         </div>
       </div>
 
@@ -145,12 +134,12 @@ export default function AddressTab({ user }: AddressTabProps) {
             className="rounded-sm h-8 px-3 text-xs text-red-500 hover:text-red-600 hover:bg-red-50 md:opacity-0 group-hover:opacity-100 transition-opacity duration-200"
           >
             {isDeleting === address._id ? (
-                <span className="animate-pulse">Deleting...</span>
+              <span className="animate-pulse">Deleting...</span>
             ) : (
-                <>
-                    <Trash2 className="h-3.5 w-3.5 mr-1.5" />
-                    Delete
-                </>
+              <>
+                <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                Delete
+              </>
             )}
           </Button>
         )}
@@ -163,16 +152,20 @@ export default function AddressTab({ user }: AddressTabProps) {
       {isLoading && <SpinnerLoading className="absolute inset-0 m-auto" />}
       <div className={isLoading ? "opacity-50 pointer-events-none" : ""}>
         <div className="flex justify-between items-center">
-            <div>
-                <h2 className="text-xl font-semibold tracking-tight">Address Book</h2>
-                <p className="text-muted-foreground text-sm">Manage your shipping destinations</p>
-            </div>
-            {addresses.length > 0 && (
-                <Button onClick={openAddDialog} className="rounded-sm">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Address
-                </Button>
-            )}
+          <div>
+            <h2 className="text-xl font-semibold tracking-tight">
+              Address Book
+            </h2>
+            <p className="text-muted-foreground text-sm">
+              Manage your shipping destinations
+            </p>
+          </div>
+          {addresses.length > 0 && (
+            <Button onClick={openAddDialog} className="rounded-sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Address
+            </Button>
+          )}
         </div>
 
         {addresses.length === 0 ? (

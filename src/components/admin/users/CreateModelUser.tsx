@@ -21,15 +21,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Plus, ChevronDown, ChevronUp, Shield } from "lucide-react";
 import { RESOURCES, ACTIONS } from "@/constants/permissions";
 import { getRolePermissions } from "@/api/permission";
-
-interface CreateUserData {
-  username: string;
-  email: string;
-  password: string;
-  roles: string;
-  isVerifiedEmail: boolean;
-  permissions?: string[];
-}
+import { CreateUserData } from "@/types/user";
 
 interface CreateModelUserProps {
   open: boolean;

@@ -1,21 +1,17 @@
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { useOnSaleProducts } from "@/hooks/queries/useProducts";
 import { ProductCard } from "./ProductCard";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { toast } from "sonner";
 import { useEffect } from "react";
-import { getOnSaleProducts } from "@/features/product/productAction";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
 export default function OnSaleProduct() {
-  const dispatch = useAppDispatch();
-  const { isLoading, onSale, error } = useAppSelector((state) => state.product);
+  const { data: onSale, isLoading, error } = useOnSaleProducts();
 
   useEffect(() => {
-    dispatch(getOnSaleProducts());
-  }, [dispatch]);
-
-  if (error) toast.error(error);
+    if (error) toast.error(String(error));
+  }, [error]);
 
   const saleProducts =
     onSale?.filter(
@@ -65,12 +61,13 @@ export default function OnSaleProduct() {
           >
             {saleProducts.length > 0 ? (
               saleProducts.slice(0, 8).map((p) => {
-                 if (!p.price?.currentPrice || !p.price?.discountPrice) return null;
-                 return (
-                   <motion.div key={p._id} variants={item}>
-                     <ProductCard product={p} />
-                   </motion.div>
-                 );
+                if (!p.price?.currentPrice || !p.price?.discountPrice)
+                  return null;
+                return (
+                  <motion.div key={p._id} variants={item}>
+                    <ProductCard product={p} />
+                  </motion.div>
+                );
               })
             ) : (
               <div className="col-span-full text-center py-20">

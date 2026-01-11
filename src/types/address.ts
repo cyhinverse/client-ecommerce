@@ -1,5 +1,3 @@
-import { User } from "./user";
-
 export interface Address {
   _id: string;
   fullName: string;
@@ -21,18 +19,10 @@ export interface AddressFormData {
   isDefault: boolean;
 }
 
+// Props types - move to component files ideally but keeping here for now if used across multiple
 export interface AddressDialogProps {
   open: boolean;
   onClose: () => void;
   editingAddress: Address | null;
   onSuccess: () => void;
-  user?: User;
-}
-
-export interface AddressTabProps {
-  user: User;
-}
-
-export interface ProfileTabProps {
-  user: User;
 }

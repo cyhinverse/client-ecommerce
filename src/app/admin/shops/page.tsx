@@ -24,27 +24,20 @@ import Image from "next/image";
 import instance from "@/api/api";
 import { toast } from "sonner";
 import { ViewShopModal } from "@/components/admin/shops/ViewShopModal";
+import { Shop as BaseShop, ShopOwner } from "@/types/shop";
 
-interface Shop {
-  _id: string;
-  name: string;
-  slug: string;
-  logo?: string;
-  banner?: string;
-  description?: string;
-  owner: { _id: string; username: string; email: string };
-  status: "pending" | "active" | "suspended";
-  rating: number;
+// Extended Shop type for admin list view with additional stats
+interface AdminShopListItem extends Omit<BaseShop, 'owner'> {
+  owner: ShopOwner;
   totalProducts: number;
   totalOrders: number;
-  createdAt: string;
 }
 
 export default function AdminShopsPage() {
-  const [shops, setShops] = useState<Shop[]>([]);
+  const [shops, setShops] = useState<AdminShopListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
+  const [selectedShop, setSelectedShop] = useState<AdminShopListItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchShops = async () => {

@@ -7,13 +7,19 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { updateShop, uploadShopImage } from "@/features/shop/shopAction";
+import {
+  useMyShop,
+  useUpdateShop,
+  useUploadShopLogo,
+  useUploadShopBanner,
+} from "@/hooks/queries/useShop";
 import { UpdateShopPayload } from "@/types/shop";
 
 export default function SellerSettingsPage() {
-  const dispatch = useAppDispatch();
-  const { myShop, isUpdating, error, isUploadingLogo, isUploadingBanner } = useAppSelector((state) => state.shop);
+  const { data: myShop } = useMyShop();
+  const updateShopMutation = useUpdateShop();
+  const uploadLogoMutation = useUploadShopLogo();
+  const uploadBannerMutation = useUploadShopBanner();
 
   const [formData, setFormData] = useState<UpdateShopPayload>({
     name: "",
@@ -48,10 +54,10 @@ export default function SellerSettingsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await dispatch(updateShop(formData)).unwrap();
+      await updateShopMutation.mutateAsync(formData);
       toast.success("Cập nhật shop thành công!");
-    } catch {
-      toast.error(error || "Cập nhật shop thất bại");
+    } catch (error) {
+      toast.error("Cập nhật shop thất bại");
     }
   };
 
@@ -62,7 +68,10 @@ export default function SellerSettingsPage() {
     }));
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, type: "logo" | "banner") => {
+  const handleFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: "logo" | "banner"
+  ) => {
     const file = e.target.files?.[0];
     if (file) {
       if (!file.type.startsWith("image/")) {
@@ -73,16 +82,30 @@ export default function SellerSettingsPage() {
         toast.error("File ảnh không được vượt quá 5MB");
         return;
       }
-      
+
       try {
-        const result = await dispatch(uploadShopImage({ file, type })).unwrap();
-        setFormData((prev) => ({ ...prev, [type]: result.url }));
-        toast.success(`Upload ${type === "logo" ? "logo" : "banner"} thành công!`);
+        const formDataUpload = new FormData();
+        formDataUpload.append("file", file);
+
+        if (type === "logo") {
+          const result = await uploadLogoMutation.mutateAsync(formDataUpload);
+          setFormData((prev) => ({ ...prev, logo: result.logo }));
+        } else {
+          const result = await uploadBannerMutation.mutateAsync(formDataUpload);
+          setFormData((prev) => ({ ...prev, banner: result.banner }));
+        }
+        toast.success(
+          `Upload ${type === "logo" ? "logo" : "banner"} thành công!`
+        );
       } catch {
         toast.error(`Upload ${type === "logo" ? "logo" : "banner"} thất bại`);
       }
     }
   };
+
+  const isUploadingLogo = uploadLogoMutation.isPending;
+  const isUploadingBanner = uploadBannerMutation.isPending;
+  const isUpdating = updateShopMutation.isPending;
 
   if (!myShop) return null;
 
@@ -95,7 +118,9 @@ export default function SellerSettingsPage() {
         </div>
         <div>
           <h1 className="text-xl font-bold text-gray-800">Cài đặt Shop</h1>
-          <p className="text-sm text-gray-500">Quản lý thông tin và cài đặt shop của bạn</p>
+          <p className="text-sm text-gray-500">
+            Quản lý thông tin và cài đặt shop của bạn
+          </p>
         </div>
       </div>
 
@@ -112,7 +137,12 @@ export default function SellerSettingsPage() {
               onChange={(e) => handleFileChange(e, "banner")}
             />
             {formData.banner && (
-              <Image src={formData.banner} alt="Banner" fill className="object-cover" />
+              <Image
+                src={formData.banner}
+                alt="Banner"
+                fill
+                className="object-cover"
+              />
             )}
             <button
               type="button"
@@ -145,7 +175,13 @@ export default function SellerSettingsPage() {
                       <Loader2 className="h-6 w-6 animate-spin text-primary" />
                     </div>
                   ) : formData.logo ? (
-                    <Image src={formData.logo} alt="Logo" width={96} height={96} className="object-cover" />
+                    <Image
+                      src={formData.logo}
+                      alt="Logo"
+                      width={96}
+                      height={96}
+                      className="object-cover"
+                    />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gray-100">
                       <Upload className="h-6 w-6 text-gray-400" />
@@ -162,32 +198,41 @@ export default function SellerSettingsPage() {
               </div>
               <div className="pb-2">
                 <h2 className="font-semibold text-gray-800">{myShop.name}</h2>
-                <p className="text-sm text-gray-500">Click vào ảnh để thay đổi</p>
+                <p className="text-sm text-gray-500">
+                  Click vào ảnh để thay đổi
+                </p>
               </div>
             </div>
           </div>
         </div>
-
 
         {/* Basic Info */}
         <div className="bg-[#f7f7f7] rounded-2xl p-6">
           <h3 className="font-semibold text-gray-800 mb-4">Thông tin cơ bản</h3>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="name" className="text-gray-600">Tên Shop</Label>
+              <Label htmlFor="name" className="text-gray-600">
+                Tên Shop
+              </Label>
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 className="mt-1.5 h-11 rounded-xl border-0 bg-white"
               />
             </div>
             <div>
-              <Label htmlFor="description" className="text-gray-600">Mô tả</Label>
+              <Label htmlFor="description" className="text-gray-600">
+                Mô tả
+              </Label>
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 rows={4}
                 className="mt-1.5 rounded-xl resize-none border-0 bg-white"
                 placeholder="Giới thiệu về shop của bạn..."
@@ -208,7 +253,9 @@ export default function SellerSettingsPage() {
                 <Label className="text-gray-600">Họ tên người gửi</Label>
                 <Input
                   value={formData.pickupAddress?.fullName || ""}
-                  onChange={(e) => updatePickupAddress("fullName", e.target.value)}
+                  onChange={(e) =>
+                    updatePickupAddress("fullName", e.target.value)
+                  }
                   className="mt-1.5 h-11 rounded-xl border-0 bg-white"
                 />
               </div>
@@ -243,7 +290,9 @@ export default function SellerSettingsPage() {
                 <Label className="text-gray-600">Quận/Huyện</Label>
                 <Input
                   value={formData.pickupAddress?.district || ""}
-                  onChange={(e) => updatePickupAddress("district", e.target.value)}
+                  onChange={(e) =>
+                    updatePickupAddress("district", e.target.value)
+                  }
                   className="mt-1.5 h-11 rounded-xl border-0 bg-white"
                 />
               </div>

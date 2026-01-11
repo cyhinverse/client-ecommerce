@@ -1,7 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Zap, Plus, Search, Clock, Package, TrendingUp, Trash2 } from "lucide-react";
+import {
+  Zap,
+  Plus,
+  Search,
+  Clock,
+  Package,
+  TrendingUp,
+  Trash2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +32,7 @@ interface FlashSaleProduct {
   _id: string;
   name: string;
   slug: string;
-  images: string[];
+  variants?: { images?: string[] }[];
   price: { currentPrice: number };
   flashSale: {
     isActive: boolean;
@@ -84,7 +92,12 @@ export default function AdminFlashSalePage() {
   }, []);
 
   const handleAddToFlashSale = async () => {
-    if (!selectedProductId || !formData.salePrice || !formData.startTime || !formData.endTime) {
+    if (
+      !selectedProductId ||
+      !formData.salePrice ||
+      !formData.startTime ||
+      !formData.endTime
+    ) {
       toast.error("Please fill all required fields");
       return;
     }
@@ -129,9 +142,17 @@ export default function AdminFlashSalePage() {
 
   // Stats
   const totalProducts = products.length;
-  const totalSold = products.reduce((sum, p) => sum + (p.flashSale?.soldCount || 0), 0);
+  const totalSold = products.reduce(
+    (sum, p) => sum + (p.flashSale?.soldCount || 0),
+    0
+  );
   const avgDiscount = products.length
-    ? Math.round(products.reduce((sum, p) => sum + (p.flashSale?.discountPercent || 0), 0) / products.length)
+    ? Math.round(
+        products.reduce(
+          (sum, p) => sum + (p.flashSale?.discountPercent || 0),
+          0
+        ) / products.length
+      )
     : 0;
 
   return (
@@ -143,7 +164,9 @@ export default function AdminFlashSalePage() {
             <Zap className="h-6 w-6 text-[#E53935]" />
             Flash Sale
           </h1>
-          <p className="text-sm text-muted-foreground">Manage flash sale campaigns</p>
+          <p className="text-sm text-muted-foreground">
+            Manage flash sale campaigns
+          </p>
         </div>
         <Button
           onClick={() => setAddModalOpen(true)}
@@ -156,10 +179,30 @@ export default function AdminFlashSalePage() {
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         {[
-          { label: "Active Products", value: totalProducts, icon: Package, color: "text-foreground" },
-          { label: "Total Sold", value: totalSold, icon: TrendingUp, color: "text-green-600" },
-          { label: "Avg Discount", value: `${avgDiscount}%`, icon: Zap, color: "text-[#E53935]" },
-          { label: "Next Sale", value: schedule[0]?.label || "N/A", icon: Clock, color: "text-purple-600" },
+          {
+            label: "Active Products",
+            value: totalProducts,
+            icon: Package,
+            color: "text-foreground",
+          },
+          {
+            label: "Total Sold",
+            value: totalSold,
+            icon: TrendingUp,
+            color: "text-green-600",
+          },
+          {
+            label: "Avg Discount",
+            value: `${avgDiscount}%`,
+            icon: Zap,
+            color: "text-[#E53935]",
+          },
+          {
+            label: "Next Sale",
+            value: schedule[0]?.label || "N/A",
+            icon: Clock,
+            color: "text-purple-600",
+          },
         ].map((stat) => (
           <div
             key={stat.label}
@@ -169,7 +212,9 @@ export default function AdminFlashSalePage() {
               <p className="text-sm text-muted-foreground">{stat.label}</p>
               <stat.icon className={`h-4 w-4 ${stat.color}`} />
             </div>
-            <p className={`text-2xl font-bold mt-1 ${stat.color}`}>{stat.value}</p>
+            <p className={`text-2xl font-bold mt-1 ${stat.color}`}>
+              {stat.value}
+            </p>
           </div>
         ))}
       </div>
@@ -196,7 +241,9 @@ export default function AdminFlashSalePage() {
             </div>
           ))}
           {schedule.length === 0 && (
-            <p className="text-sm text-muted-foreground">No upcoming sales scheduled</p>
+            <p className="text-sm text-muted-foreground">
+              No upcoming sales scheduled
+            </p>
           )}
         </div>
       </div>
@@ -230,16 +277,23 @@ export default function AdminFlashSalePage() {
           <div className="text-center py-16 text-muted-foreground rounded-2xl bg-[#f7f7f7] dark:bg-[#1C1C1E]">
             <Zap className="h-12 w-12 mx-auto mb-3 opacity-30" />
             <p>No flash sale products</p>
-            <p className="text-sm">Add products to start a flash sale campaign</p>
+            <p className="text-sm">
+              Add products to start a flash sale campaign
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {filteredProducts.map((product) => {
               const soldPercent = product.flashSale?.stock
-                ? Math.round((product.flashSale.soldCount / product.flashSale.stock) * 100)
+                ? Math.round(
+                    (product.flashSale.soldCount / product.flashSale.stock) *
+                      100
+                  )
                 : 0;
               const timeLeft = product.flashSale?.endTime
-                ? formatDistanceToNow(new Date(product.flashSale.endTime), { addSuffix: true })
+                ? formatDistanceToNow(new Date(product.flashSale.endTime), {
+                    addSuffix: true,
+                  })
                 : "";
 
               return (
@@ -249,7 +303,10 @@ export default function AdminFlashSalePage() {
                 >
                   <div className="aspect-square relative bg-white dark:bg-black/20 m-3 rounded-xl overflow-hidden">
                     <Image
-                      src={product.variants?.[0]?.images?.[0] || "/images/placeholder.png"}
+                      src={
+                        product.variants?.[0]?.images?.[0] ||
+                        "/images/placeholder.png"
+                      }
                       alt={product.name}
                       fill
                       className="object-cover"
@@ -267,7 +324,9 @@ export default function AdminFlashSalePage() {
                     </Button>
                   </div>
                   <div className="px-4 pb-4">
-                    <h4 className="font-medium text-sm line-clamp-2 mb-2">{product.name}</h4>
+                    <h4 className="font-medium text-sm line-clamp-2 mb-2">
+                      {product.name}
+                    </h4>
                     <div className="flex items-baseline gap-2 mb-3">
                       <span className="text-lg font-bold text-[#E53935]">
                         {product.flashSale?.salePrice?.toLocaleString()}đ
@@ -280,7 +339,8 @@ export default function AdminFlashSalePage() {
                       <div className="flex justify-between text-xs">
                         <span className="text-muted-foreground">Sold</span>
                         <span className="font-medium">
-                          {product.flashSale?.soldCount || 0}/{product.flashSale?.stock || 0}
+                          {product.flashSale?.soldCount || 0}/
+                          {product.flashSale?.stock || 0}
                         </span>
                       </div>
                       <Progress value={soldPercent} className="h-1.5" />
@@ -318,7 +378,12 @@ export default function AdminFlashSalePage() {
                 <Input
                   type="number"
                   value={formData.salePrice}
-                  onChange={(e) => setFormData({ ...formData, salePrice: Number(e.target.value) })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      salePrice: Number(e.target.value),
+                    })
+                  }
                   className="rounded-xl"
                 />
               </div>
@@ -327,7 +392,12 @@ export default function AdminFlashSalePage() {
                 <Input
                   type="number"
                   value={formData.discountPercent}
-                  onChange={(e) => setFormData({ ...formData, discountPercent: Number(e.target.value) })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      discountPercent: Number(e.target.value),
+                    })
+                  }
                   className="rounded-xl"
                 />
               </div>
@@ -337,7 +407,9 @@ export default function AdminFlashSalePage() {
               <Input
                 type="number"
                 value={formData.stock}
-                onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) })}
+                onChange={(e) =>
+                  setFormData({ ...formData, stock: Number(e.target.value) })
+                }
                 className="rounded-xl"
               />
             </div>
@@ -347,7 +419,9 @@ export default function AdminFlashSalePage() {
                 <Input
                   type="datetime-local"
                   value={formData.startTime}
-                  onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, startTime: e.target.value })
+                  }
                   className="rounded-xl"
                 />
               </div>
@@ -356,14 +430,20 @@ export default function AdminFlashSalePage() {
                 <Input
                   type="datetime-local"
                   value={formData.endTime}
-                  onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, endTime: e.target.value })
+                  }
                   className="rounded-xl"
                 />
               </div>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setAddModalOpen(false)} className="rounded-xl">
+            <Button
+              variant="outline"
+              onClick={() => setAddModalOpen(false)}
+              className="rounded-xl"
+            >
               Cancel
             </Button>
             <Button

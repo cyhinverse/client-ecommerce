@@ -1,93 +1,33 @@
-import { User } from "./auth";
+import { BaseEntity, PaginationData } from "./common";
+import { User } from "./user";
+import { Shop } from "./shop";
+import { ShopCategory } from "./shopCategory";
 
-// Category interface
+// ============ Sub-Interfaces ============
+
 export interface Category {
   _id: string;
   name: string;
   slug: string;
 }
 
-// Price interface
 export interface Price {
   currentPrice: number;
   discountPrice?: number | null;
   currency: string;
-  _id?: string;
 }
 
-// Review interface
-export interface Review extends User {
-  _id: string;
-  rating: number;
-  comment: string;
-}
-
-// Simple Variant interface - color variants only
-// Size is at product level, material is in attributes
-export interface Variant {
-  _id: string;
-  name: string;                    // Display name (usually same as color)
-  sku?: string;                    // Auto-generated: {slug}-{color}-{index}
-  color?: string;                  // Color value (e.g., "Đỏ", "Xanh", "Đen")
-  price: number;
-  stock: number;
-  sold?: number;
-  images: string[];                // Variant-specific images
-}
-
-// DEPRECATED: Old VariantAttributes interface (kept for backward compatibility)
-export interface VariantAttributes {
-  color?: string;
-  size?: string;
-  material?: string;
-}
-
-// DEPRECATED: Old TierVariation interface (kept for backward compatibility during migration)
-export interface TierVariation {
+export interface ProductAttribute {
   name: string;
-  options: string[];
-  images?: (string | string[])[];
+  value: string;
 }
 
-// DEPRECATED: Old ProductModel interface (kept for backward compatibility during migration)
-export interface ProductModel {
-  _id: string;
-  sku?: string;
-  tierIndex: number[];
-  price: number;
-  stock: number;
-  sold?: number;
-}
-
-// NEW: Shop interface
-export interface Shop {
-  _id: string;
-  name: string;
-  slug?: string;
-  logo?: string;
-}
-
-// NEW: Shop Category interface
-export interface ShopCategory {
-  _id: string;
-  name: string;
-  slug?: string;
-}
-
-// NEW: Product Dimensions
 export interface ProductDimensions {
   height?: number;
   width?: number;
   length?: number;
 }
 
-// NEW: Product Attribute (for specifications/parameters)
-export interface ProductAttribute {
-  name: string;   // e.g. "Material", "Weight", "Color"
-  value: string;  // e.g. "Cotton", "500g", "Red"
-}
-
-// NEW: Flash Sale Info
 export interface FlashSaleInfo {
   isActive: boolean;
   salePrice?: number;
@@ -98,90 +38,103 @@ export interface FlashSaleInfo {
   endTime?: string;
 }
 
-// DEPRECATED: Old variants interface (kept for backward compatibility)
-export interface OldVariant {
-  sku: string;
-  color: string;
-  size: string;
-  stock: number;
-  images: string[];
-  price?: Price;
+// Variant Schema - Color differentiation only
+// SKU is auto-generated, size is at product level
+export interface Variant {
   _id: string;
+  name: string; // Display name
+  sku?: string;
+  color?: string;
+  price: number;
+  stock: number;
+  sold?: number;
+  images: string[];
 }
 
-// Product interface - Optimized structure
-export interface Product {
-  _id: string;
+export type ProductStatus = "draft" | "published" | "suspended" | "deleted";
+
+// ============ Main Product Interface ============
+
+export interface Product extends BaseEntity {
   name: string;
-  description: string;
   slug: string;
-  
-  // Media - Product images are stored in variants[].images
-  descriptionImages?: string[];  // Detail/infographic images (max 20)
-  video?: string;
-  
-  // Relations
-  shop?: Shop | string;
+  description: string;
+
+  // Core Relations
+  shop: Shop | string; // Populated or ID
   category: Category | null;
-  shopCategory?: ShopCategory | string;
-  
+  shopCategory?: ShopCategory | string; // Populated or ID
+
   // Metadata
   brand?: string;
   tags?: string[];
-  
+
   // Sizes - Product level (applies to all variants)
-  // Example: ["S", "M", "L", "XL"] or ["36", "37", "38", "39", "40"]
-  sizes?: string[];
-  
-  // Pricing & Inventory (cached aggregates)
-  price: Price | null;
-  stock?: number;
+  sizes: string[];
+
+  // Media
+  descriptionImages: string[];
+  video?: string;
+
+  // Pricing & Inventory (cached aggregates/product level)
+  price: Price;
+  stock: number;
   soldCount: number;
-  
-  // Color Variants (size is at product level)
+
+  // Variants (Colors)
   variants: Variant[];
-  
-  // DEPRECATED: Old Taobao-style variations (kept for backward compatibility)
-  tierVariations?: TierVariation[];
-  models?: ProductModel[];
-  
+
   // Shipping
-  shippingTemplate?: string;
-  weight?: number;  // grams
+  shippingTemplate?: string; // ID
+  weight: number;
   dimensions?: ProductDimensions;
-  
-  // Specifications
-  attributes?: ProductAttribute[];
-  
-  // Reviews (cached counters - actual reviews in Review collection)
-  ratingAverage?: number;
-  reviewCount?: number;
-  
+
+  // Attributes/Specs
+  attributes: ProductAttribute[];
+
+  // Statistics
+  ratingAverage: number;
+  reviewCount: number;
+
   // Flash Sale
   flashSale?: FlashSaleInfo;
-  
+
   // Flags
-  isFeatured?: boolean;
-  isNewArrival?: boolean;
-  
-  // Status - Single source of truth
-  status?: "draft" | "published" | "suspended" | "deleted";
-  
-  // Virtuals (computed by backend)
-  onSale?: boolean;      // Derived from price.discountPrice or flashSale
-  isActive?: boolean;    // Derived from status === "published"
-  effectivePrice?: number; // Considering flash sale
-  
-  // Timestamps
-  createdAt: string;
-  updatedAt: string;
+  isFeatured: boolean;
+  isNewArrival: boolean;
+  status: ProductStatus;
+
+  // Virtuals
+  onSale?: boolean;
+  isActive?: boolean;
+  effectivePrice?: number;
 }
 
+// ============ Helpers ============
 
-import { PaginationData } from "./common";
-export type { PaginationData };
+export function getVariantDisplay(variant: Variant): string {
+  if (variant.name) return variant.name;
+  if (variant.color) return variant.color;
+  return "Mặc định";
+}
 
-// Product State for Redux
+export function findVariantByColor(
+  product: Product,
+  color: string
+): Variant | undefined {
+  return product.variants?.find((v) => v.color === color);
+}
+
+export function getUniqueColors(variants: Variant[]): string[] {
+  const colors = new Set<string>();
+  variants.forEach((v) => {
+    if (v.color) colors.add(v.color);
+  });
+  return Array.from(colors);
+}
+
+// ============ State & Filters ============
+
 export interface ProductState {
   all: Product[];
   featured: Product[];
@@ -198,21 +151,6 @@ export interface ProductState {
   related: Product[];
 }
 
-// Query params for product listing
-export type Params = {
-  page: number;
-  limit: number;
-  search?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  sortBy?: string;
-  rating?: string;
-  colors?: string;
-  sizes?: string;
-  category?: string;
-};
-
-// Product filters for frontend
 export interface ProductFilters {
   search: string;
   minPrice: number;
@@ -223,7 +161,6 @@ export interface ProductFilters {
   sortBy: string;
 }
 
-// Admin product filters
 export interface AdminProductFilters {
   page: number;
   limit: number;
@@ -236,135 +173,64 @@ export interface AdminProductFilters {
   [key: string]: string | number | boolean | null;
 }
 
-// URL-based product filters
 export interface ProductUrlFilters {
   search: string;
   minPrice: number;
   maxPrice: number;
-  rating: string; // Comma separated
-  colors: string; // Comma separated
-  sizes: string; // Comma separated
+  rating: string;
+  colors: string;
+  sizes: string;
   sortBy: string;
   [key: string]: string | number | boolean | null;
 }
 
-// Helper function to get variant display name
-export function getVariantDisplay(variant: Variant): string {
-  // New simplified structure - just use name or color
-  if (variant.name) return variant.name;
-  if (variant.color) return variant.color;
-  return "Mặc định";
-}
+// ============ Form Types (Local File Handling) ============
 
-// Helper function to find variant by color
-export function findVariantByColor(
-  product: Product, 
-  color: string
-): Variant | undefined {
-  return product.variants?.find(v => v.color === color);
-}
-
-// Get unique colors from variants
-export function getUniqueColors(variants: Variant[]): string[] {
-  const colors = new Set<string>();
-  variants.forEach(v => {
-    if (v.color) colors.add(v.color);
-  });
-  return Array.from(colors);
-}
-
-// DEPRECATED: Helper function to get variation display from model (old structure)
-export function getVariationDisplay(product: Product, model: ProductModel): string {
-  if (!product.tierVariations || !model.tierIndex) return "";
-  return model.tierIndex.map((idx, i) => {
-    const tier = product.tierVariations![i];
-    if (!tier) return "";
-    return `${tier.name}: ${tier.options[idx] || ""}`;
-  }).filter(Boolean).join(", ");
-}
-
-// DEPRECATED: Helper function to find model by tierIndex (old structure)
-export function findModelByTierIndex(product: Product, tierIndex: number[]): ProductModel | undefined {
-  return product.models?.find(model => 
-    model.tierIndex.length === tierIndex.length &&
-    model.tierIndex.every((val, idx) => val === tierIndex[idx])
-  );
-}
-
-// ============================================================================
-// Form-specific types for variant handling with local file management
-// ============================================================================
-
-/**
- * Image structure for Create form variants
- * Used when creating new products - all images are new files
- */
 export interface VariantImagesCreate {
-  files: File[];      // New files to upload
-  previews: string[]; // Object URLs for preview
-  existing: string[]; // Always empty for create (kept for type compatibility)
+  files: File[];
+  previews: string[];
+  existing: string[];
 }
 
-/**
- * Image structure for Update form variants
- * Used when editing existing products - mix of existing URLs and new files
- */
 export interface VariantImagesUpdate {
-  existing: string[];    // URLs from server (existing images)
-  newFiles: File[];      // New files to upload
-  newPreviews: string[]; // Object URLs for new file previews
+  existing: string[];
+  newFiles: File[];
+  newPreviews: string[];
 }
 
-/**
- * Variant with local file handling for Create form
- * Extends base Variant but replaces images with file handling structure
- */
-export interface VariantWithFilesCreate extends Omit<Variant, '_id' | 'images'> {
-  _id: string;                    // Temporary ID (e.g., "temp-1234567890")
+export interface VariantWithFilesCreate
+  extends Omit<Variant, "_id" | "images"> {
+  _id: string;
   images: VariantImagesCreate;
 }
 
-/**
- * Variant with local file handling for Update form
- * Includes both existing images from server and new files to upload
- */
 export interface VariantWithFilesUpdate {
-  _id: string;                    // Real ID from server or temp ID for new variants
+  _id: string;
   name: string;
-  color?: string;                 // Color value
+  color?: string;
   price: number;
   stock: number;
   sold?: number;
   images: VariantImagesUpdate;
 }
 
-/**
- * Union type for form handling - can be either Create or Update variant
- */
 export type VariantWithFiles = VariantWithFilesCreate | VariantWithFilesUpdate;
 
-/**
- * Type guard to check if variant is for Create form
- */
 export function isVariantForCreate(
   variant: VariantWithFiles
 ): variant is VariantWithFilesCreate {
-  return 'files' in variant.images && 'previews' in variant.images;
+  return "files" in variant.images && "previews" in variant.images;
 }
 
-/**
- * Type guard to check if variant is for Update form
- */
 export function isVariantForUpdate(
   variant: VariantWithFiles
 ): variant is VariantWithFilesUpdate {
-  return 'newFiles' in variant.images && 'newPreviews' in variant.images;
+  return "newFiles" in variant.images && "newPreviews" in variant.images;
 }
 
-/**
- * Create a new empty variant for Create form
- */
-export function createEmptyVariantForCreate(defaultPrice: number = 0): VariantWithFilesCreate {
+export function createEmptyVariantForCreate(
+  defaultPrice: number = 0
+): VariantWithFilesCreate {
   return {
     _id: `temp-${Date.now()}`,
     name: "",
@@ -376,10 +242,9 @@ export function createEmptyVariantForCreate(defaultPrice: number = 0): VariantWi
   };
 }
 
-/**
- * Create a new empty variant for Update form
- */
-export function createEmptyVariantForUpdate(defaultPrice: number = 0): VariantWithFilesUpdate {
+export function createEmptyVariantForUpdate(
+  defaultPrice: number = 0
+): VariantWithFilesUpdate {
   return {
     _id: `temp-${Date.now()}`,
     name: "",
@@ -391,9 +256,6 @@ export function createEmptyVariantForUpdate(defaultPrice: number = 0): VariantWi
   };
 }
 
-/**
- * Convert server Variant to VariantWithFilesUpdate for editing
- */
 export function variantToEditForm(variant: Variant): VariantWithFilesUpdate {
   return {
     _id: variant._id,
@@ -409,3 +271,79 @@ export function variantToEditForm(variant: Variant): VariantWithFilesUpdate {
     },
   };
 }
+
+// ============ Form Variant Types for Admin Components ============
+
+// Simplified variant for create form (used in CreateModelProduct.tsx)
+export interface CreateVariant {
+  _id: string;
+  name: string;
+  color?: string;
+  price: number;
+  stock: number;
+  sold?: number;
+  images: {
+    files: File[];
+    previews: string[];
+  };
+}
+
+// Simplified variant for update form (used in UpdateModelProduct.tsx)
+export interface UpdateVariant {
+  _id: string;
+  name: string;
+  color?: string;
+  price: number;
+  stock: number;
+  sold?: number;
+  images: {
+    existing: string[];
+    newFiles: File[];
+    newPreviews: string[];
+  };
+}
+
+// Helper to create empty variant for create form
+export function createEmptyCreateVariant(defaultPrice: number = 0): CreateVariant {
+  return {
+    _id: `temp-${Date.now()}`,
+    name: "",
+    color: "",
+    price: defaultPrice,
+    stock: 0,
+    sold: 0,
+    images: { files: [], previews: [] },
+  };
+}
+
+// Helper to create empty variant for update form
+export function createEmptyUpdateVariant(defaultPrice: number = 0): UpdateVariant {
+  return {
+    _id: `temp-${Date.now()}`,
+    name: "",
+    color: "",
+    price: defaultPrice,
+    stock: 0,
+    sold: 0,
+    images: { existing: [], newFiles: [], newPreviews: [] },
+  };
+}
+
+// Helper to convert API variant to update form variant
+export function variantToUpdateForm(variant: Variant): UpdateVariant {
+  return {
+    _id: variant._id,
+    name: variant.name,
+    color: variant.color || "",
+    price: variant.price,
+    stock: variant.stock,
+    sold: variant.sold || 0,
+    images: {
+      existing: variant.images || [],
+      newFiles: [],
+      newPreviews: [],
+    },
+  };
+}
+
+export type { PaginationData };

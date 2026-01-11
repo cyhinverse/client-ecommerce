@@ -1,24 +1,18 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { useState, useMemo } from "react";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
 import {
-  cancelOrder,
-  getAllOrders,
-  getOrderById,
-  updateOrderStatus,
-  getOrderStatistics,
-} from "@/features/order/orderAction";
-import { getAllShops } from "@/features/shop/shopAction";
+  useAllOrders,
+  useOrder,
+  useUpdateOrderStatus,
+  useCancelOrder,
+  useOrderStatistics,
+} from "@/hooks/queries/useOrders";
+import { useAllShops } from "@/hooks/queries/useShop";
 import { toast } from "sonner";
 import { PaginationControls } from "@/components/common/Pagination";
-import {
-  Order,
-  PaginationData,
-  OrderStatistics,
-  OrderFilters,
-} from "@/types/order";
-import { Shop } from "@/types/product";
+import { Order, OrderFilters } from "@/types/order";
+import { Shop } from "@/types/shop";
 import { OrdersHeader } from "@/components/admin/orders/OrdersHeader";
 import { OrdersStats } from "@/components/admin/orders/OrderStats";
 import { OrdersTable } from "@/components/admin/orders/OrderTable";
@@ -28,13 +22,6 @@ import { Button } from "@/components/ui/button";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 export default function OrdersAdminPage() {
-  const dispatch = useAppDispatch();
-  const orderState = useAppSelector((state) => state.order);
-  const shopState = useAppSelector((state) => state.shop);
-
-  // Get shops list for filter
-  const shops: Shop[] = shopState.shops || [];
-
   // Use URL filters hook
   const { filters, updateFilter, updateFilters, resetFilters } =
     useUrlFilters<OrderFilters>({
@@ -61,33 +48,20 @@ export default function OrdersAdminPage() {
   const userIdFilter = filters.userId as string;
   const shopFilter = filters.shop as string;
 
-  const [statistics, setStatistics] = useState<OrderStatistics | null>(null);
-
-  const orders: Order[] = orderState?.allOrders ?? [];
-  const pagination: PaginationData | null = orderState?.pagination;
-
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
-
-  // Fetch orders khi URL params thay đổi
-  useEffect(() => {
+  // Build query params
+  const queryParams = useMemo(() => {
     const params: Record<string, string | number | boolean> = {
       page: currentPage,
       limit: pageSize,
     };
-
     if (searchTerm) params.search = searchTerm;
     if (statusFilter && statusFilter !== "all") params.status = statusFilter;
     if (paymentStatusFilter) params.paymentStatus = paymentStatusFilter;
     if (paymentMethodFilter) params.paymentMethod = paymentMethodFilter;
     if (userIdFilter) params.userId = userIdFilter;
     if (shopFilter && shopFilter !== "all") params.shop = shopFilter;
-
-    dispatch(getAllOrders(params));
+    return params;
   }, [
-    dispatch,
     currentPage,
     pageSize,
     searchTerm,
@@ -98,39 +72,31 @@ export default function OrdersAdminPage() {
     shopFilter,
   ]);
 
-  // Fetch shops for filter dropdown
-  useEffect(() => {
-    dispatch(getAllShops());
-  }, [dispatch]);
+  // React Query hooks
+  const {
+    data: ordersData,
+    isLoading,
+    error,
+    refetch,
+  } = useAllOrders(queryParams);
+  const { data: shopsData } = useAllShops();
+  const { data: statistics } = useOrderStatistics();
+  const updateOrderMutation = useUpdateOrderStatus();
+  const cancelOrderMutation = useCancelOrder();
 
-  const refreshData = () => {
-    const params: Record<string, string | number | boolean> = {
-      page: currentPage,
-      limit: pageSize,
-    };
+  const orders: Order[] = ordersData?.orders ?? [];
+  const pagination = ordersData?.pagination ?? null;
+  const shops: Shop[] = (shopsData?.shops as unknown as Shop[]) || [];
 
-    if (searchTerm) params.search = searchTerm;
-    if (statusFilter && statusFilter !== "all") params.status = statusFilter;
-    if (paymentStatusFilter) params.paymentStatus = paymentStatusFilter;
-    if (paymentMethodFilter) params.paymentMethod = paymentMethodFilter;
-    if (userIdFilter) params.userId = userIdFilter;
-    if (shopFilter && shopFilter !== "all") params.shop = shopFilter;
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [viewingOrderId, setViewingOrderId] = useState<string | null>(null);
 
-    dispatch(getAllOrders(params));
-  };
-
-  // Fetch statistics
-  useEffect(() => {
-    const fetchStatistics = async () => {
-      try {
-        const result = await dispatch(getOrderStatistics({})).unwrap();
-        setStatistics(result);
-      } catch {
-        toast.error("Failed to load order statistics");
-      }
-    };
-    fetchStatistics();
-  }, [dispatch]);
+  // Fetch order detail when viewing
+  const { data: orderDetail } = useOrder(viewingOrderId || "", {
+    enabled: !!viewingOrderId,
+  });
 
   // Hàm mở modal chỉnh sửa
   const handleEditOrder = (order: Order) => {
@@ -148,7 +114,6 @@ export default function OrdersAdminPage() {
   const handleCloseEditModal = () => {
     setEditModalOpen(false);
     setSelectedOrder(null);
-    setIsUpdating(false);
   };
 
   // Trong hàm handleSaveOrder hoặc component EditOrderModal
@@ -173,31 +138,26 @@ export default function OrdersAdminPage() {
       return;
     }
 
-    setIsUpdating(true);
     try {
-      await dispatch(
-        updateOrderStatus({
-          orderId: selectedOrder._id,
-          status: orderData.status as
-            | "pending"
-            | "confirmed"
-            | "processing"
-            | "shipped"
-            | "delivered"
-            | "cancelled",
-        })
-      ).unwrap();
+      await updateOrderMutation.mutateAsync({
+        orderId: selectedOrder._id,
+        status: orderData.status as
+          | "pending"
+          | "confirmed"
+          | "processing"
+          | "shipped"
+          | "delivered"
+          | "cancelled",
+      });
 
-      // Refresh danh sách
-      refreshData();
       handleCloseEditModal();
       toast.success("Order status updated successfully");
     } catch {
       toast.error("Failed to update status. Please try again.");
-    } finally {
-      setIsUpdating(false);
     }
   };
+
+  const isUpdating = updateOrderMutation.isPending;
 
   const handlePageChange = (page: number) => {
     updateFilter("page", page);
@@ -235,40 +195,14 @@ export default function OrdersAdminPage() {
     setViewModalOpen(false);
     setEditModalOpen(false);
     setSelectedOrder(null);
+    setViewingOrderId(null);
   };
 
   const handleDeleteOrder = async (order: Order) => {
     if (confirm(`Are you sure you want to cancel order ${order._id}?`)) {
       try {
-        await dispatch(cancelOrder(order._id)).unwrap();
+        await cancelOrderMutation.mutateAsync(order._id);
         toast.success("Order cancelled successfully");
-        // Refresh danh sách
-        dispatch(
-          getAllOrders({
-            page: currentPage,
-            limit: pageSize,
-            ...(searchTerm && { search: searchTerm }),
-            ...(statusFilter && {
-              status: statusFilter as
-                | "pending"
-                | "confirmed"
-                | "processing"
-                | "shipped"
-                | "delivered"
-                | "cancelled",
-            }),
-            ...(paymentStatusFilter && {
-              paymentStatus: paymentStatusFilter as
-                | "unpaid"
-                | "paid"
-                | "refunded",
-            }),
-            ...(paymentMethodFilter && {
-              paymentMethod: paymentMethodFilter as "cod" | "vnpay",
-            }),
-            ...(userIdFilter && { userId: userIdFilter }),
-          })
-        );
       } catch {
         toast.error("Failed to cancel order");
       }
@@ -276,13 +210,9 @@ export default function OrdersAdminPage() {
   };
 
   const handleViewOrder = async (order: Order) => {
-    try {
-      const result = await dispatch(getOrderById(order._id)).unwrap();
-      setSelectedOrder(result);
-      setViewModalOpen(true);
-    } catch {
-      toast.error("Failed to load order details");
-    }
+    setViewingOrderId(order._id);
+    setSelectedOrder(order);
+    setViewModalOpen(true);
   };
 
   // Reset tất cả bộ lọc
@@ -291,7 +221,7 @@ export default function OrdersAdminPage() {
   };
 
   // Thêm loading state rõ ràng
-  if (orderState?.isLoading && orders.length === 0) {
+  if (isLoading && orders.length === 0) {
     return (
       <div className="space-y-6">
         <OrdersHeader />
@@ -302,7 +232,7 @@ export default function OrdersAdminPage() {
     );
   }
 
-  if (orderState?.error) {
+  if (error) {
     return (
       <div className="space-y-6">
         <OrdersHeader />
@@ -311,8 +241,11 @@ export default function OrdersAdminPage() {
             <div className="text-lg font-semibold mb-2">
               Error loading orders
             </div>
-            <div>{orderState.error}</div>
-            <Button onClick={() => window.location.reload()} className="mt-4 rounded-xl bg-[#E53935] hover:bg-[#D32F2F] text-white">
+            <div>{String(error)}</div>
+            <Button
+              onClick={() => refetch()}
+              className="mt-4 rounded-xl bg-[#E53935] hover:bg-[#D32F2F] text-white"
+            >
               Try Again
             </Button>
           </div>
@@ -332,51 +265,51 @@ export default function OrdersAdminPage() {
       {/* Main Content Area */}
       <div className="space-y-6">
         <OrdersTable
-            orders={orders}
-            searchTerm={searchTerm}
-            statusFilter={statusFilter}
-            paymentStatusFilter={paymentStatusFilter}
-            paymentMethodFilter={paymentMethodFilter}
-            userIdFilter={userIdFilter}
-            pageSize={pageSize}
-            isLoading={orderState.isLoading}
-            onSearch={handleSearch}
-            onStatusFilter={handleStatusFilter}
-            onPaymentStatusFilter={handlePaymentStatusFilter}
-            onPaymentMethodFilter={handlePaymentMethodFilter}
-            onUserIdFilter={handleUserIdFilter}
-            onResetFilters={handleResetFilters}
-            onPageSizeChange={handlePageSizeChange}
-            onEdit={handleEditOrder}
-            onDelete={handleDeleteOrder}
-            onView={handleViewOrder}
-            onShopFilterChange={handleShopFilter}
-            selectedShop={shopFilter || "all"}
-            shops={shops}
-          />
-          
-          <div className="flex justify-center">
-             <PaginationControls
-              pagination={pagination}
-              onPageChange={handlePageChange}
-              itemName="orders"
-             />
-          </div>
+          orders={orders}
+          searchTerm={searchTerm}
+          statusFilter={statusFilter}
+          paymentStatusFilter={paymentStatusFilter}
+          paymentMethodFilter={paymentMethodFilter}
+          userIdFilter={userIdFilter}
+          pageSize={pageSize}
+          isLoading={isLoading}
+          onSearch={handleSearch}
+          onStatusFilter={handleStatusFilter}
+          onPaymentStatusFilter={handlePaymentStatusFilter}
+          onPaymentMethodFilter={handlePaymentMethodFilter}
+          onUserIdFilter={handleUserIdFilter}
+          onResetFilters={handleResetFilters}
+          onPageSizeChange={handlePageSizeChange}
+          onEdit={handleEditOrder}
+          onDelete={handleDeleteOrder}
+          onView={handleViewOrder}
+          onShopFilterChange={handleShopFilter}
+          selectedShop={shopFilter || "all"}
+          shops={shops}
+        />
 
-          <ViewOrderModal
-            isOpen={viewModalOpen}
-            onClose={handleCloseModals}
-            onEdit={handleEditFromView}
-            order={selectedOrder}
+        <div className="flex justify-center">
+          <PaginationControls
+            pagination={pagination}
+            onPageChange={handlePageChange}
+            itemName="orders"
           />
+        </div>
 
-          <EditOrderModal
-            isOpen={editModalOpen}
-            onClose={handleCloseEditModal}
-            onSave={handleSaveOrder}
-            order={selectedOrder}
-            isLoading={isUpdating}
-          />
+        <ViewOrderModal
+          isOpen={viewModalOpen}
+          onClose={handleCloseModals}
+          onEdit={handleEditFromView}
+          order={orderDetail || selectedOrder}
+        />
+
+        <EditOrderModal
+          isOpen={editModalOpen}
+          onClose={handleCloseEditModal}
+          onSave={handleSaveOrder}
+          order={selectedOrder}
+          isLoading={isUpdating}
+        />
       </div>
     </div>
   );

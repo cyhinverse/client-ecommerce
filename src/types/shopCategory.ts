@@ -1,7 +1,8 @@
+import { BaseEntity } from "./common";
+
 // Shop category interface
-export interface ShopCategory {
-  _id: string;
-  shop: string;
+export interface ShopCategory extends BaseEntity {
+  shop: string; // Shop ID
   name: string;
   slug: string;
   description?: string;
@@ -9,8 +10,6 @@ export interface ShopCategory {
   productCount: number;
   isActive: boolean;
   sortOrder: number;
-  createdAt: string;
-  updatedAt: string;
 }
 
 // Create shop category payload

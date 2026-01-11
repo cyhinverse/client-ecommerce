@@ -1,15 +1,22 @@
-// Message interface
-export interface Message {
-  _id: string;
+import { BaseEntity } from "./common";
+
+// ============ User-Shop Chat Types ============
+
+// Message type enum
+export type MessageType = "text" | "image" | "product";
+
+// Sender type enum
+export type SenderType = "user" | "shop";
+
+// Message interface - for user-shop chat
+export interface Message extends BaseEntity {
   conversation: string;
   sender: string;
-  senderType: "user" | "shop";
+  senderType: SenderType;
   content: string;
-  messageType: "text" | "image" | "product";
+  messageType: MessageType;
   productRef?: string;
   isRead: boolean;
-  createdAt: string;
-  updatedAt: string;
 }
 
 // Conversation participant
@@ -19,15 +26,17 @@ export interface ConversationParticipant {
   avatar?: string;
 }
 
+// Shop participant with shopId
+export interface ShopParticipant extends ConversationParticipant {
+  shopId: string;
+}
+
 // Conversation interface
-export interface Conversation {
-  _id: string;
+export interface Conversation extends BaseEntity {
   user: ConversationParticipant;
-  shop: ConversationParticipant & { shopId: string };
+  shop: ShopParticipant;
   lastMessage?: Message;
   unreadCount: number;
-  createdAt: string;
-  updatedAt: string;
 }
 
 // Start conversation payload
@@ -40,9 +49,23 @@ export interface StartConversationPayload {
 export interface SendMessagePayload {
   conversationId: string;
   content: string;
-  messageType?: "text" | "image" | "product";
+  messageType?: MessageType;
   productRef?: string;
 }
+
+// ============ Chatbot Types ============
+
+// Chatbot message role
+export type ChatbotRole = "user" | "assistant";
+
+// Chatbot message interface - for AI chatbot
+export interface ChatbotMessage {
+  role: ChatbotRole;
+  content: string;
+  timestamp?: string;
+}
+
+// ============ State Types ============
 
 // Chat state for Redux
 export interface ChatState {
@@ -53,5 +76,12 @@ export interface ChatState {
   isLoadingConversations: boolean;
   isLoadingMessages: boolean;
   isSending: boolean;
+  error: string | null;
+}
+
+// Chatbot state
+export interface ChatbotState {
+  messages: ChatbotMessage[];
+  isLoading: boolean;
   error: string | null;
 }

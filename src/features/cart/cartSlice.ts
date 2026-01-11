@@ -58,7 +58,8 @@ export const cartSlice = createSlice({
         const existingItemIndex = state.data.items.findIndex(
           (item) =>
             item._id === action.payload._id ||
-            (typeof item.productId === "object" &&
+            (item.productId &&
+              typeof item.productId === "object" &&
               item.productId._id === action.payload.productId._id &&
               (item.modelId === action.payload.modelId ||
                 item.variantId === action.payload.variantId))

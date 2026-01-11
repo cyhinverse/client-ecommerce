@@ -1,7 +1,7 @@
 "use client";
 import { memo, useEffect } from "react";
 import { Sparkles, TrendingUp, Clock, Star } from "lucide-react";
-import { useRecommendation } from "@/hooks/useRecommendation";
+import { useRecommendation } from "@/hooks/queries/useRecommendations";
 import { ProductCard } from "@/components/product/ProductCard";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { cn } from "@/lib/utils";
@@ -43,7 +43,12 @@ const ProductGrid = memo(function ProductGrid({
   };
 
   return (
-    <div className={cn("grid gap-3", gridCols[columns as keyof typeof gridCols] || gridCols[6])}>
+    <div
+      className={cn(
+        "grid gap-3",
+        gridCols[columns as keyof typeof gridCols] || gridCols[6]
+      )}
+    >
       {products.map((product) => (
         <ProductCard key={product._id} product={product} />
       ))}
@@ -96,7 +101,11 @@ export const RecentlyViewedSection = memo(function RecentlyViewedSection({
 
   return (
     <section className={cn("py-6", className)}>
-      <SectionHeader icon={Clock} title="Đã xem gần đây" iconColor="text-blue-500" />
+      <SectionHeader
+        icon={Clock}
+        title="Đã xem gần đây"
+        iconColor="text-blue-500"
+      />
       <ProductGrid products={recentlyViewed} columns={5} />
     </section>
   );
@@ -129,7 +138,11 @@ export const HomepageRecommendations = memo(function HomepageRecommendations({
       {/* Popular Products */}
       {homepage.popular && homepage.popular.length > 0 && (
         <section>
-          <SectionHeader icon={TrendingUp} title="Sản phẩm bán chạy" iconColor="text-orange-500" />
+          <SectionHeader
+            icon={TrendingUp}
+            title="Sản phẩm bán chạy"
+            iconColor="text-orange-500"
+          />
           <ProductGrid products={homepage.popular} columns={5} />
         </section>
       )}
@@ -137,7 +150,11 @@ export const HomepageRecommendations = memo(function HomepageRecommendations({
       {/* Top Rated */}
       {homepage.topRated && homepage.topRated.length > 0 && (
         <section>
-          <SectionHeader icon={Star} title="Đánh giá cao" iconColor="text-yellow-500" />
+          <SectionHeader
+            icon={Star}
+            title="Đánh giá cao"
+            iconColor="text-yellow-500"
+          />
           <ProductGrid products={homepage.topRated} columns={5} />
         </section>
       )}

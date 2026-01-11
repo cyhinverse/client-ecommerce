@@ -1,7 +1,7 @@
 import { Socket } from "socket.io-client";
-import { AppDispatch } from "@/store/configStore";
+import { QueryClient } from "@tanstack/react-query";
 import { handleNotificationEvents } from "./notification.socket";
 
-export const initSocketEvents = (socket: Socket, dispatch: AppDispatch) => {
-  handleNotificationEvents(socket, dispatch);
+export const initSocketEvents = (socket: Socket, queryClient: QueryClient) => {
+  handleNotificationEvents(socket, queryClient);
 };

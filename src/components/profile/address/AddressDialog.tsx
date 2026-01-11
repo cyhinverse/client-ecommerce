@@ -1,11 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import {
-  createAddress,
-  updateAddress,
-  getProfile,
-} from "@/features/user/userAction";
-import { useAppDispatch } from "@/hooks/hooks";
+import { useCreateAddress, useUpdateAddress } from "@/hooks/queries/useProfile";
 import {
   Dialog,
   DialogContent,
@@ -29,7 +24,8 @@ export default function AddressDialog({
   onSuccess,
   user,
 }: AddressDialogProps) {
-  const dispatch = useAppDispatch();
+  const createAddressMutation = useCreateAddress();
+  const updateAddressMutation = useUpdateAddress();
 
   const [addressForm, setAddressForm] = useState<AddressFormData>({
     fullName: "",
@@ -268,19 +264,15 @@ export default function AddressDialog({
       };
 
       if (editingAddress) {
-        await dispatch(
-          updateAddress({
-            addressId: editingAddress._id,
-            addressData: addressDataToSend,
-          })
-        ).unwrap();
+        await updateAddressMutation.mutateAsync({
+          addressId: editingAddress._id,
+          ...addressDataToSend,
+        });
         toast.success("Address updated successfully");
       } else {
-        await dispatch(createAddress(addressDataToSend)).unwrap();
+        await createAddressMutation.mutateAsync(addressDataToSend);
         toast.success("Address added successfully");
       }
-
-      await dispatch(getProfile()).unwrap();
 
       onClose();
       onSuccess();
@@ -327,122 +319,151 @@ export default function AddressDialog({
             {editingAddress ? "Edit Address" : "Add New Address"}
           </DialogTitle>
           <DialogDescription>
-             Fill in your delivery details below.
+            Fill in your delivery details below.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            {/* Personal Info */}
-            <div className="space-y-4">
-                 <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Contact Info</h4>
-                 <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="fullName">Full Name</Label>
-                        <Input
-                            id="fullName"
-                            placeholder="John Doe"
-                            value={addressForm.fullName}
-                            onChange={(e) => setAddressForm({ ...addressForm, fullName: e.target.value })}
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="phone">Phone Number</Label>
-                        <Input
-                            id="phone"
-                            placeholder="0123 456 789"
-                            value={addressForm.phone}
-                            onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })}
-                        />
-                    </div>
-                 </div>
-            </div>
-
-             {/* Address Info */}
-            <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Address Details</h4>
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={getCurrentLocation}
-                        disabled={isGettingLocation}
-                        className="h-8 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                    >
-                        {isGettingLocation ? (
-                            <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-                        ) : (
-                            <Navigation className="h-3.5 w-3.5 mr-1.5" />
-                        )}
-                        Use Current Location
-                    </Button>
-                </div>
-
-                <div className="space-y-2">
-                    <Label htmlFor="address">Street Address <span className="text-destructive">*</span></Label>
-                    <Input
-                        id="address"
-                        placeholder="House no., Street name"
-                        value={addressForm.address}
-                        onChange={(e) => setAddressForm({ ...addressForm, address: e.target.value })}
-                    />
-                </div>
-
-                <div className="grid grid-cols-3 gap-3">
-                     <div className="space-y-2">
-                        <Label htmlFor="city">City/Province</Label>
-                        <Input
-                            id="city"
-                            placeholder="City"
-                            value={addressForm.city}
-                            onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
-                        />
-                     </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="district">District</Label>
-                        <Input
-                            id="district"
-                            placeholder="District"
-                            value={addressForm.district}
-                            onChange={(e) => setAddressForm({ ...addressForm, district: e.target.value })}
-                        />
-                     </div>
-                     <div className="space-y-2">
-                         <Label htmlFor="ward">Ward</Label>
-                        <Input
-                            id="ward"
-                            placeholder="Ward"
-                            value={addressForm.ward}
-                            onChange={(e) => setAddressForm({ ...addressForm, ward: e.target.value })}
-                        />
-                     </div>
-                </div>
-            </div>
-
-            {/* Settings */}
-            <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
-                <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-background border flex items-center justify-center">
-                        <Home className="h-4 w-4 text-primary" />
-                    </div>
-                    <div>
-                        <Label htmlFor="isDefault" className="font-medium cursor-pointer">Set as Default Address</Label>
-                        <p className="text-xs text-muted-foreground">This address will be selected by default</p>
-                    </div>
-                </div>
-                <Switch
-                    id="isDefault"
-                    checked={addressForm.isDefault}
-                    onCheckedChange={(checked) => setAddressForm({ ...addressForm, isDefault: checked })}
+          {/* Personal Info */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+              Contact Info
+            </h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Full Name</Label>
+                <Input
+                  id="fullName"
+                  placeholder="John Doe"
+                  value={addressForm.fullName}
+                  onChange={(e) =>
+                    setAddressForm({ ...addressForm, fullName: e.target.value })
+                  }
                 />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  placeholder="0123 456 789"
+                  value={addressForm.phone}
+                  onChange={(e) =>
+                    setAddressForm({ ...addressForm, phone: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Address Info */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                Address Details
+              </h4>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={getCurrentLocation}
+                disabled={isGettingLocation}
+                className="h-8 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+              >
+                {isGettingLocation ? (
+                  <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                ) : (
+                  <Navigation className="h-3.5 w-3.5 mr-1.5" />
+                )}
+                Use Current Location
+              </Button>
             </div>
 
-            <DialogFooter className="gap-2 sm:gap-0">
-                <Button type="button" variant="ghost" onClick={handleClose}>Cancel</Button>
-                <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? "Saving..." : "Save Address"}
-                </Button>
-            </DialogFooter>
+            <div className="space-y-2">
+              <Label htmlFor="address">
+                Street Address <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="address"
+                placeholder="House no., Street name"
+                value={addressForm.address}
+                onChange={(e) =>
+                  setAddressForm({ ...addressForm, address: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="city">City/Province</Label>
+                <Input
+                  id="city"
+                  placeholder="City"
+                  value={addressForm.city}
+                  onChange={(e) =>
+                    setAddressForm({ ...addressForm, city: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="district">District</Label>
+                <Input
+                  id="district"
+                  placeholder="District"
+                  value={addressForm.district}
+                  onChange={(e) =>
+                    setAddressForm({ ...addressForm, district: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="ward">Ward</Label>
+                <Input
+                  id="ward"
+                  placeholder="Ward"
+                  value={addressForm.ward}
+                  onChange={(e) =>
+                    setAddressForm({ ...addressForm, ward: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Settings */}
+          <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-full bg-background border flex items-center justify-center">
+                <Home className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <Label
+                  htmlFor="isDefault"
+                  className="font-medium cursor-pointer"
+                >
+                  Set as Default Address
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  This address will be selected by default
+                </p>
+              </div>
+            </div>
+            <Switch
+              id="isDefault"
+              checked={addressForm.isDefault}
+              onCheckedChange={(checked) =>
+                setAddressForm({ ...addressForm, isDefault: checked })
+              }
+            />
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button type="button" variant="ghost" onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : "Save Address"}
+            </Button>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

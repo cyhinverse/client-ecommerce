@@ -1,6 +1,5 @@
 "use client";
-import { uploadAvatar } from "@/features/user/userAction";
-import { useAppDispatch } from "@/hooks/hooks";
+import { useUploadAvatar } from "@/hooks/queries/useProfile";
 import { useState } from "react";
 import Image from "next/image";
 import { Plus, User, Mail, MapPin, Check } from "lucide-react";
@@ -10,14 +9,14 @@ import { toast } from "sonner";
 import { Address, ProfileTabProps } from "@/types/address";
 
 export default function ProfileTab({ user }: ProfileTabProps) {
-  const dispatch = useAppDispatch();
+  const uploadAvatarMutation = useUploadAvatar();
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   const handleUploadAvatar = () => {
     const file = document.createElement("input");
     file.type = "file";
     file.accept = "image/*";
-    file.onchange = () => {
+    file.onchange = async () => {
       const selectedFile = file.files?.item(0);
       if (!selectedFile) return;
 
@@ -25,17 +24,14 @@ export default function ProfileTab({ user }: ProfileTabProps) {
       const formData = new FormData();
       formData.append("avatar", selectedFile);
 
-      dispatch(uploadAvatar(formData))
-        .unwrap()
-        .then(() => {
-          toast.success("Profile picture updated successfully");
-        })
-        .catch(() => {
-          toast.error("Failed to update profile picture");
-        })
-        .finally(() => {
-          setIsUploadingAvatar(false);
-        });
+      try {
+        await uploadAvatarMutation.mutateAsync(formData);
+        toast.success("Profile picture updated successfully");
+      } catch {
+        toast.error("Failed to update profile picture");
+      } finally {
+        setIsUploadingAvatar(false);
+      }
     };
     file.click();
   };
@@ -69,7 +65,9 @@ export default function ProfileTab({ user }: ProfileTabProps) {
           </Button>
         </div>
         <div className="space-y-1">
-          <h2 className="text-2xl font-semibold tracking-tight">{user.username}</h2>
+          <h2 className="text-2xl font-semibold tracking-tight">
+            {user.username}
+          </h2>
           <p className="text-muted-foreground text-sm">
             Member since {new Date(user.createdAt).getFullYear()}
           </p>
@@ -78,39 +76,54 @@ export default function ProfileTab({ user }: ProfileTabProps) {
 
       {/* Info Grid */}
       <div className="space-y-3">
-        <InfoRow 
-            icon={User} 
-            label="Username" 
-            value={user.username} 
-            sublabel="Your display name visible to other users"
-        />
-        
-        <InfoRow 
-            icon={Mail} 
-            label="Email Address" 
-            value={user.email}
-            sublabel="Used for sign in and notifications"
-            action={
-                user.isVerifiedEmail ? (
-                    <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100 gap-1 px-2 py-0.5 h-5 text-[10px]">
-                        <Check className="h-3 w-3" />
-                        Verified
-                    </Badge>
-                ) : (
-                    <Badge variant="outline" className="text-[10px] h-5 px-2">Unverified</Badge>
-                )
-            }
+        <InfoRow
+          icon={User}
+          label="Username"
+          value={user.username}
+          sublabel="Your display name visible to other users"
         />
 
-        <InfoRow 
-            icon={MapPin} 
-            label="Default Address" 
-            value={
-                user.addresses && user.addresses.length > 0
-                  ? `${user.addresses.find((addr: Address) => addr.isDefault)?.district || user.addresses[0]?.district}, ${user.addresses.find((addr: Address) => addr.isDefault)?.city || user.addresses[0]?.city}`
-                  : "No address set"
-            }
-            sublabel={user.addresses && user.addresses.length > 0 ? "Primary delivery location" : "Add an address to speed up checkout"}
+        <InfoRow
+          icon={Mail}
+          label="Email Address"
+          value={user.email}
+          sublabel="Used for sign in and notifications"
+          action={
+            user.isVerifiedEmail ? (
+              <Badge
+                variant="secondary"
+                className="bg-green-100 text-green-700 hover:bg-green-100 gap-1 px-2 py-0.5 h-5 text-[10px]"
+              >
+                <Check className="h-3 w-3" />
+                Verified
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="text-[10px] h-5 px-2">
+                Unverified
+              </Badge>
+            )
+          }
+        />
+
+        <InfoRow
+          icon={MapPin}
+          label="Default Address"
+          value={
+            user.addresses && user.addresses.length > 0
+              ? `${
+                  user.addresses.find((addr: Address) => addr.isDefault)
+                    ?.district || user.addresses[0]?.district
+                }, ${
+                  user.addresses.find((addr: Address) => addr.isDefault)
+                    ?.city || user.addresses[0]?.city
+                }`
+              : "No address set"
+          }
+          sublabel={
+            user.addresses && user.addresses.length > 0
+              ? "Primary delivery location"
+              : "Add an address to speed up checkout"
+          }
         />
       </div>
     </div>
@@ -125,20 +138,28 @@ interface InfoRowProps {
   action?: React.ReactNode;
 }
 
-const InfoRow = ({ icon: Icon, label, value, sublabel, action }: InfoRowProps) => (
+const InfoRow = ({
+  icon: Icon,
+  label,
+  value,
+  sublabel,
+  action,
+}: InfoRowProps) => (
   <div className="flex items-center justify-between p-4 bg-muted/50 rounded-md transition-colors duration-200 hover:bg-muted">
-      <div className="flex items-center gap-4">
-          <div className="h-10 w-10 rounded-full bg-background flex items-center justify-center text-muted-foreground">
-              <Icon className="h-5 w-5" />
-          </div>
-          <div>
-              <p className="text-sm text-muted-foreground">{label}</p>
-              <div className="flex items-center gap-2">
-                  <p className="font-medium text-foreground">{value}</p>
-                  {action}
-              </div>
-              {sublabel && <p className="text-xs text-muted-foreground mt-0.5">{sublabel}</p>}
-          </div>
+    <div className="flex items-center gap-4">
+      <div className="h-10 w-10 rounded-full bg-background flex items-center justify-center text-muted-foreground">
+        <Icon className="h-5 w-5" />
       </div>
+      <div>
+        <p className="text-sm text-muted-foreground">{label}</p>
+        <div className="flex items-center gap-2">
+          <p className="font-medium text-foreground">{value}</p>
+          {action}
+        </div>
+        {sublabel && (
+          <p className="text-xs text-muted-foreground mt-0.5">{sublabel}</p>
+        )}
+      </div>
+    </div>
   </div>
 );

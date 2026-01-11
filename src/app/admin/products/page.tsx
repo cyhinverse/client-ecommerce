@@ -1,15 +1,15 @@
 "use client";
-import { useEffect, useState, useMemo, useCallback } from "react";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { useState, useMemo, useCallback } from "react";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
 import { toast } from "sonner";
 import {
-  getAllProducts,
-  updateProduct,
-  deleteProduct,
-} from "@/features/product/productAction";
-import { getAllShops } from "@/features/shop/shopAction";
-import { Product, AdminProductFilters, Shop } from "@/types/product";
+  useProducts,
+  useUpdateProduct,
+  useDeleteProduct,
+} from "@/hooks/queries/useProducts";
+import { useAllShops } from "@/hooks/queries/useShop";
+import { Product, AdminProductFilters } from "@/types/product";
+import { Shop } from "@/types/shop";
 import { ProductsHeader } from "@/components/admin/products/ProductHeader";
 import { ProductsStats } from "@/components/admin/products/ProductStats";
 import { ProductsTable } from "@/components/admin/products/ProductTable";
@@ -18,51 +18,43 @@ import { UpdateModelProduct } from "@/components/product/forms/UpdateModelProduc
 import { ViewModelProduct } from "@/components/product/forms/ViewModelProduct";
 
 export default function AdminProductsPage() {
-  const dispatch = useAppDispatch();
-  const productState = useAppSelector((state) => state.product);
-  const shopState = useAppSelector((state) => state.shop);
+  const { data: shopsData } = useAllShops();
+  const shops: Shop[] = shopsData?.shops || [];
 
-  // Get shops list for filter
-  const shops: Shop[] = shopState.shops || [];
+  const defaultFilters = useMemo(
+    () => ({
+      page: 1,
+      limit: 10,
+      search: "",
+      category: "",
+      brand: "",
+      shop: "",
+      minPrice: null,
+      maxPrice: null,
+      isActive: null,
+    }),
+    []
+  );
 
-  const defaultFilters = useMemo(() => ({
-    page: 1,
-    limit: 10,
-    search: "",
-    category: "",
-    brand: "",
-    shop: "",
-    minPrice: null,
-    maxPrice: null,
-    isActive: null,
-  }), []);
-
-  const { filters, updateFilter, updateFilters } = useUrlFilters<AdminProductFilters>({
-    defaultFilters,
-    basePath: "/admin/products",
-  });
+  const { filters, updateFilter, updateFilters } =
+    useUrlFilters<AdminProductFilters>({
+      defaultFilters,
+      basePath: "/admin/products",
+    });
 
   const currentPage = Number(filters.page) || 1;
   const pageSize = Number(filters.limit) || 10;
 
-  const searchTerm = filters.search as string || "";
-  const selectedCategory = filters.category as string || "";
-
-  const products: Product[] = productState.all || []; 
-  const pagination = productState.pagination;
-
-  const [updateModalOpen, setUpdateModalOpen] = useState(false);
-  const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [isUpdating, setIsUpdating] = useState(false);
-
-  const selectedBrand = filters.brand as string || "";
-  const selectedShop = filters.shop as string || "";
+  const searchTerm = (filters.search as string) || "";
+  const selectedCategory = (filters.category as string) || "";
+  const selectedBrand = (filters.brand as string) || "";
+  const selectedShop = (filters.shop as string) || "";
   const selectedMinPrice = filters.minPrice as number | null;
   const selectedMaxPrice = filters.maxPrice as number | null;
   const selectedStatus = filters.isActive as boolean | null;
 
-  const fetchProducts = useCallback(() => {
+  // Build query params for React Query
+  const queryParams = useMemo(() => {
     const params: Record<string, string | number | boolean> = {
       page: currentPage,
       limit: pageSize,
@@ -76,28 +68,65 @@ export default function AdminProductsPage() {
     if (selectedMaxPrice !== null) params.maxPrice = selectedMaxPrice;
     if (selectedStatus !== null) params.isActive = selectedStatus;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    dispatch(getAllProducts(params as any));
-  }, [dispatch, currentPage, pageSize, searchTerm, selectedCategory, selectedBrand, selectedShop, selectedMinPrice, selectedMaxPrice, selectedStatus]);
+    return params;
+  }, [
+    currentPage,
+    pageSize,
+    searchTerm,
+    selectedCategory,
+    selectedBrand,
+    selectedShop,
+    selectedMinPrice,
+    selectedMaxPrice,
+    selectedStatus,
+  ]);
 
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+  const {
+    data: productsData,
+    isLoading,
+    refetch: fetchProducts,
+  } = useProducts(queryParams);
+  const products: Product[] = productsData?.products || [];
 
-  // Fetch shops for filter dropdown
-  useEffect(() => {
-    dispatch(getAllShops());
-  }, [dispatch]);
+  // Transform pagination to match PaginationData interface
+  const pagination = useMemo(() => {
+    const paginationRaw = productsData?.pagination;
+    if (!paginationRaw) return null;
+    return {
+      currentPage: paginationRaw.page,
+      pageSize: paginationRaw.limit,
+      totalPages: paginationRaw.totalPages,
+      totalItems: paginationRaw.total,
+      hasNextPage: paginationRaw.page < paginationRaw.totalPages,
+      hasPrevPage: paginationRaw.page > 1,
+      nextPage:
+        paginationRaw.page < paginationRaw.totalPages
+          ? paginationRaw.page + 1
+          : null,
+      prevPage: paginationRaw.page > 1 ? paginationRaw.page - 1 : null,
+    };
+  }, [productsData?.pagination]);
+
+  const updateProductMutation = useUpdateProduct();
+  const deleteProductMutation = useDeleteProduct();
+
+  const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handleUpdateProduct = async (id: string, productData: FormData) => {
     setIsUpdating(true);
     try {
-      await dispatch(updateProduct({ productId: id, updateData: productData })).unwrap();
+      await updateProductMutation.mutateAsync({
+        productId: id,
+        formData: productData,
+      });
       fetchProducts();
       setUpdateModalOpen(false);
       setSelectedProduct(null);
       toast.success("Cập nhật sản phẩm thành công");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error.message || "Không thể cập nhật sản phẩm");
     } finally {
@@ -108,10 +137,10 @@ export default function AdminProductsPage() {
   const handleDeleteProduct = async (product: Product) => {
     if (!confirm("Bạn có chắc muốn xóa sản phẩm này?")) return;
     try {
-      await dispatch(deleteProduct(product._id)).unwrap();
+      await deleteProductMutation.mutateAsync(product._id);
       fetchProducts();
       toast.success("Xóa sản phẩm thành công");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error.message || "Không thể xóa sản phẩm");
     }
@@ -145,52 +174,57 @@ export default function AdminProductsPage() {
 
   const totalProducts = pagination?.totalItems || 0;
   // Calculate stats based on current loaded products (or better, fetch from stats API if available)
-  const activeProducts = products.filter(p => p.isActive).length; 
+  const activeProducts = products.filter((p) => p.isActive).length;
   // Note: These client-side stats are only for the current page. ideally we want backend stats.
   // Passing these mostly as placeholders/for immediate visual feedback.
-  
-  // Calculate total categories and on sale products for the stats component
-  const totalCategories = new Set(products.map(p => typeof p.category === 'object' ? p.category?._id : p.category)).size;
-  const productsOnSale = products.filter(p => p.onSale).length;
 
+  // Calculate total categories and on sale products for the stats component
+  const totalCategories = new Set(
+    products.map((p) =>
+      typeof p.category === "object" ? p.category?._id : p.category
+    )
+  ).size;
+  const productsOnSale = products.filter((p) => p.onSale).length;
 
   // Handlers for table filters
   const handleCategoryFilterChange = (category: string) => {
-    updateFilter("category", category === 'all' ? '' : category);
+    updateFilter("category", category === "all" ? "" : category);
   };
 
   const handleBrandFilterChange = (brand: string) => {
-     updateFilters({ brand: brand === 'all' ? '' : brand, page: 1 });
+    updateFilters({ brand: brand === "all" ? "" : brand, page: 1 });
   };
 
-  const handlePriceFilterChange = (min: number | undefined, max: number | undefined) => {
-      updateFilters({ minPrice: min || null, maxPrice: max || null, page: 1 });
+  const handlePriceFilterChange = (
+    min: number | undefined,
+    max: number | undefined
+  ) => {
+    updateFilters({ minPrice: min || null, maxPrice: max || null, page: 1 });
   };
-  
+
   const handleStatusFilterChange = (status: boolean | null) => {
-      updateFilters({ isActive: status, page: 1 });
+    updateFilters({ isActive: status, page: 1 });
   };
 
   const handleShopFilterChange = (shop: string) => {
-      updateFilters({ shop: shop === 'all' ? '' : shop, page: 1 });
+    updateFilters({ shop: shop === "all" ? "" : shop, page: 1 });
   };
-
 
   return (
     <div className="space-y-8 p-1">
       <ProductsHeader onRefresh={fetchProducts} />
 
-      <ProductsStats 
-         totalProducts={totalProducts}
-         activeProducts={activeProducts}
-         productsOnSale={productsOnSale}
-         totalCategories={totalCategories}
+      <ProductsStats
+        totalProducts={totalProducts}
+        activeProducts={activeProducts}
+        productsOnSale={productsOnSale}
+        totalCategories={totalCategories}
       />
 
       <div className="space-y-6">
         <ProductsTable
           products={products}
-          isLoading={productState.isLoading}
+          isLoading={isLoading}
           searchTerm={searchTerm}
           pageSize={pageSize}
           onSearch={(val) => updateFilters({ search: val, page: 1 })}
@@ -204,7 +238,7 @@ export default function AdminProductsPage() {
           onStatusFilterChange={handleStatusFilterChange}
           onShopFilterChange={handleShopFilterChange}
           selectedCategory={selectedCategory}
-          selectedBrand={filters.brand as string || ""}
+          selectedBrand={(filters.brand as string) || ""}
           selectedShop={selectedShop || "all"}
           selectedMinPrice={filters.minPrice as number | undefined}
           selectedMaxPrice={filters.maxPrice as number | undefined}
@@ -225,7 +259,9 @@ export default function AdminProductsPage() {
         open={updateModalOpen}
         onOpenChange={handleCloseUpdateModal}
         product={selectedProduct}
-        onUpdate={(formData) => selectedProduct && handleUpdateProduct(selectedProduct._id, formData)}
+        onUpdate={(formData) =>
+          selectedProduct && handleUpdateProduct(selectedProduct._id, formData)
+        }
         isLoading={isUpdating}
       />
 

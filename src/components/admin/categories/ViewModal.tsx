@@ -27,7 +27,11 @@ import { useState } from "react";
 import Image from "next/image";
 
 const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' });
+  return new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 };
 
 interface ViewCategoryModalProps {
@@ -76,125 +80,154 @@ export function ViewCategoryModal({
         <DialogContent className="rounded-[2rem] border-border/50 bg-white/80 dark:bg-[#1C1C1E]/80 backdrop-blur-xl shadow-2xl p-6 sm:max-w-[700px] max-h-[90vh] overflow-y-auto no-scrollbar">
           <DialogHeader className="border-b border-border/50 pb-6">
             <div className="flex items-center justify-between">
-                <div>
-                    <DialogTitle className="text-2xl font-bold tracking-tight">Category Details</DialogTitle>
-                    <DialogDescription className="text-muted-foreground mt-1">
-                      Information and configuration for this category
-                    </DialogDescription>
-                </div>
-                {getStatusBadge(category.isActive)}
+              <div>
+                <DialogTitle className="text-2xl font-bold tracking-tight">
+                  Category Details
+                </DialogTitle>
+                <DialogDescription className="text-muted-foreground mt-1">
+                  Information and configuration for this category
+                </DialogDescription>
+              </div>
+              {getStatusBadge(category.isActive)}
             </div>
           </DialogHeader>
 
           <div className="space-y-6 pt-6">
             {/* Header Info */}
             <div className="p-5 rounded-2xl bg-gray-50/50 dark:bg-white/5 border border-border/50 flex items-start gap-4">
-                <div className="h-12 w-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 shrink-0">
-                    <Folder className="h-6 w-6" />
+              <div className="h-12 w-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 shrink-0">
+                <Folder className="h-6 w-6" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-foreground">
+                  {category.name}
+                </h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge
+                    variant="outline"
+                    className="rounded-md font-mono text-xs text-muted-foreground bg-white/50 border-gray-200"
+                  >
+                    {category.slug}
+                  </Badge>
                 </div>
-                <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-foreground">{category.name}</h3>
-                    <div className="flex items-center gap-2 mt-1">
-                         <Badge variant="outline" className="rounded-md font-mono text-xs text-muted-foreground bg-white/50 border-gray-200">
-                             {category.slug}
-                         </Badge>
-                    </div>
-                    {category.description && (
-                         <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-                             {category.description}
-                         </p>
-                    )}
-                </div>
+                {category.description && (
+                  <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+                    {category.description}
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* Basic Stats Grid */}
             <div className="grid grid-cols-2 gap-4">
-               <div className="p-4 rounded-2xl bg-white/40 border border-border/50 flex flex-col gap-1">
-                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Product Count</span>
-                    <div className="flex items-center gap-2">
-                        <Package className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-lg font-semibold">{category.productCount || 0}</span>
-                    </div>
-               </div>
-               <div className="p-4 rounded-2xl bg-white/40 border border-border/50 flex flex-col gap-1">
-                   <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Created Date</span>
-                    <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm font-medium">{formatDate(category.createdAt || "")}</span>
-                    </div>
-               </div>
+              <div className="p-4 rounded-2xl bg-white/40 border border-border/50 flex flex-col gap-1">
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Product Count
+                </span>
+                <div className="flex items-center gap-2">
+                  <Package className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-lg font-semibold">
+                    {category.productCount || 0}
+                  </span>
+                </div>
+              </div>
+              <div className="p-4 rounded-2xl bg-white/40 border border-border/50 flex flex-col gap-1">
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Created Date
+                </span>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">
+                    {formatDate(category.createdAt || "")}
+                  </span>
+                </div>
+              </div>
             </div>
 
             {/* Images Section */}
             <div>
-              <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">Images ({images.length})</h4>
+              <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
+                Images ({images.length})
+              </h4>
               {images.length > 0 ? (
-                 <div className="grid grid-cols-4 gap-3">
-                   {images.map((image, index) => (
-                      <div
-                        key={index}
-                        className="relative aspect-square rounded-xl overflow-hidden border border-border/50 cursor-zoom-in group bg-gray-50"
-                        onClick={() => setSelectedImage(image)}
-                      >
-                         <Image
-                           src={image}
-                           alt={`${category.name} - ${index}`}
-                           fill
-                           className="object-cover transition-transform duration-500 group-hover:scale-105"
-                           sizes="25vw"
-                         />
-                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                            <ZoomIn className="text-white opacity-0 group-hover:opacity-100 transition-opacity transform scale-75 group-hover:scale-100" />
-                         </div>
+                <div className="grid grid-cols-4 gap-3">
+                  {images.map((image, index) => (
+                    <div
+                      key={index}
+                      className="relative aspect-square rounded-xl overflow-hidden border border-border/50 cursor-zoom-in group bg-gray-50"
+                      onClick={() => setSelectedImage(image)}
+                    >
+                      <Image
+                        src={image}
+                        alt={`${category.name} - ${index}`}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        sizes="25vw"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                        <ZoomIn className="text-white opacity-0 group-hover:opacity-100 transition-opacity transform scale-75 group-hover:scale-100" />
                       </div>
-                   ))}
-                 </div>
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <div className="p-8 border-2 border-dashed border-border/50 rounded-2xl flex flex-col items-center justify-center text-muted-foreground bg-gray-50/30">
-                     <ImageIcon className="h-8 w-8 mb-2 opacity-30" />
-                     <p className="text-sm">No images uploaded</p>
+                  <ImageIcon className="h-8 w-8 mb-2 opacity-30" />
+                  <p className="text-sm">No images uploaded</p>
                 </div>
               )}
             </div>
 
             {/* Parent Category & Misc */}
             <div className="space-y-4">
-                 <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Hierarchy & Links</h4>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {category.parentCategory ? (
-                         <div className="p-4 rounded-xl border border-border/50 bg-gray-50/50 flex items-center gap-3">
-                            <div className="p-2 bg-white rounded-lg border border-border/30 shadow-sm">
-                                <Layers className="h-4 w-4 text-blue-500" />
-                            </div>
-                            <div>
-                                <p className="text-xs text-muted-foreground uppercase font-bold">Parent Category</p>
-                                <p className="font-medium text-sm">{category.parentCategory.name}</p>
-                            </div>
-                         </div>
-                    ) : (
-                        <div className="p-4 rounded-xl border border-border/50 bg-gray-50/50 flex items-center gap-3 opacity-60">
-                            <div className="p-2 bg-white rounded-lg border border-border/30">
-                                <Layers className="h-4 w-4 text-muted-foreground" />
-                            </div>
-                            <div>
-                                <p className="text-xs text-muted-foreground uppercase font-bold">Category Level</p>
-                                <p className="font-medium text-sm">Root Category</p>
-                            </div>
-                        </div>
-                    )}
-                    
-                    <div className="p-4 rounded-xl border border-border/50 bg-gray-50/50 flex items-center gap-3">
-                        <div className="p-2 bg-white rounded-lg border border-border/30 shadow-sm">
-                             <Link className="h-4 w-4 text-green-500" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-xs text-muted-foreground uppercase font-bold">Public URL</p>
-                            <p className="font-medium text-sm truncate text-blue-600 hover:underline cursor-pointer">
-                                /categories/{category.slug}
-                            </p>
-                        </div>
+              <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                Hierarchy & Links
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {category.parentCategory ? (
+                  <div className="p-4 rounded-xl border border-border/50 bg-gray-50/50 flex items-center gap-3">
+                    <div className="p-2 bg-white rounded-lg border border-border/30 shadow-sm">
+                      <Layers className="h-4 w-4 text-blue-500" />
                     </div>
-                 </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase font-bold">
+                        Parent Category
+                      </p>
+                      <p className="font-medium text-sm">
+                        {typeof category.parentCategory === "object"
+                          ? category.parentCategory.name
+                          : category.parentCategory}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-4 rounded-xl border border-border/50 bg-gray-50/50 flex items-center gap-3 opacity-60">
+                    <div className="p-2 bg-white rounded-lg border border-border/30">
+                      <Layers className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase font-bold">
+                        Category Level
+                      </p>
+                      <p className="font-medium text-sm">Root Category</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="p-4 rounded-xl border border-border/50 bg-gray-50/50 flex items-center gap-3">
+                  <div className="p-2 bg-white rounded-lg border border-border/30 shadow-sm">
+                    <Link className="h-4 w-4 text-green-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-muted-foreground uppercase font-bold">
+                      Public URL
+                    </p>
+                    <p className="font-medium text-sm truncate text-blue-600 hover:underline cursor-pointer">
+                      /categories/{category.slug}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -227,24 +260,24 @@ export function ViewCategoryModal({
           onOpenChange={() => setSelectedImage(null)}
         >
           <DialogContent className="max-w-screen-lg w-auto bg-transparent border-0 shadow-none p-0 overflow-visible flex items-center justify-center">
-             <div className="relative group">
-                <Button
-                    size="icon"
-                    className="absolute -top-12 right-0 rounded-full bg-white/20 hover:bg-white/40 text-white backdrop-blur-md border-0"
-                    onClick={() => setSelectedImage(null)}
-                >
-                    <X className="h-5 w-5" />
-                </Button>
-                <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-                    <Image
-                    src={selectedImage}
-                    alt="Zoomed"
-                    width={1000}
-                    height={1000}
-                    className="max-h-[85vh] w-auto object-contain bg-black/50 backdrop-blur-sm"
-                    />
-                </div>
-             </div>
+            <div className="relative group">
+              <Button
+                size="icon"
+                className="absolute -top-12 right-0 rounded-full bg-white/20 hover:bg-white/40 text-white backdrop-blur-md border-0"
+                onClick={() => setSelectedImage(null)}
+              >
+                <X className="h-5 w-5" />
+              </Button>
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                <Image
+                  src={selectedImage}
+                  alt="Zoomed"
+                  width={1000}
+                  height={1000}
+                  className="max-h-[85vh] w-auto object-contain bg-black/50 backdrop-blur-sm"
+                />
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       )}

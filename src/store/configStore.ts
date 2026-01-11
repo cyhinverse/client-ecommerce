@@ -3,25 +3,8 @@ import { persistStore, persistReducer } from "redux-persist";
 import createWebStorage from "redux-persist/lib/storage/createWebStorage";
 import { authSlice } from "@/features/auth/authSlice";
 import { cartSlice } from "@/features/cart/cartSlice";
-import { categorySlice } from "@/features/category/categorySlice";
-import { productSlice } from "@/features/product/productSlice";
-import { userSlice } from "@/features/user/userSlice";
-import { voucherSlice } from "@/features/voucher/voucherSlice";
-import { orderSlice } from "@/features/order/orderSlice";
-import { paymentSlice } from "@/features/payment/paymentSlice";
-import { notificationSlice } from "@/features/notification/notificationSlice";
-import { reviewSlice } from "@/features/reviews/reviewSlice";
-import { statisticsSlice } from "@/features/statistics/statisticsSlice";
-import { bannerSlice } from "@/features/banner/bannerSlice";
 import { chatSlice } from "@/features/chat/chatSlice";
-import { shopSlice } from "@/features/shop/shopSlice";
 import { shippingSlice } from "@/features/shipping/shippingSlice";
-import { shopCategorySlice } from "@/features/shopCategory/shopCategorySlice";
-// New feature slices
-import { wishlistSlice } from "@/features/wishlist/wishlistSlice";
-import { searchSlice } from "@/features/search/searchSlice";
-import { flashSaleSlice } from "@/features/flash-sale/flashSaleSlice";
-import { recommendationSlice } from "@/features/recommendation/recommendationSlice";
 import { injectStore } from "@/api/api";
 
 const createNoopStorage = () => {
@@ -45,32 +28,15 @@ const storage =
 
 export const rootReducer = combineReducers({
   auth: authSlice.reducer,
-  category: categorySlice.reducer,
   cart: cartSlice.reducer,
-  user: userSlice.reducer,
-  product: productSlice.reducer,
-  voucher: voucherSlice.reducer,
-  order: orderSlice.reducer,
-  payment: paymentSlice.reducer,
-  notification: notificationSlice.reducer,
-  reviews: reviewSlice.reducer,
-  statistics: statisticsSlice.reducer,
-  banner: bannerSlice.reducer,
   chat: chatSlice.reducer,
-  shop: shopSlice.reducer,
   shipping: shippingSlice.reducer,
-  shopCategory: shopCategorySlice.reducer,
-  // New features
-  wishlist: wishlistSlice.reducer,
-  search: searchSlice.reducer,
-  flashSale: flashSaleSlice.reducer,
-  recommendation: recommendationSlice.reducer,
 });
 
 const persistConfig = {
   key: "root_ecommerce_v1",
   storage,
-  whitelist: ["auth", "cart", "order"],
+  whitelist: ["auth", "cart"],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

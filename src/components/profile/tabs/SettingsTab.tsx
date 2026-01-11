@@ -1,12 +1,6 @@
 "use client";
 import { useState } from "react";
-import {
-  changePassword,
-  //   verifyEmail,
-  //   enableTwoFactor,
-  //   verifyTwoFactor,
-} from "@/features/user/userAction";
-import { useAppDispatch } from "@/hooks/hooks";
+import { useChangePassword } from "@/hooks/queries/useProfile";
 import { Shield, Key, Eye, EyeOff, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +16,7 @@ interface SettingsTabProps {
 }
 
 export default function SettingsTab({ user }: SettingsTabProps) {
-  const dispatch = useAppDispatch();
+  const changePasswordMutation = useChangePassword();
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -73,12 +67,10 @@ export default function SettingsTab({ user }: SettingsTabProps) {
     }
 
     try {
-      await dispatch(
-        changePassword({
-          oldPassword: passwordData.currentPassword,
-          newPassword: passwordData.newPassword,
-        })
-      ).unwrap();
+      await changePasswordMutation.mutateAsync({
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      });
 
       toast.success("Password changed successfully");
       setPasswordData({
@@ -212,7 +204,12 @@ export default function SettingsTab({ user }: SettingsTabProps) {
               <form onSubmit={handlePasswordChange} className="space-y-4">
                 <div className="grid gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="currentPassword" className="text-sm font-medium">Current Password</Label>
+                    <Label
+                      htmlFor="currentPassword"
+                      className="text-sm font-medium"
+                    >
+                      Current Password
+                    </Label>
                     <div className="relative">
                       <Input
                         id="currentPassword"
@@ -241,7 +238,12 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="newPassword" className="text-sm font-medium">New Password</Label>
+                      <Label
+                        htmlFor="newPassword"
+                        className="text-sm font-medium"
+                      >
+                        New Password
+                      </Label>
                       <div className="relative">
                         <Input
                           id="newPassword"
@@ -269,7 +271,12 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirm Password</Label>
+                      <Label
+                        htmlFor="confirmPassword"
+                        className="text-sm font-medium"
+                      >
+                        Confirm Password
+                      </Label>
                       <div className="relative">
                         <Input
                           id="confirmPassword"
@@ -322,7 +329,9 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                     <Shield className="h-5 w-5" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-base">Two-Factor Authentication</h4>
+                    <h4 className="font-medium text-base">
+                      Two-Factor Authentication
+                    </h4>
                     <p className="text-xs text-muted-foreground">
                       Add an extra layer of security to your account.
                     </p>
@@ -336,7 +345,10 @@ export default function SettingsTab({ user }: SettingsTabProps) {
 
               {showVerificationInput && (
                 <div className="mt-5 p-4 bg-background rounded-md border border-border">
-                  <Label htmlFor="verificationCode" className="mb-2 block text-sm font-medium">
+                  <Label
+                    htmlFor="verificationCode"
+                    className="mb-2 block text-sm font-medium"
+                  >
                     Enter the 6-digit code from your app
                   </Label>
                   <div className="flex gap-2">
@@ -379,7 +391,9 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h4 className="font-medium text-base">Email Verification</h4>
+                      <h4 className="font-medium text-base">
+                        Email Verification
+                      </h4>
                       {user?.isVerifiedEmail ? (
                         <Badge
                           variant="secondary"

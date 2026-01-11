@@ -1,53 +1,33 @@
-import { Shop, Price, Variant } from "./product";
+import { BaseEntity } from "./common";
+import { Product, Price, Variant } from "./product";
+import { Shop } from "./shop";
 
-// Product info in cart item
-interface CartProduct {
-  _id: string;
-  name: string;
-  slug: string;
-  category?: {
-    _id: string;
-    name: string;
-    slug: string;
-  };
-  images: string[];
-  price?: Price;
-  isActive: boolean;
-  // NEW: variants for getting images
-  variants?: Variant[];
-}
+// Price type for cart item - can be number (old) or object (new)
+// Matches backend Schema.Types.Mixed
+export type CartItemPrice = number | Price;
 
-// Variant info in cart item (populated from server)
-interface CartVariant {
-  _id: string;
-  name: string;
-  color?: string;
-  images?: string[];
-  price?: number;
-  stock?: number;
-}
-
-// Cart item interface - Updated with new structure
+// Cart item interface - matches backend itemSchema
 export interface CartItem {
   _id: string;
-  productId: CartProduct | string | null;  // Can be null if product was deleted
-  shopId: Shop | string;      // NEW: for grouping by shop
-  modelId?: string;           // NEW: replaces variantId
-  variantId?: string;         // Variant ID reference
-  variant?: CartVariant;      // Populated variant info
-  size?: string;              // Selected size
+  productId: Product | string; // Populated or ID
+  shopId?: Shop | string; // Optional for backward compatibility
+
+  // Variations
+  modelId?: string; // OLD: refers to product.models._id
+  variantId?: string; // NEW: refers to product.variants._id (color variant)
+  variant?: Variant; // Populated variant info (frontend only)
+  size?: string; // NEW: Product-level size selection
+
   quantity: number;
-  price: {
-    currentPrice: number;
-    discountPrice?: number;
-    currency: string;
-  };
-  // Variation info (derived from tierIndex)
-  variationInfo?: string;     // e.g. "Color: Red, Size: M"
+
+  // Price can be Number (old) or Object (new) - Schema.Types.Mixed
+  price?: CartItemPrice;
+
+  // Frontend/UI only
   selected?: boolean;
 }
 
-// NEW: Cart items grouped by shop
+// Items grouped by shop (Frontend helper)
 export interface CartItemsByShop {
   shop: Shop;
   items: CartItem[];
@@ -55,16 +35,12 @@ export interface CartItemsByShop {
   itemCount: number;
 }
 
-// Cart interface
-export interface Cart {
-  _id?: string;
+// Cart interface - matches backend cartSchema
+export interface Cart extends BaseEntity {
   userId: string;
   items: CartItem[];
-  totalAmount?: number;
-  cartCount?: number;
-  createdAt?: string;
-  updatedAt?: string;
-  __v?: number;
+  totalAmount: number;
+  cartCount: number;
 }
 
 // Cart state for Redux
@@ -74,77 +50,115 @@ export interface CartState {
   error: string | null;
   selectedItems: CartItem[];
   checkoutTotal: number;
-  // NEW: Items grouped by shop for display
-  itemsByShop?: CartItemsByShop[];
-}
-
-// Helper function to group cart items by shop
-export function groupCartItemsByShop(items: CartItem[]): CartItemsByShop[] {
-  const shopMap = new Map<string, CartItemsByShop>();
-  const DEFAULT_SHOP_ID = 'default-shop';
-  
-  items.forEach(item => {
-    let shopId: string | undefined;
-    let shop: Shop;
-    
-    // Priority 1: Get shop from productId.shop (populated with full info)
-    if (typeof item.productId === 'object' && (item.productId as any).shop) {
-      const productShop = (item.productId as any).shop;
-      if (typeof productShop === 'object' && productShop?.name) {
-        shopId = productShop._id;
-        shop = productShop as Shop;
-      } else {
-        shopId = typeof productShop === 'string' ? productShop : productShop?._id;
-        shop = { _id: shopId || DEFAULT_SHOP_ID, name: 'Shop' } as Shop;
-      }
-    }
-    // Priority 2: Get from item.shopId (populated)
-    else if (item.shopId && typeof item.shopId === 'object' && (item.shopId as Shop)?.name) {
-      shopId = (item.shopId as Shop)._id;
-      shop = item.shopId as Shop;
-    }
-    // Priority 3: item.shopId is string
-    else if (item.shopId && typeof item.shopId === 'string') {
-      shopId = item.shopId;
-      shop = { _id: shopId, name: 'Shop' } as Shop;
-    }
-    // Default
-    else {
-      shopId = DEFAULT_SHOP_ID;
-      shop = { _id: DEFAULT_SHOP_ID, name: 'Shop' } as Shop;
-    }
-
-    const resolvedShopId = shopId || DEFAULT_SHOP_ID;
-    
-    if (!shopMap.has(resolvedShopId)) {
-      shopMap.set(resolvedShopId, {
-        shop,
-        items: [],
-        subtotal: 0,
-        itemCount: 0
-      });
-    }
-    
-    const group = shopMap.get(resolvedShopId)!;
-    group.items.push(item);
-    group.subtotal += (item.price?.discountPrice || item.price?.currentPrice || 0) * item.quantity;
-    group.itemCount += item.quantity;
-  });
-  
-  return Array.from(shopMap.values());
+  itemsByShop?: CartItemsByShop[]; // Derived state
 }
 
 // Add to cart payload
 export interface AddToCartPayload {
   productId: string;
   shopId: string;
+  variantId?: string;
   modelId?: string;
   quantity: number;
-  size?: string;  // Product-level size selection
+  size?: string;
 }
 
 // Update cart item payload
 export interface UpdateCartItemPayload {
   itemId: string;
   quantity: number;
+}
+
+// Helper to get price value from CartItemPrice (handles both number and object)
+export function getCartItemPriceValue(price: CartItemPrice | undefined): number {
+  if (price === undefined) return 0;
+  if (typeof price === "number") return price;
+  return price.discountPrice ?? price.currentPrice;
+}
+
+// Helper function to group cart items by shop
+export function groupCartItemsByShop(items: CartItem[]): CartItemsByShop[] {
+  const shopMap = new Map<string, CartItemsByShop>();
+  const DEFAULT_SHOP_ID = "default-shop";
+
+  items.forEach((item) => {
+    let shopId: string | undefined;
+    let shop: Shop;
+
+    // 1. Try to get shop from populated productId
+    if (
+      typeof item.productId === "object" &&
+      item.productId !== null &&
+      "shop" in item.productId
+    ) {
+      const productShop = item.productId.shop;
+      if (
+        typeof productShop === "object" &&
+        productShop !== null &&
+        "name" in productShop
+      ) {
+        shopId = productShop._id;
+        shop = productShop as Shop;
+      } else if (typeof productShop === "string") {
+        shopId = productShop;
+        shop = { _id: shopId, name: "Shop" } as unknown as Shop; // Placeholder
+      }
+    }
+
+    // 2. Try to get from item.shopId (populated)
+    if (
+      !shopId &&
+      typeof item.shopId === "object" &&
+      item.shopId !== null &&
+      "name" in item.shopId
+    ) {
+      shopId = item.shopId._id;
+      shop = item.shopId as Shop;
+    }
+
+    // 3. Try to get from item.shopId (string)
+    if (!shopId && typeof item.shopId === "string") {
+      shopId = item.shopId;
+      shop = { _id: shopId, name: "Shop" } as unknown as Shop;
+    }
+
+    if (!shopId) {
+      shopId = DEFAULT_SHOP_ID;
+      shop = { _id: DEFAULT_SHOP_ID, name: "Shop" } as unknown as Shop;
+    }
+
+    // Cast strict for map key
+    const resolvedShopId = shopId!;
+
+    if (!shopMap.has(resolvedShopId)) {
+      shopMap.set(resolvedShopId, {
+        shop,
+        items: [],
+        subtotal: 0,
+        itemCount: 0,
+      });
+    }
+
+    const group = shopMap.get(resolvedShopId)!;
+    group.items.push(item);
+
+    // Calculate price - handle both number and object price types
+    let price = 0;
+    if (item.price !== undefined) {
+      price = getCartItemPriceValue(item.price);
+    } else if (
+      typeof item.productId === "object" &&
+      "price" in item.productId &&
+      item.productId.price
+    ) {
+      // Fallback to live product price
+      price =
+        item.productId.price.discountPrice || item.productId.price.currentPrice;
+    }
+
+    group.subtotal += price * item.quantity;
+    group.itemCount += item.quantity;
+  });
+
+  return Array.from(shopMap.values());
 }

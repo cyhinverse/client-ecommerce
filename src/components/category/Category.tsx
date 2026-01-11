@@ -1,7 +1,6 @@
 "use client";
-import React, { useEffect, useRef } from "react";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { getTreeCategories } from "@/features/category/categoryAction";
+import React, { useRef } from "react";
+import { useCategoryTree } from "@/hooks/queries/useCategories";
 import { cn } from "@/lib/utils";
 import {
   Heart,
@@ -58,13 +57,8 @@ export default function Category({
   onSelectCategory,
   selectedSlug,
 }: CategoryProps) {
-  const dispatch = useAppDispatch();
-  const { categories } = useAppSelector((state) => state.category);
+  const { data: categories } = useCategoryTree();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    dispatch(getTreeCategories());
-  }, [dispatch]);
 
   const scrollRight = () => {
     if (scrollContainerRef.current) {
@@ -124,7 +118,7 @@ export default function Category({
                       : "text-muted-foreground group-hover:text-primary"
                   )}
                 >
-                  {getIcon(cat.slug ?? '')}
+                  {getIcon(cat.slug ?? "")}
                 </span>
 
                 <span

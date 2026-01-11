@@ -1,0 +1,67 @@
+/**
+ * Payment React Query Hooks
+ * Replaces paymentAction.ts async thunks with React Query
+ */
+import { useMutation, useQuery } from "@tanstack/react-query";
+import instance from "@/api/api";
+import { extractApiData, extractApiError } from "@/utils/api";
+import { paymentKeys } from "@/lib/queryKeys";
+
+// ============ Types ============
+export interface PaymentUrlResponse {
+  paymentUrl: string;
+}
+
+export interface PaymentDetails {
+  _id: string;
+  orderId: string;
+  amount: number;
+  status: string;
+  method: string;
+  transactionId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ============ API Functions ============
+const paymentApi = {
+  createUrl: async (orderId: string): Promise<PaymentUrlResponse> => {
+    const response = await instance.post("/payment/create", { orderId });
+    return extractApiData(response);
+  },
+
+  getByOrder: async (orderId: string): Promise<PaymentDetails> => {
+    const response = await instance.get(`/payment/order/${orderId}`);
+    return extractApiData(response);
+  },
+};
+
+// ============ Query Hooks ============
+
+/**
+ * Get payment details by order ID
+ */
+export function usePaymentByOrder(
+  orderId: string,
+  options?: { enabled?: boolean }
+) {
+  return useQuery({
+    queryKey: [...paymentKeys.all, "order", orderId] as const,
+    queryFn: () => paymentApi.getByOrder(orderId),
+    enabled: options?.enabled ?? !!orderId,
+  });
+}
+
+// ============ Mutation Hooks ============
+
+/**
+ * Create VNPay payment URL
+ */
+export function useCreatePaymentUrl() {
+  return useMutation({
+    mutationFn: paymentApi.createUrl,
+    onError: (error) => {
+      console.error("Create payment URL failed:", extractApiError(error));
+    },
+  });
+}

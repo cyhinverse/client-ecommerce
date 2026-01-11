@@ -1,6 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { useState } from "react";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
 import { toast } from "sonner";
 import { UsersHeader } from "@/components/admin/users/UsersHeader";
@@ -11,17 +10,14 @@ import { CreateModelUser } from "@/components/admin/users/CreateModelUser";
 import { UpdateModelUser } from "@/components/admin/users/UpdateModelUser";
 import { ViewModelUser } from "@/components/admin/users/ViewModelUser";
 import {
-  getAllUsers,
-  deleteUser,
-  updateUser,
-  createUser,
-} from "@/features/user/userAction";
+  useAllUsers,
+  useCreateUser,
+  useUpdateUser,
+  useDeleteUser,
+} from "@/hooks/queries";
 import { User, UserFilters } from "@/types/user";
 
 export default function AdminUsersPage() {
-  const dispatch = useAppDispatch();
-  const userState = useAppSelector((state) => state.user);
-
   // Use URL filters hook
   const { filters, updateFilter, updateFilters } = useUrlFilters<UserFilters>({
     defaultFilters: {
@@ -40,40 +36,31 @@ export default function AdminUsersPage() {
   const searchTerm = filters.search as string;
   const selectedRole = filters.role as string;
   const selectedVerified = filters.isVerifiedEmail as boolean | null;
-  const users: User[] = userState.user || [];
-  const pagination = userState.pagination;
+
+  // Build query params
+  const queryParams = {
+    page: currentPage,
+    limit: pageSize,
+    ...(searchTerm &&
+      searchTerm.trim() !== "" && { search: searchTerm.trim() }),
+    ...(selectedRole &&
+      selectedRole.trim() !== "" && { role: selectedRole.trim() }),
+    ...(selectedVerified !== null && { isVerifiedEmail: selectedVerified }),
+  };
+
+  // React Query hooks
+  const { data: usersData, isLoading, error } = useAllUsers(queryParams);
+  const createMutation = useCreateUser();
+  const updateMutation = useUpdateUser();
+  const deleteMutation = useDeleteUser();
+
+  const users: User[] = usersData?.users || [];
+  const pagination = usersData?.pagination || null;
+
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
-
-  // Fetch users with current filters
-  const fetchUsers = () => {
-    const params: Record<string, string | number | boolean> = {
-      page: currentPage,
-      limit: pageSize,
-    };
-
-    if (searchTerm && searchTerm.trim() !== "") {
-      params.search = searchTerm.trim();
-    }
-    if (selectedRole && selectedRole.trim() !== "") {
-      params.role = selectedRole.trim();
-    }
-    if (selectedVerified !== null) {
-      params.isVerifiedEmail = selectedVerified;
-    }
-
-    dispatch(getAllUsers(params));
-  };
-
-  // Fetch users when filters change
-  useEffect(() => {
-    fetchUsers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, pageSize, searchTerm, selectedRole, selectedVerified]);
 
   // ============= Event Handlers =============
 
@@ -81,29 +68,23 @@ export default function AdminUsersPage() {
     setCreateModalOpen(true);
   };
 
-  const handleCreateUser = async (userData: Partial<User>) => {
-    setIsCreating(true);
+  const handleCreateUser = async (userData: any) => {
     try {
-      await dispatch(
-        createUser(
-          userData as {
-            name: string;
-            email: string;
-            phone: string;
-            roles: string;
-            isVerifiedEmail: boolean;
-          }
-        )
-      ).unwrap();
-      fetchUsers();
+      await createMutation.mutateAsync(
+        userData as {
+          name: string;
+          email: string;
+          phone: string;
+          roles: string;
+          isVerifiedEmail: boolean;
+        }
+      );
       setCreateModalOpen(false);
       toast.success("User created successfully");
     } catch (error) {
       const err = error as Error;
       console.error("Create user error:", err);
       toast.error(err?.message || "Error creating user. Please try again.");
-    } finally {
-      setIsCreating(false);
     }
   };
 
@@ -121,34 +102,26 @@ export default function AdminUsersPage() {
   const handleCloseEditModal = () => {
     setUpdateModalOpen(false);
     setSelectedUser(null);
-    setIsUpdating(false);
   };
 
-  const handleUpdateUser = async (userData: Partial<User> & { permissions?: string[] }) => {
+  const handleUpdateUser = async (userData: any) => {
     if (!selectedUser) return;
 
-    setIsUpdating(true);
     try {
-      await dispatch(
-        updateUser({
-          id: selectedUser._id,
-          username: userData.username || selectedUser.username,
-          email: userData.email || selectedUser.email,
-          isVerifiedEmail: userData.isVerifiedEmail ?? selectedUser.isVerifiedEmail,
-          roles: userData.roles || selectedUser.roles,
-          permissions: userData.permissions,
-        })
-      ).unwrap();
-      fetchUsers();
+      await updateMutation.mutateAsync({
+        id: selectedUser._id,
+        username: userData.username || selectedUser.username,
+        email: userData.email || selectedUser.email,
+        isVerifiedEmail:
+          userData.isVerifiedEmail ?? selectedUser.isVerifiedEmail,
+        roles: userData.roles || selectedUser.roles,
+        permissions: userData.permissions,
+      });
       handleCloseEditModal();
       toast.success("User updated successfully");
     } catch (error) {
       const err = error as Error;
-      toast.error(
-        err?.message || "Failed to update user. Please try again."
-      );
-    } finally {
-      setIsUpdating(false);
+      toast.error(err?.message || "Failed to update user. Please try again.");
     }
   };
 
@@ -181,8 +154,7 @@ export default function AdminUsersPage() {
 
   const handleDeleteUser = async (user: User) => {
     try {
-      await dispatch(deleteUser(user._id)).unwrap();
-      fetchUsers();
+      await deleteMutation.mutateAsync(user._id);
       toast.success("User deleted successfully");
     } catch {
       toast.error("Failed to delete user. Please try again.");
@@ -211,10 +183,12 @@ export default function AdminUsersPage() {
     }
   }).length;
 
-  if (userState.error) {
+  if (error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-destructive">Error: {userState.error}</div>
+        <div className="text-destructive">
+          Error: {(error as Error).message}
+        </div>
       </div>
     );
   }
@@ -232,52 +206,52 @@ export default function AdminUsersPage() {
         recentUsers={recentUsers}
       />
 
-       {/* Main Content Area */}
-        <UsersTable
-            users={users}
-            searchTerm={searchTerm}
-            pageSize={pageSize}
-            isLoading={userState.isLoading}
-            onSearch={handleSearch}
-            onPageSizeChange={handlePageSizeChange}
-            onEdit={handleEditUser}
-            onDelete={handleDeleteUser}
-            onView={handleViewUser}
-            onRoleFilterChange={handleRoleFilterChange}
-            onVerifiedFilterChange={handleVerifiedFilterChange}
-            selectedRole={selectedRole}
-            selectedVerified={selectedVerified}
-          />
+      {/* Main Content Area */}
+      <UsersTable
+        users={users}
+        searchTerm={searchTerm}
+        pageSize={pageSize}
+        isLoading={isLoading}
+        onSearch={handleSearch}
+        onPageSizeChange={handlePageSizeChange}
+        onEdit={handleEditUser}
+        onDelete={handleDeleteUser}
+        onView={handleViewUser}
+        onRoleFilterChange={handleRoleFilterChange}
+        onVerifiedFilterChange={handleVerifiedFilterChange}
+        selectedRole={selectedRole}
+        selectedVerified={selectedVerified}
+      />
 
-          <div className="mt-6">
-            <PaginationControls
-              pagination={pagination}
-              onPageChange={handlePageChange}
-              itemName="users"
-            />
-          </div>
+      <div className="mt-6">
+        <PaginationControls
+          pagination={pagination}
+          onPageChange={handlePageChange}
+          itemName="users"
+        />
+      </div>
 
-          <CreateModelUser
-            open={createModalOpen}
-            onOpenChange={setCreateModalOpen}
-            onCreate={handleCreateUser}
-            isLoading={isCreating}
-          />
+      <CreateModelUser
+        open={createModalOpen}
+        onOpenChange={setCreateModalOpen}
+        onCreate={handleCreateUser}
+        isLoading={createMutation.isPending}
+      />
 
-          <ViewModelUser
-            open={viewModalOpen}
-            onOpenChange={handleCloseModals}
-            user={selectedUser}
-            onEdit={handleEditFromView}
-          />
+      <ViewModelUser
+        open={viewModalOpen}
+        onOpenChange={handleCloseModals}
+        user={selectedUser}
+        onEdit={handleEditFromView}
+      />
 
-          <UpdateModelUser
-            open={updateModalOpen}
-            onOpenChange={handleCloseEditModal}
-            user={selectedUser}
-            onUpdate={handleUpdateUser}
-            isLoading={isUpdating}
-          />
+      <UpdateModelUser
+        open={updateModalOpen}
+        onOpenChange={handleCloseEditModal}
+        user={selectedUser}
+        onUpdate={handleUpdateUser}
+        isLoading={updateMutation.isPending}
+      />
     </div>
   );
 }

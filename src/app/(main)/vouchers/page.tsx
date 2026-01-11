@@ -1,64 +1,77 @@
 // VoucherPage - Taobao Light Style
 "use client";
-import { useState, useEffect } from "react";
-import { Ticket, Store, Clock, Check, ChevronRight, Filter, Loader2 } from "lucide-react";
+import { useState } from "react";
+import {
+  Ticket,
+  Store,
+  Clock,
+  Check,
+  ChevronRight,
+  Filter,
+  Loader2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { getAllVouchers, getAvailableVouchers } from "@/features/voucher/voucherAction";
+import { useVouchers } from "@/hooks/queries";
+import { useAppSelector } from "@/hooks/hooks";
 import { Voucher as VoucherType } from "@/types/voucher";
-import { Shop } from "@/types/product";
+import { Shop } from "@/types/shop";
 
 // Extended voucher interface for UI state
-interface Voucher extends Omit<VoucherType, 'shopId'> {
+interface Voucher extends Omit<VoucherType, "shopId"> {
   shopId?: { _id: string; name: string; logo?: string } | string | Shop;
   isCollected?: boolean;
 }
 
 // Helper to get shop info from voucher
-const getShopInfo = (shopId: Voucher['shopId']): { _id: string; name: string; logo?: string } | undefined => {
+const getShopInfo = (
+  shopId: Voucher["shopId"]
+): { _id: string; name: string; logo?: string } | undefined => {
   if (!shopId) return undefined;
-  if (typeof shopId === 'string') return { _id: shopId, name: 'Shop', logo: undefined };
-  if ('name' in shopId) return { _id: shopId._id, name: shopId.name, logo: (shopId as any).logo };
+  if (typeof shopId === "string")
+    return { _id: shopId, name: "Shop", logo: undefined };
+  if ("name" in shopId)
+    return { _id: shopId._id, name: shopId.name, logo: (shopId as any).logo };
   return undefined;
 };
 
 export default function VouchersPage() {
-  const dispatch = useAppDispatch();
-  const { vouchers: reduxVouchers, loading } = useAppSelector((state) => state.voucher);
   const { isAuthenticated } = useAppSelector((state) => state.auth);
-  
+
   const [collectedIds, setCollectedIds] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState("all");
-  const [filterType, setFilterType] = useState<"all" | "percentage" | "fixed_amount">("all");
+  const [filterType, setFilterType] = useState<
+    "all" | "percentage" | "fixed_amount"
+  >("all");
 
-  // Fetch vouchers on mount
-  useEffect(() => {
-    dispatch(getAllVouchers({ isActive: true }));
-  }, [dispatch]);
+  // Fetch vouchers using React Query
+  const { data: vouchersData, isLoading } = useVouchers({ isActive: true });
+  const reduxVouchers = vouchersData?.vouchers || [];
 
   // Map redux vouchers to UI vouchers with collected state
-  const vouchers: Voucher[] = reduxVouchers.map(v => ({
+  const vouchers: Voucher[] = reduxVouchers.map((v) => ({
     ...v,
     isCollected: collectedIds.has(v._id),
   }));
 
   const handleCollectVoucher = (voucherId: string) => {
-    setCollectedIds(prev => new Set(prev).add(voucherId));
+    setCollectedIds((prev) => new Set(prev).add(voucherId));
     toast.success("Đã lưu voucher thành công!");
   };
 
-  const filteredVouchers = vouchers.filter(v => {
+  const filteredVouchers = vouchers.filter((v) => {
     if (activeTab === "platform" && v.scope !== "platform") return false;
     if (activeTab === "shop" && v.scope !== "shop") return false;
     if (filterType !== "all" && v.type !== filterType) return false;
     return true;
   });
 
-  const platformVouchers = filteredVouchers.filter(v => v.scope === "platform");
-  const shopVouchers = filteredVouchers.filter(v => v.scope === "shop");
+  const platformVouchers = filteredVouchers.filter(
+    (v) => v.scope === "platform"
+  );
+  const shopVouchers = filteredVouchers.filter((v) => v.scope === "shop");
 
   // Group shop vouchers by shop
   const shopVouchersByShop = shopVouchers.reduce((acc, voucher) => {
@@ -75,7 +88,7 @@ export default function VouchersPage() {
   }, {} as Record<string, { shop: ReturnType<typeof getShopInfo>; vouchers: Voucher[] }>);
 
   // Loading state
-  if (loading && vouchers.length === 0) {
+  if (isLoading && vouchers.length === 0) {
     return (
       <div className="min-h-screen bg-background py-4 -mt-4 -mx-4 px-4 flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-[#E53935]" />
@@ -111,19 +124,19 @@ export default function VouchersPage() {
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="bg-white rounded border border-[#f0f0f0] p-1 mb-4 w-full justify-start">
-            <TabsTrigger 
-              value="all" 
+            <TabsTrigger
+              value="all"
               className="data-[state=active]:bg-[#FFEBEE] data-[state=active]:text-[#E53935]"
             >
               Tất cả
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="platform"
               className="data-[state=active]:bg-[#FFEBEE] data-[state=active]:text-[#E53935]"
             >
               Voucher nền tảng
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="shop"
               className="data-[state=active]:bg-[#FFEBEE] data-[state=active]:text-[#E53935]"
             >
@@ -141,9 +154,9 @@ export default function VouchersPage() {
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {platformVouchers.map((voucher) => (
-                    <VoucherCard 
-                      key={voucher._id} 
-                      voucher={voucher} 
+                    <VoucherCard
+                      key={voucher._id}
+                      voucher={voucher}
                       onCollect={handleCollectVoucher}
                     />
                   ))}
@@ -161,13 +174,15 @@ export default function VouchersPage() {
                 {Object.values(shopVouchersByShop).map((group) => (
                   <div key={group.shop?._id} className="mb-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm text-gray-800 font-medium">{group.shop?.name}</span>
+                      <span className="text-sm text-gray-800 font-medium">
+                        {group.shop?.name}
+                      </span>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {group.vouchers.map((voucher) => (
-                        <VoucherCard 
-                          key={voucher._id} 
-                          voucher={voucher} 
+                        <VoucherCard
+                          key={voucher._id}
+                          voucher={voucher}
                           onCollect={handleCollectVoucher}
                         />
                       ))}
@@ -181,9 +196,9 @@ export default function VouchersPage() {
           <TabsContent value="platform" className="mt-0">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {platformVouchers.map((voucher) => (
-                <VoucherCard 
-                  key={voucher._id} 
-                  voucher={voucher} 
+                <VoucherCard
+                  key={voucher._id}
+                  voucher={voucher}
                   onCollect={handleCollectVoucher}
                 />
               ))}
@@ -194,13 +209,15 @@ export default function VouchersPage() {
             {Object.values(shopVouchersByShop).map((group) => (
               <div key={group.shop?._id} className="mb-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-sm text-gray-800 font-medium">{group.shop?.name}</span>
+                  <span className="text-sm text-gray-800 font-medium">
+                    {group.shop?.name}
+                  </span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {group.vouchers.map((voucher) => (
-                    <VoucherCard 
-                      key={voucher._id} 
-                      voucher={voucher} 
+                    <VoucherCard
+                      key={voucher._id}
+                      voucher={voucher}
                       onCollect={handleCollectVoucher}
                     />
                   ))}
@@ -215,21 +232,23 @@ export default function VouchersPage() {
 }
 
 // VoucherCard Component
-function VoucherCard({ 
-  voucher, 
-  onCollect 
-}: { 
-  voucher: Voucher; 
+function VoucherCard({
+  voucher,
+  onCollect,
+}: {
+  voucher: Voucher;
   onCollect: (id: string) => void;
 }) {
   const formatValue = () => {
     if (voucher.type === "percentage") {
       return `${voucher.value}%`;
     }
-    return `₫${voucher.value.toLocaleString('vi-VN')}`;
+    return `₫${voucher.value.toLocaleString("vi-VN")}`;
   };
 
-  const usagePercent = Math.round((voucher.usageCount / voucher.usageLimit) * 100);
+  const usagePercent = Math.round(
+    (voucher.usageCount / voucher.usageLimit) * 100
+  );
 
   return (
     <motion.div
@@ -239,9 +258,13 @@ function VoucherCard({
     >
       {/* Left - Value */}
       <div className="w-[100px] bg-[#FFEBEE] flex flex-col items-center justify-center p-3 border-r border-dashed border-[#FFCDD2]">
-        <span className="text-2xl font-bold text-[#E53935]">{formatValue()}</span>
+        <span className="text-2xl font-bold text-[#E53935]">
+          {formatValue()}
+        </span>
         <span className="text-[10px] text-[#E53935] mt-0.5">
-          {voucher.type === "percentage" ? `Tối đa ₫${(voucher.maxValue || 0).toLocaleString('vi-VN')}` : "Giảm trực tiếp"}
+          {voucher.type === "percentage"
+            ? `Tối đa ₫${(voucher.maxValue || 0).toLocaleString("vi-VN")}`
+            : "Giảm trực tiếp"}
         </span>
       </div>
 
@@ -249,8 +272,12 @@ function VoucherCard({
       <div className="flex-1 p-3 flex flex-col">
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="font-medium text-gray-800 text-sm">{voucher.name}</h3>
-            <p className="text-xs text-gray-500 mt-0.5">{voucher.description}</p>
+            <h3 className="font-medium text-gray-800 text-sm">
+              {voucher.name}
+            </h3>
+            <p className="text-xs text-gray-500 mt-0.5">
+              {voucher.description}
+            </p>
           </div>
           {voucher.scope === "shop" && (
             <span className="text-[10px] text-[#E53935] border border-[#E53935] px-1 py-0.5 rounded shrink-0">
@@ -261,22 +288,26 @@ function VoucherCard({
 
         <div className="mt-auto pt-2">
           <div className="flex items-center justify-between text-[11px] text-gray-400 mb-1">
-            <span>Đơn tối thiểu ₫{voucher.minOrderValue.toLocaleString('vi-VN')}</span>
+            <span>
+              Đơn tối thiểu ₫{voucher.minOrderValue.toLocaleString("vi-VN")}
+            </span>
             <span className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
-              HSD: {new Date(voucher.endDate).toLocaleDateString('vi-VN')}
+              HSD: {new Date(voucher.endDate).toLocaleDateString("vi-VN")}
             </span>
           </div>
 
           {/* Usage Progress */}
           <div className="flex items-center gap-2">
             <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-              <div 
+              <div
                 className="h-full bg-[#E53935] rounded-full transition-all"
                 style={{ width: `${usagePercent}%` }}
               />
             </div>
-            <span className="text-[10px] text-gray-400">Đã dùng {usagePercent}%</span>
+            <span className="text-[10px] text-gray-400">
+              Đã dùng {usagePercent}%
+            </span>
           </div>
         </div>
 

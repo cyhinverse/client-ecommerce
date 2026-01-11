@@ -1,27 +1,30 @@
-import { Shop } from "./product";
+import { BaseEntity, PaginationData } from "./common";
+import { Shop } from "./shop";
+import { User } from "./user";
 
-// Order product interface - Updated with new structure
+// Order product interface - matches backend products[] schema
 export interface OrderProduct {
-  productId: string;
-  modelId?: string;           // NEW: replaces variantId
-  tierIndex?: number[];       // NEW: e.g. [0, 1] for Blue, M
+  productId: string; // ObjectId ref to Product
+  modelId?: string; // maps to product.models._id
+
+  // Variation info
   name: string;
   sku?: string;
   image?: string;
+
+  // Selection
   quantity: number;
-  price: number;
-  totalPrice?: number;
-  
-  // Variation display (derived from tierIndex)
-  variationInfo?: string;     // e.g. "Color: Red, Size: M"
-  
-  // DEPRECATED: Old variant fields (kept for backward compatibility)
-  variantId?: string;
-  color?: string;
-  size?: string;
+  tierIndex?: number[]; // e.g. [0, 1] for Blue, M
+
+  // Snapshot prices
+  price: number; // Snapshot price at purchase
+  totalPrice: number; // quantity * price (required in backend)
+
+  // Display helper (frontend only)
+  variationInfo?: string;
 }
 
-// Shipping address interface
+// Shipping address interface - matches backend shippingAddress schema exactly
 export interface ShippingAddress {
   fullName: string;
   phone: string;
@@ -33,44 +36,51 @@ export interface ShippingAddress {
 }
 
 // Order status type
-export type OrderStatus = "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
+export type OrderStatus =
+  | "pending"
+  | "confirmed"
+  | "processing"
+  | "shipped"
+  | "delivered"
+  | "cancelled"
+  | "returned";
+export type PaymentMethod = "cod" | "vnpay" | "momo";
+export type PaymentStatus = "unpaid" | "paid" | "refunded";
 
-// Order interface - Updated with new structure
-export interface Order {
-  _id: string;
-  orderGroupId?: string;      // NEW: for multi-vendor checkout
-  shopId?: string | Shop;     // NEW: which shop this order belongs to
-  userId: string | { _id: string; username: string; email: string };
+// Order interface
+export interface Order extends BaseEntity {
+  orderGroupId?: string; // Group ID for multi-shop checkout
+
+  userId: string | User;
+  shopId: string | Shop;
+
   products: OrderProduct[];
   shippingAddress: ShippingAddress;
-  
+
   // Payment info
-  paymentMethod: "cod" | "vnpay" | "momo";
-  paymentStatus: "unpaid" | "paid" | "refunded";
-  
-  // Financials - Updated
+  paymentMethod: PaymentMethod;
+  paymentStatus: PaymentStatus;
+
+  // Financials
   subtotal: number;
-  shippingFee?: number;
-  discountShop?: number;       // NEW: shop voucher discount
-  discountPlatform?: number;   // NEW: platform voucher discount
+  shippingFee: number;
+  discountShop: number;
+  discountPlatform: number;
   totalAmount: number;
-  
+
   // Status and tracking
   status: OrderStatus;
   trackingNumber?: string;
   carrier?: string;
+
   deliveredAt?: string;
   cancelledAt?: string;
   cancelReason?: string;
+
+  // Display only
   orderCode?: string;
-  
-  // Timestamps
-  createdAt: string;
-  updatedAt: string;
 }
 
-
-import { PaginationData } from "./common";
 export type { PaginationData };
 
 // Order statistics interface
@@ -99,32 +109,9 @@ export interface OrderFilters {
   paymentStatus: string;
   paymentMethod: string;
   userId: string;
-  shopId?: string;            // NEW: filter by shop
-  orderGroupId?: string;      // NEW: filter by order group
+  shopId?: string; // NEW: filter by shop
+  orderGroupId?: string; // NEW: filter by order group
   [key: string]: string | number | boolean | null | undefined;
-}
-
-// Order state for Redux
-export interface OrderState {
-  userOrders: Order[];
-  currentOrder: Order | null;
-  allOrders: Order[];
-  statistics: OrderStatistics | null;
-  pagination: PaginationData | null;
-  isLoading: boolean;
-  isCreating: boolean;
-  isUpdating: boolean;
-  isCancelling: boolean;
-  error: string | null;
-  // Seller shop orders
-  shopOrders: Order[];
-  shopOrdersPagination: PaginationData | null;
-  isLoadingShopOrders: boolean;
-  shopOrdersError: string | null;
-  // Seller statistics
-  sellerStatistics: SellerOrderStatistics | null;
-  isLoadingSellerStats: boolean;
-  sellerStatsError: string | null;
 }
 
 // Seller order statistics interface
@@ -151,6 +138,29 @@ export interface SellerOrderStatistics {
   }>;
 }
 
+// Order state for Redux
+export interface OrderState {
+  userOrders: Order[];
+  currentOrder: Order | null;
+  allOrders: Order[];
+  statistics: OrderStatistics | null;
+  pagination: PaginationData | null;
+  isLoading: boolean;
+  isCreating: boolean;
+  isUpdating: boolean;
+  isCancelling: boolean;
+  error: string | null;
+  // Seller shop orders
+  shopOrders: Order[];
+  shopOrdersPagination: PaginationData | null;
+  isLoadingShopOrders: boolean;
+  shopOrdersError: string | null;
+  // Seller statistics
+  sellerStatistics: SellerOrderStatistics | null;
+  isLoadingSellerStats: boolean;
+  sellerStatsError: string | null;
+}
+
 // Order status count for stats
 export interface OrderStatusCount {
   _id: string;
@@ -175,15 +185,15 @@ export interface CreateOrderPayload {
   products: Array<{
     productId: string;
     modelId?: string;
-    tierIndex?: number[];
+    // tierIndex is generally calculated on backend or used for meta
     quantity: number;
     price: number;
   }>;
   shippingAddress: ShippingAddress;
-  paymentMethod: "cod" | "vnpay" | "momo";
+  paymentMethod: PaymentMethod;
   shopId?: string;
-  voucherShopCode?: string;     // NEW: shop voucher
-  voucherPlatformCode?: string; // NEW: platform voucher
+  voucherShopCode?: string;
+  voucherPlatformCode?: string;
 }
 
 // Order group for multi-vendor checkout

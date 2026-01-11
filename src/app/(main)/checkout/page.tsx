@@ -14,12 +14,14 @@ import {
 import { useAppSelector, useAppDispatch } from "@/hooks/hooks";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { createOrder } from "@/features/order/orderAction";
-import { clearCart } from "@/features/cart/cartAction";
+import {
+  useCreateOrder,
+  useCreatePaymentUrl,
+  useApplyVoucher,
+} from "@/hooks/queries";
+import { useClearCart } from "@/hooks/queries/useCart";
 import { toast } from "sonner";
-import { createPaymentUrl } from "@/features/payment/paymentAction";
-import { applyVoucherCode } from "@/features/voucher/voucherAction";
-import { clearAppliedVouchers, setAppliedShopVoucher, setAppliedPlatformVoucher } from "@/features/voucher/voucherSlice";
+import { ApplyVoucherResult } from "@/types/voucher";
 import {
   Check,
   CreditCard,
@@ -37,10 +39,16 @@ import { groupCartItemsByShop } from "@/types/cart";
 
 export default function CheckoutPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [paymentMethod, setPaymentMethod] = useState<"cod" | "vnpay" | "momo">("cod");
+  const [paymentMethod, setPaymentMethod] = useState<"cod" | "vnpay" | "momo">(
+    "cod"
+  );
   const [promoCode, setPromoCode] = useState<string>("");
   const [shopVoucherCode, setShopVoucherCode] = useState<string>("");
   const [platformVoucherCode, setPlatformVoucherCode] = useState<string>("");
+  const [appliedShopVoucher, setAppliedShopVoucher] =
+    useState<ApplyVoucherResult | null>(null);
+  const [appliedPlatformVoucher, setAppliedPlatformVoucher] =
+    useState<ApplyVoucherResult | null>(null);
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -53,14 +61,18 @@ export default function CheckoutPage() {
   });
 
   const { data: userData } = useAppSelector((state) => state.auth);
-  const { data: cartData, checkoutTotal, selectedItems } = useAppSelector(
-    (state) => state.cart
-  );
-  const { appliedShopVoucher, appliedPlatformVoucher, loading: voucherLoading } = useAppSelector(
-    (state) => state.voucher
-  );
-  const dispatch = useAppDispatch();
+  const {
+    data: cartData,
+    checkoutTotal,
+    selectedItems,
+  } = useAppSelector((state) => state.cart);
   const router = useRouter();
+
+  const createOrderMutation = useCreateOrder();
+  const clearCartMutation = useClearCart();
+  const paymentMutation = useCreatePaymentUrl();
+  const applyVoucherMutation = useApplyVoucher();
+  const voucherLoading = applyVoucherMutation.isPending;
 
   const cartItems = useMemo(() => {
     return selectedItems || cartData?.items || [];
@@ -75,7 +87,7 @@ export default function CheckoutPage() {
   const shopDiscount = appliedShopVoucher?.discountAmount || 0;
   const platformDiscount = appliedPlatformVoucher?.discountAmount || 0;
   const totalDiscount = shopDiscount + platformDiscount;
-  
+
   const finalTotal = (checkoutTotal || 0) - totalDiscount;
   const cartItemIds = cartItems.map((item) => item._id);
 
@@ -132,18 +144,18 @@ export default function CheckoutPage() {
         note: formData.note,
       };
 
-      const result = await dispatch(createOrder(orderData)).unwrap();
+      const result = await createOrderMutation.mutateAsync(orderData);
 
       if (result) {
-        dispatch(clearCart()).unwrap().catch(console.error);
+        clearCartMutation.mutateAsync().catch(console.error);
 
         if (paymentMethod === "vnpay") {
           try {
             toast.loading("Đang chuyển đến VNPay...");
-            const orderId = result.data ? result.data._id : result._id;
+            const orderId = result._id;
             if (!orderId) throw new Error("Missing order ID");
 
-            const paymentResult = await dispatch(createPaymentUrl(orderId)).unwrap();
+            const paymentResult = await paymentMutation.mutateAsync(orderId);
 
             if (paymentResult.paymentUrl) {
               window.location.href = paymentResult.paymentUrl;
@@ -151,7 +163,9 @@ export default function CheckoutPage() {
             }
           } catch (paymentError) {
             console.error("Payment error:", paymentError);
-            toast.error("Không thể tạo thanh toán VNPay. Vui lòng thanh toán lại trong lịch sử đơn hàng.");
+            toast.error(
+              "Không thể tạo thanh toán VNPay. Vui lòng thanh toán lại trong lịch sử đơn hàng."
+            );
             router.push("/");
           }
         } else {
@@ -176,19 +190,27 @@ export default function CheckoutPage() {
     const orderTotal = checkoutTotal || 0;
 
     try {
-      await dispatch(
-        applyVoucherCode({ code: promoCode, orderTotal })
-      ).unwrap();
+      const result = await applyVoucherMutation.mutateAsync({
+        code: promoCode,
+        orderTotal,
+      });
+      // Set the appropriate voucher based on scope
+      if (result.scope === "shop") {
+        setAppliedShopVoucher(result);
+      } else {
+        setAppliedPlatformVoucher(result);
+      }
       toast.success("Áp dụng mã giảm giá thành công!");
     } catch (err) {
-      const errorMessage = (err as Error).message || "Không thể áp dụng mã giảm giá";
+      const errorMessage =
+        (err as Error).message || "Không thể áp dụng mã giảm giá";
       toast.error(errorMessage);
-      dispatch(clearAppliedVouchers());
     }
   };
 
   const handleRemoveVoucher = () => {
-    dispatch(clearAppliedVouchers());
+    setAppliedShopVoucher(null);
+    setAppliedPlatformVoucher(null);
     setPromoCode("");
     setShopVoucherCode("");
     setPlatformVoucherCode("");
@@ -204,16 +226,19 @@ export default function CheckoutPage() {
   };
 
   // Helper to get item image
-  const getItemImage = (item: typeof cartItems[0]): string | null => {
+  const getItemImage = (item: (typeof cartItems)[0]): string | null => {
     if (item.variant?.images?.[0]) return item.variant.images[0];
-    if (typeof item.productId === 'object' && item.productId.images?.[0]) {
-      return item.productId.images[0];
+    if (typeof item.productId === "object") {
+      if (item.productId.variants?.[0]?.images?.[0])
+        return item.productId.variants[0].images[0];
+      if (item.productId.descriptionImages?.[0])
+        return item.productId.descriptionImages[0];
     }
     return null;
   };
 
   // Helper to get effective price
-  const getEffectivePrice = (item: typeof cartItems[0]): number => {
+  const getEffectivePrice = (item: (typeof cartItems)[0]): number => {
     const discountPrice = item.price?.discountPrice ?? 0;
     const currentPrice = item.price?.currentPrice ?? 0;
     return discountPrice > 0 && discountPrice < currentPrice
@@ -254,12 +279,16 @@ export default function CheckoutPage() {
               <div className="bg-[#f7f7f7] rounded-sm p-4">
                 <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
                   <MapPin className="h-5 w-5 text-[#E53935]" />
-                  <h2 className="font-semibold text-gray-800">Địa chỉ nhận hàng</h2>
+                  <h2 className="font-semibold text-gray-800">
+                    Địa chỉ nhận hàng
+                  </h2>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="fullName" className="text-sm text-gray-600">Họ và tên</Label>
+                    <Label htmlFor="fullName" className="text-sm text-gray-600">
+                      Họ và tên
+                    </Label>
                     <Input
                       id="fullName"
                       placeholder="Nguyễn Văn A"
@@ -270,7 +299,9 @@ export default function CheckoutPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="phone" className="text-sm text-gray-600">Số điện thoại</Label>
+                    <Label htmlFor="phone" className="text-sm text-gray-600">
+                      Số điện thoại
+                    </Label>
                     <Input
                       id="phone"
                       placeholder="0123 456 789"
@@ -281,7 +312,9 @@ export default function CheckoutPage() {
                     />
                   </div>
                   <div className="space-y-1.5 md:col-span-2">
-                    <Label htmlFor="email" className="text-sm text-gray-600">Email</Label>
+                    <Label htmlFor="email" className="text-sm text-gray-600">
+                      Email
+                    </Label>
                     <Input
                       id="email"
                       type="email"
@@ -293,7 +326,9 @@ export default function CheckoutPage() {
                     />
                   </div>
                   <div className="space-y-1.5 md:col-span-2">
-                    <Label htmlFor="address" className="text-sm text-gray-600">Địa chỉ</Label>
+                    <Label htmlFor="address" className="text-sm text-gray-600">
+                      Địa chỉ
+                    </Label>
                     <Input
                       id="address"
                       placeholder="Số nhà, tên đường"
@@ -304,8 +339,15 @@ export default function CheckoutPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="city" className="text-sm text-gray-600">Tỉnh/Thành phố</Label>
-                    <Select value={formData.city} onValueChange={(value) => handleSelectChange(value, "city")}>
+                    <Label htmlFor="city" className="text-sm text-gray-600">
+                      Tỉnh/Thành phố
+                    </Label>
+                    <Select
+                      value={formData.city}
+                      onValueChange={(value) =>
+                        handleSelectChange(value, "city")
+                      }
+                    >
                       <SelectTrigger className="h-10 rounded border-gray-200 focus:ring-[#E53935]/20">
                         <SelectValue placeholder="Chọn tỉnh/thành" />
                       </SelectTrigger>
@@ -319,7 +361,9 @@ export default function CheckoutPage() {
                     </Select>
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="district" className="text-sm text-gray-600">Quận/Huyện</Label>
+                    <Label htmlFor="district" className="text-sm text-gray-600">
+                      Quận/Huyện
+                    </Label>
                     <Input
                       id="district"
                       placeholder="Quận/Huyện"
@@ -330,7 +374,9 @@ export default function CheckoutPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="ward" className="text-sm text-gray-600">Phường/Xã</Label>
+                    <Label htmlFor="ward" className="text-sm text-gray-600">
+                      Phường/Xã
+                    </Label>
                     <Input
                       id="ward"
                       placeholder="Phường/Xã"
@@ -341,7 +387,9 @@ export default function CheckoutPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="note" className="text-sm text-gray-600">Ghi chú</Label>
+                    <Label htmlFor="note" className="text-sm text-gray-600">
+                      Ghi chú
+                    </Label>
                     <Input
                       id="note"
                       placeholder="Ghi chú cho người giao hàng..."
@@ -355,22 +403,37 @@ export default function CheckoutPage() {
 
               {/* Order Items by Shop */}
               {itemsByShop.map((shopGroup) => (
-                <div key={shopGroup.shop._id} className="bg-[#f7f7f7] rounded-sm overflow-hidden">
+                <div
+                  key={shopGroup.shop._id}
+                  className="bg-[#f7f7f7] rounded-sm overflow-hidden"
+                >
                   {/* Shop Header */}
                   <div className="flex items-center gap-2 p-4 border-b border-gray-100">
                     <Store className="h-4 w-4 text-[#E53935]" />
-                    <span className="font-medium text-gray-800">{shopGroup.shop.name}</span>
-                    <span className="text-xs text-[#E53935] border border-[#E53935] px-1.5 py-0.5 rounded">Mall</span>
+                    <span className="font-medium text-gray-800">
+                      {shopGroup.shop.name}
+                    </span>
+                    <span className="text-xs text-[#E53935] border border-[#E53935] px-1.5 py-0.5 rounded">
+                      Mall
+                    </span>
                   </div>
 
                   {/* Items */}
                   {shopGroup.items.map((item) => (
-                    <div key={item._id} className="flex items-center gap-4 p-4 border-b border-gray-50 last:border-0">
+                    <div
+                      key={item._id}
+                      className="flex items-center gap-4 p-4 border-b border-gray-50 last:border-0"
+                    >
                       <div className="relative w-16 h-16 bg-gray-100 rounded overflow-hidden shrink-0">
                         {getItemImage(item) ? (
                           <Image
                             src={getItemImage(item)!}
-                            alt={typeof item.productId === 'object' ? item.productId.name : 'Product'}
+                            alt={
+                              typeof item.productId === "object" &&
+                              item.productId
+                                ? item.productId.name
+                                : "Product"
+                            }
                             fill
                             className="object-cover"
                           />
@@ -382,18 +445,23 @@ export default function CheckoutPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="text-sm text-gray-800 line-clamp-1">
-                          {typeof item.productId === 'object' ? item.productId.name : 'Sản phẩm'}
+                          {typeof item.productId === "object" && item.productId
+                            ? item.productId.name
+                            : "Sản phẩm"}
                         </h4>
-                        {(item.variationInfo || item.variant) && (
+                        {(item.variant || item.size) && (
                           <p className="text-xs text-gray-500 mt-0.5">
-                            {item.variationInfo || 
-                              [item.variant?.color, item.variant?.size && `Size: ${item.variant.size}`]
-                                .filter(Boolean)
-                                .join(', ')
-                            }
+                            {[
+                              item.variant?.color,
+                              item.size && `Size: ${item.size}`,
+                            ]
+                              .filter(Boolean)
+                              .join(", ")}
                           </p>
                         )}
-                        <p className="text-xs text-gray-400 mt-0.5">x{item.quantity}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          x{item.quantity}
+                        </p>
                       </div>
                       <div className="text-right">
                         <span className="text-[#E53935] font-medium">
@@ -409,7 +477,10 @@ export default function CheckoutPage() {
                       <Tag className="h-4 w-4 text-[#E53935]" />
                       <span>Voucher của Shop</span>
                     </div>
-                    <button type="button" className="flex items-center gap-1 text-sm text-[#E53935]">
+                    <button
+                      type="button"
+                      className="flex items-center gap-1 text-sm text-[#E53935]"
+                    >
                       <span>Chọn voucher</span>
                       <ChevronRight className="h-4 w-4" />
                     </button>
@@ -422,7 +493,9 @@ export default function CheckoutPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Tag className="h-5 w-5 text-[#E53935]" />
-                    <span className="font-medium text-gray-800">Voucher nền tảng</span>
+                    <span className="font-medium text-gray-800">
+                      Voucher nền tảng
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Input
@@ -458,7 +531,8 @@ export default function CheckoutPage() {
                 {appliedPlatformVoucher && (
                   <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
                     <Check className="h-3 w-3" />
-                    Đã áp dụng mã: {appliedPlatformVoucher.code} (-{formatPrice(appliedPlatformVoucher.discountAmount)})
+                    Đã áp dụng mã: {appliedPlatformVoucher.code} (-
+                    {formatPrice(appliedPlatformVoucher.discountAmount)})
                   </p>
                 )}
               </div>
@@ -467,7 +541,9 @@ export default function CheckoutPage() {
               <div className="bg-[#f7f7f7] rounded-sm p-4">
                 <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
                   <Wallet className="h-5 w-5 text-[#E53935]" />
-                  <h2 className="font-semibold text-gray-800">Phương thức thanh toán</h2>
+                  <h2 className="font-semibold text-gray-800">
+                    Phương thức thanh toán
+                  </h2>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -485,9 +561,21 @@ export default function CheckoutPage() {
                       checked={paymentMethod === "cod"}
                       onChange={() => setPaymentMethod("cod")}
                     />
-                    <Truck className={`h-5 w-5 ${paymentMethod === "cod" ? "text-[#E53935]" : "text-gray-400"}`} />
+                    <Truck
+                      className={`h-5 w-5 ${
+                        paymentMethod === "cod"
+                          ? "text-[#E53935]"
+                          : "text-gray-400"
+                      }`}
+                    />
                     <div>
-                      <span className={`text-sm font-medium ${paymentMethod === "cod" ? "text-[#E53935]" : "text-gray-700"}`}>
+                      <span
+                        className={`text-sm font-medium ${
+                          paymentMethod === "cod"
+                            ? "text-[#E53935]"
+                            : "text-gray-700"
+                        }`}
+                      >
                         Thanh toán khi nhận hàng
                       </span>
                       <p className="text-xs text-gray-500">COD</p>
@@ -511,12 +599,26 @@ export default function CheckoutPage() {
                       checked={paymentMethod === "vnpay"}
                       onChange={() => setPaymentMethod("vnpay")}
                     />
-                    <CreditCard className={`h-5 w-5 ${paymentMethod === "vnpay" ? "text-[#E53935]" : "text-gray-400"}`} />
+                    <CreditCard
+                      className={`h-5 w-5 ${
+                        paymentMethod === "vnpay"
+                          ? "text-[#E53935]"
+                          : "text-gray-400"
+                      }`}
+                    />
                     <div>
-                      <span className={`text-sm font-medium ${paymentMethod === "vnpay" ? "text-[#E53935]" : "text-gray-700"}`}>
+                      <span
+                        className={`text-sm font-medium ${
+                          paymentMethod === "vnpay"
+                            ? "text-[#E53935]"
+                            : "text-gray-700"
+                        }`}
+                      >
                         VNPay
                       </span>
-                      <p className="text-xs text-gray-500">Thẻ ATM/Visa/Master</p>
+                      <p className="text-xs text-gray-500">
+                        Thẻ ATM/Visa/Master
+                      </p>
                     </div>
                     {paymentMethod === "vnpay" && (
                       <Check className="h-4 w-4 text-[#E53935] ml-auto" />
@@ -537,9 +639,21 @@ export default function CheckoutPage() {
                       checked={paymentMethod === "momo"}
                       onChange={() => setPaymentMethod("momo")}
                     />
-                    <Wallet className={`h-5 w-5 ${paymentMethod === "momo" ? "text-[#E53935]" : "text-gray-400"}`} />
+                    <Wallet
+                      className={`h-5 w-5 ${
+                        paymentMethod === "momo"
+                          ? "text-[#E53935]"
+                          : "text-gray-400"
+                      }`}
+                    />
                     <div>
-                      <span className={`text-sm font-medium ${paymentMethod === "momo" ? "text-[#E53935]" : "text-gray-700"}`}>
+                      <span
+                        className={`text-sm font-medium ${
+                          paymentMethod === "momo"
+                            ? "text-[#E53935]"
+                            : "text-gray-700"
+                        }`}
+                      >
                         Ví MoMo
                       </span>
                       <p className="text-xs text-gray-500">Ví điện tử</p>
@@ -561,8 +675,12 @@ export default function CheckoutPage() {
 
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Tạm tính ({cartItems.length} sản phẩm)</span>
-                    <span className="text-gray-800">{formatPrice(checkoutTotal || 0)}</span>
+                    <span className="text-gray-500">
+                      Tạm tính ({cartItems.length} sản phẩm)
+                    </span>
+                    <span className="text-gray-800">
+                      {formatPrice(checkoutTotal || 0)}
+                    </span>
                   </div>
 
                   {shopDiscount > 0 && (
@@ -586,12 +704,16 @@ export default function CheckoutPage() {
 
                   <div className="pt-3 border-t border-gray-100">
                     <div className="flex justify-between items-center">
-                      <span className="font-medium text-gray-800">Tổng thanh toán</span>
+                      <span className="font-medium text-gray-800">
+                        Tổng thanh toán
+                      </span>
                       <span className="text-xl font-bold text-[#E53935]">
                         {formatPrice(finalTotal > 0 ? finalTotal : 0)}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-400 text-right mt-1">Đã bao gồm VAT</p>
+                    <p className="text-xs text-gray-400 text-right mt-1">
+                      Đã bao gồm VAT
+                    </p>
                   </div>
                 </div>
 
@@ -605,7 +727,8 @@ export default function CheckoutPage() {
                 </Button>
 
                 <p className="text-center text-xs text-gray-400 mt-3">
-                  Nhấn "Đặt hàng" đồng nghĩa với việc bạn đồng ý tuân theo Điều khoản của chúng tôi
+                  Nhấn "Đặt hàng" đồng nghĩa với việc bạn đồng ý tuân theo Điều
+                  khoản của chúng tôi
                 </p>
               </div>
             </div>

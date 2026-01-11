@@ -1,7 +1,15 @@
 // CartPage - Taobao Style with Shop Grouping
 "use client";
 import { useEffect, useState, useMemo } from "react";
-import { Plus, Minus, ShoppingBag, ArrowRight, Store, Trash2, Tag } from "lucide-react";
+import {
+  Plus,
+  Minus,
+  ShoppingBag,
+  ArrowRight,
+  Store,
+  Trash2,
+  Tag,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
@@ -19,8 +27,8 @@ import {
   unselectAllItems,
   prepareForCheckout,
 } from "@/features/cart/cartSlice";
-import { applyVoucherCode } from "@/features/voucher/voucherAction";
-import { clearAppliedVouchers } from "@/features/voucher/voucherSlice";
+import { useApplyVoucher } from "@/hooks/queries";
+import { ApplyVoucherResult } from "@/types/voucher";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -36,12 +44,19 @@ export default function CartPage() {
     selectedItems,
     checkoutTotal,
   } = useAppSelector((state) => state.cart);
-  const { appliedShopVoucher, appliedPlatformVoucher, loading: voucherLoading } = useAppSelector(
-    (state) => state.voucher
-  );
   const dispatch = useAppDispatch();
   const router = useRouter();
   const [promoCode, setPromoCode] = useState("");
+  const [appliedVoucher, setAppliedVoucher] =
+    useState<ApplyVoucherResult | null>(null);
+  const applyVoucherMutation = useApplyVoucher();
+
+  // Derived voucher states for backward compatibility
+  const appliedShopVoucher =
+    appliedVoucher?.scope === "shop" ? appliedVoucher : null;
+  const appliedPlatformVoucher =
+    appliedVoucher?.scope === "platform" ? appliedVoucher : null;
+  const voucherLoading = applyVoucherMutation.isPending;
 
   useEffect(() => {
     dispatch(getCart());
@@ -54,7 +69,7 @@ export default function CartPage() {
 
   const handleClearCart = () => {
     dispatch(clearCart());
-    dispatch(clearAppliedVouchers());
+    setAppliedVoucher(null);
     toast.success("Đã xóa giỏ hàng");
   };
 
@@ -98,23 +113,22 @@ export default function CartPage() {
     const orderTotal = checkoutTotal || 0;
 
     try {
-      await dispatch(
-        applyVoucherCode({
-          code: promoCode,
-          orderTotal,
-        })
-      ).unwrap();
+      const result = await applyVoucherMutation.mutateAsync({
+        code: promoCode,
+        orderTotal,
+      });
+      setAppliedVoucher(result);
       toast.success("Áp dụng mã giảm giá thành công!");
     } catch (err) {
       const errorMessage =
         (err as Error).message || "Không thể áp dụng mã giảm giá";
       toast.error(errorMessage);
-      dispatch(clearAppliedVouchers());
+      setAppliedVoucher(null);
     }
   };
 
   const handleRemoveVoucher = () => {
-    dispatch(clearAppliedVouchers());
+    setAppliedVoucher(null);
     setPromoCode("");
     toast.success("Đã xóa mã giảm giá");
   };
@@ -155,26 +169,28 @@ export default function CartPage() {
   const itemsByShop = useMemo(() => {
     if (!cartData?.items) return [];
     // Filter out items where productId is null (deleted products)
-    const validItems = cartData.items.filter(item => item.productId !== null);
+    const validItems = cartData.items.filter((item) => item.productId !== null);
     return groupCartItemsByShop(validItems);
   }, [cartData?.items]);
 
   // Get deleted product items (productId is null)
   const deletedItems = useMemo(() => {
     if (!cartData?.items) return [];
-    return cartData.items.filter(item => item.productId === null);
+    return cartData.items.filter((item) => item.productId === null);
   }, [cartData?.items]);
 
   // Helper to get item image
   const getItemImage = (item: CartItem): string | null => {
     // 1. Try variant images first
     if (item.variant?.images?.[0]) return item.variant.images[0];
-    
+
     // 2. Try to find variant from product.variants using variantId or modelId
-    if (typeof item.productId === 'object' && item.productId?.variants) {
+    if (typeof item.productId === "object" && item.productId?.variants) {
       const variantId = item.variantId || item.modelId;
       if (variantId) {
-        const variant = item.productId.variants.find(v => v._id === variantId);
+        const variant = item.productId.variants.find(
+          (v) => v._id === variantId
+        );
         if (variant?.images?.[0]) return variant.images[0];
       }
       // Fallback to first variant's image
@@ -182,37 +198,39 @@ export default function CartPage() {
         return item.productId.variants[0].images[0];
       }
     }
-    
-    // 3. Try product images
-    if (typeof item.productId === 'object' && item.productId?.images?.[0]) {
-      return item.productId.images[0];
+
+    // 3. Fallback to product first variant image or description image
+    if (typeof item.productId === "object") {
+      if (item.productId.variants?.[0]?.images?.[0]) {
+        return item.productId.variants[0].images[0];
+      }
+      if (item.productId.descriptionImages?.[0]) {
+        return item.productId.descriptionImages[0];
+      }
     }
-    
+
     return null;
   };
 
   // Helper to get variation display text
   const getVariationText = (item: CartItem): string | null => {
     const parts: string[] = [];
-    
+
     // Get color from variant
     if (item.variant?.color) {
       parts.push(item.variant.color);
     } else if (item.variant?.name) {
       parts.push(item.variant.name);
     }
-    
+
     // Get size
     if (item.size) {
       parts.push(`Size: ${item.size}`);
     }
-    
-    // Fallback to variationInfo
-    if (parts.length === 0 && item.variationInfo) {
-      return item.variationInfo;
-    }
-    
-    return parts.length > 0 ? parts.join(', ') : null;
+
+    // Fallback removed
+
+    return parts.length > 0 ? parts.join(", ") : null;
   };
 
   // Helper to get effective price
@@ -251,9 +269,7 @@ export default function CartPage() {
           </div>
 
           <Link href="/products" className="block pt-4">
-            <Button
-              className="rounded bg-[#E53935] hover:bg-[#D32F2F] px-8 h-10 text-sm"
-            >
+            <Button className="rounded bg-[#E53935] hover:bg-[#D32F2F] px-8 h-10 text-sm">
               Mua sắm ngay <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
@@ -280,10 +296,14 @@ export default function CartPage() {
               <div className="bg-[#f7f7f7] rounded-sm p-4 flex items-center gap-4 text-sm">
                 <Checkbox
                   checked={isAllSelected}
-                  onCheckedChange={() => isAllSelected ? handleUnselectAll() : handleSelectAll()}
+                  onCheckedChange={() =>
+                    isAllSelected ? handleUnselectAll() : handleSelectAll()
+                  }
                   className="h-4 w-4 rounded border-gray-300 data-[state=checked]:bg-[#E53935] data-[state=checked]:border-[#E53935]"
                 />
-                <span className="text-gray-600">Chọn tất cả ({cartData?.items?.length || 0} sản phẩm)</span>
+                <span className="text-gray-600">
+                  Chọn tất cả ({cartData?.items?.length || 0} sản phẩm)
+                </span>
                 <button
                   onClick={handleClearCart}
                   className="ml-auto text-gray-500 hover:text-red-500 flex items-center gap-1"
@@ -300,12 +320,15 @@ export default function CartPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-yellow-700">
                     <span className="text-sm">
-                      ⚠️ Có {deletedItems.length} sản phẩm không còn tồn tại và đã bị xóa khỏi hiển thị.
+                      ⚠️ Có {deletedItems.length} sản phẩm không còn tồn tại và
+                      đã bị xóa khỏi hiển thị.
                     </span>
                   </div>
                   <button
                     onClick={() => {
-                      deletedItems.forEach(item => handleRemoveItem(item._id));
+                      deletedItems.forEach((item) =>
+                        handleRemoveItem(item._id)
+                      );
                     }}
                     className="text-sm text-red-500 hover:text-red-600 font-medium"
                   >
@@ -329,10 +352,12 @@ export default function CartPage() {
                   {/* Shop Header */}
                   <div className="flex items-center gap-3 p-4 border-b border-gray-100">
                     <Checkbox
-                      checked={shopGroup.items.every(item => item.selected)}
+                      checked={shopGroup.items.every((item) => item.selected)}
                       onCheckedChange={() => {
-                        const allSelected = shopGroup.items.every(item => item.selected);
-                        shopGroup.items.forEach(item => {
+                        const allSelected = shopGroup.items.every(
+                          (item) => item.selected
+                        );
+                        shopGroup.items.forEach((item) => {
                           if (allSelected ? item.selected : !item.selected) {
                             handleToggleSelect(item._id);
                           }
@@ -341,8 +366,12 @@ export default function CartPage() {
                       className="h-4 w-4 rounded border-gray-300 data-[state=checked]:bg-[#E53935] data-[state=checked]:border-[#E53935]"
                     />
                     <Store className="h-4 w-4 text-[#E53935]" />
-                    <span className="font-medium text-gray-800">{shopGroup.shop.name}</span>
-                    <span className="text-xs text-[#E53935] border border-[#E53935] px-1.5 py-0.5 rounded">Mall</span>
+                    <span className="font-medium text-gray-800">
+                      {shopGroup.shop.name}
+                    </span>
+                    <span className="text-xs text-[#E53935] border border-[#E53935] px-1.5 py-0.5 rounded">
+                      Mall
+                    </span>
                   </div>
 
                   {/* Shop Items */}
@@ -360,14 +389,23 @@ export default function CartPage() {
 
                       {/* Image */}
                       <Link
-                        href={`/products/${typeof item.productId === 'object' && item.productId ? (item.productId.slug || item.productId._id) : item.productId || ''}`}
+                        href={`/products/${
+                          typeof item.productId === "object" && item.productId
+                            ? item.productId.slug || item.productId._id
+                            : item.productId || ""
+                        }`}
                         className="shrink-0"
                       >
                         <div className="relative w-20 h-20 bg-gray-100 rounded overflow-hidden">
                           {getItemImage(item) ? (
                             <Image
                               src={getItemImage(item)!}
-                              alt={typeof item.productId === 'object' && item.productId ? item.productId.name : 'Product'}
+                              alt={
+                                typeof item.productId === "object" &&
+                                item.productId
+                                  ? item.productId.name
+                                  : "Product"
+                              }
                               fill
                               className="object-cover"
                             />
@@ -382,14 +420,21 @@ export default function CartPage() {
                       {/* Product Info */}
                       <div className="flex-1 min-w-0">
                         <Link
-                          href={`/products/${typeof item.productId === 'object' && item.productId ? (item.productId.slug || item.productId._id) : item.productId || ''}`}
+                          href={`/products/${
+                            typeof item.productId === "object" && item.productId
+                              ? item.productId.slug || item.productId._id
+                              : item.productId || ""
+                          }`}
                           className="hover:text-[#E53935] transition-colors"
                         >
                           <h3 className="text-sm text-gray-800 line-clamp-2 mb-1">
-                            {typeof item.productId === 'object' && item.productId ? item.productId.name : 'Sản phẩm'}
+                            {typeof item.productId === "object" &&
+                            item.productId
+                              ? item.productId.name
+                              : "Sản phẩm"}
                           </h3>
                         </Link>
-                        
+
                         {/* Variation Info */}
                         {getVariationText(item) && (
                           <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded inline-block mb-1">
@@ -403,18 +448,21 @@ export default function CartPage() {
                             {formatPrice(getEffectivePrice(item))}
                           </span>
                           {(item.price?.discountPrice ?? 0) > 0 &&
-                            (item.price?.currentPrice ?? 0) > (item.price?.discountPrice ?? 0) && (
-                            <span className="text-xs text-gray-400 line-through">
-                              {formatPrice(item.price?.currentPrice ?? 0)}
-                            </span>
-                          )}
+                            (item.price?.currentPrice ?? 0) >
+                              (item.price?.discountPrice ?? 0) && (
+                              <span className="text-xs text-gray-400 line-through">
+                                {formatPrice(item.price?.currentPrice ?? 0)}
+                              </span>
+                            )}
                         </div>
                       </div>
 
                       {/* Quantity Controls */}
                       <div className="flex items-center shrink-0">
                         <button
-                          onClick={() => updateQuantity(item._id, item.quantity - 1)}
+                          onClick={() =>
+                            updateQuantity(item._id, item.quantity - 1)
+                          }
                           disabled={item.quantity <= 1}
                           className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-l text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                         >
@@ -427,7 +475,9 @@ export default function CartPage() {
                           className="w-10 h-7 text-center text-sm border-y border-gray-200 focus:outline-none bg-white"
                         />
                         <button
-                          onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                          onClick={() =>
+                            updateQuantity(item._id, item.quantity + 1)
+                          }
                           className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-r text-gray-500 hover:bg-gray-50"
                         >
                           <Plus className="h-3 w-3" />
@@ -500,16 +550,22 @@ export default function CartPage() {
               {/* Summary */}
               <div className="space-y-3 py-4 border-t border-gray-100">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Tạm tính ({selectedItemsCount} sản phẩm)</span>
+                  <span className="text-gray-500">
+                    Tạm tính ({selectedItemsCount} sản phẩm)
+                  </span>
                   <span className="text-gray-800">
-                    {formatPrice(hasSelectedItems ? checkoutTotal || 0 : subtotal)}
+                    {formatPrice(
+                      hasSelectedItems ? checkoutTotal || 0 : subtotal
+                    )}
                   </span>
                 </div>
 
                 {appliedPlatformVoucher && (
                   <div className="flex justify-between text-sm text-green-600">
                     <span>Giảm giá</span>
-                    <span>-{formatPrice(appliedPlatformVoucher.discountAmount)}</span>
+                    <span>
+                      -{formatPrice(appliedPlatformVoucher.discountAmount)}
+                    </span>
                   </div>
                 )}
 
@@ -525,7 +581,8 @@ export default function CartPage() {
                 <span className="text-xl font-bold text-[#E53935]">
                   {formatPrice(
                     appliedPlatformVoucher
-                      ? (checkoutTotal || 0) - appliedPlatformVoucher.discountAmount
+                      ? (checkoutTotal || 0) -
+                          appliedPlatformVoucher.discountAmount
                       : hasSelectedItems
                       ? checkoutTotal || 0
                       : subtotal

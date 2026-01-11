@@ -1,22 +1,21 @@
 "use client";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
-import { getTreeCategories } from "@/features/category/categoryAction";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { useCategoryTree } from "@/hooks/queries/useCategories";
 import Link from "next/link";
 import { useEffect } from "react";
 import { toast } from "sonner";
-import { 
-  ChevronRight, 
-  Laptop, 
-  Smartphone, 
-  Home, 
-  Shirt, 
-  Watch, 
-  Baby, 
-  Car, 
-  Utensils, 
-  Dumbbell, 
-  Sparkles, 
+import {
+  ChevronRight,
+  Laptop,
+  Smartphone,
+  Home,
+  Shirt,
+  Watch,
+  Baby,
+  Car,
+  Utensils,
+  Dumbbell,
+  Sparkles,
   Package,
   Headphones,
   Camera,
@@ -24,7 +23,7 @@ import {
   BookOpen,
   Flower2,
   Flame,
-  TrendingUp
+  TrendingUp,
 } from "lucide-react";
 
 // Icon mapping for categories
@@ -52,7 +51,7 @@ const categoryIcons: Record<string, React.ReactNode> = {
 };
 
 const getIcon = (slug: string) => {
-  const normalizedSlug = slug?.toLowerCase() || '';
+  const normalizedSlug = slug?.toLowerCase() || "";
   for (const key of Object.keys(categoryIcons)) {
     if (normalizedSlug.includes(key)) {
       return categoryIcons[key];
@@ -62,29 +61,28 @@ const getIcon = (slug: string) => {
 };
 
 export default function CategoriesPage() {
-  const dispatch = useAppDispatch();
-  const { isLoading, categories, error } = useAppSelector(
-    (state) => state.category
-  );
-
-  useEffect(() => {
-    dispatch(getTreeCategories());
-  }, [dispatch]);
+  const { data: categories, isLoading, error } = useCategoryTree();
 
   useEffect(() => {
     if (error) {
-      toast.error(error);
+      toast.error(String(error));
     }
   }, [error]);
 
   return (
     <div className="w-full min-h-screen bg-background">
       {isLoading && <SpinnerLoading className="fixed inset-0 m-auto z-50" />}
-      
-      <div className={`container-taobao py-4 ${isLoading ? "opacity-50 pointer-events-none" : ""}`}>
+
+      <div
+        className={`container-taobao py-4 ${
+          isLoading ? "opacity-50 pointer-events-none" : ""
+        }`}
+      >
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
-          <Link href="/" className="hover:text-primary transition-colors">Trang chủ</Link>
+          <Link href="/" className="hover:text-primary transition-colors">
+            Trang chủ
+          </Link>
           <ChevronRight className="w-3 h-3" />
           <span className="text-foreground">Tất cả danh mục</span>
         </div>
@@ -102,18 +100,18 @@ export default function CategoriesPage() {
         {categories && categories.length > 0 ? (
           <div className="space-y-3">
             {categories.map((category) => (
-              <div 
-                key={category._id} 
+              <div
+                key={category._id}
                 className="bg-card rounded-lg border border-border overflow-hidden"
               >
                 {/* Category Header - Compact */}
                 <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
-                      {getIcon(category.slug ?? '')}
+                      {getIcon(category.slug ?? "")}
                     </div>
                     <div>
-                      <Link 
+                      <Link
                         href={`/categories/${category.slug}`}
                         className="font-semibold text-sm text-foreground hover:text-primary transition-colors"
                       >
@@ -124,7 +122,7 @@ export default function CategoriesPage() {
                       </p>
                     </div>
                   </div>
-                  <Link 
+                  <Link
                     href={`/categories/${category.slug}`}
                     className="flex items-center gap-1 text-xs text-primary hover:underline"
                   >
@@ -134,39 +132,42 @@ export default function CategoriesPage() {
                 </div>
 
                 {/* Subcategories Grid - Always Visible */}
-                {category.subcategories && category.subcategories.length > 0 && (
-                  <div className="p-3">
-                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-                      {category.subcategories.slice(0, 16).map((sub) => (
-                        <Link
-                          key={sub._id}
-                          href={`/categories/${sub.slug}`}
-                          className="group flex flex-col items-center p-2 rounded-lg hover:bg-primary/5 transition-all"
-                        >
-                          <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center mb-1.5 group-hover:bg-primary/10 transition-colors overflow-hidden">
-                            <Package className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
-                          </div>
-                          <span className="text-[11px] text-center text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight">
-                            {sub.name}
-                          </span>
-                        </Link>
-                      ))}
-                      {category.subcategories.length > 16 && (
-                        <Link
-                          href={`/categories/${category.slug}`}
-                          className="group flex flex-col items-center p-2 rounded-lg hover:bg-primary/5 transition-all"
-                        >
-                          <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-1.5">
-                            <span className="text-xs font-bold text-primary">+{category.subcategories.length - 16}</span>
-                          </div>
-                          <span className="text-[11px] text-center text-primary font-medium">
-                            Xem thêm
-                          </span>
-                        </Link>
-                      )}
+                {category.subcategories &&
+                  category.subcategories.length > 0 && (
+                    <div className="p-3">
+                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+                        {category.subcategories.slice(0, 16).map((sub) => (
+                          <Link
+                            key={sub._id}
+                            href={`/categories/${sub.slug}`}
+                            className="group flex flex-col items-center p-2 rounded-lg hover:bg-primary/5 transition-all"
+                          >
+                            <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center mb-1.5 group-hover:bg-primary/10 transition-colors overflow-hidden">
+                              <Package className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                            </div>
+                            <span className="text-[11px] text-center text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight">
+                              {sub.name}
+                            </span>
+                          </Link>
+                        ))}
+                        {category.subcategories.length > 16 && (
+                          <Link
+                            href={`/categories/${category.slug}`}
+                            className="group flex flex-col items-center p-2 rounded-lg hover:bg-primary/5 transition-all"
+                          >
+                            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-1.5">
+                              <span className="text-xs font-bold text-primary">
+                                +{category.subcategories.length - 16}
+                              </span>
+                            </div>
+                            <span className="text-[11px] text-center text-primary font-medium">
+                              Xem thêm
+                            </span>
+                          </Link>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
               </div>
             ))}
           </div>
@@ -176,7 +177,9 @@ export default function CategoriesPage() {
               <div className="w-14 h-14 bg-muted rounded-full flex items-center justify-center mb-3">
                 <Package className="w-7 h-7 text-muted-foreground" />
               </div>
-              <p className="text-sm text-muted-foreground">Không có danh mục nào</p>
+              <p className="text-sm text-muted-foreground">
+                Không có danh mục nào
+              </p>
             </div>
           )
         )}

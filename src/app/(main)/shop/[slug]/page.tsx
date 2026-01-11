@@ -1,29 +1,28 @@
 // ShopPage - Taobao Light Style
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { 
-  Store, 
-  Star, 
-  Users, 
-  MessageCircle, 
-  Clock, 
+import {
+  Store,
+  Star,
+  Users,
+  MessageCircle,
+  Clock,
   Truck,
   Search,
   Grid3X3,
   List,
-  Loader2
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ProductCard from "@/components/product/ProductCard";
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { getShopById } from "@/features/shop/shopAction";
-import { getShopCategories } from "@/features/shopCategory/shopCategoryAction";
-import { getProductsByShop } from "@/features/product/productAction";
+import { useShopBySlug, useShopCategories } from "@/hooks/queries/useShop";
+import { useShopProducts } from "@/hooks/queries/useProducts";
 import { startConversation } from "@/features/chat/chatAction";
 import { setChatOpen } from "@/features/chat/chatSlice";
 
@@ -32,34 +31,24 @@ export default function ShopPage() {
   const dispatch = useAppDispatch();
   const slug = params.slug as string;
 
-  const { currentShop, isLoading: shopLoading, error: shopError } = useAppSelector(
-    (state) => state.shop
+  const {
+    data: currentShop,
+    isLoading: shopLoading,
+    error: shopError,
+  } = useShopBySlug(slug);
+  const { data: categories = [], isLoading: categoriesLoading } =
+    useShopCategories(currentShop?._id || "", { enabled: !!currentShop?._id });
+  const { data: productsData, isLoading: productsLoading } = useShopProducts(
+    currentShop?._id || "",
+    { page: 1, limit: 50 }
   );
-  const { categories, isLoading: categoriesLoading } = useAppSelector(
-    (state) => state.shopCategory
-  );
-  const { all: products, isLoading: productsLoading } = useAppSelector(
-    (state) => state.product
-  );
+  const products = productsData?.products || [];
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
   const [isFollowing, setIsFollowing] = useState(false);
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-
-  useEffect(() => {
-    if (slug) {
-      dispatch(getShopById(slug));
-    }
-  }, [dispatch, slug]);
-
-  useEffect(() => {
-    if (currentShop?._id) {
-      dispatch(getShopCategories(currentShop._id));
-      dispatch(getProductsByShop({ shopId: currentShop._id }));
-    }
-  }, [dispatch, currentShop?._id]);
 
   const handleFollow = () => {
     setIsFollowing(!isFollowing);
@@ -89,10 +78,11 @@ export default function ShopPage() {
 
   // Filter products by category and search
   const filteredProducts = products.filter((product) => {
-    const matchesSearch = !searchQuery || 
+    const matchesSearch =
+      !searchQuery ||
       product.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = activeCategory === "all" || 
-      product.category?.slug === activeCategory;
+    const matchesCategory =
+      activeCategory === "all" || product.category?.slug === activeCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -109,7 +99,11 @@ export default function ShopPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Store className="h-12 w-12 mx-auto mb-2 text-gray-300" />
-          <p className="text-gray-500">{shopError || "Không tìm thấy shop"}</p>
+          <p className="text-gray-500">
+            {shopError instanceof Error
+              ? shopError.message
+              : shopError || "Không tìm thấy shop"}
+          </p>
           <Link href="/">
             <Button variant="outline" className="mt-4">
               Về trang chủ
@@ -150,24 +144,33 @@ export default function ShopPage() {
             {/* Info */}
             <div className="flex-1 text-center md:text-left">
               <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
-                <h1 className="text-xl font-bold text-gray-800">{currentShop.name}</h1>
+                <h1 className="text-xl font-bold text-gray-800">
+                  {currentShop.name}
+                </h1>
                 <span className="inline-flex items-center justify-center md:justify-start gap-1 text-xs text-[#E53935] border border-[#E53935] px-2 py-0.5 rounded w-fit mx-auto md:mx-0">
                   <Store className="h-3 w-3" />
                   Official Store
                 </span>
               </div>
-              <p className="text-sm text-gray-500 mt-1 line-clamp-2">{currentShop.description}</p>
-              
+              <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+                {currentShop.description}
+              </p>
+
               {/* Stats */}
               <div className="flex items-center justify-center md:justify-start gap-6 mt-3 text-sm">
                 <div className="flex items-center gap-1">
                   <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
                   <span className="font-medium">{currentShop.rating}</span>
-                  <span className="text-gray-400">({formatNumber(currentShop.metrics?.ratingCount || 0)} đánh giá)</span>
+                  <span className="text-gray-400">
+                    ({formatNumber(currentShop.metrics?.ratingCount || 0)} đánh
+                    giá)
+                  </span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Users className="h-4 w-4 text-gray-400" />
-                  <span className="font-medium">{formatNumber(currentShop.followers || 0)}</span>
+                  <span className="font-medium">
+                    {formatNumber(currentShop.followerCount || 0)}
+                  </span>
                   <span className="text-gray-400">theo dõi</span>
                 </div>
               </div>
@@ -178,14 +181,19 @@ export default function ShopPage() {
               <Button
                 onClick={handleFollow}
                 variant={isFollowing ? "outline" : "default"}
-                className={isFollowing 
-                  ? "border-[#E53935] text-[#E53935] hover:bg-[#FFEBEE]" 
-                  : "bg-[#E53935] hover:bg-[#D32F2F]"
+                className={
+                  isFollowing
+                    ? "border-[#E53935] text-[#E53935] hover:bg-[#FFEBEE]"
+                    : "bg-[#E53935] hover:bg-[#D32F2F]"
                 }
               >
                 {isFollowing ? "Đang theo dõi" : "+ Theo dõi"}
               </Button>
-              <Button variant="outline" className="border-gray-200" onClick={handleChat}>
+              <Button
+                variant="outline"
+                className="border-gray-200"
+                onClick={handleChat}
+              >
                 <MessageCircle className="h-4 w-4 mr-1" />
                 Chat
               </Button>
@@ -197,7 +205,9 @@ export default function ShopPage() {
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 text-[#4CAF50]">
                 <MessageCircle className="h-4 w-4" />
-                <span className="font-bold">{currentShop.metrics?.responseRate || 0}%</span>
+                <span className="font-bold">
+                  {currentShop.metrics?.responseRate || 0}%
+                </span>
               </div>
               <p className="text-xs text-gray-500 mt-0.5">Tỉ lệ phản hồi</p>
             </div>
@@ -211,7 +221,9 @@ export default function ShopPage() {
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 text-[#FF9800]">
                 <Truck className="h-4 w-4" />
-                <span className="font-bold">{currentShop.metrics?.shippingOnTime || 0}%</span>
+                <span className="font-bold">
+                  {currentShop.metrics?.shippingOnTime || 0}%
+                </span>
               </div>
               <p className="text-xs text-gray-500 mt-0.5">Giao đúng hạn</p>
             </div>
@@ -242,7 +254,9 @@ export default function ShopPage() {
                       }`}
                     >
                       Tất cả
-                      <span className="text-gray-400 ml-1">({products.length})</span>
+                      <span className="text-gray-400 ml-1">
+                        ({products.length})
+                      </span>
                     </button>
                   </li>
                   {categories.map((cat) => (
@@ -256,7 +270,12 @@ export default function ShopPage() {
                         }`}
                       >
                         {cat.name}
-                        <span className="text-gray-400 ml-1">({cat.productCount})</span>
+                        {(cat as { productCount?: number }).productCount !==
+                          undefined && (
+                          <span className="text-gray-400 ml-1">
+                            ({(cat as { productCount?: number }).productCount})
+                          </span>
+                        )}
                       </button>
                     </li>
                   ))}
@@ -281,13 +300,21 @@ export default function ShopPage() {
               <div className="flex items-center gap-1 ml-auto">
                 <button
                   onClick={() => setViewMode("grid")}
-                  className={`p-2 rounded ${viewMode === "grid" ? "bg-[#FFEBEE] text-[#E53935]" : "text-gray-400 hover:bg-gray-50"}`}
+                  className={`p-2 rounded ${
+                    viewMode === "grid"
+                      ? "bg-[#FFEBEE] text-[#E53935]"
+                      : "text-gray-400 hover:bg-gray-50"
+                  }`}
                 >
                   <Grid3X3 className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setViewMode("list")}
-                  className={`p-2 rounded ${viewMode === "list" ? "bg-[#FFEBEE] text-[#E53935]" : "text-gray-400 hover:bg-gray-50"}`}
+                  className={`p-2 rounded ${
+                    viewMode === "list"
+                      ? "bg-[#FFEBEE] text-[#E53935]"
+                      : "text-gray-400 hover:bg-gray-50"
+                  }`}
                 >
                   <List className="h-4 w-4" />
                 </button>

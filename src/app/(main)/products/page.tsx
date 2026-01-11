@@ -1,18 +1,17 @@
 // ProductsPage - Taobao Style with Sticky Category Tabs
 "use client";
 
-import { useEffect, useState, useMemo, useCallback } from "react";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { useState, useMemo, useCallback } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
-import { getAllProducts } from "@/features/product/productAction";
-import { getAllCategories } from "@/features/category/categoryAction";
+import { useProducts } from "@/hooks/queries/useProducts";
+import { useCategories } from "@/hooks/queries/useCategories";
 import { Button } from "@/components/ui/button";
 import { SlidersHorizontal, ChevronDown } from "lucide-react";
 import ProductFilter from "@/components/product/ProductFilter";
 import ProductGrid from "@/components/product/ProductGrid";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
-import { Params, ProductFilters, ProductUrlFilters } from "@/types/product";
+import { ProductFilters, ProductUrlFilters } from "@/types/product";
 import {
   Sheet,
   SheetContent,
@@ -41,18 +40,12 @@ const SORT_TABS = [
 ];
 
 export default function ProductsPage() {
-  const dispatch = useAppDispatch();
-  const { all: products, isLoading } = useAppSelector((state) => state.product);
-  const { categories } = useAppSelector((state) => state.category);
+  const { data: categoriesData } = useCategories({});
+  const categories = categoriesData?.data || [];
 
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [priceSort, setPriceSort] = useState<"asc" | "desc" | null>(null);
-
-  // Fetch categories on mount
-  useEffect(() => {
-    dispatch(getAllCategories({}));
-  }, [dispatch]);
 
   const {
     filters: urlFilters,
@@ -84,24 +77,33 @@ export default function ProductsPage() {
   const debouncedFilters = useDebounce(filters, 300);
   const debouncedCategory = useDebounce(activeCategory, 300);
 
-  // API call with debounced values
-  useEffect(() => {
-    const params: Params = {
+  // Build query params for React Query
+  const queryParams = useMemo(() => {
+    const params: Record<string, string | number | boolean> = {
       page: 1,
       limit: 50,
     };
 
     if (debouncedFilters.search) params.search = debouncedFilters.search;
-    if (debouncedFilters.minPrice > 0) params.minPrice = debouncedFilters.minPrice;
-    if (debouncedFilters.maxPrice < 10000000) params.maxPrice = debouncedFilters.maxPrice;
-    if (debouncedFilters.sortBy !== "newest") params.sortBy = debouncedFilters.sortBy;
-    if (debouncedFilters.rating.length > 0) params.rating = debouncedFilters.rating.join(",");
-    if (debouncedFilters.colors.length > 0) params.colors = debouncedFilters.colors.join(",");
-    if (debouncedFilters.sizes.length > 0) params.sizes = debouncedFilters.sizes.join(",");
+    if (debouncedFilters.minPrice > 0)
+      params.minPrice = debouncedFilters.minPrice;
+    if (debouncedFilters.maxPrice < 10000000)
+      params.maxPrice = debouncedFilters.maxPrice;
+    if (debouncedFilters.sortBy !== "newest")
+      params.sort = debouncedFilters.sortBy;
+    if (debouncedFilters.rating.length > 0)
+      params.rating = debouncedFilters.rating.join(",");
+    if (debouncedFilters.colors.length > 0)
+      params.colors = debouncedFilters.colors.join(",");
+    if (debouncedFilters.sizes.length > 0)
+      params.sizes = debouncedFilters.sizes.join(",");
     if (debouncedCategory) params.category = debouncedCategory;
 
-    dispatch(getAllProducts(params));
-  }, [dispatch, debouncedFilters, debouncedCategory]);
+    return params;
+  }, [debouncedFilters, debouncedCategory]);
+
+  const { data: productsData, isLoading } = useProducts(queryParams);
+  const products = productsData?.products || [];
 
   const handleFilterChange = useCallback(
     (newFilters: Partial<ProductFilters>) => {
@@ -204,7 +206,10 @@ export default function ProductsPage() {
             ))}
 
             {/* Mobile Filter Button */}
-            <Sheet open={isMobileFilterOpen} onOpenChange={setIsMobileFilterOpen}>
+            <Sheet
+              open={isMobileFilterOpen}
+              onOpenChange={setIsMobileFilterOpen}
+            >
               <SheetTrigger asChild>
                 <Button
                   variant="outline"
@@ -215,7 +220,10 @@ export default function ProductsPage() {
                   Lọc
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-[280px] overflow-y-auto p-0">
+              <SheetContent
+                side="left"
+                className="w-[280px] overflow-y-auto p-0"
+              >
                 <SheetHeader className="p-4 border-b">
                   <SheetTitle>Bộ lọc</SheetTitle>
                 </SheetHeader>
@@ -231,7 +239,9 @@ export default function ProductsPage() {
 
             {/* Product Count */}
             <div className="hidden lg:flex items-center ml-auto text-sm text-gray-500">
-              <span className="font-medium text-gray-800">{products?.length || 0}</span>
+              <span className="font-medium text-gray-800">
+                {products?.length || 0}
+              </span>
               <span className="ml-1">sản phẩm</span>
             </div>
           </div>
@@ -257,7 +267,10 @@ export default function ProductsPage() {
             )}
 
             <div className="bg-[#f7f7f7] rounded-lg p-4">
-              <ProductGrid products={products || []} isLoading={isLoading && !products?.length} />
+              <ProductGrid
+                products={products || []}
+                isLoading={isLoading && !products?.length}
+              />
             </div>
 
             {/* Load More */}

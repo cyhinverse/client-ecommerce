@@ -1,64 +1,59 @@
 "use client";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
-import { getTreeCategories } from "@/features/category/categoryAction";
-import { getProductsBySlugOfCategory } from "@/features/product/productAction";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { useCategoryTree } from "@/hooks/queries/useCategories";
+import { useProductsByCategory } from "@/hooks/queries/useProducts";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ProductCard } from "@/components/product/ProductCard";
 import { cn } from "@/lib/utils";
-import { 
-  ChevronRight, 
+import {
+  ChevronRight,
   ChevronLeft,
-  Grid3X3, 
-  LayoutList, 
+  Grid3X3,
+  LayoutList,
   ChevronDown,
   Package,
 } from "lucide-react";
 
-type SortType = 'default' | 'sales' | 'price-asc' | 'price-desc' | 'newest';
+type SortType = "default" | "sales" | "price-asc" | "price-desc" | "newest";
 
 export default function CategoryDetailPage() {
-  const dispatch = useAppDispatch();
   const path = usePathname();
   const slug = path.split("/")[2];
-  const { isLoading: isCategoryLoading, categories, error } = useAppSelector(
-    (state) => state.category
-  );
-  const { byCategory, isLoading: isProductLoading } = useAppSelector((state) => state.product);
-  
-  const [sortBy, setSortBy] = useState<SortType>('default');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  useEffect(() => {
-    dispatch(getTreeCategories());
-  }, [dispatch]);
+  const {
+    data: categories,
+    isLoading: isCategoryLoading,
+    error,
+  } = useCategoryTree();
+  const { data: byCategory = [], isLoading: isProductLoading } =
+    useProductsByCategory(slug || "", { enabled: !!slug });
 
-  useEffect(() => {
-    if (slug) {
-      dispatch(getProductsBySlugOfCategory(slug));
-    }
-  }, [dispatch, slug]);
+  const [sortBy, setSortBy] = useState<SortType>("default");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   useEffect(() => {
     if (error) {
-      toast.error(error);
+      toast.error(String(error));
     }
   }, [error]);
 
-  const currentCategory = categories?.find(c => c.slug === slug);
+  const currentCategory = categories?.find((c) => c.slug === slug);
 
   // Sort products
   const sortedProducts = [...(byCategory || [])].sort((a, b) => {
     switch (sortBy) {
-      case 'price-asc':
+      case "price-asc":
         return (a.price?.currentPrice || 0) - (b.price?.currentPrice || 0);
-      case 'price-desc':
+      case "price-desc":
         return (b.price?.currentPrice || 0) - (a.price?.currentPrice || 0);
-      case 'newest':
-        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+      case "newest":
+        return (
+          new Date(b.createdAt || 0).getTime() -
+          new Date(a.createdAt || 0).getTime()
+        );
       default:
         return 0;
     }
@@ -69,40 +64,45 @@ export default function CategoryDetailPage() {
   return (
     <div className="w-full min-h-screen bg-background">
       {isLoading && <SpinnerLoading className="fixed inset-0 m-auto z-50" />}
-      
-      <div className={cn("transition-opacity duration-200", isLoading ? "opacity-50" : "opacity-100")}>
-        
+
+      <div
+        className={cn(
+          "transition-opacity duration-200",
+          isLoading ? "opacity-50" : "opacity-100"
+        )}
+      >
         {/* Subcategory Tabs with Images - Taobao Style */}
-        {currentCategory?.subcategories && currentCategory.subcategories.length > 0 && (
-          <div className="bg-card">
-            <div className="container-taobao py-3">
-              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-                <button className="p-1.5 rounded-full bg-muted hover:bg-muted/80 shrink-0">
-                  <ChevronLeft className="w-4 h-4 text-muted-foreground" />
-                </button>
-                
-                {currentCategory.subcategories.slice(0, 12).map((sub) => (
-                  <Link
-                    key={sub._id}
-                    href={`/categories/${sub.slug}`}
-                    className="flex flex-col items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-muted/50 transition-colors shrink-0 min-w-[80px]"
-                  >
-                    <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center overflow-hidden">
-                      <Package className="w-6 h-6 text-muted-foreground" />
-                    </div>
-                    <span className="text-[11px] text-foreground text-center line-clamp-1 max-w-[70px]">
-                      {sub.name}
-                    </span>
-                  </Link>
-                ))}
-                
-                <button className="p-1.5 rounded-full bg-muted hover:bg-muted/80 shrink-0">
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                </button>
+        {currentCategory?.subcategories &&
+          currentCategory.subcategories.length > 0 && (
+            <div className="bg-card">
+              <div className="container-taobao py-3">
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+                  <button className="p-1.5 rounded-full bg-muted hover:bg-muted/80 shrink-0">
+                    <ChevronLeft className="w-4 h-4 text-muted-foreground" />
+                  </button>
+
+                  {currentCategory.subcategories.slice(0, 12).map((sub) => (
+                    <Link
+                      key={sub._id}
+                      href={`/categories/${sub.slug}`}
+                      className="flex flex-col items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-muted/50 transition-colors shrink-0 min-w-[80px]"
+                    >
+                      <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center overflow-hidden">
+                        <Package className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                      <span className="text-[11px] text-foreground text-center line-clamp-1 max-w-[70px]">
+                        {sub.name}
+                      </span>
+                    </Link>
+                  ))}
+
+                  <button className="p-1.5 rounded-full bg-muted hover:bg-muted/80 shrink-0">
+                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* Main Tabs */}
         <div className="bg-card">
@@ -128,62 +128,68 @@ export default function CategoryDetailPage() {
               {/* Sort Tabs */}
               <div className="flex items-center">
                 <button
-                  onClick={() => setSortBy('default')}
+                  onClick={() => setSortBy("default")}
                   className={cn(
                     "px-4 py-1.5 text-xs font-medium rounded-sm transition-colors",
-                    sortBy === 'default' 
-                      ? "bg-primary text-white" 
+                    sortBy === "default"
+                      ? "bg-primary text-white"
                       : "text-foreground hover:text-primary"
                   )}
                 >
                   Tổng hợp
                 </button>
                 <button
-                  onClick={() => setSortBy('sales')}
+                  onClick={() => setSortBy("sales")}
                   className={cn(
                     "px-4 py-1.5 text-xs font-medium transition-colors",
-                    sortBy === 'sales' 
-                      ? "text-primary" 
+                    sortBy === "sales"
+                      ? "text-primary"
                       : "text-foreground hover:text-primary"
                   )}
                 >
                   Bán chạy
                 </button>
                 <button
-                  onClick={() => setSortBy(sortBy === 'price-asc' ? 'price-desc' : 'price-asc')}
+                  onClick={() =>
+                    setSortBy(
+                      sortBy === "price-asc" ? "price-desc" : "price-asc"
+                    )
+                  }
                   className={cn(
                     "px-4 py-1.5 text-xs font-medium transition-colors flex items-center gap-0.5",
-                    (sortBy === 'price-asc' || sortBy === 'price-desc')
-                      ? "text-primary" 
+                    sortBy === "price-asc" || sortBy === "price-desc"
+                      ? "text-primary"
                       : "text-foreground hover:text-primary"
                   )}
                 >
                   Giá
-                  <ChevronDown className={cn(
-                    "w-3 h-3 transition-transform",
-                    sortBy === 'price-asc' && "rotate-180"
-                  )} />
+                  <ChevronDown
+                    className={cn(
+                      "w-3 h-3 transition-transform",
+                      sortBy === "price-asc" && "rotate-180"
+                    )}
+                  />
                 </button>
-                
+
                 {/* Price Range */}
                 <div className="flex items-center gap-1 ml-2 text-xs text-muted-foreground">
                   <span className="text-primary">Khoảng giá</span>
                   <ChevronDown className="w-3 h-3" />
                 </div>
-                
+
                 {/* Brand filter */}
                 <div className="flex items-center gap-1 ml-3 text-xs text-muted-foreground">
                   <span>Thương hiệu</span>
                   <ChevronDown className="w-3 h-3" />
                 </div>
-                
+
                 {/* More filters */}
                 <button
-                  onClick={() => setSortBy('newest')}
+                  onClick={() => setSortBy("newest")}
                   className={cn(
                     "px-3 py-1.5 text-xs font-medium transition-colors ml-2",
-                    sortBy === 'newest' 
-                      ? "text-primary" 
+                    sortBy === "newest"
+                      ? "text-primary"
                       : "text-foreground hover:text-primary"
                   )}
                 >
@@ -198,19 +204,23 @@ export default function CategoryDetailPage() {
                 </span>
                 <div className="flex items-center overflow-hidden">
                   <button
-                    onClick={() => setViewMode('grid')}
+                    onClick={() => setViewMode("grid")}
                     className={cn(
                       "p-1.5 transition-colors",
-                      viewMode === 'grid' ? "text-primary" : "text-muted-foreground hover:text-primary"
+                      viewMode === "grid"
+                        ? "text-primary"
+                        : "text-muted-foreground hover:text-primary"
                     )}
                   >
                     <Grid3X3 className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={() => setViewMode('list')}
+                    onClick={() => setViewMode("list")}
                     className={cn(
                       "p-1.5 transition-colors",
-                      viewMode === 'list' ? "text-primary" : "text-muted-foreground hover:text-primary"
+                      viewMode === "list"
+                        ? "text-primary"
+                        : "text-muted-foreground hover:text-primary"
                     )}
                   >
                     <LayoutList className="w-4 h-4" />
@@ -244,12 +254,14 @@ export default function CategoryDetailPage() {
         {/* Products Grid */}
         <div className="container-taobao py-4">
           {sortedProducts.length > 0 ? (
-            <div className={cn(
-              "grid gap-2",
-              viewMode === 'grid' 
-                ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5" 
-                : "grid-cols-1"
-            )}>
+            <div
+              className={cn(
+                "grid gap-2",
+                viewMode === "grid"
+                  ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+                  : "grid-cols-1"
+              )}
+            >
               {sortedProducts.map((p) => (
                 <ProductCard key={p._id} product={p} />
               ))}
@@ -260,9 +272,13 @@ export default function CategoryDetailPage() {
                 <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
                   <Package className="w-8 h-8 text-muted-foreground" />
                 </div>
-                <h3 className="font-semibold text-foreground mb-2">Không tìm thấy sản phẩm</h3>
-                <p className="text-sm text-muted-foreground mb-4">Danh mục này chưa có sản phẩm nào</p>
-                <Link 
+                <h3 className="font-semibold text-foreground mb-2">
+                  Không tìm thấy sản phẩm
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Danh mục này chưa có sản phẩm nào
+                </p>
+                <Link
                   href="/products"
                   className="px-4 py-2 bg-primary text-white text-sm rounded-lg hover:bg-primary/90 transition-colors"
                 >

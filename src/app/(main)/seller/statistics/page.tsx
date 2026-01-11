@@ -1,12 +1,19 @@
 "use client";
-import { useState, useEffect } from "react";
-import { 
-  BarChart3, TrendingUp, TrendingDown, DollarSign, 
-  ShoppingCart, Package, Users, Calendar, ArrowUpRight
+import { useState } from "react";
+import {
+  BarChart3,
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  ShoppingCart,
+  Package,
+  Users,
+  Calendar,
+  ArrowUpRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAppSelector, useAppDispatch } from "@/hooks/hooks";
-import { getProductsByShop } from "@/features/product/productAction";
+import { useMyShop } from "@/hooks/queries/useShop";
+import { useShopProducts } from "@/hooks/queries/useProducts";
 
 const formatPrice = (price: number): string => {
   if (price >= 1000000000) return (price / 1000000000).toFixed(1) + "B";
@@ -16,18 +23,14 @@ const formatPrice = (price: number): string => {
 };
 
 export default function SellerStatisticsPage() {
-  const dispatch = useAppDispatch();
-  const { myShop } = useAppSelector((state) => state.shop);
-  const { pagination: productPagination } = useAppSelector((state) => state.product);
+  const { data: myShop } = useMyShop();
+  const { data: productsData } = useShopProducts(myShop?._id || "", {
+    page: 1,
+    limit: 1,
+  });
   const [period, setPeriod] = useState<"week" | "month" | "year">("month");
 
-  const totalProducts = productPagination?.totalItems || 0;
-
-  useEffect(() => {
-    if (myShop?._id) {
-      dispatch(getProductsByShop({ shopId: myShop._id, page: 1, limit: 1 }));
-    }
-  }, [myShop, period, dispatch]);
+  const totalProducts = productsData?.pagination?.total || 0;
 
   const periods = [
     { key: "week", label: "7 ngày" },
@@ -47,7 +50,9 @@ export default function SellerStatisticsPage() {
           </div>
           <div>
             <h1 className="text-xl font-bold text-gray-800">Thống kê</h1>
-            <p className="text-sm text-gray-500">Phân tích hiệu suất shop của bạn</p>
+            <p className="text-sm text-gray-500">
+              Phân tích hiệu suất shop của bạn
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2 bg-[#f7f7f7] p-1 rounded-xl">
@@ -104,7 +109,9 @@ export default function SellerStatisticsPage() {
         {/* Revenue Chart */}
         <div className="bg-[#f7f7f7] rounded-2xl p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="font-semibold text-gray-800">Doanh thu theo thời gian</h3>
+            <h3 className="font-semibold text-gray-800">
+              Doanh thu theo thời gian
+            </h3>
             <Button variant="ghost" size="sm" className="text-primary">
               <Calendar className="h-4 w-4 mr-1" />
               Chi tiết
@@ -122,7 +129,9 @@ export default function SellerStatisticsPage() {
         {/* Orders Chart */}
         <div className="bg-[#f7f7f7] rounded-2xl p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="font-semibold text-gray-800">Đơn hàng theo trạng thái</h3>
+            <h3 className="font-semibold text-gray-800">
+              Đơn hàng theo trạng thái
+            </h3>
             <Button variant="ghost" size="sm" className="text-primary">
               <ArrowUpRight className="h-4 w-4 mr-1" />
               Xem tất cả
@@ -173,19 +182,36 @@ const colorMap = {
   orange: { icon: "bg-orange-100", text: "text-orange-600" },
 };
 
-const StatCard = ({ title, value, change, subtext, icon: Icon, color }: StatCardProps) => {
+const StatCard = ({
+  title,
+  value,
+  change,
+  subtext,
+  icon: Icon,
+  color,
+}: StatCardProps) => {
   const colors = colorMap[color];
   const isPositive = change !== undefined && change >= 0;
 
   return (
     <div className="bg-[#f7f7f7] rounded-2xl p-5">
       <div className="flex items-center justify-between mb-4">
-        <div className={`w-10 h-10 ${colors.icon} rounded-xl flex items-center justify-center`}>
+        <div
+          className={`w-10 h-10 ${colors.icon} rounded-xl flex items-center justify-center`}
+        >
           <Icon className={`h-5 w-5 ${colors.text}`} />
         </div>
         {change !== undefined && (
-          <div className={`flex items-center gap-1 text-sm ${isPositive ? "text-green-600" : "text-red-500"}`}>
-            {isPositive ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
+          <div
+            className={`flex items-center gap-1 text-sm ${
+              isPositive ? "text-green-600" : "text-red-500"
+            }`}
+          >
+            {isPositive ? (
+              <TrendingUp className="h-4 w-4" />
+            ) : (
+              <TrendingDown className="h-4 w-4" />
+            )}
             <span>{Math.abs(change)}%</span>
           </div>
         )}

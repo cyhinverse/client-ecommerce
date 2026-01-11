@@ -1,49 +1,38 @@
-import { Shop } from "./product";
-import { PaginationData } from "./common";
+import { BaseEntity, PaginationData } from "./common";
+import { Shop } from "./shop";
 
-// Voucher type enum
+// Voucher type enum - matches backend schema
 export type VoucherType = "fixed_amount" | "percentage";
 
-// Voucher scope enum
+// Voucher scope enum - matches backend schema
 export type VoucherScope = "shop" | "platform";
 
-// Voucher interface - Replaces Discount
-export interface Voucher {
-  _id: string;
-  code: string;
+// Voucher interface - matches backend voucherSchema
+export interface Voucher extends BaseEntity {
+  code: string; // uppercase, unique
   name: string;
   description?: string;
-  
+
   // Type and value
   type: VoucherType;
-  value: number;
-  maxValue?: number;          // Max discount for percentage type
-  
+  value: number; // 10000 for fixed, 10 for percentage
+  maxValue?: number; // Max discount for percentage type
+
   // Scope
-  scope: VoucherScope;
-  shopId?: string | Shop;
-  
+  scope: VoucherScope; // default "shop"
+  shopId?: string | Shop; // Required if scope is "shop"
+
   // Usage limits
-  minOrderValue: number;
-  usageLimit: number;
-  usageCount: number;
-  usageLimitPerUser: number;
-  usedBy?: string[];
-  
+  minOrderValue: number; // default 0
+  usageLimit: number; // default 1000
+  usageCount: number; // default 0
+  usageLimitPerUser: number; // default 1
+  usedBy: string[]; // Array of User IDs who used this voucher
+
   // Validity
   startDate: string;
   endDate: string;
-  isActive: boolean;
-  
-  // Timestamps
-  createdAt: string;
-  updatedAt: string;
-  
-  // BACKWARD COMPATIBILITY: Old Discount field aliases
-  discountType?: "percent" | "fixed";  // Maps to type
-  discountValue?: number;              // Maps to value
-  usedCount?: number;                  // Maps to usageCount
-  applicableProducts?: string[];       // Deprecated
+  isActive: boolean; // default true
 }
 
 // Create voucher payload
@@ -62,10 +51,6 @@ export interface CreateVoucherData {
   startDate: string;
   endDate: string;
   isActive?: boolean;
-  // BACKWARD COMPATIBILITY: Old Discount field aliases
-  discountType?: "percent" | "fixed";
-  discountValue?: number;
-  applicableProducts?: string[];
 }
 
 // Update voucher payload
@@ -84,10 +69,6 @@ export interface UpdateVoucherData {
   startDate?: string;
   endDate?: string;
   isActive?: boolean;
-  // BACKWARD COMPATIBILITY: Old Discount field aliases
-  discountType?: "percent" | "fixed";
-  discountValue?: number;
-  applicableProducts?: string[];
 }
 
 // Voucher filters for listing
@@ -109,9 +90,6 @@ export interface ApplyVoucherResult {
   discountAmount: number;
   type: VoucherType;
   scope: VoucherScope;
-  // BACKWARD COMPATIBILITY
-  finalTotal?: number;
-  originalTotal?: number;
 }
 
 // Voucher state for Redux
@@ -124,7 +102,7 @@ export interface VoucherState {
   isUpdating: boolean;
   isDeleting: boolean;
   error: string | null;
-  
+
   // Applied vouchers in checkout
   appliedShopVoucher: ApplyVoucherResult | null;
   appliedPlatformVoucher: ApplyVoucherResult | null;
@@ -146,11 +124,11 @@ export function calculateVoucherDiscount(
   orderAmount: number
 ): number {
   if (orderAmount < voucher.minOrderValue) return 0;
-  
+
   if (voucher.type === "fixed_amount") {
     return Math.min(voucher.value, orderAmount);
   }
-  
+
   // Percentage type
   const discount = (orderAmount * voucher.value) / 100;
   if (voucher.maxValue) {
@@ -162,13 +140,13 @@ export function calculateVoucherDiscount(
 // Helper function to check if voucher is valid
 export function isVoucherValid(voucher: Voucher): boolean {
   if (!voucher.isActive) return false;
-  
+
   const now = new Date();
   const startDate = new Date(voucher.startDate);
   const endDate = new Date(voucher.endDate);
-  
+
   if (now < startDate || now > endDate) return false;
   if (voucher.usageCount >= voucher.usageLimit) return false;
-  
+
   return true;
 }

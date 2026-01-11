@@ -1,13 +1,21 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
-import { 
-  MessageSquare, Search, Send, User, 
-  Phone, Video, Info, Smile, Paperclip, ImageIcon
+import {
+  MessageSquare,
+  Search,
+  Send,
+  User,
+  Phone,
+  Video,
+  Info,
+  Smile,
+  Paperclip,
+  ImageIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useAppSelector } from "@/hooks/hooks";
+import { useMyShop } from "@/hooks/queries";
 import { cn } from "@/lib/utils";
 
 interface Message {
@@ -25,9 +33,10 @@ interface Conversation {
 }
 
 export default function SellerChatPage() {
-  const { myShop } = useAppSelector((state) => state.shop);
+  const { data: myShop } = useMyShop();
   const [conversations] = useState<Conversation[]>([]);
-  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [selectedConversation, setSelectedConversation] =
+    useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -39,19 +48,25 @@ export default function SellerChatPage() {
 
   const handleSendMessage = () => {
     if (!newMessage.trim() || !selectedConversation) return;
-    setMessages(prev => [...prev, {
-      _id: Date.now().toString(),
-      content: newMessage,
-      sender: "shop",
-      createdAt: new Date().toISOString(),
-    }]);
+    setMessages((prev) => [
+      ...prev,
+      {
+        _id: Date.now().toString(),
+        content: newMessage,
+        sender: "shop",
+        createdAt: new Date().toISOString(),
+      },
+    ]);
     setNewMessage("");
   };
 
-  const formatTime = (date: string) => new Date(date).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+  const formatTime = (date: string) =>
+    new Date(date).toLocaleTimeString("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
   if (!myShop) return null;
-
 
   return (
     <div className="bg-[#f7f7f7] rounded-2xl overflow-hidden h-[calc(100vh-180px)]">
@@ -65,7 +80,9 @@ export default function SellerChatPage() {
               </div>
               <div>
                 <h2 className="font-semibold text-gray-800">Tin nhắn</h2>
-                <p className="text-xs text-gray-500">{conversations.length} cuộc hội thoại</p>
+                <p className="text-xs text-gray-500">
+                  {conversations.length} cuộc hội thoại
+                </p>
               </div>
             </div>
             <div className="relative">
@@ -97,21 +114,41 @@ export default function SellerChatPage() {
                   <div className="relative">
                     <div className="w-12 h-12 rounded-full overflow-hidden bg-[#f7f7f7]">
                       {conv.customer.avatar ? (
-                        <Image src={conv.customer.avatar} alt={conv.customer.name} width={48} height={48} className="object-cover" />
+                        <Image
+                          src={conv.customer.avatar}
+                          alt={conv.customer.name}
+                          width={48}
+                          height={48}
+                          className="object-cover"
+                        />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center"><User className="h-5 w-5 text-gray-400" /></div>
+                        <div className="w-full h-full flex items-center justify-center">
+                          <User className="h-5 w-5 text-gray-400" />
+                        </div>
                       )}
                     </div>
                     {conv.unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-xs rounded-full flex items-center justify-center">{conv.unreadCount}</span>
+                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-xs rounded-full flex items-center justify-center">
+                        {conv.unreadCount}
+                      </span>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <p className="font-medium text-gray-800 truncate">{conv.customer.name}</p>
-                      {conv.lastMessage && <span className="text-xs text-gray-400">{formatTime(conv.lastMessage.createdAt)}</span>}
+                      <p className="font-medium text-gray-800 truncate">
+                        {conv.customer.name}
+                      </p>
+                      {conv.lastMessage && (
+                        <span className="text-xs text-gray-400">
+                          {formatTime(conv.lastMessage.createdAt)}
+                        </span>
+                      )}
                     </div>
-                    {conv.lastMessage && <p className="text-sm text-gray-500 truncate">{conv.lastMessage.content}</p>}
+                    {conv.lastMessage && (
+                      <p className="text-sm text-gray-500 truncate">
+                        {conv.lastMessage.content}
+                      </p>
+                    )}
                   </div>
                 </button>
               ))
@@ -127,28 +164,66 @@ export default function SellerChatPage() {
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full overflow-hidden bg-[#f7f7f7]">
                     {selectedConversation.customer.avatar ? (
-                      <Image src={selectedConversation.customer.avatar} alt={selectedConversation.customer.name} width={40} height={40} className="object-cover" />
+                      <Image
+                        src={selectedConversation.customer.avatar}
+                        alt={selectedConversation.customer.name}
+                        width={40}
+                        height={40}
+                        className="object-cover"
+                      />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center"><User className="h-4 w-4 text-gray-400" /></div>
+                      <div className="w-full h-full flex items-center justify-center">
+                        <User className="h-4 w-4 text-gray-400" />
+                      </div>
                     )}
                   </div>
                   <div>
-                    <p className="font-medium text-gray-800">{selectedConversation.customer.name}</p>
+                    <p className="font-medium text-gray-800">
+                      {selectedConversation.customer.name}
+                    </p>
                     <p className="text-xs text-green-500">Đang hoạt động</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Button variant="ghost" size="icon" className="rounded-lg"><Phone className="h-4 w-4 text-gray-500" /></Button>
-                  <Button variant="ghost" size="icon" className="rounded-lg"><Video className="h-4 w-4 text-gray-500" /></Button>
-                  <Button variant="ghost" size="icon" className="rounded-lg"><Info className="h-4 w-4 text-gray-500" /></Button>
+                  <Button variant="ghost" size="icon" className="rounded-lg">
+                    <Phone className="h-4 w-4 text-gray-500" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="rounded-lg">
+                    <Video className="h-4 w-4 text-gray-500" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="rounded-lg">
+                    <Info className="h-4 w-4 text-gray-500" />
+                  </Button>
                 </div>
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {messages.map((msg) => (
-                  <div key={msg._id} className={cn("flex", msg.sender === "shop" ? "justify-end" : "justify-start")}>
-                    <div className={cn("max-w-[70%] px-4 py-2.5 rounded-2xl", msg.sender === "shop" ? "bg-primary text-white rounded-br-md" : "bg-white text-gray-800 rounded-bl-md")}>
+                  <div
+                    key={msg._id}
+                    className={cn(
+                      "flex",
+                      msg.sender === "shop" ? "justify-end" : "justify-start"
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        "max-w-[70%] px-4 py-2.5 rounded-2xl",
+                        msg.sender === "shop"
+                          ? "bg-primary text-white rounded-br-md"
+                          : "bg-white text-gray-800 rounded-bl-md"
+                      )}
+                    >
                       <p className="text-sm">{msg.content}</p>
-                      <p className={cn("text-[10px] mt-1", msg.sender === "shop" ? "text-white/70" : "text-gray-400")}>{formatTime(msg.createdAt)}</p>
+                      <p
+                        className={cn(
+                          "text-[10px] mt-1",
+                          msg.sender === "shop"
+                            ? "text-white/70"
+                            : "text-gray-400"
+                        )}
+                      >
+                        {formatTime(msg.createdAt)}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -156,11 +231,41 @@ export default function SellerChatPage() {
               </div>
               <div className="p-4 bg-white">
                 <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon" className="rounded-lg shrink-0"><Smile className="h-5 w-5 text-gray-400" /></Button>
-                  <Button variant="ghost" size="icon" className="rounded-lg shrink-0"><ImageIcon className="h-5 w-5 text-gray-400" /></Button>
-                  <Button variant="ghost" size="icon" className="rounded-lg shrink-0"><Paperclip className="h-5 w-5 text-gray-400" /></Button>
-                  <Input placeholder="Nhập tin nhắn..." value={newMessage} onChange={(e) => setNewMessage(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSendMessage()} className="flex-1 h-11 rounded-xl bg-[#f7f7f7] border-0" />
-                  <Button onClick={handleSendMessage} disabled={!newMessage.trim()} className="bg-primary hover:bg-primary/90 rounded-xl h-11 px-4"><Send className="h-4 w-4" /></Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-lg shrink-0"
+                  >
+                    <Smile className="h-5 w-5 text-gray-400" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-lg shrink-0"
+                  >
+                    <ImageIcon className="h-5 w-5 text-gray-400" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-lg shrink-0"
+                  >
+                    <Paperclip className="h-5 w-5 text-gray-400" />
+                  </Button>
+                  <Input
+                    placeholder="Nhập tin nhắn..."
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+                    className="flex-1 h-11 rounded-xl bg-[#f7f7f7] border-0"
+                  />
+                  <Button
+                    onClick={handleSendMessage}
+                    disabled={!newMessage.trim()}
+                    className="bg-primary hover:bg-primary/90 rounded-xl h-11 px-4"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </>
@@ -169,8 +274,12 @@ export default function SellerChatPage() {
               <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mb-4">
                 <MessageSquare className="h-10 w-10 opacity-50" />
               </div>
-              <p className="text-lg font-medium text-gray-600">Chọn một cuộc hội thoại</p>
-              <p className="text-sm mt-1">Chọn từ danh sách bên trái để bắt đầu chat</p>
+              <p className="text-lg font-medium text-gray-600">
+                Chọn một cuộc hội thoại
+              </p>
+              <p className="text-sm mt-1">
+                Chọn từ danh sách bên trái để bắt đầu chat
+              </p>
             </div>
           )}
         </div>

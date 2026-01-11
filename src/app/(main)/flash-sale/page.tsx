@@ -3,7 +3,7 @@ import { memo, useMemo, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Zap, Clock, ChevronLeft, ChevronRight } from "lucide-react";
-import { useFlashSale } from "@/hooks/useFlashSale";
+import { useFlashSaleWithCountdown } from "@/hooks/queries/useFlashSale";
 import { cn } from "@/lib/utils";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { WishlistButton } from "@/components/common/WishlistButton";
@@ -29,7 +29,9 @@ const TimeSlot = memo(function TimeSlot({
       )}
     >
       <span className="text-lg font-bold">{slot.startTime}</span>
-      <span className={cn("text-xs", isActive ? "text-white/80" : "text-gray-400")}>
+      <span
+        className={cn("text-xs", isActive ? "text-white/80" : "text-gray-400")}
+      >
         {slot.label}
       </span>
     </button>
@@ -37,7 +39,11 @@ const TimeSlot = memo(function TimeSlot({
 });
 
 // Countdown Timer
-const CountdownTimer = memo(function CountdownTimer({ seconds }: { seconds: number }) {
+const CountdownTimer = memo(function CountdownTimer({
+  seconds,
+}: {
+  seconds: number;
+}) {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const secs = seconds % 60;
@@ -64,7 +70,11 @@ const CountdownTimer = memo(function CountdownTimer({ seconds }: { seconds: numb
 });
 
 // Progress Bar
-const SoldProgress = memo(function SoldProgress({ percent }: { percent: number }) {
+const SoldProgress = memo(function SoldProgress({
+  percent,
+}: {
+  percent: number;
+}) {
   return (
     <div className="relative h-5 bg-[#FFCDD2] rounded-full overflow-hidden">
       <div
@@ -85,7 +95,8 @@ const FlashSaleProductCard = memo(function FlashSaleProductCard({
   product: any;
 }) {
   const { flashSaleInfo } = product;
-  const productImage = product.variants?.[0]?.images?.[0] || "/images/placeholder.png";
+  const productImage =
+    product.variants?.[0]?.images?.[0] || "/images/placeholder.png";
 
   return (
     <div className="bg-white rounded-xl overflow-hidden border border-gray-100 hover:shadow-lg transition-all group">
@@ -107,7 +118,11 @@ const FlashSaleProductCard = memo(function FlashSaleProductCard({
           )}
           {/* Wishlist Button */}
           <div className="absolute top-2 right-2">
-            <WishlistButton productId={product._id} productName={product.name} size="sm" />
+            <WishlistButton
+              productId={product._id}
+              productName={product.name}
+              size="sm"
+            />
           </div>
         </div>
       </Link>
@@ -154,7 +169,8 @@ const TIME_SLOTS = [
 
 export default function FlashSalePage() {
   const [activeSlot, setActiveSlot] = useState(0);
-  const { products, isLoading, error, fetchFlashSale } = useFlashSale(true);
+  const { products, isLoading, error, fetchFlashSale } =
+    useFlashSaleWithCountdown();
 
   // Get current slot based on time
   const currentSlotIndex = useMemo(() => {
@@ -192,7 +208,9 @@ export default function FlashSalePage() {
               <Zap className="h-8 w-8 text-white fill-white" />
               <h1 className="text-2xl font-bold text-white">FLASH SALE</h1>
             </div>
-            {remainingSeconds > 0 && <CountdownTimer seconds={remainingSeconds} />}
+            {remainingSeconds > 0 && (
+              <CountdownTimer seconds={remainingSeconds} />
+            )}
           </div>
         </div>
       </div>
@@ -227,7 +245,9 @@ export default function FlashSalePage() {
           <div className="text-center py-20">
             <Zap className="h-16 w-16 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500 text-lg">Chưa có sản phẩm Flash Sale</p>
-            <p className="text-gray-400 text-sm mt-2">Quay lại sau để xem các ưu đãi mới</p>
+            <p className="text-gray-400 text-sm mt-2">
+              Quay lại sau để xem các ưu đãi mới
+            </p>
             <Link
               href="/"
               className="inline-flex items-center gap-2 mt-6 px-6 py-2 bg-[#E53935] text-white rounded-full hover:bg-[#D32F2F] transition-colors"

@@ -5,17 +5,12 @@ import { Product } from "@/types/product";
 import WishlistButton from "@/components/common/WishlistButton";
 
 // Helper function to get price range from variants (new) or models (old)
-const getPriceRange = (product: Product): { min: number; max: number } | null => {
+const getPriceRange = (
+  product: Product
+): { min: number; max: number } | null => {
   // New structure: variants with price
   if (product.variants && product.variants.length > 0) {
-    const prices = product.variants.map(v => v.price).filter(p => p > 0);
-    if (prices.length > 0) {
-      return { min: Math.min(...prices), max: Math.max(...prices) };
-    }
-  }
-  // Old structure: models with price (backward compatibility)
-  if (product.models && product.models.length > 0) {
-    const prices = product.models.map(m => m.price).filter(p => p > 0);
+    const prices = product.variants.map((v) => v.price).filter((p) => p > 0);
     if (prices.length > 0) {
       return { min: Math.min(...prices), max: Math.max(...prices) };
     }
@@ -24,12 +19,14 @@ const getPriceRange = (product: Product): { min: number; max: number } | null =>
 };
 
 // Helper function to get display price
-const getDisplayPrice = (product: Product): { current: number; discount?: number } => {
+const getDisplayPrice = (
+  product: Product
+): { current: number; discount?: number } => {
   const priceRange = getPriceRange(product);
   if (priceRange) {
     return { current: priceRange.min };
   }
-  
+
   return {
     current: product.price?.currentPrice || 0,
     discount: product.price?.discountPrice || undefined,
@@ -42,14 +39,7 @@ const getProductImage = (product: Product): string | null => {
   if (product.variants?.[0]?.images?.[0]) {
     return product.variants[0].images[0];
   }
-  // Old structure: tierVariations (backward compatibility)
-  if (product.tierVariations?.[0]?.images?.[0]) {
-    const firstImage = product.tierVariations[0].images[0];
-    if (Array.isArray(firstImage)) {
-      return firstImage[0] || null;
-    }
-    return typeof firstImage === 'string' ? firstImage : null;
-  }
+
   return null;
 };
 
@@ -81,15 +71,16 @@ export const ProductCard = ({ product }: { product: Product }) => {
   const displayPrice = getDisplayPrice(product);
   const productImage = getProductImage(product);
   const priceRange = getPriceRange(product);
-  
-  const hasDiscount = product.onSale && 
-    displayPrice.discount && 
+
+  const hasDiscount =
+    product.onSale &&
+    displayPrice.discount &&
     displayPrice.discount < displayPrice.current;
-  
-  const discountPercent = hasDiscount 
+
+  const discountPercent = hasDiscount
     ? getDiscountPercent(displayPrice.current, displayPrice.discount!)
     : 0;
-  
+
   return (
     <Link
       href={`/products/${product.slug || product._id}`}
@@ -111,23 +102,23 @@ export const ProductCard = ({ product }: { product: Product }) => {
               <span className="text-gray-400 text-xs">Không có ảnh</span>
             </div>
           )}
-          
+
           {/* Wishlist Button */}
           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-            <WishlistButton 
-              productId={product._id} 
+            <WishlistButton
+              productId={product._id}
               productName={product.name}
               size="sm"
             />
           </div>
-          
+
           {/* Discount Badge - Orange */}
           {discountPercent > 0 && (
             <div className="absolute top-2 left-2 bg-[#FF9800] text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
               -{discountPercent}%
             </div>
           )}
-          
+
           {/* New Badge */}
           {product.soldCount === 0 && (
             <div className="absolute top-2 right-2 bg-[#4CAF50] text-white text-[10px] font-bold px-1.5 py-0.5 rounded group-hover:opacity-0 transition-opacity">
@@ -150,10 +141,10 @@ export const ProductCard = ({ product }: { product: Product }) => {
               <div className="flex items-baseline gap-1">
                 <span className="text-[10px] text-[#E53935]">₫</span>
                 <span className="font-bold text-base text-[#E53935]">
-                  {priceRange.min.toLocaleString('vi-VN')}
+                  {priceRange.min.toLocaleString("vi-VN")}
                 </span>
                 <span className="text-[11px] text-gray-500">
-                  - ₫{priceRange.max.toLocaleString('vi-VN')}
+                  - ₫{priceRange.max.toLocaleString("vi-VN")}
                 </span>
               </div>
             ) : hasDiscount ? (
@@ -161,18 +152,18 @@ export const ProductCard = ({ product }: { product: Product }) => {
                 <div className="flex items-baseline">
                   <span className="text-[10px] text-[#E53935]">₫</span>
                   <span className="font-bold text-base text-[#E53935]">
-                    {displayPrice.discount!.toLocaleString('vi-VN')}
+                    {displayPrice.discount!.toLocaleString("vi-VN")}
                   </span>
                 </div>
                 <span className="text-[11px] text-gray-400 line-through">
-                  ₫{displayPrice.current.toLocaleString('vi-VN')}
+                  ₫{displayPrice.current.toLocaleString("vi-VN")}
                 </span>
               </div>
             ) : (
               <div className="flex items-baseline">
                 <span className="text-[10px] text-[#E53935]">₫</span>
                 <span className="font-bold text-base text-[#E53935]">
-                  {displayPrice.current.toLocaleString('vi-VN')}
+                  {displayPrice.current.toLocaleString("vi-VN")}
                 </span>
               </div>
             )}
@@ -181,7 +172,8 @@ export const ProductCard = ({ product }: { product: Product }) => {
           {/* Shop & Sold Count */}
           <div className="flex items-center justify-between text-[11px] text-[#999] pt-1 border-t border-border">
             <span className="truncate max-w-[60%]">
-              {product.brand || (typeof product.shop === 'object' ? product.shop.name : "Shop")}
+              {product.brand ||
+                (typeof product.shop === "object" ? product.shop.name : "Shop")}
             </span>
             <span className="shrink-0">
               {formatSoldCount(product.soldCount)}

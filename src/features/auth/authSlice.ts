@@ -10,7 +10,6 @@ import {
   sendCode,
   verifyCode,
 } from "./authAction";
-import { fetchMyPermissions, updateMyPermissions } from "../permission/permissionAction";
 
 const initState: AuthState = {
   loading: false,
@@ -145,18 +144,6 @@ export const authSlice = createSlice({
     });
     builder.addCase(resetPassword.rejected, (state) => {
       state.loading = false;
-    });
-
-    // Permission actions
-    builder.addCase(fetchMyPermissions.fulfilled, (state, action) => {
-      if (state.data) {
-        state.data.permissions = action.payload;
-      }
-    });
-    builder.addCase(updateMyPermissions.fulfilled, (state, action) => {
-      if (state.data && action.payload.userId === state.data._id) {
-        state.data.permissions = action.payload.permissions;
-      }
     });
   },
 });

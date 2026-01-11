@@ -7,12 +7,12 @@ import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { setChatOpen } from "@/features/chat/chatSlice";
+import { ChatbotMessage } from "@/types/chat";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-interface Message {
-  role: "user" | "assistant";
-  content: string;
+// Extended ChatbotMessage with Date timestamp for local state
+interface Message extends Omit<ChatbotMessage, 'timestamp'> {
   timestamp: Date;
 }
 

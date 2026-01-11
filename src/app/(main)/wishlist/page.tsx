@@ -1,53 +1,68 @@
 "use client";
-import { useEffect, useCallback } from "react";
+import { useCallback } from "react";
 import { Heart, ShoppingCart, Trash2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { getWishlist, removeFromWishlist } from "@/features/wishlist/wishlistAction";
-import { addToCart } from "@/features/cart/cartAction";
+import { useAppSelector } from "@/hooks/hooks";
+import {
+  useWishlist,
+  useRemoveFromWishlist,
+} from "@/hooks/queries/useWishlist";
+import { useAddToCart } from "@/hooks/queries/useCart";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { useRouter } from "next/navigation";
 
 export default function WishlistPage() {
-  const dispatch = useAppDispatch();
   const router = useRouter();
-  const { items, isLoading, pagination } = useAppSelector((state) => state.wishlist);
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/login?redirect=/wishlist");
-      return;
-    }
-    dispatch(getWishlist({ page: 1, limit: 20 }));
-  }, [dispatch, isAuthenticated, router]);
+  // React Query hooks
+  const { data: wishlistData, isLoading } = useWishlist({ page: 1, limit: 20 });
+  const removeFromWishlistMutation = useRemoveFromWishlist();
+  const addToCartMutation = useAddToCart();
 
-  const handleRemoveItem = useCallback(async (productId: string) => {
-    try {
-      await dispatch(removeFromWishlist(productId)).unwrap();
-      toast.success("Đã xóa khỏi danh sách yêu thích");
-    } catch (error: any) {
-      toast.error(error?.message || "Có lỗi xảy ra");
-    }
-  }, [dispatch]);
+  // Extract items from React Query response
+  const items = wishlistData?.data || [];
+  const pagination = wishlistData?.pagination;
 
-  const handleAddToCart = useCallback(async (product: any) => {
-    try {
-      const shopId = typeof product.shop === "object" ? product.shop._id : product.shop;
-      await dispatch(addToCart({
-        productId: product._id,
-        shopId: shopId || "",
-        quantity: 1,
-      })).unwrap();
-      toast.success("Đã thêm vào giỏ hàng");
-    } catch (error: any) {
-      toast.error(error?.message || "Không thể thêm vào giỏ hàng");
-    }
-  }, [dispatch]);
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    router.push("/login?redirect=/wishlist");
+    return null;
+  }
+
+  const handleRemoveItem = useCallback(
+    async (productId: string) => {
+      try {
+        await removeFromWishlistMutation.mutateAsync(productId);
+        toast.success("Đã xóa khỏi danh sách yêu thích");
+      } catch (error: any) {
+        toast.error(error?.message || "Có lỗi xảy ra");
+      }
+    },
+    [removeFromWishlistMutation]
+  );
+
+  const handleAddToCart = useCallback(
+    async (product: any) => {
+      try {
+        const shopId =
+          typeof product.shop === "object" ? product.shop._id : product.shop;
+        await addToCartMutation.mutateAsync({
+          productId: product._id,
+          shopId: shopId || "",
+          quantity: 1,
+        });
+        toast.success("Đã thêm vào giỏ hàng");
+      } catch (error: any) {
+        toast.error(error?.message || "Không thể thêm vào giỏ hàng");
+      }
+    },
+    [addToCartMutation]
+  );
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -104,7 +119,9 @@ export default function WishlistPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Heart className="h-5 w-5 text-[#E53935]" />
-              <h1 className="text-xl font-bold text-gray-800">Sản phẩm yêu thích</h1>
+              <h1 className="text-xl font-bold text-gray-800">
+                Sản phẩm yêu thích
+              </h1>
               <span className="text-sm text-gray-500">
                 ({pagination?.totalItems || items.length} sản phẩm)
               </span>
@@ -116,12 +133,17 @@ export default function WishlistPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           <AnimatePresence mode="popLayout">
             {items.map((item) => {
-              const price = item.price?.discountPrice || item.price?.currentPrice || 0;
+              const price =
+                item.price?.discountPrice || item.price?.currentPrice || 0;
               const originalPrice = item.price?.currentPrice || 0;
-              const hasDiscount = item.price?.discountPrice && item.price.discountPrice < originalPrice;
-              // Get image from: image field (from server) -> variants[0].images[0] -> placeholder
-              const productImage = item.image || item.variants?.[0]?.images?.[0] || "/images/placeholder.png";
-              const shopName = typeof item.shop === "object" ? item.shop?.name : "Shop";
+              const hasDiscount =
+                item.price?.discountPrice &&
+                item.price.discountPrice < originalPrice;
+              // Get image from: variants[0].images[0] -> placeholder
+              const productImage =
+                item.variants?.[0]?.images?.[0] || "/images/placeholder.png";
+              const shopName =
+                typeof item.shop === "object" ? item.shop?.name : "Shop";
 
               return (
                 <motion.div

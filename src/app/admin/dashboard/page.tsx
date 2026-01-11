@@ -28,24 +28,19 @@ import {
 import { useSocket } from "@/context/SocketContext";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState, AppDispatch } from "@/store/configStore";
-import { getDashboardStats } from "@/features/statistics/statisticsAction";
+import { useDashboardStats } from "@/hooks/queries/useStatistics";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 export default function AdminDashboard() {
   const { socket } = useSocket();
-  const dispatch = useDispatch<AppDispatch>();
-  const { stats, isLoading: loading } = useSelector(
-    (state: RootState) => state.statistics
-  );
+  const { data: stats, isLoading: loading, refetch } = useDashboardStats();
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    dispatch(getDashboardStats());
-  }, [dispatch, refreshKey]);
+    refetch();
+  }, [refetch, refreshKey]);
 
   useEffect(() => {
     if (!socket) return;
@@ -133,17 +128,21 @@ export default function AdminDashboard() {
     );
   }
 
-  const displayStats = stats || {
-    counts: { revenue: 0, orders: 0, users: 0, products: 0 },
-    recentOrders: [],
-    topProducts: [],
-    chartData: [],
+  const displayStats = {
+    // Handle both flat and nested counts structure
+    totalRevenue: stats?.totalRevenue ?? stats?.counts?.revenue ?? 0,
+    totalOrders: stats?.totalOrders ?? stats?.counts?.orders ?? 0,
+    totalUsers: stats?.totalUsers ?? stats?.counts?.users ?? 0,
+    totalProducts: stats?.totalProducts ?? stats?.counts?.products ?? 0,
+    recentOrders: stats?.recentOrders || [],
+    topProducts: stats?.topProducts || [],
+    chartData: stats?.chartData || [],
   };
 
   const statCards = [
     {
       name: "Total Revenue",
-      value: formatPrice(displayStats.counts.revenue),
+      value: formatPrice(displayStats.totalRevenue || 0),
       icon: DollarSign,
       description: "Total earnings",
       trend: "+12.5%",
@@ -153,7 +152,7 @@ export default function AdminDashboard() {
     },
     {
       name: "Orders",
-      value: displayStats.counts.orders.toLocaleString(),
+      value: (displayStats.totalOrders || 0).toLocaleString(),
       icon: ShoppingCart,
       description: "Total orders",
       trend: "+8.2%",
@@ -163,7 +162,7 @@ export default function AdminDashboard() {
     },
     {
       name: "Customers",
-      value: displayStats.counts.users.toLocaleString(),
+      value: (displayStats.totalUsers || 0).toLocaleString(),
       icon: Users,
       description: "Total users",
       trend: "+4.6%",
@@ -173,7 +172,7 @@ export default function AdminDashboard() {
     },
     {
       name: "Products",
-      value: displayStats.counts.products.toLocaleString(),
+      value: (displayStats.totalProducts || 0).toLocaleString(),
       icon: Package,
       description: "Active items",
       trend: "0%",
@@ -387,11 +386,7 @@ export default function AdminDashboard() {
                       fontSize: "11px",
                     }}
                   />
-                  <Bar
-                    dataKey="orders"
-                    fill="#E53935"
-                    radius={[6, 6, 6, 6]}
-                  />
+                  <Bar dataKey="orders" fill="#E53935" radius={[6, 6, 6, 6]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -439,7 +434,7 @@ export default function AdminDashboard() {
                         #{order._id.slice(-6).toUpperCase()}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {order.userId?.username || "Guest"}
+                        {order.user?.name || "Guest"}
                       </p>
                     </div>
                   </div>
@@ -491,9 +486,9 @@ export default function AdminDashboard() {
                 >
                   <div className="flex items-center gap-4">
                     <div className="relative h-12 w-12 shrink-0 rounded-xl bg-white dark:bg-black/20 overflow-hidden">
-                      {product.variants?.[0]?.images?.[0] ? (
+                      {product.image ? (
                         <Image
-                          src={product.variants[0].images[0]}
+                          src={product.image}
                           alt={product.name}
                           fill
                           className="object-cover"
@@ -512,16 +507,13 @@ export default function AdminDashboard() {
                         {product.name}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {product.soldCount} sales
+                        {product.sold} sales
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
                     <p className="font-medium text-sm text-foreground">
-                      {formatPrice(
-                        product.price.discountPrice ||
-                          product.price.currentPrice
-                      )}
+                      {formatPrice(product.revenue)}
                     </p>
                   </div>
                 </div>

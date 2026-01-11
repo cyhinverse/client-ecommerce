@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Order } from "@/types/order";
-import { Shop } from "@/types/product";
+import { Shop } from "@/types/shop";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -79,7 +79,7 @@ export function OrdersTable({
 
   useEffect(() => {
     if (debouncedSearch !== searchTerm) {
-       onSearch(debouncedSearch);
+      onSearch(debouncedSearch);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch]);
@@ -91,21 +91,52 @@ export function OrdersTable({
         className?: string;
       };
     } = {
-      pending: { label: "Pending", variant: "secondary", className: "bg-gray-100 text-gray-700 hover:bg-gray-100" },
-      confirmed: { label: "Confirmed", variant: "outline", className: "bg-blue-50 text-blue-700 border-blue-200" },
-      processing: { label: "Processing", variant: "default", className: "bg-indigo-100 text-indigo-700 hover:bg-indigo-100" },
-      shipped: { label: "Shipped", variant: "default", className: "bg-purple-100 text-purple-700 hover:bg-purple-100" },
-      delivered: { label: "Delivered", variant: "outline", className: "bg-green-50 text-green-700 border-green-200" },
-      cancelled: { label: "Cancelled", variant: "destructive", className: "bg-red-50 text-red-700 border-red-200 hover:bg-red-50" },
+      pending: {
+        label: "Pending",
+        variant: "secondary",
+        className: "bg-gray-100 text-gray-700 hover:bg-gray-100",
+      },
+      confirmed: {
+        label: "Confirmed",
+        variant: "outline",
+        className: "bg-blue-50 text-blue-700 border-blue-200",
+      },
+      processing: {
+        label: "Processing",
+        variant: "default",
+        className: "bg-indigo-100 text-indigo-700 hover:bg-indigo-100",
+      },
+      shipped: {
+        label: "Shipped",
+        variant: "default",
+        className: "bg-purple-100 text-purple-700 hover:bg-purple-100",
+      },
+      delivered: {
+        label: "Delivered",
+        variant: "outline",
+        className: "bg-green-50 text-green-700 border-green-200",
+      },
+      cancelled: {
+        label: "Cancelled",
+        variant: "destructive",
+        className: "bg-red-50 text-red-700 border-red-200 hover:bg-red-50",
+      },
     };
 
     const config = statusConfig[status] || {
       label: status,
       variant: "secondary",
-      className: "bg-gray-100 text-gray-700"
+      className: "bg-gray-100 text-gray-700",
     };
 
-    return <Badge variant={config.variant} className={`rounded-lg font-medium px-2.5 py-0.5 border-0 shadow-none ${config.className}`}>{config.label}</Badge>;
+    return (
+      <Badge
+        variant={config.variant}
+        className={`rounded-lg font-medium px-2.5 py-0.5 border-0 shadow-none ${config.className}`}
+      >
+        {config.label}
+      </Badge>
+    );
   };
 
   const getPaymentStatusBadge = (status: string) => {
@@ -116,8 +147,16 @@ export function OrdersTable({
         className?: string; // Add className property
       };
     } = {
-      unpaid: { label: "Unpaid", variant: "secondary", className: "bg-yellow-50 text-yellow-700 border border-yellow-200" },
-      paid: { label: "Paid", variant: "outline", className: "bg-green-50 text-green-700 border border-green-200" },
+      unpaid: {
+        label: "Unpaid",
+        variant: "secondary",
+        className: "bg-yellow-50 text-yellow-700 border border-yellow-200",
+      },
+      paid: {
+        label: "Paid",
+        variant: "outline",
+        className: "bg-green-50 text-green-700 border border-green-200",
+      },
       refunded: { label: "Refunded", variant: "destructive" },
     };
 
@@ -126,7 +165,14 @@ export function OrdersTable({
       variant: "secondary",
     };
 
-    return <Badge variant={config.variant} className={`rounded-lg font-medium px-2.5 py-0.5 border-0 shadow-none ${config.className}`}>{config.label}</Badge>;
+    return (
+      <Badge
+        variant={config.variant}
+        className={`rounded-lg font-medium px-2.5 py-0.5 border-0 shadow-none ${config.className}`}
+      >
+        {config.label}
+      </Badge>
+    );
   };
 
   const formatDate = (dateString: string) => {
@@ -140,7 +186,9 @@ export function OrdersTable({
     }).format(amount);
   };
 
-  const getShopInfo = (shopId: string | Shop | undefined): { name: string; logo?: string } => {
+  const getShopInfo = (
+    shopId: string | Shop | undefined
+  ): { name: string; logo?: string } => {
     if (!shopId) return { name: "N/A" };
     if (typeof shopId === "string") return { name: shopId };
     return { name: shopId.name || "N/A", logo: shopId.logo };
@@ -211,14 +259,30 @@ export function OrdersTable({
         <Table>
           <TableHeader className="bg-[#f7f7f7]">
             <TableRow className="border-0 hover:bg-transparent">
-              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground pl-6">Order ID</TableHead>
-              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Customer</TableHead>
-              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Shop</TableHead>
-              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Date</TableHead>
-              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Total</TableHead>
-              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Status</TableHead>
-              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">Payment</TableHead>
-              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground w-[80px] text-right pr-6">Actions</TableHead>
+              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground pl-6">
+                Order ID
+              </TableHead>
+              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
+                Customer
+              </TableHead>
+              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
+                Shop
+              </TableHead>
+              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
+                Date
+              </TableHead>
+              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
+                Total
+              </TableHead>
+              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
+                Status
+              </TableHead>
+              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
+                Payment
+              </TableHead>
+              <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground w-[80px] text-right pr-6">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -244,7 +308,9 @@ export function OrdersTable({
               orders.map((order) => (
                 <TableRow
                   key={order._id}
-                  className={`border-0 hover:bg-[#f7f7f7]/50 transition-colors ${isLoading ? "opacity-50 pointer-events-none" : ""}`}
+                  className={`border-0 hover:bg-[#f7f7f7]/50 transition-colors ${
+                    isLoading ? "opacity-50 pointer-events-none" : ""
+                  }`}
                 >
                   <TableCell className="font-medium pl-6 text-sm">
                     #{order._id.slice(-8).toUpperCase()}
@@ -284,8 +350,12 @@ export function OrdersTable({
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{formatDate(order.createdAt)}</TableCell>
-                  <TableCell className="font-medium">{formatCurrency(order.totalAmount)}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {formatDate(order.createdAt)}
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    {formatCurrency(order.totalAmount)}
+                  </TableCell>
                   <TableCell>{getStatusBadge(order.status)}</TableCell>
                   <TableCell>
                     {getPaymentStatusBadge(order.paymentStatus)}
@@ -293,16 +363,28 @@ export function OrdersTable({
                   <TableCell className="pr-6 text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0 rounded-lg hover:bg-[#f7f7f7]">
+                        <Button
+                          variant="ghost"
+                          className="h-8 w-8 p-0 rounded-lg hover:bg-[#f7f7f7]"
+                        >
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="rounded-xl border-0 shadow-lg">
-                        <DropdownMenuItem onClick={() => onView(order)} className="cursor-pointer gap-2">
+                      <DropdownMenuContent
+                        align="end"
+                        className="rounded-xl border-0 shadow-lg"
+                      >
+                        <DropdownMenuItem
+                          onClick={() => onView(order)}
+                          className="cursor-pointer gap-2"
+                        >
                           <Eye className="w-4 h-4" />
                           View Details
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onEdit(order)} className="cursor-pointer gap-2">
+                        <DropdownMenuItem
+                          onClick={() => onEdit(order)}
+                          className="cursor-pointer gap-2"
+                        >
                           <Edit className="w-4 h-4" />
                           Update Status
                         </DropdownMenuItem>

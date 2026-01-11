@@ -1,24 +1,18 @@
 "use client";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { getFeaturedProducts } from "@/features/product/productAction";
-import { useEffect } from "react";
+import { useFeaturedProducts } from "@/hooks/queries/useProducts";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { toast } from "sonner";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ProductCard } from "@/components/product/ProductCard";
+import { useEffect } from "react";
 
 export default function ProductFeatures() {
-  const dispatch = useAppDispatch();
-  const { isLoading, featured, error } = useAppSelector(
-    (state) => state.product
-  );
+  const { data: featured, isLoading, error } = useFeaturedProducts();
 
   useEffect(() => {
-    dispatch(getFeaturedProducts());
-  }, [dispatch]);
-
-  if (error) toast.error(error);
+    if (error) toast.error(String(error));
+  }, [error]);
 
   const container = {
     hidden: { opacity: 0 },

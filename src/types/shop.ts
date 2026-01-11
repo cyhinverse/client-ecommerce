@@ -1,13 +1,14 @@
-import { PaginationData } from "./common";
+import { BaseEntity, PaginationData } from "./common";
+import { User } from "./user";
 
-// Pickup address for shop
+// Pickup address for shop - all fields optional per backend schema
 export interface PickupAddress {
-  fullName: string;
-  phone: string;
-  address: string;
-  city: string;
-  district: string;
-  ward: string;
+  fullName?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  district?: string;
+  ward?: string;
 }
 
 // Shop metrics
@@ -20,22 +21,34 @@ export interface ShopMetrics {
 // Shop status type
 export type ShopStatus = "active" | "inactive" | "banned";
 
-// Main Shop interface
-export interface Shop {
+// Shop owner interface for populated owner field
+export interface ShopOwner {
   _id: string;
-  owner: string;
+  username: string;
+  email: string;
+  avatar?: string | null;
+}
+
+// Main Shop interface - matches backend schema
+export interface Shop extends BaseEntity {
+  owner: string | ShopOwner | User; // Can be ID or populated User
   name: string;
   slug: string;
   logo: string;
   banner: string;
   description: string;
+
   pickupAddress?: PickupAddress;
   status: ShopStatus;
+
+  // Metrics
   rating: number;
   metrics: ShopMetrics;
-  followers: number;
-  createdAt: string;
-  updatedAt: string;
+
+  // Followers - array of User IDs (matches backend: [{ type: Types.ObjectId, ref: "User" }])
+  followers: string[];
+  // Follower count - separate field (matches backend: followerCount: { type: Number, default: 0 })
+  followerCount: number;
 }
 
 // Create shop payload
@@ -61,7 +74,7 @@ export interface UpdateShopPayload {
 export interface ShopState {
   myShop: Shop | null;
   currentShop: Shop | null;
-  shops: Shop[];  // List of all shops (for admin)
+  shops: Shop[]; // List of all shops (for admin)
   isLoading: boolean;
   isRegistering: boolean;
   isUpdating: boolean;

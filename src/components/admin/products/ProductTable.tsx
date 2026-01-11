@@ -18,7 +18,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { category, price, Shop } from "@/types/product";
+import { Category, Price } from "@/types/product";
+import { Shop } from "@/types/shop";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -143,18 +144,20 @@ export function ProductsTable({
     )
   );
 
-  const getCategoryName = (category: string | category | null): string => {
+  const getCategoryName = (category: string | Category | null): string => {
     if (!category) return "None";
     return typeof category === "string" ? category : category.name || "None";
   };
 
-  const getShopInfo = (shop: string | Shop | undefined): { name: string; logo?: string } => {
+  const getShopInfo = (
+    shop: string | Shop | undefined
+  ): { name: string; logo?: string } => {
     if (!shop) return { name: "N/A" };
     if (typeof shop === "string") return { name: shop };
     return { name: shop.name || "N/A", logo: shop.logo };
   };
 
-  const getPriceDisplay = (price: price | null) => {
+  const getPriceDisplay = (price: Price | null) => {
     if (!price) return "0₫";
     const currentPrice = price.currentPrice || 0;
     const discountPrice = price.discountPrice || 0;
@@ -178,10 +181,6 @@ export function ProductsTable({
     if (product.variants && product.variants.length > 0) {
       return product.variants.reduce((total, v) => total + (v.stock || 0), 0);
     }
-    // Old schema: models (backward compatibility)
-    if (product.models && product.models.length > 0) {
-      return product.models.reduce((total, model) => total + (model.stock || 0), 0);
-    }
     // Fallback to stock field
     return product.stock || 0;
   };
@@ -191,14 +190,6 @@ export function ProductsTable({
     // New schema: variants with images (primary source)
     if (product.variants?.[0]?.images?.[0]) {
       return product.variants[0].images[0];
-    }
-    // Old schema: tierVariations (backward compatibility)
-    if (product.tierVariations?.[0]?.images?.[0]) {
-      const firstImage = product.tierVariations[0].images[0];
-      if (Array.isArray(firstImage)) {
-        return firstImage[0] || null;
-      }
-      return typeof firstImage === 'string' ? firstImage : null;
     }
     return null;
   };
@@ -315,10 +306,7 @@ export function ProductsTable({
 
           {/* Shop Filter */}
           {onShopFilterChange && shops.length > 0 && (
-            <Select
-              value={selectedShop}
-              onValueChange={onShopFilterChange}
-            >
+            <Select value={selectedShop} onValueChange={onShopFilterChange}>
               <SelectTrigger className="w-[160px] rounded-xl border-0 bg-white focus:ring-0">
                 <Store className="h-4 w-4 mr-2 text-muted-foreground" />
                 <SelectValue placeholder="Shop" />

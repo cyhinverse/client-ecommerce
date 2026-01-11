@@ -1,8 +1,7 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { getTreeCategories } from "@/features/category/categoryAction";
+import { useState } from "react";
+import { useCategoryTree } from "@/hooks/queries/useCategories";
 import { cn } from "@/lib/utils";
 import {
   Laptop,
@@ -64,13 +63,8 @@ interface CategorySidebarProps {
 }
 
 export default function CategorySidebar({ className }: CategorySidebarProps) {
-  const dispatch = useAppDispatch();
-  const { categories } = useAppSelector((state) => state.category);
+  const { data: categories } = useCategoryTree();
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
-
-  useEffect(() => {
-    dispatch(getTreeCategories());
-  }, [dispatch]);
 
   const hasCategories = categories && categories.length > 0;
 
@@ -81,14 +75,11 @@ export default function CategorySidebar({ className }: CategorySidebarProps) {
   return (
     <div className="relative z-30">
       <div
-        className={cn(
-          "w-[220px] bg-[#f7f7f7] rounded-lg",
-          className
-        )}
+        className={cn("w-[220px] bg-[#f7f7f7] rounded-lg", className)}
         onMouseLeave={() => setHoveredCategory(null)}
       >
         {/* Promo Banner - First Row */}
-        <Link 
+        <Link
           href="/vouchers"
           className="flex items-center gap-2 px-4 py-2.5 text-primary hover:bg-white/50 transition-colors border-b border-gray-200"
         >
@@ -123,13 +114,13 @@ export default function CategorySidebar({ className }: CategorySidebarProps) {
                       : "text-muted-foreground"
                   )}
                 >
-                  {getIcon(category.slug ?? '')}
+                  {getIcon(category.slug ?? "")}
                 </span>
-                
+
                 {/* Category Name + Inline Subcategories */}
                 <div className="flex items-center gap-1 flex-1 min-w-0 overflow-hidden">
                   <Link
-                    href={`/categories/${category.slug ?? ''}`}
+                    href={`/categories/${category.slug ?? ""}`}
                     className={cn(
                       "font-medium whitespace-nowrap transition-colors",
                       hoveredCategory === category._id
@@ -139,23 +130,27 @@ export default function CategorySidebar({ className }: CategorySidebarProps) {
                   >
                     {category.name}
                   </Link>
-                  
+
                   {/* Inline Subcategories with / separator */}
-                  {category.subcategories && category.subcategories.length > 0 && (
-                    <div className="flex items-center gap-1 text-muted-foreground overflow-hidden">
-                      {category.subcategories.slice(0, 3).map((sub, idx) => (
-                        <span key={sub._id} className="flex items-center gap-1 whitespace-nowrap">
-                          <span className="text-border">/</span>
-                          <Link
-                            href={`/categories/${sub.slug}`}
-                            className="hover:text-primary transition-colors truncate"
+                  {category.subcategories &&
+                    category.subcategories.length > 0 && (
+                      <div className="flex items-center gap-1 text-muted-foreground overflow-hidden">
+                        {category.subcategories.slice(0, 3).map((sub, idx) => (
+                          <span
+                            key={sub._id}
+                            className="flex items-center gap-1 whitespace-nowrap"
                           >
-                            {sub.name}
-                          </Link>
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                            <span className="text-border">/</span>
+                            <Link
+                              href={`/categories/${sub.slug}`}
+                              className="hover:text-primary transition-colors truncate"
+                            >
+                              {sub.name}
+                            </Link>
+                          </span>
+                        ))}
+                      </div>
+                    )}
                 </div>
               </div>
             </li>
@@ -178,7 +173,7 @@ export default function CategorySidebar({ className }: CategorySidebarProps) {
               {/* Header */}
               <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200">
                 <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                  {getIcon(activeCategory.slug ?? '')}
+                  {getIcon(activeCategory.slug ?? "")}
                   {activeCategory.name}
                 </h3>
                 <Link

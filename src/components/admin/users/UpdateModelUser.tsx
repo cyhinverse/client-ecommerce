@@ -21,19 +21,10 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useLayoutEffect, useEffect } from "react";
 import { User as UserIcon, Mail, Shield, Key, CheckCircle, Loader2 } from "lucide-react";
-import { User } from "@/types/user";
+import { User, UpdateUserData } from "@/types/user";
 import { RESOURCES, ACTIONS } from "@/constants/permissions";
 import { getRolePermissions, getUserPermissions } from "@/api/permission";
 import { cn } from "@/lib/utils";
-
-interface UpdateUserData {
-  id: string;
-  username: string;
-  email: string;
-  roles: string;
-  isVerifiedEmail: boolean;
-  permissions?: string[];
-}
 
 interface UpdateModelUserProps {
   open: boolean;

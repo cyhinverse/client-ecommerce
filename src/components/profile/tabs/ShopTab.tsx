@@ -1,26 +1,28 @@
 "use client";
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Store, MapPin, Settings, Package, BarChart3, Loader2 } from "lucide-react";
+import {
+  Store,
+  MapPin,
+  Settings,
+  Package,
+  BarChart3,
+  Loader2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { getMyShop } from "@/features/shop/shopAction";
+import { useAppSelector } from "@/hooks/hooks";
+import { useMyShop } from "@/hooks/queries/useShop";
 
 export default function ShopTab() {
   const router = useRouter();
-  const dispatch = useAppDispatch();
-  const { myShop, isLoading } = useAppSelector((state) => state.shop);
+  const { data: myShop, isLoading } = useMyShop();
   const { data } = useAppSelector((state) => state.auth);
 
-  const canHaveShop = data?.roles === "seller" || data?.roles === "admin" ||
-    (Array.isArray(data?.roles) && (data.roles.includes("seller") || data.roles.includes("admin")));
-
-  useEffect(() => {
-    if (canHaveShop) {
-      dispatch(getMyShop());
-    }
-  }, [dispatch, canHaveShop]);
+  const canHaveShop =
+    data?.roles === "seller" ||
+    data?.roles === "admin" ||
+    (Array.isArray(data?.roles) &&
+      (data.roles.includes("seller") || data.roles.includes("admin")));
 
   if (isLoading) {
     return (
@@ -43,7 +45,7 @@ export default function ShopTab() {
             Đăng ký bán hàng để bắt đầu kinh doanh trên nền tảng
           </p>
         </div>
-        <Button 
+        <Button
           onClick={() => router.push("/seller/register")}
           className="bg-primary hover:bg-primary/90"
         >
@@ -61,20 +63,25 @@ export default function ShopTab() {
         {/* Banner */}
         <div className="h-32 rounded-xl overflow-hidden bg-gradient-to-r from-primary/20 to-primary/5">
           {myShop.banner && (
-            <Image 
-              src={myShop.banner} 
-              alt="Shop Banner" 
-              fill 
+            <Image
+              src={myShop.banner}
+              alt="Shop Banner"
+              fill
               className="object-cover"
             />
           )}
         </div>
-        
+
         {/* Logo & Info */}
         <div className="flex items-end gap-4 -mt-10 px-4">
           <div className="relative w-20 h-20 rounded-full border-4 border-white bg-white shadow-lg overflow-hidden">
             {myShop.logo ? (
-              <Image src={myShop.logo} alt={myShop.name} fill className="object-cover" />
+              <Image
+                src={myShop.logo}
+                alt={myShop.name}
+                fill
+                className="object-cover"
+              />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-primary/10">
                 <Store className="h-8 w-8 text-primary" />
@@ -84,11 +91,13 @@ export default function ShopTab() {
           <div className="flex-1 pb-2">
             <div className="flex items-center gap-2">
               <h2 className="text-xl font-bold">{myShop.name}</h2>
-              <span className={`px-2 py-0.5 text-xs rounded-full ${
-                myShop.status === "active" 
-                  ? "bg-green-100 text-green-700" 
-                  : "bg-gray-100 text-gray-600"
-              }`}>
+              <span
+                className={`px-2 py-0.5 text-xs rounded-full ${
+                  myShop.status === "active"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-gray-100 text-gray-600"
+                }`}
+              >
                 {myShop.status === "active" ? "Đang hoạt động" : myShop.status}
               </span>
             </div>
@@ -103,9 +112,21 @@ export default function ShopTab() {
 
       {/* Shop Stats */}
       <div className="grid grid-cols-3 gap-4">
-        <StatCard icon={Store} label="Followers" value={myShop.followers || 0} />
-        <StatCard icon={BarChart3} label="Đánh giá" value={myShop.rating?.toFixed(1) || "0.0"} />
-        <StatCard icon={Package} label="Phản hồi" value={`${myShop.metrics?.responseRate || 0}%`} />
+        <StatCard
+          icon={Store}
+          label="Followers"
+          value={myShop.followerCount || 0}
+        />
+        <StatCard
+          icon={BarChart3}
+          label="Đánh giá"
+          value={myShop.rating?.toFixed(1) || "0.0"}
+        />
+        <StatCard
+          icon={Package}
+          label="Phản hồi"
+          value={`${myShop.metrics?.responseRate || 0}%`}
+        />
       </div>
 
       {/* Pickup Address */}
@@ -116,19 +137,24 @@ export default function ShopTab() {
               <MapPin className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Địa chỉ lấy hàng</p>
-              <p className="font-semibold">{myShop.pickupAddress.fullName} - {myShop.pickupAddress.phone}</p>
+              <p className="text-sm font-medium text-muted-foreground">
+                Địa chỉ lấy hàng
+              </p>
+              <p className="font-semibold">
+                {myShop.pickupAddress.fullName} - {myShop.pickupAddress.phone}
+              </p>
             </div>
           </div>
           <p className="text-sm text-muted-foreground pl-[52px]">
-            {myShop.pickupAddress.address}, {myShop.pickupAddress.ward}, {myShop.pickupAddress.district}, {myShop.pickupAddress.city}
+            {myShop.pickupAddress.address}, {myShop.pickupAddress.ward},{" "}
+            {myShop.pickupAddress.district}, {myShop.pickupAddress.city}
           </p>
         </div>
       )}
 
       {/* Quick Actions */}
       <div className="flex gap-3">
-        <Button 
+        <Button
           onClick={() => router.push("/seller")}
           variant="outline"
           className="flex-1"
@@ -136,7 +162,7 @@ export default function ShopTab() {
           <Settings className="h-4 w-4 mr-2" />
           Kênh người bán
         </Button>
-        <Button 
+        <Button
           onClick={() => router.push("/seller/products")}
           className="flex-1 bg-primary hover:bg-primary/90"
         >

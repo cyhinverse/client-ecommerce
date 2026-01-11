@@ -2,7 +2,8 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { useAppSelector } from "@/hooks/hooks";
+import { useQueryClient } from "@tanstack/react-query";
 import { initSocketEvents } from "@/socket/index";
 import { SocketContextType } from "@/types/socket";
 
@@ -16,7 +17,7 @@ export const useSocket = () => useContext(SocketContext);
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const dispatch = useAppDispatch();
+  const queryClient = useQueryClient();
   const { token, isAuthenticated } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
@@ -40,7 +41,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     // Initialize events (listen for notifications)
-    initSocketEvents(socketInstance, dispatch);
+    initSocketEvents(socketInstance, queryClient);
 
     // Save socket to state
     setSocket(socketInstance);

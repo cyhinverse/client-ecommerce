@@ -1,8 +1,7 @@
 "use client";
 import Link from "next/link";
-import { useEffect } from "react";
-import { useAppSelector, useAppDispatch } from "@/hooks/hooks";
-import { getMyShop } from "@/features/shop/shopAction";
+import { useAppSelector } from "@/hooks/hooks";
+import { useMyShop } from "@/hooks/queries/useShop";
 import {
   MapPin,
   Phone,
@@ -47,26 +46,25 @@ const Divider = () => (
 );
 
 export default function TopBar() {
-  const dispatch = useAppDispatch();
-  const { isAuthenticated, data, token } = useAppSelector((state) => state.auth);
-  const { myShop } = useAppSelector((state) => state.shop);
+  const { isAuthenticated, data, token } = useAppSelector(
+    (state) => state.auth
+  );
+  const { data: myShop } = useMyShop({ enabled: isAuthenticated });
 
   // Check if user has seller or admin role (can have a shop)
-  const canHaveShop = data?.roles === "seller" || data?.roles === "admin" ||
-    (Array.isArray(data?.roles) && (data.roles.includes("seller") || data.roles.includes("admin")));
-
-  // Fetch user's shop info when authenticated AND can have shop
-  useEffect(() => {
-    if (isAuthenticated && token && canHaveShop && !myShop) {
-      dispatch(getMyShop());
-    }
-  }, [isAuthenticated, token, canHaveShop, myShop, dispatch]);
+  const canHaveShop =
+    data?.roles === "seller" ||
+    data?.roles === "admin" ||
+    (Array.isArray(data?.roles) &&
+      (data.roles.includes("seller") || data.roles.includes("admin")));
 
   // Determine seller link based on role and shop status
   // If user has shop or is seller/admin, go to seller dashboard
   const hasShopAccess = myShop || canHaveShop;
   const sellerLink = hasShopAccess ? "/seller" : "/seller/register";
-  const sellerText = hasShopAccess ? "Kênh người bán" : "Bán hàng cùng chúng tôi";
+  const sellerText = hasShopAccess
+    ? "Kênh người bán"
+    : "Bán hàng cùng chúng tôi";
 
   return (
     <div className="w-full bg-muted border-b border-border hidden md:block">
@@ -80,7 +78,10 @@ export default function TopBar() {
               <span>Giao đến: Việt Nam</span>
               <ChevronDown className="h-3 w-3" />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-44 bg-white shadow-lg border-gray-200">
+            <DropdownMenuContent
+              align="start"
+              className="w-44 bg-white shadow-lg border-gray-200"
+            >
               <DropdownMenuItem className="text-[11px] hover:bg-[#FFEBEE] hover:text-[#E53935] cursor-pointer">
                 🇻🇳 Việt Nam
               </DropdownMenuItem>
@@ -112,11 +113,17 @@ export default function TopBar() {
           ) : (
             <div className="flex items-center gap-1 text-[11px] text-gray-600">
               <span>Xin chào,</span>
-              <Link href="/login" className="text-[#E53935] hover:underline font-medium">
+              <Link
+                href="/login"
+                className="text-[#E53935] hover:underline font-medium"
+              >
                 Đăng nhập
               </Link>
               <span>hoặc</span>
-              <Link href="/register" className="text-[#E53935] hover:underline font-medium">
+              <Link
+                href="/register"
+                className="text-[#E53935] hover:underline font-medium"
+              >
                 Đăng ký
               </Link>
             </div>
@@ -125,15 +132,18 @@ export default function TopBar() {
           <Divider />
 
           {/* Download App */}
-          <TopBarLink href="/download" icon={<Smartphone className="h-3 w-3" />}>
+          <TopBarLink
+            href="/download"
+            icon={<Smartphone className="h-3 w-3" />}
+          >
             Tải ứng dụng
           </TopBarLink>
 
           <Divider />
 
           {/* Seller Center */}
-          <TopBarLink 
-            href={sellerLink} 
+          <TopBarLink
+            href={sellerLink}
             icon={<Store className="h-3 w-3" />}
             className="font-medium text-[#E53935] hover:text-[#D32F2F]"
           >
@@ -180,7 +190,10 @@ export default function TopBar() {
               <span>Tiếng Việt</span>
               <ChevronDown className="h-3 w-3" />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-36 bg-white shadow-lg border-gray-200">
+            <DropdownMenuContent
+              align="end"
+              className="w-36 bg-white shadow-lg border-gray-200"
+            >
               <DropdownMenuItem className="text-[11px] hover:bg-[#FFEBEE] hover:text-[#E53935] cursor-pointer">
                 🇻🇳 Tiếng Việt
               </DropdownMenuItem>
