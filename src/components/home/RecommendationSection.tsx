@@ -4,6 +4,7 @@ import { Sparkles, TrendingUp, Clock, Star } from "lucide-react";
 import { useRecommendation } from "@/hooks/queries/useRecommendations";
 import { ProductCard } from "@/components/product/ProductCard";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
+import { Product } from "@/types/product";
 import { cn } from "@/lib/utils";
 
 interface RecommendationSectionProps {
@@ -33,7 +34,7 @@ const ProductGrid = memo(function ProductGrid({
   products,
   columns = 6,
 }: {
-  products: any[];
+  products: Product[];
   columns?: number;
 }) {
   const gridCols = {

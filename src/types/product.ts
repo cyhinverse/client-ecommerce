@@ -186,96 +186,8 @@ export interface ProductUrlFilters {
 
 // ============ Form Types (Local File Handling) ============
 
-export interface VariantImagesCreate {
-  files: File[];
-  previews: string[];
-  existing: string[];
-}
-
-export interface VariantImagesUpdate {
-  existing: string[];
-  newFiles: File[];
-  newPreviews: string[];
-}
-
-export interface VariantWithFilesCreate
-  extends Omit<Variant, "_id" | "images"> {
-  _id: string;
-  images: VariantImagesCreate;
-}
-
-export interface VariantWithFilesUpdate {
-  _id: string;
-  name: string;
-  color?: string;
-  price: number;
-  stock: number;
-  sold?: number;
-  images: VariantImagesUpdate;
-}
-
-export type VariantWithFiles = VariantWithFilesCreate | VariantWithFilesUpdate;
-
-export function isVariantForCreate(
-  variant: VariantWithFiles
-): variant is VariantWithFilesCreate {
-  return "files" in variant.images && "previews" in variant.images;
-}
-
-export function isVariantForUpdate(
-  variant: VariantWithFiles
-): variant is VariantWithFilesUpdate {
-  return "newFiles" in variant.images && "newPreviews" in variant.images;
-}
-
-export function createEmptyVariantForCreate(
-  defaultPrice: number = 0
-): VariantWithFilesCreate {
-  return {
-    _id: `temp-${Date.now()}`,
-    name: "",
-    color: "",
-    price: defaultPrice,
-    stock: 0,
-    sold: 0,
-    images: { files: [], previews: [], existing: [] },
-  };
-}
-
-export function createEmptyVariantForUpdate(
-  defaultPrice: number = 0
-): VariantWithFilesUpdate {
-  return {
-    _id: `temp-${Date.now()}`,
-    name: "",
-    color: "",
-    price: defaultPrice,
-    stock: 0,
-    sold: 0,
-    images: { existing: [], newFiles: [], newPreviews: [] },
-  };
-}
-
-export function variantToEditForm(variant: Variant): VariantWithFilesUpdate {
-  return {
-    _id: variant._id,
-    name: variant.name,
-    color: variant.color || "",
-    price: variant.price,
-    stock: variant.stock,
-    sold: variant.sold || 0,
-    images: {
-      existing: variant.images || [],
-      newFiles: [],
-      newPreviews: [],
-    },
-  };
-}
-
-// ============ Form Variant Types for Admin Components ============
-
-// Simplified variant for create form (used in CreateModelProduct.tsx)
-export interface CreateVariant {
+// For creating new variants (with file uploads)
+export interface VariantFormCreate {
   _id: string;
   name: string;
   color?: string;
@@ -288,8 +200,8 @@ export interface CreateVariant {
   };
 }
 
-// Simplified variant for update form (used in UpdateModelProduct.tsx)
-export interface UpdateVariant {
+// For updating existing variants (with file uploads)
+export interface VariantFormUpdate {
   _id: string;
   name: string;
   color?: string;
@@ -303,8 +215,26 @@ export interface UpdateVariant {
   };
 }
 
-// Helper to create empty variant for create form
-export function createEmptyCreateVariant(defaultPrice: number = 0): CreateVariant {
+// Union type for form handling
+export type VariantForm = VariantFormCreate | VariantFormUpdate;
+
+// Type guards
+export function isVariantFormCreate(
+  variant: VariantForm
+): variant is VariantFormCreate {
+  return "files" in variant.images && "previews" in variant.images;
+}
+
+export function isVariantFormUpdate(
+  variant: VariantForm
+): variant is VariantFormUpdate {
+  return "newFiles" in variant.images && "newPreviews" in variant.images;
+}
+
+// Factory function for creating empty variant (create form)
+export function createEmptyVariantForm(
+  defaultPrice: number = 0
+): VariantFormCreate {
   return {
     _id: `temp-${Date.now()}`,
     name: "",
@@ -316,8 +246,10 @@ export function createEmptyCreateVariant(defaultPrice: number = 0): CreateVarian
   };
 }
 
-// Helper to create empty variant for update form
-export function createEmptyUpdateVariant(defaultPrice: number = 0): UpdateVariant {
+// Factory function for creating empty variant (update form)
+export function createEmptyVariantFormUpdate(
+  defaultPrice: number = 0
+): VariantFormUpdate {
   return {
     _id: `temp-${Date.now()}`,
     name: "",
@@ -329,8 +261,8 @@ export function createEmptyUpdateVariant(defaultPrice: number = 0): UpdateVarian
   };
 }
 
-// Helper to convert API variant to update form variant
-export function variantToUpdateForm(variant: Variant): UpdateVariant {
+// Convert API variant to update form variant
+export function variantToForm(variant: Variant): VariantFormUpdate {
   return {
     _id: variant._id,
     name: variant.name,
@@ -346,4 +278,34 @@ export function variantToUpdateForm(variant: Variant): UpdateVariant {
   };
 }
 
-export type { PaginationData };
+// ============ Backward Compatibility Aliases (Deprecated) ============
+// These aliases are kept for backward compatibility during migration
+// TODO: Remove after all usages are updated
+
+/** @deprecated Use VariantFormCreate instead */
+export type VariantWithFilesCreate = VariantFormCreate;
+/** @deprecated Use VariantFormUpdate instead */
+export type VariantWithFilesUpdate = VariantFormUpdate;
+/** @deprecated Use VariantForm instead */
+export type VariantWithFiles = VariantForm;
+/** @deprecated Use VariantFormCreate instead */
+export type CreateVariant = VariantFormCreate;
+/** @deprecated Use VariantFormUpdate instead */
+export type UpdateVariant = VariantFormUpdate;
+
+/** @deprecated Use isVariantFormCreate instead */
+export const isVariantForCreate = isVariantFormCreate;
+/** @deprecated Use isVariantFormUpdate instead */
+export const isVariantForUpdate = isVariantFormUpdate;
+/** @deprecated Use createEmptyVariantForm instead */
+export const createEmptyVariantForCreate = createEmptyVariantForm;
+/** @deprecated Use createEmptyVariantFormUpdate instead */
+export const createEmptyVariantForUpdate = createEmptyVariantFormUpdate;
+/** @deprecated Use createEmptyVariantForm instead */
+export const createEmptyCreateVariant = createEmptyVariantForm;
+/** @deprecated Use createEmptyVariantFormUpdate instead */
+export const createEmptyUpdateVariant = createEmptyVariantFormUpdate;
+/** @deprecated Use variantToForm instead */
+export const variantToEditForm = variantToForm;
+/** @deprecated Use variantToForm instead */
+export const variantToUpdateForm = variantToForm;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Order } from "@/types/order";
 import { Shop } from "@/types/shop";
@@ -72,6 +72,8 @@ export function OrdersTable({
 }: OrdersTableProps) {
   const [localSearch, setLocalSearch] = useState(searchTerm);
   const debouncedSearch = useDebounce(localSearch, 500);
+  const onSearchRef = useRef(onSearch);
+  onSearchRef.current = onSearch;
 
   useEffect(() => {
     setLocalSearch(searchTerm);
@@ -79,10 +81,9 @@ export function OrdersTable({
 
   useEffect(() => {
     if (debouncedSearch !== searchTerm) {
-      onSearch(debouncedSearch);
+      onSearchRef.current(debouncedSearch);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch]);
+  }, [debouncedSearch, searchTerm]);
   const getStatusBadge = (status: string) => {
     const statusConfig: {
       [key: string]: {

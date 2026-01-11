@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Zap, ChevronRight } from "lucide-react";
 import { useFlashSaleWithCountdown } from "@/hooks/queries/useFlashSale";
+import { FlashSaleProduct } from "@/types/flash-sale";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 // Countdown Timer Component
@@ -58,7 +59,7 @@ const SoldProgress = memo(function SoldProgress({
 const FlashSaleCard = memo(function FlashSaleCard({
   product,
 }: {
-  product: any;
+  product: FlashSaleProduct;
 }) {
   const { flashSaleInfo } = product;
   const productImage =

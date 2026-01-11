@@ -13,7 +13,7 @@
 
 import { describe, it, expect } from "vitest";
 import * as fc from "fast-check";
-import { extractApiError, ApiError } from "@/utils/api";
+import { extractApiError, ApiError } from "@/api";
 
 describe("Feature: code-cleanup-audit, Property 2: Error Handling Pattern Consistency", () => {
   describe("extractApiError utility", () => {

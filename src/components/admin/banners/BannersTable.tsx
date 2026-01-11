@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 import {
   Table,
@@ -75,6 +75,8 @@ export function BannersTable({
 }: BannersTableProps) {
   const [localSearch, setLocalSearch] = useState(searchTerm);
   const debouncedSearch = useDebounce(localSearch, 500);
+  const onSearchRef = useRef(onSearch);
+  onSearchRef.current = onSearch;
 
   useEffect(() => {
     setLocalSearch(searchTerm);
@@ -82,10 +84,9 @@ export function BannersTable({
 
   useEffect(() => {
     if (debouncedSearch !== searchTerm) {
-       onSearch(debouncedSearch);
+       onSearchRef.current(debouncedSearch);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch]);
+  }, [debouncedSearch, searchTerm]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalSearch(e.target.value);

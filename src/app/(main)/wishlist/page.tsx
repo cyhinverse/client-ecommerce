@@ -12,6 +12,8 @@ import {
   useRemoveFromWishlist,
 } from "@/hooks/queries/useWishlist";
 import { useAddToCart } from "@/hooks/queries/useCart";
+import { Product } from "@/types/product";
+import { formatCurrency } from "@/utils/format";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { useRouter } from "next/navigation";
 
@@ -39,15 +41,16 @@ export default function WishlistPage() {
       try {
         await removeFromWishlistMutation.mutateAsync(productId);
         toast.success("Đã xóa khỏi danh sách yêu thích");
-      } catch (error: any) {
-        toast.error(error?.message || "Có lỗi xảy ra");
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Có lỗi xảy ra";
+        toast.error(errorMessage);
       }
     },
     [removeFromWishlistMutation]
   );
 
   const handleAddToCart = useCallback(
-    async (product: any) => {
+    async (product: Product) => {
       try {
         const shopId =
           typeof product.shop === "object" ? product.shop._id : product.shop;
@@ -57,20 +60,13 @@ export default function WishlistPage() {
           quantity: 1,
         });
         toast.success("Đã thêm vào giỏ hàng");
-      } catch (error: any) {
-        toast.error(error?.message || "Không thể thêm vào giỏ hàng");
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Không thể thêm vào giỏ hàng";
+        toast.error(errorMessage);
       }
     },
     [addToCartMutation]
   );
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
 
   // Loading state
   if (isLoading && items.length === 0) {

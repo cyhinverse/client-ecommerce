@@ -5,7 +5,9 @@
  */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/utils/api";
+import { extractApiData, extractApiError } from "@/api";
+import { errorHandler } from "@/services/errorHandler";
+import { STALE_TIME } from "@/constants/cache";
 import { cartKeys } from "@/lib/queryKeys";
 import { CartItem, Cart } from "@/types/cart";
 
@@ -14,7 +16,6 @@ export interface AddToCartData {
   productId: string;
   shopId: string;
   modelId?: string;
-  variantId?: string; // DEPRECATED
   quantity?: number;
   size?: string;
 }
@@ -35,7 +36,7 @@ const cartApi = {
     const response = await instance.post("/cart", {
       productId: data.productId,
       shopId: data.shopId,
-      modelId: data.modelId || data.variantId,
+      modelId: data.modelId,
       quantity: data.quantity || 1,
       size: data.size,
     });
@@ -93,7 +94,7 @@ export function useAddToCart() {
       queryClient.setQueryData(cartKeys.current(), data);
     },
     onError: (error) => {
-      console.error("Add to cart failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Add to cart failed" });
     },
   });
 }
@@ -110,7 +111,7 @@ export function useUpdateCartItem() {
       queryClient.setQueryData(cartKeys.current(), data);
     },
     onError: (error) => {
-      console.error("Update cart item failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Update cart item failed" });
     },
   });
 }
@@ -127,7 +128,7 @@ export function useRemoveFromCart() {
       queryClient.setQueryData(cartKeys.current(), data);
     },
     onError: (error) => {
-      console.error("Remove from cart failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Remove from cart failed" });
     },
   });
 }
@@ -144,7 +145,7 @@ export function useRemoveCartByShop() {
       queryClient.setQueryData(cartKeys.current(), data);
     },
     onError: (error) => {
-      console.error("Remove cart by shop failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Remove cart by shop failed" });
     },
   });
 }
@@ -162,7 +163,7 @@ export function useClearCart() {
       queryClient.invalidateQueries({ queryKey: cartKeys.all });
     },
     onError: (error) => {
-      console.error("Clear cart failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Clear cart failed" });
     },
   });
 }

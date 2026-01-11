@@ -55,16 +55,6 @@ function hasNestedData<T>(data: unknown): data is ApiResponse<T> {
 /**
  * Extract data from API response consistently
  * Handles both nested (response.data.data) and flat (response.data) structures
- * 
- * @param response - Axios response object
- * @returns Extracted data payload
- * 
- * @example
- * // Nested response: { data: { status: "success", data: [...] } }
- * const products = extractApiData(response); // returns [...]
- * 
- * // Flat response: { data: [...] }
- * const products = extractApiData(response); // returns [...]
  */
 export function extractApiData<T>(response: { data: ApiResponse<T> | T }): T {
   const data = response.data;
@@ -78,9 +68,6 @@ export function extractApiData<T>(response: { data: ApiResponse<T> | T }): T {
 
 /**
  * Extract paginated data from API response
- * 
- * @param response - Axios response object with pagination
- * @returns Object containing data array and pagination metadata
  */
 export function extractPaginatedData<T>(
   response: { data: ApiResponse<PaginatedResponse<T>> | PaginatedResponse<T> }
@@ -96,20 +83,8 @@ export function extractPaginatedData<T>(
 
 /**
  * Extract error message from API error response
- * Provides consistent error extraction from various error formats
- * 
- * @param error - Error object (typically from axios catch block)
- * @returns Structured ApiError object
- * 
- * @example
- * try {
- *   await api.get('/endpoint');
- * } catch (error) {
- *   return rejectWithValue(extractApiError(error));
- * }
  */
 export function extractApiError(error: unknown): ApiError {
-  // Handle null/undefined
   if (error === null || error === undefined) {
     return {
       message: "Đã xảy ra lỗi, vui lòng thử lại sau",
@@ -117,7 +92,6 @@ export function extractApiError(error: unknown): ApiError {
     };
   }
 
-  // Handle axios error structure
   const axiosError = error as {
     response?: { 
       data?: { 
@@ -131,7 +105,6 @@ export function extractApiError(error: unknown): ApiError {
     message?: string;
   };
 
-  // Try to get message from response data first
   if (axiosError?.response?.data?.message) {
     return {
       message: axiosError.response.data.message,
@@ -140,7 +113,6 @@ export function extractApiError(error: unknown): ApiError {
     };
   }
 
-  // Fall back to error message
   if (axiosError?.message) {
     return {
       message: axiosError.message,
@@ -148,7 +120,6 @@ export function extractApiError(error: unknown): ApiError {
     };
   }
 
-  // Default error
   return {
     message: "Đã xảy ra lỗi, vui lòng thử lại sau",
     code: 500,
@@ -171,10 +142,6 @@ export const ERROR_MESSAGES: Record<string, string> = {
 
 /**
  * Get localized error message
- * 
- * @param code - Error code or key
- * @param fallback - Fallback message if code not found
- * @returns Localized error message
  */
 export function getLocalizedError(code: string, fallback?: string): string {
   return ERROR_MESSAGES[code] || fallback || ERROR_MESSAGES.SERVER_ERROR;

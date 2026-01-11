@@ -1,4 +1,4 @@
-import { useState, useLayoutEffect } from "react";
+import { useState, useEffect } from "react";
 import { Order } from "@/types/order";
 import {
   Dialog,
@@ -31,11 +31,10 @@ export function EditOrderModal({
   order,
   isLoading,
 }: EditOrderModalProps) {
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState(order?.status ?? "");
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (order) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStatus(order.status);
     }
   }, [order]);

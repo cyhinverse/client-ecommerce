@@ -21,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useLayoutEffect, useEffect } from "react";
 import { User as UserIcon, Mail, Shield, Key, CheckCircle, Loader2 } from "lucide-react";
-import { User, UpdateUserData } from "@/types/user";
+import { User, UpdateUserData, UserRole } from "@/types/user";
 import { RESOURCES, ACTIONS } from "@/constants/permissions";
 import { getRolePermissions, getUserPermissions } from "@/api/permission";
 import { cn } from "@/lib/utils";
@@ -125,6 +125,7 @@ export function UpdateModelUser({
       onUpdate({
         ...formData,
         id: user._id,
+        roles: formData.roles as UserRole,
         permissions: formData.permissions,
       });
     }

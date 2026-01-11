@@ -126,9 +126,9 @@ export default function AdminProductsPage() {
       setUpdateModalOpen(false);
       setSelectedProduct(null);
       toast.success("Cập nhật sản phẩm thành công");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      toast.error(error.message || "Không thể cập nhật sản phẩm");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Không thể cập nhật sản phẩm";
+      toast.error(errorMessage);
     } finally {
       setIsUpdating(false);
     }
@@ -140,9 +140,9 @@ export default function AdminProductsPage() {
       await deleteProductMutation.mutateAsync(product._id);
       fetchProducts();
       toast.success("Xóa sản phẩm thành công");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      toast.error(error.message || "Không thể xóa sản phẩm");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Không thể xóa sản phẩm";
+      toast.error(errorMessage);
     }
   };
 

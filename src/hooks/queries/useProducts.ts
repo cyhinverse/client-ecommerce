@@ -11,9 +11,12 @@ import {
   extractApiData,
   extractApiError,
   PaginatedResponse,
-} from "@/utils/api";
+} from "@/api";
+import { errorHandler } from "@/services/errorHandler";
+import { STALE_TIME } from "@/constants/cache";
 import { productKeys } from "@/lib/queryKeys";
-import { Product, Variant, Shop, Price } from "@/types/product";
+import { Product, Variant, Price } from "@/types/product";
+import { Shop } from "@/types/shop";
 import { useAddToCart } from "./useCart";
 
 // ============ Types ============
@@ -123,7 +126,8 @@ const productApi = {
 
   getByCategory: async (categorySlug: string): Promise<Product[]> => {
     const response = await instance.get(`/products/category/${categorySlug}`);
-    return extractApiData(response);
+    const result = extractApiData<{ data: Product[] }>(response);
+    return result.data || [];
   },
 
   getRelated: async (productId: string): Promise<Product[]> => {
@@ -223,7 +227,7 @@ export function useProducts(
   return useQuery({
     queryKey: productKeys.list(params),
     queryFn: () => productApi.getAll(params),
-    staleTime: 2 * 60 * 1000, // 2 minutes for list
+    staleTime: STALE_TIME.LONG,
   });
 }
 
@@ -235,7 +239,7 @@ export function useProduct(slug: string, options?: { enabled?: boolean }) {
     queryKey: productKeys.detail(slug),
     queryFn: () => productApi.getBySlug(slug),
     enabled: options?.enabled ?? !!slug,
-    staleTime: 5 * 60 * 1000, // 5 minutes for detail
+    staleTime: STALE_TIME.VERY_LONG,
   });
 }
 
@@ -260,7 +264,7 @@ export function useFeaturedProducts() {
   return useQuery({
     queryKey: productKeys.featured(),
     queryFn: productApi.getFeatured,
-    staleTime: 10 * 60 * 1000, // 10 minutes - featured changes less often
+    staleTime: STALE_TIME.STATIC,
   });
 }
 
@@ -271,7 +275,7 @@ export function useNewArrivals() {
   return useQuery({
     queryKey: productKeys.newArrivals(),
     queryFn: productApi.getNewArrivals,
-    staleTime: 10 * 60 * 1000,
+    staleTime: STALE_TIME.STATIC,
   });
 }
 
@@ -282,7 +286,7 @@ export function useOnSaleProducts() {
   return useQuery({
     queryKey: productKeys.onSale(),
     queryFn: productApi.getOnSale,
-    staleTime: 5 * 60 * 1000,
+    staleTime: STALE_TIME.VERY_LONG,
   });
 }
 
@@ -311,7 +315,7 @@ export function useRelatedProducts(
     queryKey: [...productKeys.all, "related", productId] as const,
     queryFn: () => productApi.getRelated(productId),
     enabled: options?.enabled ?? !!productId,
-    staleTime: 10 * 60 * 1000,
+    staleTime: STALE_TIME.STATIC,
   });
 }
 
@@ -336,8 +340,8 @@ export function useProductSearch(keyword: string, limit?: number) {
   return useQuery({
     queryKey: [...productKeys.all, "search", keyword, limit] as const,
     queryFn: () => productApi.search({ keyword, limit }),
-    enabled: keyword.length >= 2, // Only search when keyword has 2+ chars
-    staleTime: 1 * 60 * 1000, // 1 minute for search results
+    enabled: keyword.length >= 2,
+    staleTime: STALE_TIME.MEDIUM,
   });
 }
 
@@ -356,7 +360,7 @@ export function useCreateProduct() {
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
     },
     onError: (error) => {
-      console.error("Create product failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Create product failed" });
     },
   });
 }
@@ -382,7 +386,7 @@ export function useUpdateProduct() {
       }
     },
     onError: (error) => {
-      console.error("Update product failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Update product failed" });
     },
   });
 }
@@ -399,7 +403,7 @@ export function useDeleteProduct() {
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
     },
     onError: (error) => {
-      console.error("Delete product failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Delete product failed" });
     },
   });
 }
@@ -423,7 +427,7 @@ export function useUpdateSellerProduct() {
       }
     },
     onError: (error) => {
-      console.error("Seller update product failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Seller update product failed" });
     },
   });
 }
@@ -440,7 +444,7 @@ export function useDeleteSellerProduct() {
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
     },
     onError: (error) => {
-      console.error("Seller delete product failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Seller delete product failed" });
     },
   });
 }
@@ -459,7 +463,7 @@ export function useUpdateProductModel() {
       });
     },
     onError: (error) => {
-      console.error("Update model failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Update model failed" });
     },
   });
 }
@@ -478,7 +482,7 @@ export function useDeleteProductModel() {
       });
     },
     onError: (error) => {
-      console.error("Delete model failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Delete model failed" });
     },
   });
 }
@@ -603,7 +607,7 @@ export function useProductDetail({
   const shop = useMemo((): Shop | null => {
     if (!currentProduct?.shop) return null;
     if (typeof currentProduct.shop === "string") {
-      return { _id: currentProduct.shop, name: "Shop" };
+      return { _id: currentProduct.shop, name: "Shop" } as Shop;
     }
     return currentProduct.shop;
   }, [currentProduct]);

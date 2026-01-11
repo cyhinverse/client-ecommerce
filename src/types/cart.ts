@@ -82,8 +82,8 @@ export function groupCartItemsByShop(items: CartItem[]): CartItemsByShop[] {
   const DEFAULT_SHOP_ID = "default-shop";
 
   items.forEach((item) => {
-    let shopId: string | undefined;
-    let shop: Shop;
+    let shopId: string = DEFAULT_SHOP_ID;
+    let shop: Shop = { _id: DEFAULT_SHOP_ID, name: "Shop" } as unknown as Shop;
 
     // 1. Try to get shop from populated productId
     if (
@@ -107,7 +107,7 @@ export function groupCartItemsByShop(items: CartItem[]): CartItemsByShop[] {
 
     // 2. Try to get from item.shopId (populated)
     if (
-      !shopId &&
+      shopId === DEFAULT_SHOP_ID &&
       typeof item.shopId === "object" &&
       item.shopId !== null &&
       "name" in item.shopId
@@ -117,21 +117,13 @@ export function groupCartItemsByShop(items: CartItem[]): CartItemsByShop[] {
     }
 
     // 3. Try to get from item.shopId (string)
-    if (!shopId && typeof item.shopId === "string") {
+    if (shopId === DEFAULT_SHOP_ID && typeof item.shopId === "string") {
       shopId = item.shopId;
       shop = { _id: shopId, name: "Shop" } as unknown as Shop;
     }
 
-    if (!shopId) {
-      shopId = DEFAULT_SHOP_ID;
-      shop = { _id: DEFAULT_SHOP_ID, name: "Shop" } as unknown as Shop;
-    }
-
-    // Cast strict for map key
-    const resolvedShopId = shopId!;
-
-    if (!shopMap.has(resolvedShopId)) {
-      shopMap.set(resolvedShopId, {
+    if (!shopMap.has(shopId)) {
+      shopMap.set(shopId, {
         shop,
         items: [],
         subtotal: 0,
@@ -139,7 +131,7 @@ export function groupCartItemsByShop(items: CartItem[]): CartItemsByShop[] {
       });
     }
 
-    const group = shopMap.get(resolvedShopId)!;
+    const group = shopMap.get(shopId)!;
     group.items.push(item);
 
     // Calculate price - handle both number and object price types

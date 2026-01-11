@@ -4,20 +4,15 @@
  */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/utils/api";
+import { extractApiData } from "@/api";
+import { errorHandler } from "@/services/errorHandler";
+import { STALE_TIME } from "@/constants/cache";
+import { shopCategoryKeys } from "@/lib/queryKeys";
 import {
   ShopCategory,
   CreateShopCategoryPayload,
   UpdateShopCategoryPayload,
 } from "@/types/shopCategory";
-
-// Query keys for shop categories
-export const shopCategoryKeys = {
-  all: ["shop-categories"] as const,
-  myCategories: () => [...shopCategoryKeys.all, "my"] as const,
-  byShop: (shopId: string) =>
-    [...shopCategoryKeys.all, "shop", shopId] as const,
-};
 
 // ============ API Functions ============
 const shopCategoryApi = {
@@ -61,7 +56,7 @@ export function useMyShopCategories() {
   return useQuery({
     queryKey: shopCategoryKeys.myCategories(),
     queryFn: shopCategoryApi.getMy,
-    staleTime: 5 * 60 * 1000,
+    staleTime: STALE_TIME.VERY_LONG,
   });
 }
 
@@ -76,7 +71,7 @@ export function useShopCategoriesByShop(
     queryKey: shopCategoryKeys.byShop(shopId),
     queryFn: () => shopCategoryApi.getByShop(shopId),
     enabled: options?.enabled ?? !!shopId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: STALE_TIME.VERY_LONG,
   });
 }
 
@@ -94,7 +89,7 @@ export function useCreateShopCategory() {
       queryClient.invalidateQueries({ queryKey: shopCategoryKeys.all });
     },
     onError: (error) => {
-      console.error("Create shop category failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Create shop category failed" });
     },
   });
 }
@@ -117,7 +112,7 @@ export function useUpdateShopCategory() {
       queryClient.invalidateQueries({ queryKey: shopCategoryKeys.all });
     },
     onError: (error) => {
-      console.error("Update shop category failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Update shop category failed" });
     },
   });
 }
@@ -134,7 +129,7 @@ export function useDeleteShopCategory() {
       queryClient.invalidateQueries({ queryKey: shopCategoryKeys.all });
     },
     onError: (error) => {
-      console.error("Delete shop category failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Delete shop category failed" });
     },
   });
 }

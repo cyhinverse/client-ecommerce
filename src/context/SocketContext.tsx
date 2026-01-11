@@ -24,8 +24,12 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     if (!isAuthenticated || !token) return;
 
     // Create socket connection
-    const socketUrl =
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    const socketUrl = process.env.NEXT_PUBLIC_API_URL;
+    
+    if (!socketUrl) {
+      console.warn("NEXT_PUBLIC_API_URL is not defined");
+      return;
+    }
 
     const socketInstance = io(socketUrl, {
       auth: { token },
@@ -51,8 +55,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       socketInstance.disconnect();
       setSocket(null);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated, token]);
+  }, [isAuthenticated, token, queryClient]);
 
   return (
     <SocketContext.Provider value={{ socket, isConnected }}>

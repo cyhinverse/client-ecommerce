@@ -76,13 +76,20 @@ export default function ShopPage() {
     return num.toString();
   };
 
-  // Filter products by category and search
+  // Filter products by shop category and search
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
       !searchQuery ||
       product.name.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    // Filter by shop category (not general category)
+    const productShopCategoryId = typeof product.shopCategory === 'object' 
+      ? product.shopCategory?._id 
+      : product.shopCategory;
+    const selectedCategory = categories.find(cat => cat.slug === activeCategory);
     const matchesCategory =
-      activeCategory === "all" || product.category?.slug === activeCategory;
+      activeCategory === "all" || productShopCategoryId === selectedCategory?._id;
+    
     return matchesSearch && matchesCategory;
   });
 

@@ -52,7 +52,7 @@ export default function BannersAdminPage() {
   const updateMutation = useUpdateBanner();
   const deleteMutation = useDeleteBanner();
 
-  const banners = bannersData?.banners || [];
+  const banners = bannersData?.data || [];
 
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);

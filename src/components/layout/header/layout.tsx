@@ -21,6 +21,7 @@ import NotificationModel from "@/components/notifications/NotificationModel";
 import { useUnreadNotificationCount } from "@/hooks/queries/useNotifications";
 import { toggleChat } from "@/features/chat/chatSlice";
 import { useProductSearch } from "@/hooks/queries/useProducts";
+import { formatCurrency } from "@/utils/format";
 import { pathArray } from "@/constants/PathArray";
 import {
   Sheet,
@@ -152,14 +153,6 @@ export default function HeaderLayout() {
     cartData?.items?.reduce((total, item) => total + item.quantity, 0) || 0;
 
   if (pathArray.includes(path)) return null;
-
-  // Format price
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(price);
-  };
 
   return (
     <>
@@ -347,7 +340,7 @@ export default function HeaderLayout() {
                               <div className="space-y-2">
                                 {searchResults
                                   .slice(0, 6)
-                                  .map((product: any) => (
+                                  .map((product) => (
                                     <div
                                       key={product._id}
                                       onClick={() =>
@@ -357,11 +350,9 @@ export default function HeaderLayout() {
                                     >
                                       {/* Product Image */}
                                       <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 shrink-0">
-                                        {product.image ||
-                                        product.variants?.[0]?.images?.[0] ? (
+                                        {product.variants?.[0]?.images?.[0] ? (
                                           <Image
                                             src={
-                                              product.image ||
                                               product.variants?.[0]?.images?.[0]
                                             }
                                             alt={product.name}
@@ -386,7 +377,7 @@ export default function HeaderLayout() {
                                         </p>
                                         <div className="flex items-center gap-2 mt-0.5">
                                           <span className="text-sm font-bold text-[#E53935]">
-                                            {formatPrice(
+                                            {formatCurrency(
                                               product.price?.discountPrice ||
                                                 product.price?.currentPrice ||
                                                 0
@@ -396,7 +387,7 @@ export default function HeaderLayout() {
                                             product.price?.currentPrice >
                                               product.price?.discountPrice && (
                                               <span className="text-xs text-gray-400 line-through">
-                                                {formatPrice(
+                                                {formatCurrency(
                                                   product.price.currentPrice
                                                 )}
                                               </span>

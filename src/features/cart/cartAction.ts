@@ -1,9 +1,9 @@
 import instance from "@/api/api";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { AddToCartPayload, UpdateCartItemPayload } from "@/types/cart";
-import { extractApiData, extractApiError } from "@/utils/api";
+import { extractApiData, extractApiError } from "@/api";
 
-// Add to cart - Updated to use modelId instead of variantId
+// Add to cart
 export const addToCart = createAsyncThunk(
   "add/cart",
   async ({
@@ -12,14 +12,12 @@ export const addToCart = createAsyncThunk(
     modelId,
     quantity = 1,
     size,
-    // DEPRECATED: variantId kept for backward compatibility
-    variantId,
-  }: AddToCartPayload & { variantId?: string | null }, { rejectWithValue }) => {
+  }: AddToCartPayload, { rejectWithValue }) => {
     try {
       const response = await instance.post("/cart", {
         productId,
         shopId,
-        modelId: modelId || variantId, // Use modelId, fallback to variantId
+        modelId,
         quantity,
         size,
       });

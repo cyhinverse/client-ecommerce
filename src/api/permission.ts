@@ -1,6 +1,6 @@
 import instance from "./api";
-import { endpoint_permission } from "@/constants/enpoint";
-import { extractApiData } from "@/utils/api";
+import { endpoint_permission } from "@/constants/endpoint";
+import { extractApiData } from "./utils";
 
 export interface AllPermissionsResponse {
   permissions: string[];

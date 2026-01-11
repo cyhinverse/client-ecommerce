@@ -32,8 +32,6 @@ export interface Category extends BaseEntity {
   isActive: boolean; // Has default true in backend
 }
 
-export type { PaginationData };
-
 // Categories response from API
 export interface CategoriesResponse {
   data: Category[];

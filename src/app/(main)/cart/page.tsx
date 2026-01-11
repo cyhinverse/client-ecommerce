@@ -27,6 +27,7 @@ import {
   unselectAllItems,
   prepareForCheckout,
 } from "@/features/cart/cartSlice";
+import { formatCurrency } from "@/utils/format";
 import { useApplyVoucher } from "@/hooks/queries";
 import { ApplyVoucherResult } from "@/types/voucher";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
@@ -133,24 +134,24 @@ export default function CartPage() {
     toast.success("Đã xóa mã giảm giá");
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
-
   const subtotal =
     cartData?.items?.reduce((sum, item) => {
       // Skip items with null productId (deleted products)
       if (item.productId === null) return sum;
-      const discountPrice = item.price?.discountPrice ?? 0;
-      const currentPrice = item.price?.currentPrice ?? 0;
-      const effectivePrice =
-        discountPrice > 0 && discountPrice < currentPrice
-          ? discountPrice
-          : currentPrice;
+      
+      // Handle both number and Price object types
+      let effectivePrice = 0;
+      if (typeof item.price === "number") {
+        effectivePrice = item.price;
+      } else if (item.price) {
+        const discountPrice = item.price.discountPrice ?? 0;
+        const currentPrice = item.price.currentPrice ?? 0;
+        effectivePrice =
+          discountPrice > 0 && discountPrice < currentPrice
+            ? discountPrice
+            : currentPrice;
+      }
+      
       return sum + (effectivePrice || 0) * item.quantity;
     }, 0) ?? 0;
 
@@ -235,11 +236,32 @@ export default function CartPage() {
 
   // Helper to get effective price
   const getEffectivePrice = (item: CartItem): number => {
+    if (typeof item.price === "number") {
+      return item.price;
+    }
     const discountPrice = item.price?.discountPrice ?? 0;
     const currentPrice = item.price?.currentPrice ?? 0;
     return discountPrice > 0 && discountPrice < currentPrice
       ? discountPrice
       : currentPrice;
+  };
+
+  // Helper to check if item has discount
+  const hasDiscount = (item: CartItem): boolean => {
+    if (typeof item.price === "number") {
+      return false;
+    }
+    const discountPrice = item.price?.discountPrice ?? 0;
+    const currentPrice = item.price?.currentPrice ?? 0;
+    return discountPrice > 0 && currentPrice > discountPrice;
+  };
+
+  // Helper to get original price
+  const getOriginalPrice = (item: CartItem): number => {
+    if (typeof item.price === "number") {
+      return item.price;
+    }
+    return item.price?.currentPrice ?? 0;
   };
 
   if (error) {
@@ -445,13 +467,11 @@ export default function CartPage() {
                         {/* Price */}
                         <div className="flex items-baseline gap-2">
                           <span className="text-[#E53935] font-bold">
-                            {formatPrice(getEffectivePrice(item))}
+                            {formatCurrency(getEffectivePrice(item))}
                           </span>
-                          {(item.price?.discountPrice ?? 0) > 0 &&
-                            (item.price?.currentPrice ?? 0) >
-                              (item.price?.discountPrice ?? 0) && (
+                          {hasDiscount(item) && (
                               <span className="text-xs text-gray-400 line-through">
-                                {formatPrice(item.price?.currentPrice ?? 0)}
+                                {formatCurrency(getOriginalPrice(item))}
                               </span>
                             )}
                         </div>
@@ -554,7 +574,7 @@ export default function CartPage() {
                     Tạm tính ({selectedItemsCount} sản phẩm)
                   </span>
                   <span className="text-gray-800">
-                    {formatPrice(
+                    {formatCurrency(
                       hasSelectedItems ? checkoutTotal || 0 : subtotal
                     )}
                   </span>
@@ -564,7 +584,7 @@ export default function CartPage() {
                   <div className="flex justify-between text-sm text-green-600">
                     <span>Giảm giá</span>
                     <span>
-                      -{formatPrice(appliedPlatformVoucher.discountAmount)}
+                      -{formatCurrency(appliedPlatformVoucher.discountAmount)}
                     </span>
                   </div>
                 )}
@@ -579,7 +599,7 @@ export default function CartPage() {
               <div className="flex justify-between items-center py-4 border-t border-gray-100">
                 <span className="text-gray-800 font-medium">Tổng cộng</span>
                 <span className="text-xl font-bold text-[#E53935]">
-                  {formatPrice(
+                  {formatCurrency(
                     appliedPlatformVoucher
                       ? (checkoutTotal || 0) -
                           appliedPlatformVoucher.discountAmount

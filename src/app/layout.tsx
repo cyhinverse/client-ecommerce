@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ReduxProvider } from "./Provider";
 import { SocketProvider } from "@/context/SocketContext";
+import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -26,7 +27,9 @@ export default function RootLayout({
         suppressHydrationWarning={true}
       >
         <ReduxProvider>
-          <SocketProvider>{children}</SocketProvider>
+          <SocketProvider>
+            <ErrorBoundary>{children}</ErrorBoundary>
+          </SocketProvider>
         </ReduxProvider>
       </body>
     </html>

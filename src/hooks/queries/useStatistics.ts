@@ -4,7 +4,8 @@
  */
 import { useQuery } from "@tanstack/react-query";
 import instance from "@/api/api";
-import { extractApiData } from "@/utils/api";
+import { extractApiData } from "@/api";
+import { STALE_TIME, REFETCH_INTERVAL } from "@/constants/cache";
 import { statisticsKeys } from "@/lib/queryKeys";
 
 // ============ Types ============
@@ -130,8 +131,8 @@ export function useDashboardStats() {
   return useQuery({
     queryKey: statisticsKeys.dashboard(),
     queryFn: statisticsApi.getDashboard,
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
+    staleTime: STALE_TIME.LONG,
+    refetchInterval: REFETCH_INTERVAL.SLOW,
   });
 }
 
@@ -146,7 +147,7 @@ export function useRevenueStats(params?: {
   return useQuery({
     queryKey: statisticsKeys.revenue(params),
     queryFn: () => statisticsApi.getRevenue(params),
-    staleTime: 5 * 60 * 1000,
+    staleTime: STALE_TIME.VERY_LONG,
   });
 }
 
@@ -157,7 +158,7 @@ export function useProductStats() {
   return useQuery({
     queryKey: statisticsKeys.products(),
     queryFn: statisticsApi.getProducts,
-    staleTime: 5 * 60 * 1000,
+    staleTime: STALE_TIME.VERY_LONG,
   });
 }
 
@@ -171,6 +172,6 @@ export function useOrderStats(params?: {
   return useQuery({
     queryKey: statisticsKeys.orders(params),
     queryFn: () => statisticsApi.getOrders(params),
-    staleTime: 5 * 60 * 1000,
+    staleTime: STALE_TIME.VERY_LONG,
   });
 }

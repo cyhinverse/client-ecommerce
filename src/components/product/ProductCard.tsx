@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Star } from "lucide-react";
 import { Product } from "@/types/product";
+import { formatCurrency } from "@/utils/format";
 import WishlistButton from "@/components/common/WishlistButton";
 
 // Helper function to get price range from variants (new) or models (old)
@@ -41,15 +41,6 @@ const getProductImage = (product: Product): string | null => {
   }
 
   return null;
-};
-
-// Format price to VND
-const formatPrice = (price: number): string => {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-    maximumFractionDigits: 0,
-  }).format(price);
 };
 
 // Format sold count

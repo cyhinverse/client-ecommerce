@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Plus, X, Trash2, Upload } from "lucide-react";
-import { ProductAttribute, CreateVariant } from "@/types/product";
+import { ProductAttribute, VariantFormCreate } from "@/types/product";
 import { TagItem } from "@/components/product/forms/TagItem";
 import {
   Select,
@@ -53,7 +53,7 @@ const initialFormData = {
   weight: 0,
   dimensions: { height: 0, width: 0, length: 0 },
   sizes: [] as string[], // Product-level sizes
-  variants: [] as CreateVariant[],
+  variants: [] as VariantFormCreate[],
   attributes: [] as ProductAttribute[],
   tags: [] as string[],
   descriptionImages: { files: [] as File[], previews: [] as string[] },
@@ -99,13 +99,13 @@ export function CreateModelProduct({
 
   // Add new variant (color variant)
   const addVariant = () => {
-    const newVariant: CreateVariant = {
+    const newVariant: VariantFormCreate = {
       _id: `temp-${Date.now()}`,
       name: "",
       color: "",
       price: formData.price.currentPrice,
       stock: 0,
-      images: { files: [], previews: [], existing: [] },
+      images: { files: [], previews: [] },
     };
     setFormData((prev) => ({
       ...prev,
@@ -116,7 +116,7 @@ export function CreateModelProduct({
   // Update variant field
   const updateVariant = (
     index: number,
-    field: keyof CreateVariant,
+    field: keyof VariantFormCreate,
     value: unknown
   ) => {
     setFormData((prev) => ({

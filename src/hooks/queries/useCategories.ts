@@ -4,7 +4,9 @@
  */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/utils/api";
+import { extractApiData, extractApiError } from "@/api";
+import { errorHandler } from "@/services/errorHandler";
+import { STALE_TIME, GC_TIME } from "@/constants/cache";
 import { categoryKeys } from "@/lib/queryKeys";
 import { Category, CategoriesResponse } from "@/types/category";
 
@@ -98,8 +100,8 @@ export function useCategoryTree() {
   return useQuery({
     queryKey: categoryKeys.tree(),
     queryFn: categoryApi.getTree,
-    staleTime: 30 * 60 * 1000, // 30 minutes - categories change rarely
-    gcTime: 60 * 60 * 1000, // 1 hour cache
+    staleTime: STALE_TIME.VERY_STATIC,
+    gcTime: GC_TIME.LONG,
   });
 }
 
@@ -110,7 +112,7 @@ export function useCategories(params: CategoryListParams = {}) {
   return useQuery({
     queryKey: categoryKeys.list(params),
     queryFn: () => categoryApi.getAll(params),
-    staleTime: 10 * 60 * 1000,
+    staleTime: STALE_TIME.STATIC,
   });
 }
 
@@ -154,7 +156,7 @@ export function useCreateCategory() {
       queryClient.invalidateQueries({ queryKey: categoryKeys.all });
     },
     onError: (error) => {
-      console.error("Create category failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Create category failed" });
     },
   });
 }
@@ -175,7 +177,7 @@ export function useUpdateCategory() {
       queryClient.invalidateQueries({ queryKey: categoryKeys.tree() });
     },
     onError: (error) => {
-      console.error("Update category failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Update category failed" });
     },
   });
 }
@@ -192,7 +194,7 @@ export function useDeleteCategory() {
       queryClient.invalidateQueries({ queryKey: categoryKeys.all });
     },
     onError: (error) => {
-      console.error("Delete category failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Delete category failed" });
     },
   });
 }

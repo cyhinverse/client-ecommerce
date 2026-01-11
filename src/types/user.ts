@@ -19,6 +19,7 @@ export interface User extends BaseEntity {
 
   // Verification
   isVerifiedEmail: boolean;
+  isTwoFactorEnabled?: boolean;
   provider: AuthProvider;
 
   // Addresses
@@ -30,8 +31,6 @@ export interface User extends BaseEntity {
   codeVerifiPassword?: string;
   expiresCodeVerifiPassword?: string; // Added - matches backend schema
 }
-
-export type { PaginationData };
 
 // ============ Admin/Form Types ============
 

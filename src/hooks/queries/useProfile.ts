@@ -4,7 +4,9 @@
  */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/utils/api";
+import { extractApiData, extractApiError } from "@/api";
+import { errorHandler } from "@/services/errorHandler";
+import { STALE_TIME } from "@/constants/cache";
 import { userKeys } from "@/lib/queryKeys";
 import { User } from "@/types/user";
 import { Address } from "@/types/address";
@@ -41,11 +43,12 @@ export interface UpdateAddressData extends Partial<CreateAddressData> {
 }
 
 export interface CreateUserData {
-  name: string;
+  username: string;
   email: string;
   phone: string;
   roles: string;
   isVerifiedEmail: boolean;
+  password: string;
   permissions?: string[];
 }
 
@@ -157,7 +160,7 @@ export function useProfile(options?: { enabled?: boolean }) {
     queryKey: userKeys.profile(),
     queryFn: userApi.getProfile,
     enabled: options?.enabled,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: STALE_TIME.VERY_LONG,
   });
 }
 
@@ -169,7 +172,7 @@ export function useAddresses(options?: { enabled?: boolean }) {
     queryKey: userKeys.addresses(),
     queryFn: userApi.getAddresses,
     enabled: options?.enabled,
-    staleTime: 10 * 60 * 1000, // 10 minutes - addresses don't change often
+    staleTime: STALE_TIME.STATIC,
   });
 }
 
@@ -180,7 +183,7 @@ export function useAllUsers(params?: UserListParams) {
   return useQuery({
     queryKey: [...userKeys.all, "list", params] as const,
     queryFn: () => userApi.getAll(params),
-    staleTime: 2 * 60 * 1000,
+    staleTime: STALE_TIME.LONG,
   });
 }
 
@@ -198,7 +201,7 @@ export function useUpdateProfile() {
       queryClient.setQueryData(userKeys.profile(), data);
     },
     onError: (error) => {
-      console.error("Update profile failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Update profile failed" });
     },
   });
 }
@@ -215,7 +218,7 @@ export function useUploadAvatar() {
       queryClient.invalidateQueries({ queryKey: userKeys.profile() });
     },
     onError: (error) => {
-      console.error("Upload avatar failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Upload avatar failed" });
     },
   });
 }
@@ -227,7 +230,7 @@ export function useChangePassword() {
   return useMutation({
     mutationFn: userApi.changePassword,
     onError: (error) => {
-      console.error("Change password failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Change password failed" });
     },
   });
 }
@@ -247,7 +250,7 @@ export function useCreateAddress() {
       queryClient.invalidateQueries({ queryKey: userKeys.profile() });
     },
     onError: (error) => {
-      console.error("Create address failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Create address failed" });
     },
   });
 }
@@ -265,7 +268,7 @@ export function useUpdateAddress() {
       queryClient.invalidateQueries({ queryKey: userKeys.profile() });
     },
     onError: (error) => {
-      console.error("Update address failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Update address failed" });
     },
   });
 }
@@ -283,7 +286,7 @@ export function useDeleteAddress() {
       queryClient.invalidateQueries({ queryKey: userKeys.profile() });
     },
     onError: (error) => {
-      console.error("Delete address failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Delete address failed" });
     },
   });
 }
@@ -301,7 +304,7 @@ export function useSetDefaultAddress() {
       queryClient.invalidateQueries({ queryKey: userKeys.profile() });
     },
     onError: (error) => {
-      console.error("Set default address failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Set default address failed" });
     },
   });
 }
@@ -320,7 +323,7 @@ export function useCreateUser() {
       queryClient.invalidateQueries({ queryKey: userKeys.all });
     },
     onError: (error) => {
-      console.error("Create user failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Create user failed" });
     },
   });
 }
@@ -337,7 +340,7 @@ export function useUpdateUser() {
       queryClient.invalidateQueries({ queryKey: userKeys.all });
     },
     onError: (error) => {
-      console.error("Update user failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Update user failed" });
     },
   });
 }
@@ -354,7 +357,7 @@ export function useDeleteUser() {
       queryClient.invalidateQueries({ queryKey: userKeys.all });
     },
     onError: (error) => {
-      console.error("Delete user failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Delete user failed" });
     },
   });
 }

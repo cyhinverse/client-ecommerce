@@ -21,7 +21,8 @@ import { useState, useEffect, useCallback } from "react";
 import { Plus, ChevronDown, ChevronUp, Shield } from "lucide-react";
 import { RESOURCES, ACTIONS } from "@/constants/permissions";
 import { getRolePermissions } from "@/api/permission";
-import { CreateUserData } from "@/types/user";
+import { UserRole } from "@/types/user";
+import { CreateUserData } from "@/hooks/queries/useProfile";
 
 interface CreateModelUserProps {
   open: boolean;
@@ -101,6 +102,7 @@ export function CreateModelUser({
     e.preventDefault();
     onCreate({
       ...formData,
+      roles: formData.roles as UserRole,
       permissions: formData.permissions.length > 0 ? formData.permissions : undefined,
     });
   };

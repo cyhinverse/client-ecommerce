@@ -115,6 +115,14 @@ export const shopKeys = {
     [...shopKeys.all, "categories", shopId] as const,
 };
 
+// Shop Category query keys
+export const shopCategoryKeys = {
+  all: ["shop-categories"] as const,
+  myCategories: () => [...shopCategoryKeys.all, "my"] as const,
+  byShop: (shopId: string) =>
+    [...shopCategoryKeys.all, "shop", shopId] as const,
+};
+
 // Review query keys
 export const reviewKeys = {
   all: ["reviews"] as const,
@@ -152,8 +160,9 @@ export const voucherKeys = {
   list: (params?: unknown) => [...voucherKeys.lists(), params] as const,
   detail: (voucherId: string) =>
     [...voucherKeys.all, "detail", voucherId] as const,
-  available: () => [...voucherKeys.all, "available"] as const,
+  available: (params?: unknown) => [...voucherKeys.all, "available", params] as const,
   validate: (code: string) => [...voucherKeys.all, "validate", code] as const,
+  statistics: () => [...voucherKeys.all, "statistics"] as const,
 };
 
 // Banner query keys

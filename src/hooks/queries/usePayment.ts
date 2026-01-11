@@ -4,7 +4,8 @@
  */
 import { useMutation, useQuery } from "@tanstack/react-query";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/utils/api";
+import { extractApiData, extractApiError } from "@/api";
+import { errorHandler } from "@/services/errorHandler";
 import { paymentKeys } from "@/lib/queryKeys";
 
 // ============ Types ============
@@ -61,7 +62,7 @@ export function useCreatePaymentUrl() {
   return useMutation({
     mutationFn: paymentApi.createUrl,
     onError: (error) => {
-      console.error("Create payment URL failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Create payment URL failed" });
     },
   });
 }

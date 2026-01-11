@@ -26,6 +26,7 @@ import {
   AreaChart,
 } from "recharts";
 import { useSocket } from "@/context/SocketContext";
+import { formatCurrency } from "@/utils/format";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { useDashboardStats } from "@/hooks/queries/useStatistics";
@@ -63,13 +64,6 @@ export default function AdminDashboard() {
 
   const handleRefresh = () => {
     setRefreshKey((prev) => prev + 1);
-  };
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(price);
   };
 
   const getStatusBadge = (status: string) => {
@@ -142,7 +136,7 @@ export default function AdminDashboard() {
   const statCards = [
     {
       name: "Total Revenue",
-      value: formatPrice(displayStats.totalRevenue || 0),
+      value: formatCurrency(displayStats.totalRevenue || 0),
       icon: DollarSign,
       description: "Total earnings",
       trend: "+12.5%",
@@ -316,7 +310,7 @@ export default function AdminDashboard() {
                       fontSize: "11px",
                     }}
                     formatter={(value: number) => [
-                      formatPrice(value),
+                      formatCurrency(value),
                       "Revenue",
                     ]}
                   />
@@ -441,7 +435,7 @@ export default function AdminDashboard() {
 
                   <div className="text-right">
                     <p className="font-medium text-sm text-foreground">
-                      {formatPrice(order.totalAmount)}
+                      {formatCurrency(order.totalAmount)}
                     </p>
                     <div className="mt-1 scale-90 origin-right">
                       {getStatusBadge(order.status)}
@@ -513,7 +507,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="text-right">
                     <p className="font-medium text-sm text-foreground">
-                      {formatPrice(product.revenue)}
+                      {formatCurrency(product.revenue)}
                     </p>
                   </div>
                 </div>

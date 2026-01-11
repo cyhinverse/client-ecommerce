@@ -352,8 +352,7 @@ export function DiscountsTable({
                     </TableCell>
                     <TableCell className="text-muted-foreground font-medium align-top py-4">
                       {getDiscountTypeText(
-                        discount.discountType ??
-                          (discount.type === "percentage" ? "percent" : "fixed")
+                        discount.type === "percentage" ? "percent" : "fixed"
                       )}
                     </TableCell>
                     <TableCell className="text-foreground font-bold align-top py-4">

@@ -5,7 +5,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef, useCallback } from "react";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/utils/api";
+import { extractApiData, extractApiError } from "@/api";
+import { errorHandler } from "@/services/errorHandler";
+import { STALE_TIME, REFETCH_INTERVAL } from "@/constants/cache";
 import { flashSaleKeys } from "@/lib/queryKeys";
 import {
   FlashSaleResponse,
@@ -66,8 +68,8 @@ export function useActiveFlashSale(params?: { page?: number; limit?: number }) {
   return useQuery({
     queryKey: flashSaleKeys.active(params),
     queryFn: () => flashSaleApi.getActive(params),
-    staleTime: 30 * 1000, // 30 seconds - flash sale data changes quickly
-    refetchInterval: 60 * 1000, // Refetch every minute to keep stock updated
+    staleTime: STALE_TIME.SHORT,
+    refetchInterval: REFETCH_INTERVAL.NORMAL,
   });
 }
 
@@ -78,7 +80,7 @@ export function useFlashSaleSchedule() {
   return useQuery({
     queryKey: flashSaleKeys.schedule(),
     queryFn: flashSaleApi.getSchedule,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: STALE_TIME.VERY_LONG,
   });
 }
 
@@ -93,7 +95,7 @@ export function useFlashSaleBySlot(
     queryKey: flashSaleKeys.slot(timeSlot),
     queryFn: () => flashSaleApi.getBySlot(timeSlot),
     enabled: options?.enabled ?? !!timeSlot,
-    staleTime: 30 * 1000,
+    staleTime: STALE_TIME.SHORT,
   });
 }
 
@@ -104,7 +106,7 @@ export function useFlashSaleStats() {
   return useQuery({
     queryKey: flashSaleKeys.stats(),
     queryFn: flashSaleApi.getStats,
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: STALE_TIME.LONG,
   });
 }
 
@@ -122,7 +124,7 @@ export function useAddToFlashSale() {
       queryClient.invalidateQueries({ queryKey: flashSaleKeys.all });
     },
     onError: (error) => {
-      console.error("Add to flash sale failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Add to flash sale failed" });
     },
   });
 }
@@ -139,7 +141,7 @@ export function useRemoveFromFlashSale() {
       queryClient.invalidateQueries({ queryKey: flashSaleKeys.all });
     },
     onError: (error) => {
-      console.error("Remove from flash sale failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Remove from flash sale failed" });
     },
   });
 }

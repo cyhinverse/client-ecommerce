@@ -1,17 +1,27 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { authSlice } from "@/features/auth/authSlice";
+import type { Store } from "@reduxjs/toolkit";
 
-let store: any;
+// Type for the Redux store
+type AppStore = Store;
 
-export const injectStore = (_store: any) => {
+// Type for queued promise handlers
+interface QueuedPromise {
+  resolve: (value?: unknown) => void;
+  reject: (reason?: unknown) => void;
+}
+
+let store: AppStore | null = null;
+
+export const injectStore = (_store: AppStore) => {
   store = _store;
 };
 
 // Create a queue to hold failed requests while refreshing token
 let isRefreshing = false;
-let failedQueue: any[] = [];
+let failedQueue: QueuedPromise[] = [];
 
-const processQueue = (error: any, token: string | null = null) => {
+const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
@@ -24,7 +34,9 @@ const processQueue = (error: any, token: string | null = null) => {
 };
 
 const instance = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: process.env.NEXT_PUBLIC_API_URL
+    ? `${process.env.NEXT_PUBLIC_API_URL}/api`
+    : "http://localhost:5000/api",
   timeout: 10000,
   withCredentials: true,
   headers: {

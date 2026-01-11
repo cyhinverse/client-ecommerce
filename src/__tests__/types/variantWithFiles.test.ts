@@ -1,8 +1,8 @@
 /**
- * Property Tests for VariantWithFiles Interface Consistency
- * Validates: Requirements 6.2, 9.3
+ * Property Tests for VariantForm Interface Consistency
+ * Validates: Requirements 5.1, 5.4, 40.1-4
  * 
- * Property 6: VariantWithFiles Interface Consistency
+ * Property: VariantForm Interface Consistency
  * - Both Create and Update forms use unified types from @/types/product
  * - Type guards correctly identify variant types
  * - Helper functions create valid variant structures
@@ -11,19 +11,19 @@
 import { describe, it, expect } from "vitest";
 import * as fc from "fast-check";
 import {
-  VariantWithFilesCreate,
-  VariantWithFilesUpdate,
-  VariantWithFiles,
-  isVariantForCreate,
-  isVariantForUpdate,
-  createEmptyVariantForCreate,
-  createEmptyVariantForUpdate,
-  variantToEditForm,
+  VariantFormCreate,
+  VariantFormUpdate,
+  VariantForm,
+  isVariantFormCreate,
+  isVariantFormUpdate,
+  createEmptyVariantForm,
+  createEmptyVariantFormUpdate,
+  variantToForm,
   Variant,
 } from "@/types/product";
 
 // Arbitrary generators for testing - simplified structure with color only
-const variantWithFilesCreateArb: fc.Arbitrary<VariantWithFilesCreate> = fc.record({
+const variantFormCreateArb: fc.Arbitrary<VariantFormCreate> = fc.record({
   _id: fc.string({ minLength: 1, maxLength: 50 }),
   name: fc.string({ minLength: 0, maxLength: 100 }),
   color: fc.option(fc.string({ minLength: 0, maxLength: 20 }), { nil: undefined }),
@@ -33,11 +33,10 @@ const variantWithFilesCreateArb: fc.Arbitrary<VariantWithFilesCreate> = fc.recor
   images: fc.record({
     files: fc.constant([] as File[]),
     previews: fc.array(fc.webUrl(), { maxLength: 8 }),
-    existing: fc.array(fc.webUrl(), { maxLength: 8 }),
   }),
 });
 
-const variantWithFilesUpdateArb: fc.Arbitrary<VariantWithFilesUpdate> = fc.record({
+const variantFormUpdateArb: fc.Arbitrary<VariantFormUpdate> = fc.record({
   _id: fc.string({ minLength: 1, maxLength: 50 }),
   name: fc.string({ minLength: 0, maxLength: 100 }),
   color: fc.option(fc.string({ minLength: 0, maxLength: 20 }), { nil: undefined }),
@@ -62,23 +61,23 @@ const serverVariantArb: fc.Arbitrary<Variant> = fc.record({
   images: fc.array(fc.webUrl(), { maxLength: 8 }),
 });
 
-describe("VariantWithFiles Interface Consistency", () => {
+describe("VariantForm Interface Consistency", () => {
   describe("Type Guards", () => {
-    it("isVariantForCreate correctly identifies Create variants", () => {
+    it("isVariantFormCreate correctly identifies Create variants", () => {
       fc.assert(
-        fc.property(variantWithFilesCreateArb, (variant) => {
-          expect(isVariantForCreate(variant)).toBe(true);
-          expect(isVariantForUpdate(variant)).toBe(false);
+        fc.property(variantFormCreateArb, (variant) => {
+          expect(isVariantFormCreate(variant)).toBe(true);
+          expect(isVariantFormUpdate(variant)).toBe(false);
         }),
         { numRuns: 100 }
       );
     });
 
-    it("isVariantForUpdate correctly identifies Update variants", () => {
+    it("isVariantFormUpdate correctly identifies Update variants", () => {
       fc.assert(
-        fc.property(variantWithFilesUpdateArb, (variant) => {
-          expect(isVariantForUpdate(variant)).toBe(true);
-          expect(isVariantForCreate(variant)).toBe(false);
+        fc.property(variantFormUpdateArb, (variant) => {
+          expect(isVariantFormUpdate(variant)).toBe(true);
+          expect(isVariantFormCreate(variant)).toBe(false);
         }),
         { numRuns: 100 }
       );
@@ -87,10 +86,10 @@ describe("VariantWithFiles Interface Consistency", () => {
     it("type guards are mutually exclusive", () => {
       fc.assert(
         fc.property(
-          fc.oneof(variantWithFilesCreateArb, variantWithFilesUpdateArb),
-          (variant: VariantWithFiles) => {
-            const isCreate = isVariantForCreate(variant);
-            const isUpdate = isVariantForUpdate(variant);
+          fc.oneof(variantFormCreateArb, variantFormUpdateArb),
+          (variant: VariantForm) => {
+            const isCreate = isVariantFormCreate(variant);
+            const isUpdate = isVariantFormUpdate(variant);
             // Exactly one should be true
             expect(isCreate !== isUpdate).toBe(true);
           }
@@ -101,12 +100,12 @@ describe("VariantWithFiles Interface Consistency", () => {
   });
 
   describe("Helper Functions", () => {
-    it("createEmptyVariantForCreate produces valid Create variant", () => {
+    it("createEmptyVariantForm produces valid Create variant", () => {
       fc.assert(
         fc.property(fc.nat({ max: 100000000 }), (defaultPrice) => {
-          const variant = createEmptyVariantForCreate(defaultPrice);
+          const variant = createEmptyVariantForm(defaultPrice);
           
-          expect(isVariantForCreate(variant)).toBe(true);
+          expect(isVariantFormCreate(variant)).toBe(true);
           expect(variant._id).toMatch(/^temp-\d+$/);
           expect(variant.name).toBe("");
           expect(variant.color).toBe("");
@@ -114,18 +113,17 @@ describe("VariantWithFiles Interface Consistency", () => {
           expect(variant.stock).toBe(0);
           expect(variant.images.files).toEqual([]);
           expect(variant.images.previews).toEqual([]);
-          expect(variant.images.existing).toEqual([]);
         }),
         { numRuns: 100 }
       );
     });
 
-    it("createEmptyVariantForUpdate produces valid Update variant", () => {
+    it("createEmptyVariantFormUpdate produces valid Update variant", () => {
       fc.assert(
         fc.property(fc.nat({ max: 100000000 }), (defaultPrice) => {
-          const variant = createEmptyVariantForUpdate(defaultPrice);
+          const variant = createEmptyVariantFormUpdate(defaultPrice);
           
-          expect(isVariantForUpdate(variant)).toBe(true);
+          expect(isVariantFormUpdate(variant)).toBe(true);
           expect(variant._id).toMatch(/^temp-\d+$/);
           expect(variant.name).toBe("");
           expect(variant.color).toBe("");
@@ -139,12 +137,12 @@ describe("VariantWithFiles Interface Consistency", () => {
       );
     });
 
-    it("variantToEditForm converts server Variant to Update variant", () => {
+    it("variantToForm converts server Variant to Update variant", () => {
       fc.assert(
         fc.property(serverVariantArb, (serverVariant) => {
-          const editVariant = variantToEditForm(serverVariant);
+          const editVariant = variantToForm(serverVariant);
           
-          expect(isVariantForUpdate(editVariant)).toBe(true);
+          expect(isVariantFormUpdate(editVariant)).toBe(true);
           expect(editVariant._id).toBe(serverVariant._id);
           expect(editVariant.name).toBe(serverVariant.name);
           expect(editVariant.color).toBe(serverVariant.color || "");
@@ -162,13 +160,11 @@ describe("VariantWithFiles Interface Consistency", () => {
   describe("Structure Consistency", () => {
     it("Create variant has required image structure", () => {
       fc.assert(
-        fc.property(variantWithFilesCreateArb, (variant) => {
+        fc.property(variantFormCreateArb, (variant) => {
           expect(variant.images).toHaveProperty("files");
           expect(variant.images).toHaveProperty("previews");
-          expect(variant.images).toHaveProperty("existing");
           expect(Array.isArray(variant.images.files)).toBe(true);
           expect(Array.isArray(variant.images.previews)).toBe(true);
-          expect(Array.isArray(variant.images.existing)).toBe(true);
         }),
         { numRuns: 100 }
       );
@@ -176,7 +172,7 @@ describe("VariantWithFiles Interface Consistency", () => {
 
     it("Update variant has required image structure", () => {
       fc.assert(
-        fc.property(variantWithFilesUpdateArb, (variant) => {
+        fc.property(variantFormUpdateArb, (variant) => {
           expect(variant.images).toHaveProperty("existing");
           expect(variant.images).toHaveProperty("newFiles");
           expect(variant.images).toHaveProperty("newPreviews");
@@ -191,8 +187,8 @@ describe("VariantWithFiles Interface Consistency", () => {
     it("both variant types have consistent base properties", () => {
       fc.assert(
         fc.property(
-          fc.oneof(variantWithFilesCreateArb, variantWithFilesUpdateArb),
-          (variant: VariantWithFiles) => {
+          fc.oneof(variantFormCreateArb, variantFormUpdateArb),
+          (variant: VariantForm) => {
             // All variants must have these base properties
             expect(typeof variant._id).toBe("string");
             expect(typeof variant.name).toBe("string");
@@ -208,8 +204,8 @@ describe("VariantWithFiles Interface Consistency", () => {
     it("variant color is optional string", () => {
       fc.assert(
         fc.property(
-          fc.oneof(variantWithFilesCreateArb, variantWithFilesUpdateArb),
-          (variant: VariantWithFiles) => {
+          fc.oneof(variantFormCreateArb, variantFormUpdateArb),
+          (variant: VariantForm) => {
             // Color should be undefined or string
             if (variant.color !== undefined) {
               expect(typeof variant.color).toBe("string");
@@ -222,19 +218,19 @@ describe("VariantWithFiles Interface Consistency", () => {
   });
 
   describe("Default Values", () => {
-    it("createEmptyVariantForCreate uses 0 as default price", () => {
-      const variant = createEmptyVariantForCreate();
+    it("createEmptyVariantForm uses 0 as default price", () => {
+      const variant = createEmptyVariantForm();
       expect(variant.price).toBe(0);
     });
 
-    it("createEmptyVariantForUpdate uses 0 as default price", () => {
-      const variant = createEmptyVariantForUpdate();
+    it("createEmptyVariantFormUpdate uses 0 as default price", () => {
+      const variant = createEmptyVariantFormUpdate();
       expect(variant.price).toBe(0);
     });
 
     it("empty variants have empty color string", () => {
-      const createVariant = createEmptyVariantForCreate();
-      const updateVariant = createEmptyVariantForUpdate();
+      const createVariant = createEmptyVariantForm();
+      const updateVariant = createEmptyVariantFormUpdate();
       
       expect(createVariant.color).toBe("");
       expect(updateVariant.color).toBe("");

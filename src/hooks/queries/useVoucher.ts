@@ -4,7 +4,10 @@
  */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/utils/api";
+import { extractApiData, extractApiError } from "@/api";
+import { voucherKeys } from "@/lib/queryKeys";
+import { errorHandler } from "@/services/errorHandler";
+import { STALE_TIME } from "@/constants/cache";
 import {
   Voucher,
   CreateVoucherData,
@@ -14,21 +17,6 @@ import {
   ApplyVoucherResult,
   VoucherStatistics,
 } from "@/types/voucher";
-
-// ============ Query Keys ============
-export const voucherKeys = {
-  all: ["vouchers"] as const,
-  lists: () => [...voucherKeys.all, "list"] as const,
-  list: (params?: Partial<VoucherFilters>) =>
-    [...voucherKeys.lists(), params] as const,
-  detail: (id: string) => [...voucherKeys.all, "detail", id] as const,
-  available: (params: {
-    orderTotal: number;
-    shopId?: string;
-    scope?: VoucherScope;
-  }) => [...voucherKeys.all, "available", params] as const,
-  statistics: () => [...voucherKeys.all, "statistics"] as const,
-};
 
 // ============ Types ============
 export interface VoucherListResponse {
@@ -131,7 +119,7 @@ export function useVouchers(params?: Partial<VoucherFilters>) {
   return useQuery({
     queryKey: voucherKeys.list(params),
     queryFn: () => voucherApi.getAll(params),
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: STALE_TIME.LONG,
   });
 }
 
@@ -143,7 +131,7 @@ export function useVoucher(id: string, options?: { enabled?: boolean }) {
     queryKey: voucherKeys.detail(id),
     queryFn: () => voucherApi.getById(id),
     enabled: options?.enabled ?? !!id,
-    staleTime: 5 * 60 * 1000,
+    staleTime: STALE_TIME.VERY_LONG,
   });
 }
 
@@ -158,7 +146,7 @@ export function useAvailableVouchers(
     queryKey: voucherKeys.available(params),
     queryFn: () => voucherApi.getAvailable(params),
     enabled: options?.enabled ?? params.orderTotal > 0,
-    staleTime: 1 * 60 * 1000,
+    staleTime: STALE_TIME.MEDIUM,
   });
 }
 
@@ -169,7 +157,7 @@ export function useVoucherStatistics() {
   return useQuery({
     queryKey: voucherKeys.statistics(),
     queryFn: voucherApi.getStatistics,
-    staleTime: 5 * 60 * 1000,
+    staleTime: STALE_TIME.VERY_LONG,
   });
 }
 
@@ -188,7 +176,7 @@ export function useCreateVoucher() {
       queryClient.invalidateQueries({ queryKey: voucherKeys.statistics() });
     },
     onError: (error) => {
-      console.error("Create voucher failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Create voucher failed" });
     },
   });
 }
@@ -206,7 +194,7 @@ export function useUpdateVoucher() {
       queryClient.setQueryData(voucherKeys.detail(data._id), data);
     },
     onError: (error) => {
-      console.error("Update voucher failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Update voucher failed" });
     },
   });
 }
@@ -224,7 +212,7 @@ export function useDeleteVoucher() {
       queryClient.invalidateQueries({ queryKey: voucherKeys.statistics() });
     },
     onError: (error) => {
-      console.error("Delete voucher failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Delete voucher failed" });
     },
   });
 }
@@ -236,7 +224,7 @@ export function useApplyVoucher() {
   return useMutation({
     mutationFn: voucherApi.apply,
     onError: (error) => {
-      console.error("Apply voucher failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Apply voucher failed" });
     },
   });
 }

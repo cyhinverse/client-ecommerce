@@ -6,7 +6,7 @@
  */
 import { describe, it, expect } from "vitest";
 import * as fc from "fast-check";
-import { extractApiData, ApiResponse } from "@/utils/api";
+import { extractApiData, ApiResponse } from "@/api";
 
 describe("Property: API Data Extraction Consistency", () => {
   // Arbitrary for generating random data payloads

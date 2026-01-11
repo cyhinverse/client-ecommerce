@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Plus, X, Trash2, Upload } from "lucide-react";
-import { Product, ProductAttribute, UpdateVariant } from "@/types/product";
+import { Product, ProductAttribute, VariantFormUpdate } from "@/types/product";
 import { TagItem } from "@/components/product/forms/TagItem";
 import {
   Select,
@@ -68,7 +68,7 @@ export function UpdateModelProduct({
     weight: 0,
     dimensions: { height: 0, width: 0, length: 0 },
     sizes: [] as string[], // Product-level sizes
-    variants: [] as UpdateVariant[],
+    variants: [] as VariantFormUpdate[],
     attributes: [] as ProductAttribute[],
     tags: [] as string[],
     descriptionImages: {
@@ -96,7 +96,7 @@ export function UpdateModelProduct({
       };
 
       // Convert variants to include image structure for editing - simplified structure
-      const variantsWithFiles: UpdateVariant[] = (product.variants || []).map(
+      const variantsWithFiles: VariantFormUpdate[] = (product.variants || []).map(
         (v) => ({
           _id: v._id,
           name: v.name,
@@ -154,7 +154,7 @@ export function UpdateModelProduct({
 
   // Add new variant
   const addVariant = () => {
-    const newVariant: UpdateVariant = {
+    const newVariant: VariantFormUpdate = {
       _id: `temp-${Date.now()}`,
       name: "",
       color: "",
@@ -172,7 +172,7 @@ export function UpdateModelProduct({
   // Update variant field
   const updateVariant = (
     index: number,
-    field: keyof UpdateVariant,
+    field: keyof VariantFormUpdate,
     value: unknown
   ) => {
     setFormData((prev) => ({

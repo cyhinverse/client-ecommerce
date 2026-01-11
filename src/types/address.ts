@@ -1,3 +1,5 @@
+import { User } from "./user";
+
 export interface Address {
   _id: string;
   fullName: string;
@@ -25,4 +27,14 @@ export interface AddressDialogProps {
   onClose: () => void;
   editingAddress: Address | null;
   onSuccess: () => void;
+  user?: User | null;
+}
+
+export interface AddressTabProps {
+  user?: User | null;
+}
+
+
+export interface ProfileTabProps {
+  user?: User | null;
 }

@@ -4,7 +4,9 @@
  */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/utils/api";
+import { extractApiData, extractApiError } from "@/api";
+import { errorHandler } from "@/services/errorHandler";
+import { STALE_TIME } from "@/constants/cache";
 import { reviewKeys, productKeys } from "@/lib/queryKeys";
 import { PaginationData } from "@/types/common";
 
@@ -136,7 +138,7 @@ export function useProductReviews(
     queryKey: reviewKeys.product(productId, params),
     queryFn: () => reviewApi.getByProduct(productId, params),
     enabled: !!productId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: STALE_TIME.VERY_LONG,
   });
 }
 
@@ -148,7 +150,7 @@ export function useShopReviews(shopId: string, params?: ReviewListParams) {
     queryKey: reviewKeys.shop(shopId, params),
     queryFn: () => reviewApi.getByShop(shopId, params),
     enabled: !!shopId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: STALE_TIME.VERY_LONG,
   });
 }
 
@@ -159,7 +161,7 @@ export function useUserReviews() {
   return useQuery({
     queryKey: reviewKeys.user(),
     queryFn: reviewApi.getUserReviews,
-    staleTime: 5 * 60 * 1000,
+    staleTime: STALE_TIME.VERY_LONG,
   });
 }
 
@@ -186,7 +188,7 @@ export function useCreateReview() {
       queryClient.invalidateQueries({ queryKey: reviewKeys.user() });
     },
     onError: (error) => {
-      console.error("Create review failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Create review failed" });
     },
   });
 }
@@ -206,7 +208,7 @@ export function useUpdateReview(productId: string) {
       queryClient.invalidateQueries({ queryKey: reviewKeys.user() });
     },
     onError: (error) => {
-      console.error("Update review failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Update review failed" });
     },
   });
 }
@@ -229,7 +231,7 @@ export function useDeleteReview(productId: string) {
       queryClient.invalidateQueries({ queryKey: reviewKeys.user() });
     },
     onError: (error) => {
-      console.error("Delete review failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Delete review failed" });
     },
   });
 }

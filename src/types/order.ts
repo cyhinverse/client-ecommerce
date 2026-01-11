@@ -11,6 +11,8 @@ export interface OrderProduct {
   name: string;
   sku?: string;
   image?: string;
+  color?: string;
+  size?: string;
 
   // Selection
   quantity: number;
@@ -80,8 +82,6 @@ export interface Order extends BaseEntity {
   // Display only
   orderCode?: string;
 }
-
-export type { PaginationData };
 
 // Order statistics interface
 export interface OrderStatistics {

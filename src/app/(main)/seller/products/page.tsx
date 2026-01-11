@@ -34,13 +34,7 @@ import { CreateModelProduct } from "@/components/product/forms/CreateModelProduc
 import { UpdateModelProduct } from "@/components/product/forms/UpdateModelProduct";
 import { ViewModelProduct } from "@/components/product/forms/ViewModelProduct";
 import { Product } from "@/types/product";
-
-const formatPrice = (price: number): string => {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(price);
-};
+import { formatCurrency } from "@/utils/format";
 
 export default function SellerProductsPage() {
   const { data: myShop } = useMyShop();
@@ -307,12 +301,12 @@ export default function SellerProductsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <p className="font-semibold text-[#E53935]">
-                        {formatPrice(product.price?.currentPrice || 0)}
+                        {formatCurrency(product.price?.currentPrice || 0)}
                       </p>
                       {product.price?.discountPrice &&
                         product.price.discountPrice > 0 && (
                           <p className="text-xs text-gray-400 line-through">
-                            {formatPrice(product.price.discountPrice)}
+                            {formatCurrency(product.price.discountPrice)}
                           </p>
                         )}
                     </td>

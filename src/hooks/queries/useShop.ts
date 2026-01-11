@@ -4,7 +4,9 @@
  */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/utils/api";
+import { extractApiData, extractApiError } from "@/api";
+import { errorHandler } from "@/services/errorHandler";
+import { STALE_TIME } from "@/constants/cache";
 import { shopKeys, productKeys } from "@/lib/queryKeys";
 import { Shop, CreateShopPayload, UpdateShopPayload } from "@/types/shop";
 import { PaginationData } from "@/types/common";
@@ -49,7 +51,7 @@ const shopApi = {
   ): Promise<
     { _id: string; name: string; slug: string; isActive?: boolean }[]
   > => {
-    const response = await instance.get(`/shops/${shopId}/categories`);
+    const response = await instance.get(`/shop-categories/${shopId}`);
     return extractApiData(response);
   },
 
@@ -126,7 +128,7 @@ export function useMyShop(options?: { enabled?: boolean }) {
     queryKey: shopKeys.myShop(),
     queryFn: shopApi.getMyShop,
     enabled: options?.enabled,
-    staleTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: STALE_TIME.STATIC,
   });
 }
 
@@ -138,7 +140,7 @@ export function useShop(shopId: string, options?: { enabled?: boolean }) {
     queryKey: shopKeys.detail(shopId),
     queryFn: () => shopApi.getById(shopId),
     enabled: options?.enabled ?? !!shopId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: STALE_TIME.VERY_LONG,
   });
 }
 
@@ -150,7 +152,7 @@ export function useShopBySlug(slug: string, options?: { enabled?: boolean }) {
     queryKey: shopKeys.detailBySlug(slug),
     queryFn: () => shopApi.getBySlug(slug),
     enabled: options?.enabled ?? !!slug,
-    staleTime: 5 * 60 * 1000,
+    staleTime: STALE_TIME.VERY_LONG,
   });
 }
 
@@ -165,7 +167,7 @@ export function useShopCategories(
     queryKey: shopKeys.categories(shopId),
     queryFn: () => shopApi.getCategories(shopId),
     enabled: options?.enabled ?? !!shopId,
-    staleTime: 10 * 60 * 1000,
+    staleTime: STALE_TIME.STATIC,
   });
 }
 
@@ -176,7 +178,7 @@ export function useAllShops(params?: ShopListParams) {
   return useQuery({
     queryKey: [...shopKeys.all, "list", params] as const,
     queryFn: () => shopApi.getAll(params),
-    staleTime: 2 * 60 * 1000,
+    staleTime: STALE_TIME.LONG,
   });
 }
 
@@ -194,7 +196,7 @@ export function useRegisterShop() {
       queryClient.setQueryData(shopKeys.myShop(), data);
     },
     onError: (error) => {
-      console.error("Register shop failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Register shop failed" });
     },
   });
 }
@@ -214,7 +216,7 @@ export function useUpdateShop() {
       }
     },
     onError: (error) => {
-      console.error("Update shop failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Update shop failed" });
     },
   });
 }
@@ -231,7 +233,7 @@ export function useUploadShopLogo() {
       queryClient.invalidateQueries({ queryKey: shopKeys.myShop() });
     },
     onError: (error) => {
-      console.error("Upload logo failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Upload logo failed" });
     },
   });
 }
@@ -248,7 +250,7 @@ export function useUploadShopBanner() {
       queryClient.invalidateQueries({ queryKey: shopKeys.myShop() });
     },
     onError: (error) => {
-      console.error("Upload banner failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Upload banner failed" });
     },
   });
 }
@@ -266,7 +268,7 @@ export function useUpdateShopStatus() {
       queryClient.invalidateQueries({ queryKey: shopKeys.all });
     },
     onError: (error) => {
-      console.error("Update shop status failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Update shop status failed" });
     },
   });
 }
@@ -283,7 +285,7 @@ export function useFollowShop() {
       queryClient.invalidateQueries({ queryKey: shopKeys.detail(shopId) });
     },
     onError: (error) => {
-      console.error("Follow shop failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Follow shop failed" });
     },
   });
 }
@@ -300,7 +302,7 @@ export function useUnfollowShop() {
       queryClient.invalidateQueries({ queryKey: shopKeys.detail(shopId) });
     },
     onError: (error) => {
-      console.error("Unfollow shop failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Unfollow shop failed" });
     },
   });
 }

@@ -46,7 +46,7 @@ export default function UpdateUserProfile({
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // TODO: Connect to backend to update user profile
+    // Profile update is handled by useUpdateProfile hook in parent component
     void values; // Placeholder until backend integration
   }
 

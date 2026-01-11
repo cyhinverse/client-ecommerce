@@ -5,7 +5,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef } from "react";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/utils/api";
+import { extractApiData, extractApiError } from "@/api";
+import { errorHandler } from "@/services/errorHandler";
+import { STALE_TIME } from "@/constants/cache";
 import { recommendationKeys } from "@/lib/queryKeys";
 import { Product } from "@/types/product";
 import { HomepageRecommendations } from "@/types/recommendation";
@@ -79,7 +81,7 @@ export function useForYouRecommendations(limit?: number) {
   return useQuery({
     queryKey: recommendationKeys.forYou(limit),
     queryFn: () => recommendationApi.getForYou(limit),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: STALE_TIME.VERY_LONG,
   });
 }
 
@@ -90,7 +92,7 @@ export function useRecentlyViewed(limit?: number) {
   return useQuery({
     queryKey: recommendationKeys.recentlyViewed(limit),
     queryFn: () => recommendationApi.getRecentlyViewed(limit),
-    staleTime: 1 * 60 * 1000, // 1 minute - changes often
+    staleTime: STALE_TIME.MEDIUM,
   });
 }
 
@@ -106,7 +108,7 @@ export function useSimilarProducts(
     queryKey: recommendationKeys.similar(productId, limit),
     queryFn: () => recommendationApi.getSimilar(productId, limit),
     enabled: options?.enabled ?? !!productId,
-    staleTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: STALE_TIME.STATIC,
   });
 }
 
@@ -123,7 +125,7 @@ export function useFrequentlyBoughtTogether(
     queryFn: () =>
       recommendationApi.getFrequentlyBoughtTogether(productId, limit),
     enabled: options?.enabled ?? !!productId,
-    staleTime: 10 * 60 * 1000,
+    staleTime: STALE_TIME.STATIC,
   });
 }
 
@@ -140,7 +142,7 @@ export function useCategoryRecommendations(
     queryFn: () =>
       recommendationApi.getCategoryRecommendations(categoryId, limit),
     enabled: options?.enabled ?? !!categoryId,
-    staleTime: 10 * 60 * 1000,
+    staleTime: STALE_TIME.STATIC,
   });
 }
 
@@ -151,7 +153,7 @@ export function useHomepageRecommendations() {
   return useQuery({
     queryKey: recommendationKeys.homepage(),
     queryFn: recommendationApi.getHomepage,
-    staleTime: 5 * 60 * 1000,
+    staleTime: STALE_TIME.VERY_LONG,
   });
 }
 
@@ -174,7 +176,7 @@ export function useTrackProductView() {
     },
     onError: (error) => {
       // Silent fail - don't interrupt user experience for tracking
-      console.error("Track view failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Track view failed" });
     },
   });
 }

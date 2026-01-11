@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Zap, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { useFlashSaleWithCountdown } from "@/hooks/queries/useFlashSale";
+import { FlashSaleProduct } from "@/types/flash-sale";
 import { cn } from "@/lib/utils";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { WishlistButton } from "@/components/common/WishlistButton";
@@ -92,7 +93,7 @@ const SoldProgress = memo(function SoldProgress({
 const FlashSaleProductCard = memo(function FlashSaleProductCard({
   product,
 }: {
-  product: any;
+  product: FlashSaleProduct;
 }) {
   const { flashSaleInfo } = product;
   const productImage =

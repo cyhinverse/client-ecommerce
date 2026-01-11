@@ -25,7 +25,7 @@ function RatingBreakdownComponent({
   return (
     <div className="space-y-2">
       {[5, 4, 3, 2, 1].map((rating) => {
-        const count = breakdown[rating] || 0;
+        const count = breakdown[rating as keyof RatingBreakdown] || 0;
         const percentage = total > 0 ? (count / total) * 100 : 0;
 
         return (
@@ -67,12 +67,12 @@ export function ProductReviews({
   }, [data?.reviews]);
 
   const totalPages = data?.pagination?.totalPages || 1;
-  const ratingBreakdown = useMemo(() => {
-    // Compute rating breakdown from reviews or use empty object
-    const breakdown: Record<number, number> = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  const ratingBreakdown: RatingBreakdown = useMemo(() => {
+    // Compute rating breakdown from reviews
+    const breakdown: RatingBreakdown = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
     reviews.forEach((r) => {
       if (r.rating >= 1 && r.rating <= 5) {
-        breakdown[r.rating] = (breakdown[r.rating] || 0) + 1;
+        breakdown[r.rating as keyof RatingBreakdown] = (breakdown[r.rating as keyof RatingBreakdown] || 0) + 1;
       }
     });
     return breakdown;

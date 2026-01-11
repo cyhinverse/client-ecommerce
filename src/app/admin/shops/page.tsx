@@ -71,7 +71,7 @@ export default function AdminShopsPage() {
     }
   };
 
-  const handleViewDetails = (shop: Shop) => {
+  const handleViewDetails = (shop: AdminShopListItem) => {
     setSelectedShop(shop);
     setIsModalOpen(true);
   };
@@ -103,7 +103,7 @@ export default function AdminShopsPage() {
   // Stats
   const totalShops = shops.length;
   const activeShops = shops.filter((s) => s.status === "active").length;
-  const pendingShops = shops.filter((s) => s.status === "pending").length;
+  const inactiveShops = shops.filter((s) => s.status === "inactive").length;
 
   return (
     <div className="space-y-6">
@@ -120,7 +120,7 @@ export default function AdminShopsPage() {
         {[
           { label: "Total Shops", value: totalShops, color: "text-foreground" },
           { label: "Active", value: activeShops, color: "text-green-600" },
-          { label: "Pending Approval", value: pendingShops, color: "text-amber-600" },
+          { label: "Inactive", value: inactiveShops, color: "text-amber-600" },
         ].map((stat) => (
           <div
             key={stat.label}
@@ -216,20 +216,20 @@ export default function AdminShopsPage() {
                         <DropdownMenuItem onClick={() => handleViewDetails(shop)}>
                           <Eye className="h-4 w-4 mr-2" /> View Details
                         </DropdownMenuItem>
-                        {shop.status === "pending" && (
+                        {shop.status === "inactive" && (
                           <DropdownMenuItem onClick={() => handleStatusChange(shop._id, "active")}>
-                            <CheckCircle className="h-4 w-4 mr-2" /> Approve
+                            <CheckCircle className="h-4 w-4 mr-2" /> Activate
                           </DropdownMenuItem>
                         )}
                         {shop.status === "active" && (
                           <DropdownMenuItem 
-                            onClick={() => handleStatusChange(shop._id, "suspended")}
+                            onClick={() => handleStatusChange(shop._id, "banned")}
                             className="text-red-600"
                           >
-                            <Ban className="h-4 w-4 mr-2" /> Suspend
+                            <Ban className="h-4 w-4 mr-2" /> Ban
                           </DropdownMenuItem>
                         )}
-                        {shop.status === "suspended" && (
+                        {shop.status === "banned" && (
                           <DropdownMenuItem onClick={() => handleStatusChange(shop._id, "active")}>
                             <CheckCircle className="h-4 w-4 mr-2" /> Reactivate
                           </DropdownMenuItem>

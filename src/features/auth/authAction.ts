@@ -1,7 +1,7 @@
 import instance from "@/api/api";
 import { AuthLogin, AuthRegister } from "@/types/auth";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { extractApiData, extractApiError } from "@/utils/api";
+import { extractApiData, extractApiError } from "@/api";
 
 export const login = createAsyncThunk(
   "auth/login",

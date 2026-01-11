@@ -15,7 +15,8 @@ import {
   useUpdateUser,
   useDeleteUser,
 } from "@/hooks/queries";
-import { User, UserFilters } from "@/types/user";
+import { User, UserFilters, UpdateUserData } from "@/types/user";
+import { CreateUserData } from "@/hooks/queries/useProfile";
 
 export default function AdminUsersPage() {
   // Use URL filters hook
@@ -68,17 +69,9 @@ export default function AdminUsersPage() {
     setCreateModalOpen(true);
   };
 
-  const handleCreateUser = async (userData: any) => {
+  const handleCreateUser = async (userData: CreateUserData) => {
     try {
-      await createMutation.mutateAsync(
-        userData as {
-          name: string;
-          email: string;
-          phone: string;
-          roles: string;
-          isVerifiedEmail: boolean;
-        }
-      );
+      await createMutation.mutateAsync(userData);
       setCreateModalOpen(false);
       toast.success("User created successfully");
     } catch (error) {
@@ -104,7 +97,7 @@ export default function AdminUsersPage() {
     setSelectedUser(null);
   };
 
-  const handleUpdateUser = async (userData: any) => {
+  const handleUpdateUser = async (userData: Omit<UpdateUserData, 'id'>) => {
     if (!selectedUser) return;
 
     try {

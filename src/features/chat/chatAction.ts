@@ -1,7 +1,7 @@
 import instance from "@/api/api";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { SendMessagePayload, StartConversationPayload } from "@/types/chat";
-import { extractApiData, extractApiError } from "@/utils/api";
+import { extractApiData, extractApiError } from "@/api";
 
 // Start a new conversation with a shop
 export const startConversation = createAsyncThunk(

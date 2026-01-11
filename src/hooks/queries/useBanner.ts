@@ -4,7 +4,9 @@
  */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/utils/api";
+import { extractApiData, extractApiError } from "@/api";
+import { errorHandler } from "@/services/errorHandler";
+import { STALE_TIME } from "@/constants/cache";
 import { bannerKeys } from "@/lib/queryKeys";
 import {
   BannerItem,
@@ -163,7 +165,7 @@ export function useCreateBanner() {
       queryClient.invalidateQueries({ queryKey: bannerKeys.all });
     },
     onError: (error) => {
-      console.error("Create banner failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Create banner failed" });
     },
   });
 }
@@ -181,7 +183,7 @@ export function useUpdateBanner() {
       queryClient.invalidateQueries({ queryKey: bannerKeys.all });
     },
     onError: (error) => {
-      console.error("Update banner failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Update banner failed" });
     },
   });
 }
@@ -198,7 +200,7 @@ export function useDeleteBanner() {
       queryClient.invalidateQueries({ queryKey: bannerKeys.all });
     },
     onError: (error) => {
-      console.error("Delete banner failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Delete banner failed" });
     },
   });
 }

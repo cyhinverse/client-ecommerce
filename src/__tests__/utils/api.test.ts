@@ -15,7 +15,7 @@ import {
   ERROR_MESSAGES,
   type ApiResponse,
   type PaginatedResponse,
-} from "@/utils/api";
+} from "@/api";
 
 describe("extractApiData", () => {
   /**

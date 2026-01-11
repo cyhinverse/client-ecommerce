@@ -1,4 +1,5 @@
-import { Product, Shop } from "./product";
+import { Product } from "./product";
+import { Shop } from "./shop";
 import { PaginationData } from "./common";
 
 // Flash sale info for a product

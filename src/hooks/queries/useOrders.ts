@@ -4,7 +4,9 @@
  */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/utils/api";
+import { extractApiData, extractApiError } from "@/api";
+import { errorHandler } from "@/services/errorHandler";
+import { STALE_TIME } from "@/constants/cache";
 import { orderKeys, cartKeys } from "@/lib/queryKeys";
 import { Order, OrderStatus, OrderStatistics } from "@/types/order";
 import { PaginationData } from "@/types/common";
@@ -184,7 +186,7 @@ export function useUserOrders(params?: OrderListParams) {
   return useQuery({
     queryKey: orderKeys.list(params),
     queryFn: () => orderApi.getUserOrders(params),
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: STALE_TIME.LONG,
   });
 }
 
@@ -207,7 +209,7 @@ export function useAllOrders(params?: OrderListParams) {
   return useQuery({
     queryKey: [...orderKeys.all, "admin", params] as const,
     queryFn: () => orderApi.getAllOrders(params),
-    staleTime: 1 * 60 * 1000, // 1 minute for admin
+    staleTime: STALE_TIME.MEDIUM,
   });
 }
 
@@ -219,7 +221,7 @@ export function useShopOrders(shopId: string, params?: OrderListParams) {
     queryKey: orderKeys.shopOrders(shopId, params),
     queryFn: () => orderApi.getShopOrders(shopId, params),
     enabled: !!shopId,
-    staleTime: 1 * 60 * 1000,
+    staleTime: STALE_TIME.MEDIUM,
   });
 }
 
@@ -230,7 +232,7 @@ export function useOrderStatistics() {
   return useQuery({
     queryKey: [...orderKeys.all, "statistics"] as const,
     queryFn: orderApi.getStatistics,
-    staleTime: 5 * 60 * 1000,
+    staleTime: STALE_TIME.VERY_LONG,
   });
 }
 
@@ -250,7 +252,7 @@ export function useCreateOrder() {
       queryClient.invalidateQueries({ queryKey: cartKeys.all });
     },
     onError: (error) => {
-      console.error("Create order failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Create order failed" });
     },
   });
 }
@@ -269,7 +271,7 @@ export function useCancelOrder() {
       queryClient.invalidateQueries({ queryKey: orderKeys.lists() });
     },
     onError: (error) => {
-      console.error("Cancel order failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Cancel order failed" });
     },
   });
 }
@@ -287,7 +289,7 @@ export function useUpdateOrderStatus() {
       queryClient.invalidateQueries({ queryKey: orderKeys.lists() });
     },
     onError: (error) => {
-      console.error("Update order status failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Update order status failed" });
     },
   });
 }
@@ -305,7 +307,7 @@ export function useConfirmDelivery() {
       queryClient.invalidateQueries({ queryKey: orderKeys.lists() });
     },
     onError: (error) => {
-      console.error("Confirm delivery failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Confirm delivery failed" });
     },
   });
 }

@@ -4,7 +4,9 @@
  */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/utils/api";
+import { extractApiData, extractApiError } from "@/api";
+import { errorHandler } from "@/services/errorHandler";
+import { STALE_TIME, REFETCH_INTERVAL } from "@/constants/cache";
 import { notificationKeys } from "@/lib/queryKeys";
 import { Notification } from "@/types/notification";
 import { PaginationData } from "@/types/common";
@@ -100,7 +102,7 @@ export function useNotifications(params?: NotificationListParams) {
   return useQuery({
     queryKey: notificationKeys.list(params),
     queryFn: () => notificationApi.getList(params),
-    staleTime: 1 * 60 * 1000, // 1 minute
+    staleTime: STALE_TIME.MEDIUM,
   });
 }
 
@@ -111,8 +113,8 @@ export function useUnreadNotificationCount() {
   return useQuery({
     queryKey: notificationKeys.unreadCount(),
     queryFn: notificationApi.getUnreadCount,
-    staleTime: 30 * 1000, // 30 seconds
-    refetchInterval: 60 * 1000, // Poll every minute
+    staleTime: STALE_TIME.SHORT,
+    refetchInterval: REFETCH_INTERVAL.NORMAL,
   });
 }
 
@@ -130,7 +132,7 @@ export function useMarkNotificationAsRead() {
       queryClient.invalidateQueries({ queryKey: notificationKeys.all });
     },
     onError: (error) => {
-      console.error("Mark as read failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Mark as read failed" });
     },
   });
 }
@@ -147,7 +149,7 @@ export function useMarkAllNotificationsAsRead() {
       queryClient.invalidateQueries({ queryKey: notificationKeys.all });
     },
     onError: (error) => {
-      console.error("Mark all as read failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Mark all as read failed" });
     },
   });
 }
@@ -164,7 +166,7 @@ export function useDeleteNotification() {
       queryClient.invalidateQueries({ queryKey: notificationKeys.all });
     },
     onError: (error) => {
-      console.error("Delete notification failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Delete notification failed" });
     },
   });
 }
@@ -181,7 +183,7 @@ export function useClearAllNotifications() {
       queryClient.invalidateQueries({ queryKey: notificationKeys.all });
     },
     onError: (error) => {
-      console.error("Clear all notifications failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Clear all notifications failed" });
     },
   });
 }
@@ -198,7 +200,7 @@ export function useCreateNotification() {
       queryClient.invalidateQueries({ queryKey: notificationKeys.all });
     },
     onError: (error) => {
-      console.error("Create notification failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Create notification failed" });
     },
   });
 }

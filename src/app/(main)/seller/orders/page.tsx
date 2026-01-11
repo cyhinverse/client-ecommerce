@@ -46,6 +46,7 @@ import {
   useShopOrders,
   useUpdateOrderStatus,
 } from "@/hooks/queries";
+import { formatCurrency, formatDate } from "@/utils/format";
 import { Order } from "@/types/order";
 
 const statusConfig: Record<
@@ -98,23 +99,6 @@ const allowedTransitions: Record<string, string[]> = {
   shipped: ["delivered"],
   delivered: [],
   cancelled: [],
-};
-
-const formatPrice = (price: number): string => {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(price);
-};
-
-const formatDate = (date: string): string => {
-  return new Date(date).toLocaleDateString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 };
 
 export default function SellerOrdersPage() {
@@ -424,7 +408,7 @@ export default function SellerOrdersPage() {
                       {/* Total */}
                       <div className="text-right">
                         <p className="text-lg font-bold text-primary">
-                          {formatPrice(order.totalAmount)}
+                          {formatCurrency(order.totalAmount)}
                         </p>
                       </div>
                     </div>
@@ -532,7 +516,7 @@ export default function SellerOrdersPage() {
                         </p>
                       </div>
                       <p className="text-sm font-medium">
-                        {formatPrice(item.price * item.quantity)}
+                        {formatCurrency(item.price * item.quantity)}
                       </p>
                     </div>
                   ))}
@@ -543,19 +527,19 @@ export default function SellerOrdersPage() {
               <div className="border-t pt-4">
                 <div className="flex justify-between text-sm">
                   <span>Tạm tính:</span>
-                  <span>{formatPrice(selectedOrder.subtotal)}</span>
+                  <span>{formatCurrency(selectedOrder.subtotal)}</span>
                 </div>
                 {selectedOrder.discountShop &&
                   selectedOrder.discountShop > 0 && (
                     <div className="flex justify-between text-sm text-green-600">
                       <span>Giảm giá shop:</span>
-                      <span>-{formatPrice(selectedOrder.discountShop)}</span>
+                      <span>-{formatCurrency(selectedOrder.discountShop)}</span>
                     </div>
                   )}
                 <div className="flex justify-between font-bold mt-2">
                   <span>Tổng cộng:</span>
                   <span className="text-primary">
-                    {formatPrice(selectedOrder.totalAmount)}
+                    {formatCurrency(selectedOrder.totalAmount)}
                   </span>
                 </div>
               </div>

@@ -1,103 +1,100 @@
 import { Notification } from "@/types/notification";
-import { Bell, ShoppingBag, Tag, Info, CheckCircle } from "lucide-react";
+import { ShoppingBag, Tag, Info, Bell } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 interface NotificationItemProps {
   notification: Notification;
-  onClick?: () => void;
+  onClose?: () => void;
 }
 
-export default function NotificationItem({ notification, onClick }: NotificationItemProps) {
+export default function NotificationItem({ notification, onClose }: NotificationItemProps) {
   const timeAgo = (dateRequest: string) => {
-      const date = new Date(dateRequest);
-      const now = new Date();
-      const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-      let interval = seconds / 31536000;
-       
-      if (interval > 1) return Math.floor(interval) + " năm trước";
-      interval = seconds / 2592000;
-      if (interval > 1) return Math.floor(interval) + " tháng trước";
-      interval = seconds / 86400;
-      if (interval > 1) return Math.floor(interval) + " ngày trước";
-      interval = seconds / 3600;
-      if (interval > 1) return Math.floor(interval) + " giờ trước";
-      interval = seconds / 60;
-      if (interval > 1) return Math.floor(interval) + " phút trước";
-      return "Vừa xong";
-  }
+    const date = new Date(dateRequest);
+    const now = new Date();
+    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    let interval = seconds / 31536000;
 
-  const getIcon = () => {
-    switch (notification.type) {
-      case "order": 
-        return <ShoppingBag className="h-4 w-4 text-white" />;
-      case "promotion": 
-        return <Tag className="h-4 w-4 text-white" />;
-      case "system": 
-        return <Info className="h-4 w-4 text-white" />;
-      case "order_status": 
-        return <CheckCircle className="h-4 w-4 text-white" />;
-      default: 
-        return <Bell className="h-4 w-4 text-white" />;
-    }
+    if (interval > 1) return Math.floor(interval) + " năm trước";
+    interval = seconds / 2592000;
+    if (interval > 1) return Math.floor(interval) + " tháng trước";
+    interval = seconds / 86400;
+    if (interval > 1) return Math.floor(interval) + " ngày trước";
+    interval = seconds / 3600;
+    if (interval > 1) return Math.floor(interval) + " giờ trước";
+    interval = seconds / 60;
+    if (interval > 1) return Math.floor(interval) + " phút trước";
+    return "Vừa xong";
   };
 
-  const getIconBg = () => {
+  const getIcon = () => {
+    const iconClass = "h-4 w-4";
     switch (notification.type) {
-      case "order": return "bg-blue-500";
-      case "promotion": return "bg-green-500";
-      case "system": return "bg-orange-500";
-      case "order_status": return "bg-purple-500";
-      default: return "bg-gray-500";
+      case "order_status":
+        return <ShoppingBag className={cn(iconClass, "text-blue-500")} />;
+      case "promotion":
+        return <Tag className={cn(iconClass, "text-green-500")} />;
+      case "system":
+        return <Info className={cn(iconClass, "text-amber-500")} />;
+      default:
+        return <Bell className={cn(iconClass, "text-gray-400")} />;
     }
   };
 
   const Content = (
-    <div className={cn(
-        "relative flex gap-3 p-4 transition-all duration-200 hover:bg-black/5",
-        !notification.isRead && "bg-blue-50/50"
-    )}>
-      {/* Icon Wrapper */}
-      <div className={cn(
-          "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full mt-1",
-          getIconBg()
-      )}>
+    <div
+      className={cn(
+        "flex gap-3 px-4 py-3 transition-colors hover:bg-gray-50/80",
+        !notification.isRead && "bg-primary/[0.03]"
+      )}
+    >
+      {/* Icon */}
+      <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
         {getIcon()}
       </div>
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-2 mb-0.5">
-             <p className="text-sm font-semibold text-foreground/90 line-clamp-1">
-               {notification.title}
-             </p>
-             {!notification.isRead && (
-                 <span className="h-2 w-2 rounded-full bg-blue-500 ring-2 ring-white shrink-0" />
-             )}
-          </div>
-          
-          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed mb-1.5">
-              {notification.message}
+        <div className="flex items-start justify-between gap-2">
+          <p
+            className={cn(
+              "text-[13px] leading-snug line-clamp-1",
+              !notification.isRead ? "font-medium text-gray-800" : "text-gray-700"
+            )}
+          >
+            {notification.title}
           </p>
-          
-          <p className="text-[10px] font-medium text-muted-foreground/70">
-              {timeAgo(notification.createdAt)}
-          </p>
+          {!notification.isRead && (
+            <span className="w-2 h-2 rounded-full bg-primary shrink-0 mt-1.5" />
+          )}
+        </div>
+
+        <p className="text-xs text-gray-500 line-clamp-2 mt-0.5 leading-relaxed">
+          {notification.message}
+        </p>
+
+        <p className="text-[11px] text-gray-400 mt-1.5">
+          {timeAgo(notification.createdAt)}
+        </p>
       </div>
     </div>
   );
 
   if (notification.link) {
     return (
-        <Link href={notification.link} onClick={onClick} className="block w-full focus:outline-none">
-            {Content}
-        </Link>
+      <Link
+        href={notification.link}
+        onClick={onClose}
+        className="block focus:outline-none"
+      >
+        {Content}
+      </Link>
     );
   }
 
   return (
-    <div onClick={onClick} className="w-full cursor-pointer focus:outline-none">
-        {Content}
+    <div onClick={onClose} className="cursor-pointer">
+      {Content}
     </div>
   );
 }

@@ -23,9 +23,6 @@ export interface Notification extends BaseEntity {
   readAt?: string; // Added - matches backend schema
 }
 
-// Re-export PaginationData for backward compatibility
-export type { PaginationData };
-
 // Notification state for Redux
 export interface NotificationState {
   notifications: Notification[];

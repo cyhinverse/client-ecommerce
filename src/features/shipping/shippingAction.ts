@@ -1,7 +1,7 @@
 import instance from "@/api/api";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { CreateShippingTemplatePayload, UpdateShippingTemplatePayload } from "@/types/shipping";
-import { extractApiData, extractApiError } from "@/utils/api";
+import { extractApiData, extractApiError } from "@/api";
 
 // Get seller's shipping templates
 export const getMyShippingTemplates = createAsyncThunk(

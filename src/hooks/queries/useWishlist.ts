@@ -5,7 +5,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef } from "react";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/utils/api";
+import { extractApiData, extractApiError } from "@/api";
+import { errorHandler } from "@/services/errorHandler";
+import { STALE_TIME } from "@/constants/cache";
 import { wishlistKeys } from "@/lib/queryKeys";
 import { toast } from "sonner";
 import {
@@ -73,7 +75,7 @@ export function useWishlist(params?: { page?: number; limit?: number }) {
   return useQuery({
     queryKey: wishlistKeys.list(params),
     queryFn: () => wishlistApi.getAll(params),
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: STALE_TIME.LONG,
   });
 }
 
@@ -84,7 +86,7 @@ export function useWishlistCount() {
   return useQuery({
     queryKey: wishlistKeys.count(),
     queryFn: wishlistApi.getCount,
-    staleTime: 1 * 60 * 1000, // 1 minute
+    staleTime: STALE_TIME.MEDIUM,
   });
 }
 
@@ -99,7 +101,7 @@ export function useCheckInWishlist(
     queryKey: wishlistKeys.check(productId),
     queryFn: () => wishlistApi.check(productId),
     enabled: options?.enabled ?? !!productId,
-    staleTime: 2 * 60 * 1000,
+    staleTime: STALE_TIME.LONG,
   });
 }
 
@@ -114,7 +116,7 @@ export function useCheckMultipleInWishlist(
     queryKey: wishlistKeys.checkMultiple(productIds),
     queryFn: () => wishlistApi.checkMultiple(productIds),
     enabled: options?.enabled ?? productIds.length > 0,
-    staleTime: 2 * 60 * 1000,
+    staleTime: STALE_TIME.LONG,
   });
 }
 
@@ -136,7 +138,7 @@ export function useAddToWishlist() {
       queryClient.invalidateQueries({ queryKey: wishlistKeys.count() });
     },
     onError: (error) => {
-      console.error("Add to wishlist failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Add to wishlist failed" });
     },
   });
 }
@@ -157,7 +159,7 @@ export function useRemoveFromWishlist() {
       queryClient.invalidateQueries({ queryKey: wishlistKeys.count() });
     },
     onError: (error) => {
-      console.error("Remove from wishlist failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Remove from wishlist failed" });
     },
   });
 }
@@ -175,7 +177,7 @@ export function useClearWishlist() {
       queryClient.invalidateQueries({ queryKey: wishlistKeys.all });
     },
     onError: (error) => {
-      console.error("Clear wishlist failed:", extractApiError(error));
+      errorHandler.log(error, { context: "Clear wishlist failed" });
     },
   });
 }

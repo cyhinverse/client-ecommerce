@@ -7,7 +7,7 @@ import {
   updateCartItem,
   removeItemsByShop,
 } from "./cartAction";
-import { CartItem, CartState, groupCartItemsByShop } from "@/types/cart";
+import { CartItem, CartState, groupCartItemsByShop, getCartItemPriceValue } from "@/types/cart";
 
 const initialState: CartState = {
   data: null,
@@ -20,23 +20,13 @@ const initialState: CartState = {
 
 const calculateCartTotals = (items: CartItem[], selectedItems: CartItem[]) => {
   const totalAmount = items.reduce((sum, item) => {
-    const price =
-      item.price?.discountPrice &&
-      item.price.discountPrice > 0 &&
-      item.price.discountPrice < item.price.currentPrice
-        ? item.price.discountPrice
-        : item.price?.currentPrice || 0;
-    return sum + (price || 0) * item.quantity;
+    const price = getCartItemPriceValue(item.price);
+    return sum + price * item.quantity;
   }, 0);
 
   const checkoutTotal = selectedItems.reduce((sum, item) => {
-    const price =
-      item.price?.discountPrice &&
-      item.price.discountPrice > 0 &&
-      item.price.discountPrice < item.price.currentPrice
-        ? item.price.discountPrice
-        : item.price?.currentPrice || 0;
-    return sum + (price || 0) * item.quantity;
+    const price = getCartItemPriceValue(item.price);
+    return sum + price * item.quantity;
   }, 0);
 
   return { totalAmount, checkoutTotal };
@@ -49,10 +39,14 @@ export const cartSlice = createSlice({
     addToCartLocal: (state, action) => {
       if (!state.data) {
         state.data = {
+          _id: "",
           userId: "",
           items: [action.payload],
           totalAmount:
             action.payload.price.currentPrice * action.payload.quantity,
+          cartCount: 1,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
         };
       } else {
         const existingItemIndex = state.data.items.findIndex(

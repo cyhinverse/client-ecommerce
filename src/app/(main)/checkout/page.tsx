@@ -20,6 +20,7 @@ import {
   useApplyVoucher,
 } from "@/hooks/queries";
 import { useClearCart } from "@/hooks/queries/useCart";
+import { formatCurrency } from "@/utils/format";
 import { toast } from "sonner";
 import { ApplyVoucherResult } from "@/types/voucher";
 import {
@@ -217,14 +218,6 @@ export default function CheckoutPage() {
     toast.success("Đã xóa mã giảm giá");
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
-
   // Helper to get item image
   const getItemImage = (item: (typeof cartItems)[0]): string | null => {
     if (item.variant?.images?.[0]) return item.variant.images[0];
@@ -239,6 +232,9 @@ export default function CheckoutPage() {
 
   // Helper to get effective price
   const getEffectivePrice = (item: (typeof cartItems)[0]): number => {
+    if (typeof item.price === "number") {
+      return item.price;
+    }
     const discountPrice = item.price?.discountPrice ?? 0;
     const currentPrice = item.price?.currentPrice ?? 0;
     return discountPrice > 0 && discountPrice < currentPrice
@@ -465,7 +461,7 @@ export default function CheckoutPage() {
                       </div>
                       <div className="text-right">
                         <span className="text-[#E53935] font-medium">
-                          {formatPrice(getEffectivePrice(item) * item.quantity)}
+                          {formatCurrency(getEffectivePrice(item) * item.quantity)}
                         </span>
                       </div>
                     </div>
@@ -532,7 +528,7 @@ export default function CheckoutPage() {
                   <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
                     <Check className="h-3 w-3" />
                     Đã áp dụng mã: {appliedPlatformVoucher.code} (-
-                    {formatPrice(appliedPlatformVoucher.discountAmount)})
+                    {formatCurrency(appliedPlatformVoucher.discountAmount)})
                   </p>
                 )}
               </div>
@@ -679,21 +675,21 @@ export default function CheckoutPage() {
                       Tạm tính ({cartItems.length} sản phẩm)
                     </span>
                     <span className="text-gray-800">
-                      {formatPrice(checkoutTotal || 0)}
+                      {formatCurrency(checkoutTotal || 0)}
                     </span>
                   </div>
 
                   {shopDiscount > 0 && (
                     <div className="flex justify-between text-green-600">
                       <span>Voucher Shop</span>
-                      <span>-{formatPrice(shopDiscount)}</span>
+                      <span>-{formatCurrency(shopDiscount)}</span>
                     </div>
                   )}
 
                   {platformDiscount > 0 && (
                     <div className="flex justify-between text-green-600">
                       <span>Voucher nền tảng</span>
-                      <span>-{formatPrice(platformDiscount)}</span>
+                      <span>-{formatCurrency(platformDiscount)}</span>
                     </div>
                   )}
 
@@ -708,7 +704,7 @@ export default function CheckoutPage() {
                         Tổng thanh toán
                       </span>
                       <span className="text-xl font-bold text-[#E53935]">
-                        {formatPrice(finalTotal > 0 ? finalTotal : 0)}
+                        {formatCurrency(finalTotal > 0 ? finalTotal : 0)}
                       </span>
                     </div>
                     <p className="text-xs text-gray-400 text-right mt-1">

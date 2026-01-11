@@ -218,7 +218,6 @@ export {
   useCreateShopCategory,
   useUpdateShopCategory,
   useDeleteShopCategory,
-  shopCategoryKeys,
 } from "./useShopCategory";
 
 // Voucher queries
@@ -231,6 +230,5 @@ export {
   useUpdateVoucher,
   useDeleteVoucher,
   useApplyVoucher,
-  voucherKeys,
   type VoucherListResponse,
 } from "./useVoucher";
