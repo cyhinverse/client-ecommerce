@@ -109,10 +109,12 @@ export interface OrderFilters {
   paymentStatus: string;
   paymentMethod: string;
   userId: string;
-  shopId?: string; // NEW: filter by shop
-  orderGroupId?: string; // NEW: filter by order group
+  shop: string; // Updated from shopId to match previous usage
+  startDate: string;
+  endDate: string;
   [key: string]: string | number | boolean | null | undefined;
 }
+
 
 // Seller order statistics interface
 export interface SellerOrderStatistics {

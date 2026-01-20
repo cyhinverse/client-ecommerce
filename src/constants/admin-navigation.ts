@@ -12,7 +12,10 @@ import {
   Zap,
   Tag,
   Shield,
+  Star,
+  Bot,
 } from "lucide-react";
+
 import type { LucideIcon } from "lucide-react";
 import { PERMISSIONS } from "./permissions";
 
@@ -73,7 +76,13 @@ export const ADMIN_NAVIGATION: NavigationItem[] = [
     permission: PERMISSIONS.VOUCHER_READ,
   },
   {
+    name: "Reviews",
+    href: "/admin/reviews",
+    icon: Star,
+  },
+  {
     name: "Flash Sale",
+
     href: "/admin/flash-sale",
     icon: Zap,
     badge: "New",
@@ -92,7 +101,14 @@ export const ADMIN_NAVIGATION: NavigationItem[] = [
     permission: PERMISSIONS.NOTIFICATION_READ,
   },
   {
+    name: "Chatbot AI",
+    href: "/admin/chatbot",
+    icon: Bot,
+    permission: PERMISSIONS.ADMIN_ACCESS,
+  },
+  {
     name: "Settings",
+
     href: "/admin/settings",
     icon: Settings,
     permission: PERMISSIONS.ADMIN_ACCESS,

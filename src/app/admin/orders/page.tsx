@@ -45,6 +45,8 @@ export default function OrdersAdminPage() {
   const paymentMethodFilter = filters.paymentMethod as string;
   const userIdFilter = filters.userId as string;
   const shopFilter = filters.shop as string;
+  const startDate = filters.startDate as string;
+  const endDate = filters.endDate as string;
 
   const queryParams = useMemo(() => {
     const params: Record<string, string | number | boolean> = {
@@ -57,6 +59,8 @@ export default function OrdersAdminPage() {
     if (paymentMethodFilter) params.paymentMethod = paymentMethodFilter;
     if (userIdFilter) params.userId = userIdFilter;
     if (shopFilter && shopFilter !== "all") params.shop = shopFilter;
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
     return params;
   }, [
     currentPage,
@@ -67,6 +71,8 @@ export default function OrdersAdminPage() {
     paymentMethodFilter,
     userIdFilter,
     shopFilter,
+    startDate,
+    endDate,
   ]);
 
   const {
@@ -181,6 +187,10 @@ export default function OrdersAdminPage() {
     updateFilters({ shop: shop === "all" ? "" : shop, page: 1 });
   };
 
+  const handleDateFilter = (start: string, end: string) => {
+    updateFilters({ startDate: start, endDate: end, page: 1 });
+  };
+
   const handleCloseModals = () => {
     setViewModalOpen(false);
     setEditModalOpen(false);
@@ -269,6 +279,9 @@ export default function OrdersAdminPage() {
           onDelete={handleDeleteOrder}
           onView={handleViewOrder}
           onShopFilterChange={handleShopFilter}
+          onDateFilter={handleDateFilter}
+          startDate={startDate}
+          endDate={endDate}
           selectedShop={shopFilter || "all"}
           shops={shops}
         />

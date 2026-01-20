@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, MoreHorizontal, Eye, Edit, Trash2, Store } from "lucide-react";
+import { Search, MoreHorizontal, Eye, Edit, Trash2, Store, Calendar } from "lucide-react";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import Image from "next/image";
 
@@ -37,6 +37,8 @@ export interface OrdersTableProps {
   paymentStatusFilter: string;
   paymentMethodFilter: string;
   userIdFilter: string;
+  startDate?: string;
+  endDate?: string;
   pageSize: number;
   isLoading?: boolean;
   onSearch: (value: string) => void;
@@ -44,6 +46,7 @@ export interface OrdersTableProps {
   onPaymentStatusFilter: (status: string) => void;
   onPaymentMethodFilter: (method: string) => void;
   onUserIdFilter: (userId: string) => void;
+  onDateFilter?: (start: string, end: string) => void;
   onResetFilters: () => void;
   onPageSizeChange: (size: number) => void;
   onEdit: (order: Order) => void;
@@ -58,9 +61,12 @@ export function OrdersTable({
   orders,
   searchTerm,
   statusFilter,
+  startDate = "",
+  endDate = "",
   pageSize,
   onSearch,
   onStatusFilter,
+  onDateFilter,
   onPageSizeChange,
   onEdit,
   onDelete,
@@ -207,6 +213,27 @@ export function OrdersTable({
               className="pl-9 rounded-xl border-0 bg-white focus-visible:ring-0 transition-all"
             />
           </div>
+
+          {/* Date Range Filter */}
+          {onDateFilter && (
+            <div className="flex items-center gap-2 bg-white rounded-xl px-3 h-10">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => onDateFilter(e.target.value, endDate)}
+                className="text-sm bg-transparent border-0 focus:ring-0 w-[110px]"
+              />
+              <span className="text-gray-400">-</span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => onDateFilter(startDate, e.target.value)}
+                className="text-sm bg-transparent border-0 focus:ring-0 w-[110px]"
+              />
+            </div>
+          )}
+
           <Select value={statusFilter} onValueChange={onStatusFilter}>
             <SelectTrigger className="w-[180px] rounded-xl border-0 bg-white focus:ring-0">
               <SelectValue placeholder="All Status" />

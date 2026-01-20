@@ -1,0 +1,202 @@
+"use client";
+import React, { useMemo } from "react";
+import { useUrlFilters } from "@/hooks/useUrlFilters";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import instance from "@/services/api";
+import { extractApiData } from "@/utils/api-helpers";
+import { Star, Search, Trash2, ExternalLink } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PaginationControls } from "@/components/common/Pagination";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
+import { toast } from "sonner";
+import Image from "next/image";
+import Link from "next/link";
+import { format } from "date-fns";
+
+export default function AdminReviewsPage() {
+  const queryClient = useQueryClient();
+  const { filters, updateFilter, updateFilters, resetFilters } = useUrlFilters({
+    defaultFilters: {
+      page: 1,
+      limit: 10,
+      rating: "all",
+      search: "",
+    },
+    basePath: "/admin/reviews",
+  });
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin-reviews", filters],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      params.append("page", String(filters.page));
+      params.append("limit", String(filters.limit));
+      if (filters.rating !== "all") params.append("rating", String(filters.rating));
+      if (filters.search) params.append("search", String(filters.search));
+      
+      const res = await instance.get("/api/reviews", { params });
+      return extractApiData(res);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => instance.delete(`/api/reviews/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-reviews"] });
+      toast.success("Đã xóa đánh giá thành công");
+    },
+    onError: () => toast.error("Không thể xóa đánh giá"),
+  });
+
+  const reviews = data?.data || [];
+  const pagination = data?.pagination;
+
+  const handleDelete = (id: string) => {
+    if (confirm("Bạn có chắc chắn muốn xóa đánh giá này không?")) {
+      deleteMutation.mutate(id);
+    }
+  };
+
+  return (
+    <div className="space-y-6 p-1">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-gray-800">Quản lý Đánh giá</h1>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-wrap gap-4 items-center">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Tìm kiếm nội dung đánh giá..."
+            value={filters.search}
+            onChange={(e) => updateFilter("search", e.target.value)}
+            className="pl-9"
+          />
+        </div>
+
+        <Select
+          value={String(filters.rating)}
+          onValueChange={(val) => updateFilter("rating", val)}
+        >
+          <SelectTrigger className="w-[150px]">
+            <SelectValue placeholder="Số sao" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tất cả sao</SelectItem>
+            {[5, 4, 3, 2, 1].map((s) => (
+              <SelectItem key={s} value={String(s)}>
+                {s} sao
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Button variant="outline" onClick={resetFilters}>
+          Reset
+        </Button>
+      </div>
+
+      {/* Table */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        {isLoading ? (
+          <div className="py-20 flex justify-center">
+            <SpinnerLoading />
+          </div>
+        ) : (
+          <table className="w-full text-sm text-left">
+            <thead className="bg-gray-50 text-gray-600 font-medium border-b">
+              <tr>
+                <th className="px-6 py-4">Sản phẩm</th>
+                <th className="px-6 py-4">Người dùng</th>
+                <th className="px-6 py-4">Đánh giá</th>
+                <th className="px-6 py-4">Ngày tạo</th>
+                <th className="px-6 py-4 text-right">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {reviews.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-10 text-center text-gray-400">
+                    Không tìm thấy đánh giá nào
+                  </td>
+                </tr>
+              ) : (
+                reviews.map((review: any) => (
+                  <tr key={review._id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3 max-w-[250px]">
+                        <div className="relative w-10 h-10 rounded overflow-hidden flex-shrink-0">
+                          <Image
+                            src={review.product?.images?.[0] || "/images/placeholder.png"}
+                            alt=""
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <span className="truncate font-medium">{review.product?.name}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col">
+                        <span className="font-medium text-gray-800">{review.user?.username}</span>
+                        <span className="text-xs text-gray-500">{review.user?.email}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col gap-1">
+                        <div className="flex text-yellow-400">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-3 w-3 ${i < review.rating ? "fill-current" : "text-gray-200"}`}
+                            />
+                          ))}
+                        </div>
+                        <p className="text-gray-600 line-clamp-2 italic">
+                          "{review.comment || "Không có nội dung"}"
+                        </p>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-gray-500">
+                      {format(new Date(review.createdAt), "dd/MM/yyyy")}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex justify-end gap-2">
+                        <Link href={`/products/${review.product?.slug}`} target="_blank">
+                          <Button variant="ghost" size="icon" title="Xem sản phẩm">
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                          onClick={() => handleDelete(review._id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {pagination && (
+        <div className="flex justify-center mt-6">
+          <PaginationControls
+            pagination={pagination}
+            onPageChange={(p) => updateFilter("page", p)}
+            itemName="đánh giá"
+          />
+        </div>
+      )}
+    </div>
+  );
+}
