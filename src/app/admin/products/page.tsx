@@ -33,7 +33,7 @@ export default function AdminProductsPage() {
       maxPrice: null,
       isActive: null,
     }),
-    []
+    [],
   );
 
   const { filters, updateFilter, updateFilters } =
@@ -53,7 +53,7 @@ export default function AdminProductsPage() {
   const selectedMaxPrice = filters.maxPrice as number | null;
   const selectedStatus = filters.isActive as boolean | null;
 
-  // Build query params for React Query
+
   const queryParams = useMemo(() => {
     const params: Record<string, string | number | boolean> = {
       page: currentPage,
@@ -127,7 +127,8 @@ export default function AdminProductsPage() {
       setSelectedProduct(null);
       toast.success("Cập nhật sản phẩm thành công");
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Không thể cập nhật sản phẩm";
+      const errorMessage =
+        error instanceof Error ? error.message : "Không thể cập nhật sản phẩm";
       toast.error(errorMessage);
     } finally {
       setIsUpdating(false);
@@ -141,7 +142,8 @@ export default function AdminProductsPage() {
       fetchProducts();
       toast.success("Xóa sản phẩm thành công");
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Không thể xóa sản phẩm";
+      const errorMessage =
+        error instanceof Error ? error.message : "Không thể xóa sản phẩm";
       toast.error(errorMessage);
     }
   };
@@ -181,8 +183,8 @@ export default function AdminProductsPage() {
   // Calculate total categories and on sale products for the stats component
   const totalCategories = new Set(
     products.map((p) =>
-      typeof p.category === "object" ? p.category?._id : p.category
-    )
+      typeof p.category === "object" ? p.category?._id : p.category,
+    ),
   ).size;
   const productsOnSale = products.filter((p) => p.onSale).length;
 
@@ -197,7 +199,7 @@ export default function AdminProductsPage() {
 
   const handlePriceFilterChange = (
     min: number | undefined,
-    max: number | undefined
+    max: number | undefined,
   ) => {
     updateFilters({ minPrice: min || null, maxPrice: max || null, page: 1 });
   };
@@ -256,6 +258,7 @@ export default function AdminProductsPage() {
       </div>
 
       <UpdateModelProduct
+        key={selectedProduct?._id}
         open={updateModalOpen}
         onOpenChange={handleCloseUpdateModal}
         product={selectedProduct}
@@ -266,6 +269,7 @@ export default function AdminProductsPage() {
       />
 
       <ViewModelProduct
+        key={selectedProduct?._id}
         open={viewModalOpen}
         onOpenChange={handleCloseViewModal}
         product={selectedProduct}

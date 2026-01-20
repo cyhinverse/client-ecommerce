@@ -25,7 +25,7 @@ import { toast } from "sonner";
 import { PaginationControls } from "@/components/common/Pagination";
 
 export default function VouchersPage() {
-  // Modal states
+
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [isViewOpen, setIsViewOpen] = useState(false);
@@ -41,7 +41,7 @@ export default function VouchersPage() {
   );
   const [selectedScope, setSelectedScope] = useState("all");
 
-  // Build query params
+
   const queryParams = useMemo((): Partial<VoucherFilters> => {
     const params: Partial<VoucherFilters> = {
       page: currentPage,
@@ -62,7 +62,7 @@ export default function VouchersPage() {
     selectedScope,
   ]);
 
-  // React Query hooks
+
   const { data: vouchersData, isLoading } = useVouchers(queryParams);
   const { data: statistics } = useVoucherStatistics();
   const createMutation = useCreateVoucher();

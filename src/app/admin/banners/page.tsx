@@ -38,7 +38,7 @@ export default function BannersAdminPage() {
     }
   );
 
-  // React Query hooks
+
   const {
     data: bannersData,
     isLoading,

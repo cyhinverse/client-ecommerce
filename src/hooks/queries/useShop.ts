@@ -1,17 +1,15 @@
 /**
  * Shop React Query Hooks
- * Replaces shopAction.ts async thunks with React Query
  */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/api";
+import { extractApiData } from "@/api";
 import { errorHandler } from "@/services/errorHandler";
 import { STALE_TIME } from "@/constants/cache";
-import { shopKeys, productKeys } from "@/lib/queryKeys";
+import { shopKeys } from "@/lib/queryKeys";
 import { Shop, CreateShopPayload, UpdateShopPayload } from "@/types/shop";
 import { PaginationData } from "@/types/common";
 
-// ============ Types ============
 export interface ShopListParams {
   page?: number;
   limit?: number;
@@ -19,7 +17,6 @@ export interface ShopListParams {
   status?: "active" | "inactive" | "banned";
 }
 
-// ============ API Functions ============
 const shopApi = {
   getMyShop: async (): Promise<Shop | null> => {
     try {
@@ -47,7 +44,7 @@ const shopApi = {
   },
 
   getCategories: async (
-    shopId: string
+    shopId: string,
   ): Promise<
     { _id: string; name: string; slug: string; isActive?: boolean }[]
   > => {
@@ -57,7 +54,7 @@ const shopApi = {
 
   // Admin: Get all shops
   getAll: async (
-    params: ShopListParams = {}
+    params: ShopListParams = {},
   ): Promise<{ shops: Shop[]; pagination: PaginationData | null }> => {
     const { page = 1, limit = 10, search, status } = params;
     const response = await instance.get("/shops", {
@@ -74,7 +71,6 @@ const shopApi = {
     };
   },
 
-  // Mutations
   register: async (data: CreateShopPayload): Promise<Shop> => {
     const response = await instance.post("/shops/register", data);
     return extractApiData(response);
@@ -99,7 +95,6 @@ const shopApi = {
     return extractApiData(response);
   },
 
-  // Admin mutations
   updateStatus: async (params: {
     shopId: string;
     status: "active" | "inactive" | "banned";
@@ -118,8 +113,6 @@ const shopApi = {
   },
 };
 
-// ============ Query Hooks ============
-
 /**
  * Get current user's shop (for sellers)
  */
@@ -129,6 +122,71 @@ export function useMyShop(options?: { enabled?: boolean }) {
     queryFn: shopApi.getMyShop,
     enabled: options?.enabled,
     staleTime: STALE_TIME.STATIC,
+  });
+}
+
+export interface ShopStatistics {
+  shop: {
+    _id: string;
+    name: string;
+    slug: string;
+    logo?: string;
+    banner?: string;
+    rating: number;
+    status: string;
+    followers: number;
+    responseRate: number;
+  };
+  stats: {
+    totalProducts: number;
+    totalOrders: number;
+    totalRevenue: number;
+    ordersByStatus: {
+      pending: number;
+      confirmed: number;
+      processing: number;
+      shipped: number;
+      delivered: number;
+      cancelled: number;
+      returned: number;
+    };
+  };
+  topProducts: Array<{
+    _id: string;
+    name: string;
+    slug: string;
+    image: string | null;
+    sold: number;
+    revenue: number;
+  }>;
+  recentOrders: Array<{
+    _id: string;
+    customer: string;
+    avatar: string | null;
+    totalAmount: number;
+    status: string;
+    paymentStatus: string;
+    createdAt: string;
+  }>;
+  chartData: Array<{
+    month: string;
+    revenue: number;
+    orders: number;
+  }>;
+}
+
+/**
+ * Get shop statistics for seller dashboard
+ */
+export function useShopStatistics(options?: { enabled?: boolean }) {
+  return useQuery({
+    queryKey: shopKeys.statistics(),
+    queryFn: async (): Promise<ShopStatistics> => {
+      const response = await instance.get("/shops/statistics");
+      return extractApiData(response);
+    },
+    enabled: options?.enabled,
+    staleTime: STALE_TIME.LONG,
   });
 }
 
@@ -161,7 +219,7 @@ export function useShopBySlug(slug: string, options?: { enabled?: boolean }) {
  */
 export function useShopCategories(
   shopId: string,
-  options?: { enabled?: boolean }
+  options?: { enabled?: boolean },
 ) {
   return useQuery({
     queryKey: shopKeys.categories(shopId),
@@ -181,8 +239,6 @@ export function useAllShops(params?: ShopListParams) {
     staleTime: STALE_TIME.LONG,
   });
 }
-
-// ============ Mutation Hooks ============
 
 /**
  * Register new shop

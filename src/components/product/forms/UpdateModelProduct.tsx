@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Plus, X, Trash2, Upload } from "lucide-react";
-import { Product, ProductAttribute, VariantFormUpdate } from "@/types/product";
+import { Product, VariantFormUpdate } from "@/types/product";
 import { TagItem } from "@/components/product/forms/TagItem";
 import {
   Select,
@@ -49,110 +49,74 @@ export function UpdateModelProduct({
   });
   const flatCategories = flattenCategories(categories);
 
+  const productPrice = product?.price || {
+    currentPrice: 0,
+    discountPrice: 0,
+    currency: "VND",
+  };
+
+  const variantsWithFiles: VariantFormUpdate[] = (product?.variants || []).map(
+    (v) => ({
+      _id: v._id,
+      name: v.name,
+      color: v.color || "",
+      price: v.price,
+      stock: v.stock,
+      sold: v.sold || 0,
+      images: {
+        existing: v.images || [],
+        newFiles: [],
+        newPreviews: [],
+      },
+    }),
+  );
+
   const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    slug: "",
-    category: "",
-    shopCategory: "",
-    brand: "",
-    status: "published" as "draft" | "published" | "suspended" | "deleted",
-    isNewArrival: false,
-    isFeatured: false,
+    name: product?.name || "",
+    description: product?.description || "",
+    slug: product?.slug || "",
+    category:
+      typeof product?.category === "string"
+        ? product.category
+        : product?.category?._id || "",
+    shopCategory:
+      typeof product?.shopCategory === "string"
+        ? product.shopCategory
+        : product?.shopCategory?._id || "",
+    brand: product?.brand || "",
+    status:
+      product?.status ||
+      ("published" as "draft" | "published" | "suspended" | "deleted"),
+    isNewArrival: product?.isNewArrival || false,
+    isFeatured: product?.isFeatured || false,
     price: {
-      currentPrice: 0,
-      discountPrice: 0,
-      currency: "VND",
+      currentPrice: productPrice.currentPrice ?? 0,
+      discountPrice: productPrice.discountPrice ?? 0,
+      currency: productPrice.currency ?? "VND",
     },
-    stock: 0,
-    weight: 0,
-    dimensions: { height: 0, width: 0, length: 0 },
-    sizes: [] as string[], // Product-level sizes
-    variants: [] as VariantFormUpdate[],
-    attributes: [] as ProductAttribute[],
-    tags: [] as string[],
+    stock: product?.stock || 0,
+    weight: product?.weight || 0,
+    dimensions: {
+      height: product?.dimensions?.height || 0,
+      width: product?.dimensions?.width || 0,
+      length: product?.dimensions?.length || 0,
+    },
+    sizes: product?.sizes || [],
+    variants: variantsWithFiles,
+    attributes: product?.attributes || [],
+    tags: product?.tags || [],
     descriptionImages: {
-      existing: [] as string[],
+      existing: product?.descriptionImages || [],
       newFiles: [] as File[],
       newPreviews: [] as string[],
     },
   });
 
+
   const [newTag, setNewTag] = useState("");
   const [newAttribute, setNewAttribute] = useState({ name: "", value: "" });
   const [newSize, setNewSize] = useState("");
 
-  // Load product data when product changes
-  useEffect(() => {
-    if (product) {
-      const categoryValue =
-        typeof product.category === "string"
-          ? product.category
-          : product.category?._id || "";
-      const productPrice = product.price || {
-        currentPrice: 0,
-        discountPrice: 0,
-        currency: "VND",
-      };
-
-      // Convert variants to include image structure for editing - simplified structure
-      const variantsWithFiles: VariantFormUpdate[] = (product.variants || []).map(
-        (v) => ({
-          _id: v._id,
-          name: v.name,
-          color: v.color || "",
-          price: v.price,
-          stock: v.stock,
-          sold: v.sold || 0,
-          images: {
-            existing: v.images || [],
-            newFiles: [],
-            newPreviews: [],
-          },
-        })
-      );
-
-      const shopCategoryValue =
-        typeof product.shopCategory === "string"
-          ? product.shopCategory
-          : product.shopCategory?._id || "";
-
-      setFormData({
-        name: product.name || "",
-        description: product.description || "",
-        slug: product.slug || "",
-        category: categoryValue,
-        shopCategory: shopCategoryValue,
-        brand: product.brand || "",
-        status: product.status || "published",
-        isNewArrival: product.isNewArrival || false,
-        isFeatured: product.isFeatured || false,
-        price: {
-          currentPrice: productPrice.currentPrice ?? 0,
-          discountPrice: productPrice.discountPrice ?? 0,
-          currency: productPrice.currency ?? "VND",
-        },
-        stock: product.stock || 0,
-        weight: product.weight || 0,
-        dimensions: {
-          height: product.dimensions?.height || 0,
-          width: product.dimensions?.width || 0,
-          length: product.dimensions?.length || 0,
-        },
-        sizes: product.sizes || [],
-        variants: variantsWithFiles,
-        attributes: product.attributes || [],
-        tags: product.tags || [],
-        descriptionImages: {
-          existing: product.descriptionImages || [],
-          newFiles: [],
-          newPreviews: [],
-        },
-      });
-    }
-  }, [product]);
-
-  // Add new variant
   const addVariant = () => {
     const newVariant: VariantFormUpdate = {
       _id: `temp-${Date.now()}`,
@@ -169,11 +133,10 @@ export function UpdateModelProduct({
     }));
   };
 
-  // Update variant field
   const updateVariant = (
     index: number,
     field: keyof VariantFormUpdate,
-    value: unknown
+    value: unknown,
   ) => {
     setFormData((prev) => ({
       ...prev,
@@ -184,7 +147,6 @@ export function UpdateModelProduct({
     }));
   };
 
-  // Add size to product
   const addSize = () => {
     if (newSize.trim() && !formData.sizes.includes(newSize.trim())) {
       setFormData((prev) => ({
@@ -195,7 +157,6 @@ export function UpdateModelProduct({
     }
   };
 
-  // Remove size from product
   const removeSize = (sizeToRemove: string) => {
     setFormData((prev) => ({
       ...prev,
@@ -203,7 +164,6 @@ export function UpdateModelProduct({
     }));
   };
 
-  // Remove variant
   const removeVariant = (index: number) => {
     const variant = formData.variants[index];
     variant.images.newPreviews.forEach((url) => URL.revokeObjectURL(url));
@@ -213,10 +173,9 @@ export function UpdateModelProduct({
     }));
   };
 
-  // Handle variant image upload
   const handleVariantImageChange = (
     variantIndex: number,
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
@@ -249,10 +208,9 @@ export function UpdateModelProduct({
     }));
   };
 
-  // Remove existing variant image
   const removeExistingVariantImage = (
     variantIndex: number,
-    imageIndex: number
+    imageIndex: number,
   ) => {
     setFormData((prev) => ({
       ...prev,
@@ -269,7 +227,6 @@ export function UpdateModelProduct({
     }));
   };
 
-  // Remove new variant image
   const removeNewVariantImage = (variantIndex: number, imageIndex: number) => {
     setFormData((prev) => ({
       ...prev,
@@ -282,7 +239,7 @@ export function UpdateModelProduct({
             ...v.images,
             newFiles: v.images.newFiles.filter((_, idx) => idx !== imageIndex),
             newPreviews: v.images.newPreviews.filter(
-              (_, idx) => idx !== imageIndex
+              (_, idx) => idx !== imageIndex,
             ),
           },
         };
@@ -290,9 +247,8 @@ export function UpdateModelProduct({
     }));
   };
 
-  // Handle description images upload
   const handleDescriptionImageChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
@@ -336,10 +292,10 @@ export function UpdateModelProduct({
         descriptionImages: {
           ...prev.descriptionImages,
           newFiles: prev.descriptionImages.newFiles.filter(
-            (_, i) => i !== index
+            (_, i) => i !== index,
           ),
           newPreviews: prev.descriptionImages.newPreviews.filter(
-            (_, i) => i !== index
+            (_, i) => i !== index,
           ),
         },
       };
@@ -353,7 +309,6 @@ export function UpdateModelProduct({
     const formDataToSend = new FormData();
     formDataToSend.append("id", product._id);
 
-    // Only send changed fields
     if (formData.name !== product.name)
       formDataToSend.append("name", formData.name);
     if (formData.description !== product.description)
@@ -385,7 +340,6 @@ export function UpdateModelProduct({
     if (formData.weight !== product.weight)
       formDataToSend.append("weight", formData.weight.toString());
 
-    // Price
     const productPrice = product.price || {
       currentPrice: 0,
       discountPrice: 0,
@@ -398,14 +352,12 @@ export function UpdateModelProduct({
       formDataToSend.append("price", JSON.stringify(formData.price));
     }
 
-    // Dimensions
     if (
       JSON.stringify(formData.dimensions) !== JSON.stringify(product.dimensions)
     ) {
       formDataToSend.append("dimensions", JSON.stringify(formData.dimensions));
     }
 
-    // Variants - simple structure with color only
     const variantsForServer = formData.variants.map((v) => ({
       _id: v._id.startsWith("temp-") ? undefined : v._id,
       name: v.name,
@@ -413,47 +365,41 @@ export function UpdateModelProduct({
       price: v.price,
       stock: v.stock,
       sold: v.sold || 0,
-      // SKU will be auto-generated on server
     }));
     formDataToSend.append("variants", JSON.stringify(variantsForServer));
 
-    // Product-level sizes
     if (
       JSON.stringify(formData.sizes) !== JSON.stringify(product.sizes || [])
     ) {
       formDataToSend.append("sizes", JSON.stringify(formData.sizes));
     }
 
-    // Send existing variant images mapping
     const existingVariantImagesMapping = formData.variants.map((v, idx) => ({
       variantIndex: idx,
       existing: v.images.existing,
     }));
     formDataToSend.append(
       "existingVariantImages",
-      JSON.stringify(existingVariantImagesMapping)
+      JSON.stringify(existingVariantImagesMapping),
     );
 
-    // Append new variant images
     formData.variants.forEach((variant, idx) => {
       variant.images.newFiles.forEach((file) => {
         formDataToSend.append(`variantImages_${idx}`, file);
       });
     });
 
-    // Attributes
+
     if (
       JSON.stringify(formData.attributes) !== JSON.stringify(product.attributes)
     ) {
       formDataToSend.append("attributes", JSON.stringify(formData.attributes));
     }
 
-    // Tags
     if (JSON.stringify(formData.tags) !== JSON.stringify(product.tags)) {
       formDataToSend.append("tags", JSON.stringify(formData.tags));
     }
 
-    // Description Images
     const originalDescImages = product.descriptionImages || [];
     const hasDescImageChanges =
       JSON.stringify(formData.descriptionImages.existing) !==
@@ -463,7 +409,7 @@ export function UpdateModelProduct({
     if (hasDescImageChanges) {
       formDataToSend.append(
         "existingDescriptionImages",
-        JSON.stringify(formData.descriptionImages.existing)
+        JSON.stringify(formData.descriptionImages.existing),
       );
       formData.descriptionImages.newFiles.forEach((file) => {
         formDataToSend.append("descriptionImages", file);
@@ -474,18 +420,24 @@ export function UpdateModelProduct({
   };
 
   const addTag = useCallback(() => {
-    if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
-      setFormData((prev) => ({ ...prev, tags: [...prev.tags, newTag.trim()] }));
+    if (newTag.trim()) {
+      setFormData((prev) => {
+        if (prev.tags.includes(newTag.trim())) return prev;
+        return { ...prev, tags: [...prev.tags, newTag.trim()] };
+      });
       setNewTag("");
     }
-  }, [newTag, formData.tags]);
+  }, [newTag, setFormData, setNewTag]);
 
-  const removeTag = useCallback((tagToRemove: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      tags: prev.tags.filter((tag) => tag !== tagToRemove),
-    }));
-  }, []);
+  const removeTag = useCallback(
+    (tagToRemove: string) => {
+      setFormData((prev) => ({
+        ...prev,
+        tags: prev.tags.filter((tag) => tag !== tagToRemove),
+      }));
+    },
+    [setFormData],
+  );
 
   const addAttribute = () => {
     if (newAttribute.name.trim() && newAttribute.value.trim()) {
@@ -518,7 +470,6 @@ export function UpdateModelProduct({
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Basic Info */}
           <div className="space-y-4">
             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider border-b pb-2">
               Thông tin cơ bản
@@ -626,7 +577,6 @@ export function UpdateModelProduct({
             </div>
           </div>
 
-          {/* Description Images */}
           <div className="space-y-4">
             <div className="border-b pb-2">
               <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
@@ -701,7 +651,6 @@ export function UpdateModelProduct({
             </div>
           </div>
 
-          {/* Pricing & Status */}
           <div className="space-y-4">
             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider border-b pb-2">
               Giá & Trạng thái
@@ -811,7 +760,6 @@ export function UpdateModelProduct({
             </div>
           </div>
 
-          {/* Shipping */}
           <div className="space-y-4">
             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider border-b pb-2">
               Thông tin vận chuyển
@@ -1129,7 +1077,6 @@ export function UpdateModelProduct({
             )}
           </div>
 
-          {/* Attributes Section */}
           <div className="space-y-4">
             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider border-b pb-2">
               Thông số kỹ thuật
@@ -1185,7 +1132,6 @@ export function UpdateModelProduct({
             )}
           </div>
 
-          {/* Tags Section */}
           <div className="space-y-4">
             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider border-b pb-2">
               Tags
@@ -1220,7 +1166,6 @@ export function UpdateModelProduct({
             )}
           </div>
 
-          {/* Submit Button */}
           <div className="flex justify-end gap-3 pt-4 border-t">
             <Button
               type="button"

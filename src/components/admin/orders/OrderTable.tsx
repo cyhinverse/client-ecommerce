@@ -73,11 +73,10 @@ export function OrdersTable({
   const [localSearch, setLocalSearch] = useState(searchTerm);
   const debouncedSearch = useDebounce(localSearch, 500);
   const onSearchRef = useRef(onSearch);
-  onSearchRef.current = onSearch;
 
   useEffect(() => {
-    setLocalSearch(searchTerm);
-  }, [searchTerm]);
+    onSearchRef.current = onSearch;
+  }, [onSearch]);
 
   useEffect(() => {
     if (debouncedSearch !== searchTerm) {
@@ -188,7 +187,7 @@ export function OrdersTable({
   };
 
   const getShopInfo = (
-    shopId: string | Shop | undefined
+    shopId: string | Shop | undefined,
   ): { name: string; logo?: string } => {
     if (!shopId) return { name: "N/A" };
     if (typeof shopId === "string") return { name: shopId };

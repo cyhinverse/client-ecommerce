@@ -116,6 +116,7 @@ export const profileKeys = {
 export const shopKeys = {
   all: ["shops"] as const,
   myShop: () => [...shopKeys.all, "my-shop"] as const,
+  statistics: () => [...shopKeys.all, "statistics"] as const,
   detail: (shopId: string) => [...shopKeys.all, "detail", shopId] as const,
   detailBySlug: (slug: string) => [...shopKeys.all, "slug", slug] as const,
   categories: (shopId: string) =>
@@ -159,6 +160,13 @@ export const statisticsKeys = {
     [...statisticsKeys.all, "orders", params] as const,
   products: (params?: unknown) =>
     [...statisticsKeys.all, "products", params] as const,
+};
+
+// Settings query keys (Admin)
+export const settingsKeys = {
+  all: ["settings"] as const,
+  current: () => [...settingsKeys.all, "current"] as const,
+  section: (section: string) => [...settingsKeys.all, section] as const,
 };
 
 // Voucher query keys

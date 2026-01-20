@@ -1,8 +1,7 @@
-// ProfilePage - Taobao Style
 "use client";
 import { useProfile } from "@/hooks/queries/useProfile";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { logout } from "@/features/auth/authAction";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -37,21 +36,19 @@ export default function ProfilePage() {
   const { loading, isAuthenticated } = useAppSelector((state) => state.auth);
   const { data: currentUser, isLoading } = useProfile();
 
-  const [activeTab, setActiveTab] = useState("profile");
-  const [open, setOpen] = useState(false);
   const router = useRouter();
+  const tabParam = searchParams.get("tab");
+  const activeTab =
+    tabParam &&
+    ["profile", "orders", "address", "settings", "shop"].includes(tabParam)
+      ? tabParam
+      : "profile";
 
-  useEffect(() => {
-    const tabParam = searchParams.get("tab");
-    if (
-      tabParam &&
-      ["profile", "orders", "address", "settings", "shop"].includes(tabParam)
-    ) {
-      if (activeTab !== tabParam) {
-        setActiveTab(tabParam);
-      }
-    }
-  }, [searchParams, activeTab]);
+  const [open, setOpen] = useState(false);
+
+  const handleTabChange = (value: string) => {
+    router.push(`/profile?tab=${value}`);
+  };
 
   const handleLogout = () => {
     dispatch(logout());
@@ -132,7 +129,7 @@ export default function ProfilePage() {
       <div
         className={cn(
           "max-w-[1200px] mx-auto transition-opacity duration-200",
-          (loading || isLoading) && "opacity-50 pointer-events-none"
+          (loading || isLoading) && "opacity-50 pointer-events-none",
         )}
       >
         <div className="flex flex-col md:flex-row gap-6">
@@ -168,7 +165,11 @@ export default function ProfilePage() {
                 {quickStats.map((stat) => {
                   const Icon = stat.icon;
                   return (
-                    <div key={stat.label} className="text-center">
+                    <div
+                      key={stat.label}
+                      className="text-center flex flex-col items-center"
+                    >
+                      <Icon className="h-3.5 w-3.5 text-primary/60 mb-1" />
                       <p className="font-semibold text-primary text-sm">
                         {stat.value}
                       </p>
@@ -185,7 +186,7 @@ export default function ProfilePage() {
             <div className="bg-card rounded-md overflow-hidden border border-border/50">
               <Tabs
                 value={activeTab}
-                onValueChange={setActiveTab}
+                onValueChange={handleTabChange}
                 orientation="vertical"
                 className="w-full"
               >
@@ -201,7 +202,7 @@ export default function ProfilePage() {
                           "transition-all duration-200",
                           "hover:bg-muted/50 text-muted-foreground hover:text-foreground",
                           "data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:border-l-primary",
-                          "data-[state=inactive]:border-l-transparent"
+                          "data-[state=inactive]:border-l-transparent",
                         )}
                       >
                         <Icon className="h-4 w-4 mr-3 shrink-0" />
@@ -240,7 +241,11 @@ export default function ProfilePage() {
           {/* Main Content Area */}
           <div className="flex-1 min-w-0">
             <div className="bg-card rounded-md min-h-[500px] border border-border/50">
-              <Tabs value={activeTab} className="w-full">
+              <Tabs
+                value={activeTab}
+                onValueChange={handleTabChange}
+                className="w-full"
+              >
                 <TabsContent
                   value="profile"
                   className="mt-0 focus-visible:ring-0 p-4"

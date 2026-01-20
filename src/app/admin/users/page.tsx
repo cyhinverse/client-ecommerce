@@ -31,14 +31,14 @@ export default function AdminUsersPage() {
     basePath: "/admin/users",
   });
 
-  // Extract filter values
+
   const currentPage = Number(filters.page);
   const pageSize = Number(filters.limit);
   const searchTerm = filters.search as string;
   const selectedRole = filters.role as string;
   const selectedVerified = filters.isVerifiedEmail as boolean | null;
 
-  // Build query params
+
   const queryParams = {
     page: currentPage,
     limit: pageSize,
@@ -49,7 +49,7 @@ export default function AdminUsersPage() {
     ...(selectedVerified !== null && { isVerifiedEmail: selectedVerified }),
   };
 
-  // React Query hooks
+
   const { data: usersData, isLoading, error } = useAllUsers(queryParams);
   const createMutation = useCreateUser();
   const updateMutation = useUpdateUser();

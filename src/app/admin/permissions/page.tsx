@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Shield, Users, History, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,9 +13,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Loader2 } from "lucide-react";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { toast } from "sonner";
-import { RESOURCES, PERMISSIONS } from "@/constants/permissions";
+import { RESOURCES } from "@/constants/permissions";
 import {
   getAllPermissions,
   getRolePermissions,
@@ -27,7 +26,9 @@ import {
 export default function AdminPermissionsPage() {
   const [loading, setLoading] = useState(true);
   const [allPermissions, setAllPermissions] = useState<string[]>([]);
-  const [rolePermissions, setRolePermissions] = useState<Record<string, string[]>>({});
+  const [rolePermissions, setRolePermissions] = useState<
+    Record<string, string[]>
+  >({});
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -43,7 +44,6 @@ export default function AdminPermissionsPage() {
         getRolePermissions(),
         getAuditLogs({ limit: 50 }),
       ]);
-      // Extract permissions array from response
       setAllPermissions(permsData?.permissions || []);
       setRolePermissions(rolesData?.rolePermissions || {});
       setAuditLogs(logs?.logs || []);
@@ -56,19 +56,26 @@ export default function AdminPermissionsPage() {
   };
 
   // Ensure allPermissions is always an array before filtering
-  const filteredPermissions = Array.isArray(allPermissions) 
-    ? allPermissions.filter((p) => p.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredPermissions = Array.isArray(allPermissions)
+    ? allPermissions.filter((p) =>
+        p.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
     : [];
 
-  const groupedPermissions = Object.values(RESOURCES).reduce((acc, resource) => {
-    acc[resource] = filteredPermissions.filter((p) => p.startsWith(`${resource}:`));
-    return acc;
-  }, {} as Record<string, string[]>);
+  const groupedPermissions = Object.values(RESOURCES).reduce(
+    (acc, resource) => {
+      acc[resource] = filteredPermissions.filter((p) =>
+        p.startsWith(`${resource}:`),
+      );
+      return acc;
+    },
+    {} as Record<string, string[]>,
+  );
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <SpinnerLoading size={32} />
       </div>
     );
   }
@@ -122,23 +129,28 @@ export default function AdminPermissionsPage() {
           </div>
 
           <div className="grid gap-4">
-            {Object.entries(groupedPermissions).map(([resource, perms]) => (
-              perms.length > 0 && (
-                <div key={resource} className="border rounded-lg p-4">
-                  <h3 className="font-semibold capitalize mb-3 flex items-center gap-2">
-                    {resource}
-                    <Badge variant="secondary">{perms.length}</Badge>
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {perms.map((perm) => (
-                      <Badge key={perm} variant="outline" className="font-mono text-xs">
-                        {perm}
-                      </Badge>
-                    ))}
+            {Object.entries(groupedPermissions).map(
+              ([resource, perms]) =>
+                perms.length > 0 && (
+                  <div key={resource} className="border rounded-lg p-4">
+                    <h3 className="font-semibold capitalize mb-3 flex items-center gap-2">
+                      {resource}
+                      <Badge variant="secondary">{perms.length}</Badge>
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {perms.map((perm) => (
+                        <Badge
+                          key={perm}
+                          variant="outline"
+                          className="font-mono text-xs"
+                        >
+                          {perm}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )
-            ))}
+                ),
+            )}
           </div>
         </TabsContent>
 
@@ -153,8 +165,8 @@ export default function AdminPermissionsPage() {
                       role === "admin"
                         ? "bg-purple-100 text-purple-700"
                         : role === "seller"
-                        ? "bg-blue-100 text-blue-700"
-                        : "bg-gray-100 text-gray-700"
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-gray-100 text-gray-700"
                     }
                   >
                     {role}
@@ -165,7 +177,11 @@ export default function AdminPermissionsPage() {
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {perms.map((perm) => (
-                    <Badge key={perm} variant="outline" className="font-mono text-xs">
+                    <Badge
+                      key={perm}
+                      variant="outline"
+                      className="font-mono text-xs"
+                    >
                       {perm}
                     </Badge>
                   ))}
@@ -191,7 +207,10 @@ export default function AdminPermissionsPage() {
               <TableBody>
                 {auditLogs.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                    <TableCell
+                      colSpan={5}
+                      className="text-center py-8 text-muted-foreground"
+                    >
                       Chưa có lịch sử thay đổi permission
                     </TableCell>
                   </TableRow>
@@ -203,7 +222,9 @@ export default function AdminPermissionsPage() {
                       </TableCell>
                       <TableCell>
                         <Badge
-                          variant={log.action === "grant" ? "default" : "destructive"}
+                          variant={
+                            log.action === "grant" ? "default" : "destructive"
+                          }
                         >
                           {log.action}
                         </Badge>

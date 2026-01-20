@@ -3,7 +3,6 @@
 
 import { useState, useMemo } from "react";
 import {
-  Loader2,
   Gift,
   Sparkles,
   Search,
@@ -20,6 +19,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { useVouchers } from "@/hooks/queries";
 import { VoucherCard } from "@/components/vouchers/VoucherCard";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { Input } from "@/components/ui/input";
 
 export default function VouchersPage() {
@@ -34,7 +34,7 @@ export default function VouchersPage() {
   const { data: vouchersData, isLoading } = useVouchers({ isActive: true });
   const allVouchers = useMemo(
     () => vouchersData?.vouchers || [],
-    [vouchersData]
+    [vouchersData],
   );
 
   const handleCollectVoucher = (voucherId: string) => {
@@ -78,7 +78,7 @@ export default function VouchersPage() {
     return (
       <div className="min-h-[80vh] flex flex-col items-center justify-center gap-4 bg-white">
         <div className="w-16 h-16 rounded-full bg-[#f7f7f7] flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <SpinnerLoading size={32} />
         </div>
         <p className="text-muted-foreground text-sm">Đang tải ưu đãi...</p>
       </div>

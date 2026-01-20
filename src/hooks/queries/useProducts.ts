@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import instance from "@/api/api";
-import { extractApiData, extractApiError, PaginatedResponse } from "@/api";
+import { extractApiData } from "@/api";
 import { errorHandler } from "@/services/errorHandler";
 import { STALE_TIME } from "@/constants/cache";
 import { productKeys } from "@/lib/queryKeys";
@@ -15,7 +15,6 @@ import { Product, Variant, Price } from "@/types/product";
 import { Shop } from "@/types/shop";
 import { useAddToCart } from "./useCart";
 
-// ============ Types ============
 export interface ProductListParams {
   page?: number;
   limit?: number;
@@ -58,7 +57,6 @@ interface ServerProductListResponse {
   };
 }
 
-// ============ API Functions ============
 const productApi = {
   getAll: async (params: ProductListParams): Promise<ProductListResponse> => {
     const queryParams: Record<string, string | number | boolean> = {};
@@ -182,7 +180,7 @@ const productApi = {
       formData,
       {
         headers: { "Content-Type": "multipart/form-data" },
-      }
+      },
     );
     return extractApiData(response);
   },
@@ -200,7 +198,7 @@ const productApi = {
     const { productId, modelId, updateData } = params;
     const response = await instance.put(
       `/products/${productId}/models/${modelId}`,
-      updateData
+      updateData,
     );
     return extractApiData(response);
   },
@@ -210,18 +208,16 @@ const productApi = {
     modelId: string;
   }): Promise<void> => {
     await instance.delete(
-      `/products/${params.productId}/models/${params.modelId}`
+      `/products/${params.productId}/models/${params.modelId}`,
     );
   },
 };
-
-// ============ Query Hooks ============
 
 /**
  * Get all products with filters and pagination
  */
 export function useProducts(
-  params: ProductListParams = { page: 1, limit: 20 }
+  params: ProductListParams = { page: 1, limit: 20 },
 ) {
   return useQuery({
     queryKey: productKeys.list(params),
@@ -247,7 +243,7 @@ export function useProduct(slug: string, options?: { enabled?: boolean }) {
  */
 export function useProductById(
   productId: string,
-  options?: { enabled?: boolean }
+  options?: { enabled?: boolean },
 ) {
   return useQuery({
     queryKey: productKeys.detailById(productId),
@@ -294,7 +290,7 @@ export function useOnSaleProducts() {
  */
 export function useProductsByCategory(
   categorySlug: string,
-  options?: { enabled?: boolean }
+  options?: { enabled?: boolean },
 ) {
   return useQuery({
     queryKey: productKeys.byCategory(categorySlug),
@@ -308,7 +304,7 @@ export function useProductsByCategory(
  */
 export function useRelatedProducts(
   productId: string,
-  options?: { enabled?: boolean }
+  options?: { enabled?: boolean },
 ) {
   return useQuery({
     queryKey: productKeys.related(productId),
@@ -323,7 +319,7 @@ export function useRelatedProducts(
  */
 export function useShopProducts(
   shopId: string,
-  params?: Omit<ProductListParams, "shop">
+  params?: Omit<ProductListParams, "shop">,
 ) {
   return useQuery({
     queryKey: productKeys.shopProducts(shopId, params),
@@ -343,8 +339,6 @@ export function useProductSearch(keyword: string, limit?: number) {
     staleTime: STALE_TIME.MEDIUM,
   });
 }
-
-// ============ Mutation Hooks ============
 
 /**
  * Create product mutation
@@ -486,8 +480,6 @@ export function useDeleteProductModel() {
   });
 }
 
-// ============ Composite Hooks ============
-
 export interface UseProductDetailOptions {
   slug: string;
 }
@@ -546,9 +538,16 @@ export function useProductDetail({
 
   // Local state
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [selectedSizeInternal, setSelectedSizeInternal] = useState<
+    string | null
+  >(null);
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
+  // Derived selected size: use internal state or default to first available size
+  const selectedSize = useMemo(() => {
+    return selectedSizeInternal || currentProduct?.sizes?.[0] || null;
+  }, [selectedSizeInternal, currentProduct]);
 
   // Show error toast
   useEffect(() => {
@@ -556,13 +555,6 @@ export function useProductDetail({
       toast.error(error);
     }
   }, [error]);
-
-  // Auto-select first size when product loads
-  useEffect(() => {
-    if (currentProduct?.sizes?.length && !selectedSize) {
-      setSelectedSize(currentProduct.sizes[0]);
-    }
-  }, [currentProduct, selectedSize]);
 
   // Get selected variant
   const selectedVariant = useMemo(() => {
@@ -576,7 +568,7 @@ export function useProductDetail({
   // Check if product has variants
   const hasVariants = useMemo(() => {
     return Boolean(
-      currentProduct?.variants && currentProduct.variants.length > 0
+      currentProduct?.variants && currentProduct.variants.length > 0,
     );
   }, [currentProduct]);
 
@@ -642,7 +634,7 @@ export function useProductDetail({
         return prev;
       });
     },
-    [maxStock]
+    [maxStock],
   );
 
   // Handle variant selection
@@ -654,7 +646,7 @@ export function useProductDetail({
 
   // Handle size selection
   const handleSizeSelect = useCallback((size: string) => {
-    setSelectedSize(size);
+    setSelectedSizeInternal(size);
     setQuantity(1);
   }, []);
 
@@ -731,7 +723,7 @@ export function useProductDetail({
     maxStock,
     availableSizes,
     setSelectedVariantIndex,
-    setSelectedSize,
+    setSelectedSize: setSelectedSizeInternal,
     setQuantity,
     setSelectedImageIndex,
     handleQuantityChange,

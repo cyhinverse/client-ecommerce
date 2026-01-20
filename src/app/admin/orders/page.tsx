@@ -22,7 +22,6 @@ import { Button } from "@/components/ui/button";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 export default function OrdersAdminPage() {
-  // Use URL filters hook
   const { filters, updateFilter, updateFilters, resetFilters } =
     useUrlFilters<OrderFilters>({
       defaultFilters: {
@@ -38,7 +37,6 @@ export default function OrdersAdminPage() {
       basePath: "/admin/orders",
     });
 
-  // Extract filter values
   const currentPage = Number(filters.page);
   const pageSize = Number(filters.limit);
   const searchTerm = filters.search as string;
@@ -48,7 +46,6 @@ export default function OrdersAdminPage() {
   const userIdFilter = filters.userId as string;
   const shopFilter = filters.shop as string;
 
-  // Build query params
   const queryParams = useMemo(() => {
     const params: Record<string, string | number | boolean> = {
       page: currentPage,
@@ -72,7 +69,6 @@ export default function OrdersAdminPage() {
     shopFilter,
   ]);
 
-  // React Query hooks
   const {
     data: ordersData,
     isLoading,
@@ -93,12 +89,10 @@ export default function OrdersAdminPage() {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [viewingOrderId, setViewingOrderId] = useState<string | null>(null);
 
-  // Fetch order detail when viewing
   const { data: orderDetail } = useOrder(viewingOrderId || "", {
     enabled: !!viewingOrderId,
   });
 
-  // Hàm mở modal chỉnh sửa
   const handleEditOrder = (order: Order) => {
     setSelectedOrder(order);
     setEditModalOpen(true);
@@ -110,17 +104,14 @@ export default function OrdersAdminPage() {
     setEditModalOpen(true);
   };
 
-  // Hàm đóng modal
   const handleCloseEditModal = () => {
     setEditModalOpen(false);
     setSelectedOrder(null);
   };
 
-  // Trong hàm handleSaveOrder hoặc component EditOrderModal
   const handleSaveOrder = async (orderData: { status: string }) => {
     if (!selectedOrder) return;
 
-    // Validation: Không cho phép chuyển từ cancelled sang trạng thái khác
     if (
       selectedOrder.status === "cancelled" &&
       orderData.status !== "cancelled"
@@ -129,7 +120,6 @@ export default function OrdersAdminPage() {
       return;
     }
 
-    // Validation: Không cho phép hủy đơn hàng đã giao
     if (
       selectedOrder.status === "delivered" &&
       orderData.status === "cancelled"
@@ -215,12 +205,10 @@ export default function OrdersAdminPage() {
     setViewModalOpen(true);
   };
 
-  // Reset tất cả bộ lọc
   const handleResetFilters = () => {
     resetFilters();
   };
 
-  // Thêm loading state rõ ràng
   if (isLoading && orders.length === 0) {
     return (
       <div className="space-y-6">
@@ -256,13 +244,10 @@ export default function OrdersAdminPage() {
 
   return (
     <div className="space-y-8 p-1">
-      {/* Header Section */}
       <OrdersHeader />
 
-      {/* Stats Section */}
       {statistics && <OrdersStats {...statistics} />}
 
-      {/* Main Content Area */}
       <div className="space-y-6">
         <OrdersTable
           orders={orders}
@@ -304,6 +289,7 @@ export default function OrdersAdminPage() {
         />
 
         <EditOrderModal
+          key={selectedOrder?._id}
           isOpen={editModalOpen}
           onClose={handleCloseEditModal}
           onSave={handleSaveOrder}

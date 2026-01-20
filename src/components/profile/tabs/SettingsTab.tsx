@@ -28,10 +28,8 @@ export default function SettingsTab({ user }: SettingsTabProps) {
     confirm: false,
   });
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(
-    user?.isTwoFactorEnabled || false
+    user?.isTwoFactorEnabled || false,
   );
-  const [verificationCode, setVerificationCode] = useState("");
-  const [showVerificationInput, setShowVerificationInput] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   const handlePasswordChange = async (e: React.FormEvent) => {
@@ -90,62 +88,12 @@ export default function SettingsTab({ user }: SettingsTabProps) {
 
   const handleEmailVerification = async () => {
     toast.info("Email verification service is temporarily unavailable.");
-    // try {
-    //   await dispatch(verifyEmail()).unwrap();
-    //   toast.success(
-    //     "Verification email sent. Please check your inbox."
-    //   );
-    // } catch (error: unknown) {
-    //   const err = error as { response?: { data?: { message?: string } } };
-    //   const errorMessage =
-    //     err.response?.data?.message || "Failed to send verification email";
-    //   toast.error(errorMessage);
-    // }
   };
 
-  const handleTwoFactorToggle = async (enabled: boolean) => {
+  const handleTwoFactorToggle = async () => {
     toast.info("Two-Factor Authentication is not yet available.");
     setTwoFactorEnabled(false);
-    // if (enabled) {
-    //   try {
-    //     const result = await dispatch(enableTwoFactor()).unwrap();
-    //     if (result.success) {
-    //       setShowVerificationInput(true);
-    //       toast.success("Scan the QR code with your authenticator app");
-    //     }
-    //   } catch (error: unknown) {
-    //     const err = error as { response?: { data?: { message?: string } } };
-    //     const errorMessage =
-    //       err.response?.data?.message || "Failed to enable 2-Factor Authentication";
-    //     toast.error(errorMessage);
-    //   }
-    // } else {
-    //   setTwoFactorEnabled(false);
-    //   toast.success("2-Factor Authentication disabled");
-    // }
-  };
-
-  const handleVerifyTwoFactor = async () => {
-    toast.info("Two-Factor Authentication is not yet available.");
-    // if (verificationCode.length !== 6) {
-    //   toast.error("Verification code must be 6 digits");
-    //   return;
-    // }
-
-    // try {
-    //   const result = await dispatch(verifyTwoFactor(verificationCode)).unwrap();
-    //   if (result.success) {
-    //     setTwoFactorEnabled(true);
-    //     setShowVerificationInput(false);
-    //     setVerificationCode("");
-    //     toast.success("2-Factor Authentication enabled successfully");
-    //   }
-    // } catch (error: unknown) {
-    //   const err = error as { response?: { data?: { message?: string } } };
-    //   const errorMessage =
-    //     err.response?.data?.message || "Invalid verification code";
-    //   toast.error(errorMessage);
-    // }
+    // setTwoFactorEnabled(false);
   };
 
   const togglePasswordVisibility = (field: "current" | "new" | "confirm") => {
@@ -323,7 +271,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                       "h-10 w-10 rounded-full flex items-center justify-center transition-colors duration-200",
                       twoFactorEnabled
                         ? "bg-green-50 text-green-600"
-                        : "bg-muted text-muted-foreground"
+                        : "bg-muted text-muted-foreground",
                     )}
                   >
                     <Shield className="h-5 w-5" />
@@ -339,41 +287,9 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                 </div>
                 <Switch
                   checked={twoFactorEnabled}
-                  onCheckedChange={handleTwoFactorToggle}
+                  onCheckedChange={() => handleTwoFactorToggle()}
                 />
               </div>
-
-              {showVerificationInput && (
-                <div className="mt-5 p-4 bg-background rounded-md border border-border">
-                  <Label
-                    htmlFor="verificationCode"
-                    className="mb-2 block text-sm font-medium"
-                  >
-                    Enter the 6-digit code from your app
-                  </Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="verificationCode"
-                      type="text"
-                      placeholder="000 000"
-                      value={verificationCode}
-                      onChange={(e) =>
-                        setVerificationCode(
-                          e.target.value.replace(/\D/g, "").slice(0, 6)
-                        )
-                      }
-                      className="font-mono tracking-widest text-center text-lg max-w-[200px] rounded-sm"
-                    />
-                    <Button
-                      onClick={handleVerifyTwoFactor}
-                      disabled={verificationCode.length !== 6}
-                      className="rounded-sm"
-                    >
-                      Verify Code
-                    </Button>
-                  </div>
-                </div>
-              )}
             </div>
 
             <div className="bg-muted/20 p-5 rounded-md border border-border/30">
@@ -384,7 +300,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                       "h-10 w-10 rounded-full flex items-center justify-center transition-colors duration-200",
                       user?.isVerifiedEmail
                         ? "bg-blue-50 text-blue-600"
-                        : "bg-amber-50 text-amber-600"
+                        : "bg-amber-50 text-amber-600",
                     )}
                   >
                     <Mail className="h-5 w-5" />

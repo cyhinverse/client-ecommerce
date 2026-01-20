@@ -3,9 +3,8 @@ import { User } from "./user";
 import { Shop } from "./shop";
 import { ShopCategory } from "./shopCategory";
 
-// ============ Sub-Interfaces ============
-
 export interface Category {
+
   _id: string;
   name: string;
   slug: string;
@@ -38,11 +37,9 @@ export interface FlashSaleInfo {
   endTime?: string;
 }
 
-// Variant Schema - Color differentiation only
-// SKU is auto-generated, size is at product level
 export interface Variant {
   _id: string;
-  name: string; // Display name
+  name: string;
   sku?: string;
   color?: string;
   price: number;
@@ -51,64 +48,53 @@ export interface Variant {
   images: string[];
 }
 
+
 export type ProductStatus = "draft" | "published" | "suspended" | "deleted";
 
-// ============ Main Product Interface ============
-
 export interface Product extends BaseEntity {
+
   name: string;
   slug: string;
   description: string;
 
-  // Core Relations
-  shop: Shop | string; // Populated or ID
+  shop: Shop | string;
   category: Category | null;
-  shopCategory?: ShopCategory | string; // Populated or ID
+  shopCategory?: ShopCategory | string;
 
-  // Metadata
   brand?: string;
   tags?: string[];
 
-  // Sizes - Product level (applies to all variants)
   sizes: string[];
 
-  // Media
   descriptionImages: string[];
   video?: string;
 
-  // Pricing & Inventory (cached aggregates/product level)
   price: Price;
   stock: number;
   soldCount: number;
 
-  // Variants (Colors)
   variants: Variant[];
 
-  // Shipping
-  shippingTemplate?: string; // ID
+  shippingTemplate?: string;
   weight: number;
   dimensions?: ProductDimensions;
 
-  // Attributes/Specs
   attributes: ProductAttribute[];
 
-  // Statistics
   ratingAverage: number;
   reviewCount: number;
 
-  // Flash Sale
   flashSale?: FlashSaleInfo;
 
-  // Flags
   isFeatured: boolean;
   isNewArrival: boolean;
   status: ProductStatus;
 
-  // Virtuals
   onSale?: boolean;
   isActive?: boolean;
   effectivePrice?: number;
 }
+
 
 // ============ Helpers ============
 
@@ -120,7 +106,7 @@ export function getVariantDisplay(variant: Variant): string {
 
 export function findVariantByColor(
   product: Product,
-  color: string
+  color: string,
 ): Variant | undefined {
   return product.variants?.find((v) => v.color === color);
 }
@@ -133,9 +119,8 @@ export function getUniqueColors(variants: Variant[]): string[] {
   return Array.from(colors);
 }
 
-// ============ State & Filters ============
-
 export interface ProductState {
+
   all: Product[];
   featured: Product[];
   newArrivals: Product[];
@@ -184,9 +169,6 @@ export interface ProductUrlFilters {
   [key: string]: string | number | boolean | null;
 }
 
-// ============ Form Types (Local File Handling) ============
-
-// For creating new variants (with file uploads)
 export interface VariantFormCreate {
   _id: string;
   name: string;
@@ -199,6 +181,79 @@ export interface VariantFormCreate {
     previews: string[];
   };
 }
+
+export interface VariantFormUpdate {
+  _id: string;
+  name: string;
+  color?: string;
+  price: number;
+  stock: number;
+  sold?: number;
+  images: {
+    existing: string[];
+    newFiles: File[];
+    newPreviews: string[];
+  };
+}
+
+export type VariantForm = VariantFormCreate | VariantFormUpdate;
+
+export function isVariantFormCreate(
+  variant: VariantForm,
+): variant is VariantFormCreate {
+  return "files" in variant.images && "previews" in variant.images;
+}
+
+export function isVariantFormUpdate(
+  variant: VariantForm,
+): variant is VariantFormUpdate {
+  return "newFiles" in variant.images && "newPreviews" in variant.images;
+}
+
+export function createEmptyVariantForm(
+  defaultPrice: number = 0,
+): VariantFormCreate {
+  return {
+    _id: `temp-${Date.now()}`,
+    name: "",
+    color: "",
+    price: defaultPrice,
+    stock: 0,
+    sold: 0,
+    images: { files: [], previews: [] },
+  };
+}
+
+export function createEmptyVariantFormUpdate(
+  defaultPrice: number = 0,
+): VariantFormUpdate {
+  return {
+    _id: `temp-${Date.now()}`,
+    name: "",
+    color: "",
+    price: defaultPrice,
+    stock: 0,
+    sold: 0,
+    images: { existing: [], newFiles: [], newPreviews: [] },
+  };
+}
+
+export function variantToForm(variant: Variant): VariantFormUpdate {
+  return {
+    _id: variant._id,
+    name: variant.name,
+    color: variant.color || "",
+    price: variant.price,
+    stock: variant.stock,
+    sold: variant.sold || 0,
+    images: {
+      existing: variant.images || [],
+      newFiles: [],
+      newPreviews: [],
+    },
+  };
+}
+
 
 // For updating existing variants (with file uploads)
 export interface VariantFormUpdate {
@@ -220,20 +275,20 @@ export type VariantForm = VariantFormCreate | VariantFormUpdate;
 
 // Type guards
 export function isVariantFormCreate(
-  variant: VariantForm
+  variant: VariantForm,
 ): variant is VariantFormCreate {
   return "files" in variant.images && "previews" in variant.images;
 }
 
 export function isVariantFormUpdate(
-  variant: VariantForm
+  variant: VariantForm,
 ): variant is VariantFormUpdate {
   return "newFiles" in variant.images && "newPreviews" in variant.images;
 }
 
 // Factory function for creating empty variant (create form)
 export function createEmptyVariantForm(
-  defaultPrice: number = 0
+  defaultPrice: number = 0,
 ): VariantFormCreate {
   return {
     _id: `temp-${Date.now()}`,
@@ -248,7 +303,7 @@ export function createEmptyVariantForm(
 
 // Factory function for creating empty variant (update form)
 export function createEmptyVariantFormUpdate(
-  defaultPrice: number = 0
+  defaultPrice: number = 0,
 ): VariantFormUpdate {
   return {
     _id: `temp-${Date.now()}`,
@@ -277,35 +332,3 @@ export function variantToForm(variant: Variant): VariantFormUpdate {
     },
   };
 }
-
-// ============ Backward Compatibility Aliases (Deprecated) ============
-// These aliases are kept for backward compatibility during migration
-// TODO: Remove after all usages are updated
-
-/** @deprecated Use VariantFormCreate instead */
-export type VariantWithFilesCreate = VariantFormCreate;
-/** @deprecated Use VariantFormUpdate instead */
-export type VariantWithFilesUpdate = VariantFormUpdate;
-/** @deprecated Use VariantForm instead */
-export type VariantWithFiles = VariantForm;
-/** @deprecated Use VariantFormCreate instead */
-export type CreateVariant = VariantFormCreate;
-/** @deprecated Use VariantFormUpdate instead */
-export type UpdateVariant = VariantFormUpdate;
-
-/** @deprecated Use isVariantFormCreate instead */
-export const isVariantForCreate = isVariantFormCreate;
-/** @deprecated Use isVariantFormUpdate instead */
-export const isVariantForUpdate = isVariantFormUpdate;
-/** @deprecated Use createEmptyVariantForm instead */
-export const createEmptyVariantForCreate = createEmptyVariantForm;
-/** @deprecated Use createEmptyVariantFormUpdate instead */
-export const createEmptyVariantForUpdate = createEmptyVariantFormUpdate;
-/** @deprecated Use createEmptyVariantForm instead */
-export const createEmptyCreateVariant = createEmptyVariantForm;
-/** @deprecated Use createEmptyVariantFormUpdate instead */
-export const createEmptyUpdateVariant = createEmptyVariantFormUpdate;
-/** @deprecated Use variantToForm instead */
-export const variantToEditForm = variantToForm;
-/** @deprecated Use variantToForm instead */
-export const variantToUpdateForm = variantToForm;

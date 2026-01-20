@@ -9,11 +9,11 @@ import {
   Edit,
   Trash2,
   Eye,
-  Loader2,
-  MoreHorizontal,
-  Filter,
   Tag,
+  Filter,
+  MoreHorizontal,
 } from "lucide-react";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -55,7 +55,7 @@ export default function SellerProductsPage() {
 
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Modal states
+
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
@@ -219,7 +219,7 @@ export default function SellerProductsPage() {
       <div className="bg-[#f7f7f7] rounded-2xl overflow-hidden">
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-[#E53935]" />
+            <SpinnerLoading size={32} />
           </div>
         ) : products.length === 0 ? (
           <div className="text-center py-20">
@@ -316,8 +316,8 @@ export default function SellerProductsPage() {
                           getStockCount(product) > 10
                             ? "text-green-600"
                             : getStockCount(product) > 0
-                            ? "text-yellow-600"
-                            : "text-red-500"
+                              ? "text-yellow-600"
+                              : "text-red-500"
                         }`}
                       >
                         {getStockCount(product)}
@@ -421,6 +421,7 @@ export default function SellerProductsPage() {
       />
 
       <UpdateModelProduct
+        key={selectedProduct?._id}
         open={updateModalOpen}
         onOpenChange={handleCloseUpdateModal}
         product={selectedProduct}
@@ -429,6 +430,7 @@ export default function SellerProductsPage() {
       />
 
       <ViewModelProduct
+        key={selectedProduct?._id}
         open={viewModalOpen}
         onOpenChange={handleCloseViewModal}
         product={selectedProduct}

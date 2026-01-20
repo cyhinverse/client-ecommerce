@@ -2,7 +2,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Store, Upload, MapPin, Loader2 } from "lucide-react";
+import { Store, Upload, MapPin } from "lucide-react";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,41 +24,19 @@ export default function SellerRegisterPage() {
   const registerShopMutation = useRegisterShop();
   const uploadLogoMutation = useUploadShopLogo();
   const uploadBannerMutation = useUploadShopBanner();
-  const { isAuthenticated, token, data } = useAppSelector(
-    (state) => state.auth
-  );
+  const { isAuthenticated, data } = useAppSelector((state) => state.auth);
 
   const isRegistering = registerShopMutation.isPending;
   const isUploadingLogo = uploadLogoMutation.isPending;
   const isUploadingBanner = uploadBannerMutation.isPending;
 
   // Check if user has seller or admin role (can have a shop)
+  const roles = data?.roles;
   const canHaveShop =
-    data?.roles === "seller" ||
-    data?.roles === "admin" ||
-    (Array.isArray(data?.roles) &&
-      (data.roles.includes("seller") || data.roles.includes("admin")));
-
-  // Redirect if user already has a shop
-  useEffect(() => {
-    if (myShop) {
-      toast.info("Bạn đã có shop, chuyển đến trang quản lý");
-      router.replace("/seller/settings");
-    }
-  }, [myShop, router]);
-
-  // Also redirect if user is seller/admin (they likely have a shop)
-  useEffect(() => {
-    if (canHaveShop && !isLoading) {
-      const timer = setTimeout(() => {
-        if (canHaveShop && !myShop) {
-          // User is seller/admin but myShop not loaded - redirect anyway
-          router.replace("/seller/settings");
-        }
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [canHaveShop, isLoading, myShop, router]);
+    roles === "seller" ||
+    roles === "admin" ||
+    (Array.isArray(roles) &&
+      (roles.includes("seller") || roles.includes("admin")));
 
   const [formData, setFormData] = useState<CreateShopPayload>({
     name: "",
@@ -77,6 +56,32 @@ export default function SellerRegisterPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const logoInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
+
+  if (!data) return <SpinnerLoading fullPage />;
+  if (!isAuthenticated) return null;
+
+  // Redirect if user already has a shop
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useEffect(() => {
+    if (myShop) {
+      toast.info("Bạn đã có shop, chuyển đến trang quản lý");
+      router.replace("/seller/settings");
+    }
+  }, [myShop, router]);
+
+  // Also redirect if user is seller/admin (they likely have a shop)
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useEffect(() => {
+    if (canHaveShop && !isLoading) {
+      const timer = setTimeout(() => {
+        if (canHaveShop && !myShop) {
+          // User is seller/admin but myShop not loaded - redirect anyway
+          router.replace("/seller/settings");
+        }
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [canHaveShop, isLoading, myShop, router]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -130,7 +135,7 @@ export default function SellerRegisterPage() {
 
   const handleFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
-    type: "logo" | "banner"
+    type: "logo" | "banner",
   ) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -155,7 +160,7 @@ export default function SellerRegisterPage() {
           setFormData((prev) => ({ ...prev, banner: result.banner }));
         }
         toast.success(
-          `Upload ${type === "logo" ? "logo" : "banner"} thành công!`
+          `Upload ${type === "logo" ? "logo" : "banner"} thành công!`,
         );
       } catch {
         toast.error(`Upload ${type === "logo" ? "logo" : "banner"} thất bại`);
@@ -169,7 +174,7 @@ export default function SellerRegisterPage() {
         {/* Loading state while checking shop (only for sellers/admins) */}
         {canHaveShop && isLoading ? (
           <div className="bg-white rounded border border-[#f0f0f0] p-12 flex flex-col items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-[#E53935] mb-4" />
+            <SpinnerLoading size={32} className="mb-4" />
             <p className="text-gray-500">Đang kiểm tra thông tin...</p>
           </div>
         ) : (
@@ -238,7 +243,7 @@ export default function SellerRegisterPage() {
                     >
                       {isUploadingLogo ? (
                         <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                          <Loader2 className="h-5 w-5 animate-spin text-[#E53935]" />
+                          <SpinnerLoading size={20} />
                         </div>
                       ) : formData.logo ? (
                         <Image
@@ -272,7 +277,7 @@ export default function SellerRegisterPage() {
                     >
                       {isUploadingBanner ? (
                         <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                          <Loader2 className="h-5 w-5 animate-spin text-[#E53935]" />
+                          <SpinnerLoading size={20} />
                         </div>
                       ) : formData.banner ? (
                         <Image
@@ -401,7 +406,7 @@ export default function SellerRegisterPage() {
               >
                 {isRegistering ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <SpinnerLoading size={16} noWrapper className="mr-2" />
                     Đang xử lý...
                   </>
                 ) : (

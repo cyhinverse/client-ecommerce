@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Send, Loader2, Bot, RotateCcw, ChevronRight, Search } from "lucide-react";
+import { Send, Bot, RotateCcw, Search } from "lucide-react";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
@@ -12,12 +13,16 @@ import { ChatbotMessage } from "@/types/chat";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // Extended ChatbotMessage with Date timestamp for local state
-interface Message extends Omit<ChatbotMessage, 'timestamp'> {
+interface Message extends Omit<ChatbotMessage, "timestamp"> {
   timestamp: Date;
 }
 
 const QUICK_ACTIONS = [
-  { icon: <Search className="h-4 w-4" />, label: "Tìm sản phẩm", query: "Tìm sản phẩm" },
+  {
+    icon: <Search className="h-4 w-4" />,
+    label: "Tìm sản phẩm",
+    query: "Tìm sản phẩm",
+  },
   { icon: "🏷️", label: "Khuyến mãi", query: "Sản phẩm đang giảm giá" },
   { icon: "🔥", label: "Bán chạy", query: "Sản phẩm bán chạy nhất" },
   { icon: "👕", label: "Thời trang", query: "Gợi ý thời trang" },
@@ -63,7 +68,7 @@ export default function ChatWidget() {
           data.data.messages.map((m: Message) => ({
             ...m,
             timestamp: new Date(m.timestamp),
-          }))
+          })),
         );
       }
     } catch (error) {
@@ -120,11 +125,14 @@ export default function ChatWidget() {
                     fullContent += data.content;
                     setStreamingContent(fullContent);
                   } else if (data.type === "done") {
-                    setMessages((prev) => [...prev, {
-                      role: "assistant",
-                      content: fullContent,
-                      timestamp: new Date(),
-                    }]);
+                    setMessages((prev) => [
+                      ...prev,
+                      {
+                        role: "assistant",
+                        content: fullContent,
+                        timestamp: new Date(),
+                      },
+                    ]);
                     setStreamingContent("");
                   } else if (data.type === "error") {
                     throw new Error(data.message);
@@ -139,16 +147,19 @@ export default function ChatWidget() {
       } catch (error) {
         console.error("Chat error:", error);
         setStreamingContent("");
-        setMessages((prev) => [...prev, {
-          role: "assistant",
-          content: "Xin lỗi, không thể kết nối. Vui lòng thử lại! 🙏",
-          timestamp: new Date(),
-        }]);
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content: "Xin lỗi, không thể kết nối. Vui lòng thử lại! 🙏",
+            timestamp: new Date(),
+          },
+        ]);
       } finally {
         setIsLoading(false);
       }
     },
-    [isLoading, sessionId]
+    [isLoading, sessionId],
   );
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -174,7 +185,7 @@ export default function ChatWidget() {
     <div
       className={cn(
         "fixed top-0 right-0 h-full w-[380px] z-40 bg-white border-l border-gray-100 transform transition-transform duration-300 ease-in-out flex flex-col",
-        isOpen ? "translate-x-0" : "translate-x-full"
+        isOpen ? "translate-x-0" : "translate-x-full",
       )}
     >
       {/* Top Bar - Match với TopBar của header chính */}
@@ -199,7 +210,9 @@ export default function ChatWidget() {
               <Bot className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-base text-gray-800">Mia - Trợ lý AI</h3>
+              <h3 className="font-semibold text-base text-gray-800">
+                Mia - Trợ lý AI
+              </h3>
               <p className="text-xs text-gray-500">Hỗ trợ mua sắm 24/7</p>
             </div>
           </div>
@@ -229,7 +242,8 @@ export default function ChatWidget() {
                 <span className="font-medium">Xin chào! 👋</span>
               </p>
               <p className="text-sm text-gray-600 leading-relaxed">
-                Em là trợ lý mua sắm AI, có thể giúp bạn tìm kiếm sản phẩm, tư vấn thời trang, hoặc trả lời các câu hỏi về đơn hàng.
+                Em là trợ lý mua sắm AI, có thể giúp bạn tìm kiếm sản phẩm, tư
+                vấn thời trang, hoặc trả lời các câu hỏi về đơn hàng.
               </p>
             </div>
 
@@ -242,9 +256,13 @@ export default function ChatWidget() {
                   className="flex items-center gap-2 p-3 bg-white rounded-lg hover:bg-[#E53935]/5 transition-colors text-left group"
                 >
                   <span className="text-gray-500 group-hover:text-[#E53935]">
-                    {typeof action.icon === 'string' ? action.icon : action.icon}
+                    {typeof action.icon === "string"
+                      ? action.icon
+                      : action.icon}
                   </span>
-                  <span className="text-sm text-gray-700 group-hover:text-[#E53935]">{action.label}</span>
+                  <span className="text-sm text-gray-700 group-hover:text-[#E53935]">
+                    {action.label}
+                  </span>
                 </button>
               ))}
             </div>
@@ -256,7 +274,7 @@ export default function ChatWidget() {
                 key={i}
                 className={cn(
                   "flex",
-                  msg.role === "user" ? "justify-end" : "justify-start"
+                  msg.role === "user" ? "justify-end" : "justify-start",
                 )}
               >
                 {msg.role === "assistant" && (
@@ -269,7 +287,7 @@ export default function ChatWidget() {
                     "max-w-[80%] rounded-lg px-3 py-2 text-sm",
                     msg.role === "user"
                       ? "bg-[#E53935] text-white rounded-br-sm"
-                      : "bg-white text-gray-800 rounded-bl-sm"
+                      : "bg-white text-gray-800 rounded-bl-sm",
                   )}
                 >
                   {msg.role === "assistant" ? (
@@ -277,7 +295,13 @@ export default function ChatWidget() {
                       <ReactMarkdown
                         components={{
                           a: ({ href, children }) => (
-                            <a href={href} className="text-[#E53935] hover:underline" target={href?.startsWith("http") ? "_blank" : undefined}>
+                            <a
+                              href={href}
+                              className="text-[#E53935] hover:underline"
+                              target={
+                                href?.startsWith("http") ? "_blank" : undefined
+                              }
+                            >
                               {children}
                             </a>
                           ),
@@ -347,7 +371,7 @@ export default function ChatWidget() {
             className="h-10 w-10 rounded-lg bg-[#E53935] hover:bg-[#D32F2F] shrink-0"
           >
             {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <SpinnerLoading size={16} noWrapper />
             ) : (
               <Send className="h-4 w-4" />
             )}

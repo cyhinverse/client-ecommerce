@@ -4,14 +4,13 @@
  */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/api";
+import { extractApiData } from "@/api";
 import { errorHandler } from "@/services/errorHandler";
 import { STALE_TIME } from "@/constants/cache";
 import { orderKeys, cartKeys } from "@/lib/queryKeys";
 import { Order, OrderStatus, OrderStatistics } from "@/types/order";
 import { PaginationData } from "@/types/common";
 
-// ============ Types ============
 export interface OrderListParams {
   page?: number;
   limit?: number;
@@ -47,10 +46,9 @@ export interface OrderListResponse {
   pagination: PaginationData | null;
 }
 
-// ============ API Functions ============
 const orderApi = {
   getUserOrders: async (
-    params: OrderListParams = {}
+    params: OrderListParams = {},
   ): Promise<OrderListResponse> => {
     const {
       page = 1,
@@ -86,7 +84,7 @@ const orderApi = {
 
   // Admin: Get all orders
   getAllOrders: async (
-    params: OrderListParams = {}
+    params: OrderListParams = {},
   ): Promise<OrderListResponse> => {
     const {
       page = 1,
@@ -127,7 +125,7 @@ const orderApi = {
   // Shop orders
   getShopOrders: async (
     shopId: string,
-    params: OrderListParams = {}
+    params: OrderListParams = {},
   ): Promise<OrderListResponse> => {
     const { page = 1, limit = 10, status } = params;
     const response = await instance.get(`/orders/shop/${shopId}`, {
@@ -176,8 +174,6 @@ const orderApi = {
     return extractApiData(response);
   },
 };
-
-// ============ Query Hooks ============
 
 /**
  * Get current user's orders
@@ -235,8 +231,6 @@ export function useOrderStatistics() {
     staleTime: STALE_TIME.VERY_LONG,
   });
 }
-
-// ============ Mutation Hooks ============
 
 /**
  * Create order mutation

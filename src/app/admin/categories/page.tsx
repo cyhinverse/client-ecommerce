@@ -30,12 +30,12 @@ export default function CategoriesAdminPage() {
       basePath: "/admin/categories",
     });
 
-  // Extract filter values
+
   const currentPage = Number(filters.page);
   const pageSize = Number(filters.limit);
   const searchTerm = filters.search as string;
 
-  // Build query params
+
   const queryParams = {
     page: currentPage,
     limit: pageSize,
@@ -44,7 +44,7 @@ export default function CategoriesAdminPage() {
       : { parentCategory: "null" }),
   };
 
-  // React Query hooks
+
   const { data: categoriesData, isLoading, error } = useCategories(queryParams);
   const createMutation = useCreateCategory();
   const updateMutation = useUpdateCategory();

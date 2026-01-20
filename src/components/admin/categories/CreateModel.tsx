@@ -1,4 +1,4 @@
-// components/CreateCategoryModal.tsx
+
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { useForm, Resolver } from "react-hook-form";
@@ -38,7 +38,7 @@ import {
 import { Category } from "@/types/category";
 import Image from "next/image";
 
-// Zod validation schema
+
 const createFormSchema = z.object({
   name: z.string().min(1, { message: "Category name is required" }),
   slug: z
@@ -76,7 +76,7 @@ export function CreateCategoryModal({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Initialize form
+
   const form = useForm<CreateFormData>({
     resolver: zodResolver(createFormSchema) as Resolver<CreateFormData>,
     defaultValues: {
@@ -89,7 +89,7 @@ export function CreateCategoryModal({
     },
   });
 
-  // Close dropdown when clicking outside
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -104,7 +104,7 @@ export function CreateCategoryModal({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Reset form when modal opens/closes
+
   useEffect(() => {
     if (isOpen) {
       form.reset();
@@ -113,7 +113,7 @@ export function CreateCategoryModal({
     }
   }, [isOpen, form]);
 
-  // Auto-generate slug from name
+
   const generateSlug = (name: string) => {
     return name
       .toLowerCase()
@@ -123,7 +123,7 @@ export function CreateCategoryModal({
       .replace(/\s+/g, "-");
   };
 
-  // Handle name change with auto-slug generation
+
   const handleNameChange = (name: string) => {
     form.setValue("name", name);
 
@@ -133,7 +133,7 @@ export function CreateCategoryModal({
     }
   };
 
-  // Handle slug manual edit
+
   const handleSlugChange = (slug: string) => {
     form.setValue("slug", slug);
     if (slug && !isSlugManuallyEdited) {
@@ -141,7 +141,7 @@ export function CreateCategoryModal({
     }
   };
 
-  // Handle file upload
+
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -173,7 +173,7 @@ export function CreateCategoryModal({
     }
   };
 
-  // Simulate image upload
+
   const simulateImageUpload = (file: File): Promise<string> => {
     return new Promise((resolve) => {
       const reader = new FileReader();
@@ -185,7 +185,7 @@ export function CreateCategoryModal({
     });
   };
 
-  // Remove image from list
+
   const removeImage = (index: number) => {
     const currentImages = form.getValues("images") || [];
     const newImages = currentImages.filter((_, i) => i !== index);

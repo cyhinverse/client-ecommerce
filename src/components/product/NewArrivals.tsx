@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-
 import { useNewArrivals } from "@/hooks/queries/useProducts";
 import { ProductCard } from "./ProductCard";
 import SpinnerLoading from "@/components/common/SpinnerLoading";

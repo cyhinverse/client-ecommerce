@@ -1,4 +1,3 @@
-// ShopPage - Taobao Light Style
 "use client";
 import { useState } from "react";
 import { useParams } from "next/navigation";
@@ -14,8 +13,8 @@ import {
   Search,
   Grid3X3,
   List,
-  Loader2,
 } from "lucide-react";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ProductCard from "@/components/product/ProductCard";
@@ -40,7 +39,7 @@ export default function ShopPage() {
     useShopCategories(currentShop?._id || "", { enabled: !!currentShop?._id });
   const { data: productsData, isLoading: productsLoading } = useShopProducts(
     currentShop?._id || "",
-    { page: 1, limit: 50 }
+    { page: 1, limit: 50 },
   );
   const products = productsData?.products || [];
   const { isAuthenticated } = useAppSelector((state) => state.auth);
@@ -81,22 +80,26 @@ export default function ShopPage() {
     const matchesSearch =
       !searchQuery ||
       product.name.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     // Filter by shop category (not general category)
-    const productShopCategoryId = typeof product.shopCategory === 'object' 
-      ? product.shopCategory?._id 
-      : product.shopCategory;
-    const selectedCategory = categories.find(cat => cat.slug === activeCategory);
+    const productShopCategoryId =
+      typeof product.shopCategory === "object"
+        ? product.shopCategory?._id
+        : product.shopCategory;
+    const selectedCategory = categories.find(
+      (cat) => cat.slug === activeCategory,
+    );
     const matchesCategory =
-      activeCategory === "all" || productShopCategoryId === selectedCategory?._id;
-    
+      activeCategory === "all" ||
+      productShopCategoryId === selectedCategory?._id;
+
     return matchesSearch && matchesCategory;
   });
 
   if (shopLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-[#E53935]" />
+        <SpinnerLoading size={32} />
       </div>
     );
   }
@@ -247,7 +250,7 @@ export default function ShopPage() {
               <h3 className="font-medium text-gray-800 mb-2">Danh mục Shop</h3>
               {categoriesLoading ? (
                 <div className="flex justify-center py-4">
-                  <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+                  <SpinnerLoading size={20} />
                 </div>
               ) : (
                 <ul className="space-y-1">
@@ -331,7 +334,7 @@ export default function ShopPage() {
             {/* Products */}
             {productsLoading ? (
               <div className="flex justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-[#E53935]" />
+                <SpinnerLoading size={32} />
               </div>
             ) : filteredProducts.length === 0 ? (
               <div className="text-center py-12 text-gray-500">
@@ -340,7 +343,7 @@ export default function ShopPage() {
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 {filteredProducts.map((product) => (
-                  <ProductCard key={product._id} product={product as any} />
+                  <ProductCard key={product._id} product={product} />
                 ))}
               </div>
             )}

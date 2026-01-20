@@ -21,7 +21,7 @@ export default function WishlistPage() {
   const router = useRouter();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
-  // React Query hooks
+
   const { data: wishlistData, isLoading } = useWishlist({ page: 1, limit: 20 });
   const removeFromWishlistMutation = useRemoveFromWishlist();
   const addToCartMutation = useAddToCart();

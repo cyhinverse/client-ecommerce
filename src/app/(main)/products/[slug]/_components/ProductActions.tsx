@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { cn } from "@/lib/utils";
 
 interface ProductActionsProps {
@@ -10,11 +10,11 @@ interface ProductActionsProps {
   loading?: boolean;
 }
 
-export function ProductActions({ 
-  onAddToCart, 
-  onBuyNow, 
+export function ProductActions({
+  onAddToCart,
+  onBuyNow,
   disabled = false,
-  loading = false 
+  loading = false,
 }: ProductActionsProps) {
   return (
     <>
@@ -25,26 +25,26 @@ export function ProductActions({
           disabled={disabled || loading}
           className={cn(
             "w-[180px] h-12 rounded-full border border-[#E53935] text-[#E53935] font-bold text-sm bg-[#FFEBEE] hover:bg-[#FFCDD2] transition-colors flex items-center justify-center gap-2",
-            (disabled || loading) && "opacity-50 cursor-not-allowed"
+            (disabled || loading) && "opacity-50 cursor-not-allowed",
           )}
         >
           {loading ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <SpinnerLoading size={16} noWrapper className="mr-2" />
           ) : (
             "Thêm vào giỏ"
           )}
         </button>
-        
+
         <button
           onClick={onBuyNow}
           disabled={disabled || loading}
           className={cn(
             "w-[180px] h-12 rounded-full bg-[#E53935] text-white font-bold text-sm hover:bg-[#D32F2F] active:scale-95 transition-all flex items-center justify-center gap-2",
-            (disabled || loading) && "opacity-50 cursor-not-allowed"
+            (disabled || loading) && "opacity-50 cursor-not-allowed",
           )}
         >
           {loading ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <SpinnerLoading size={16} noWrapper className="mr-2" />
           ) : (
             "Mua ngay"
           )}
@@ -58,26 +58,26 @@ export function ProductActions({
           disabled={disabled || loading}
           className={cn(
             "flex-1 h-12 rounded-full border border-[#E53935] text-[#E53935] font-bold text-sm bg-[#FFEBEE] flex items-center justify-center gap-2",
-            (disabled || loading) && "opacity-50 cursor-not-allowed"
+            (disabled || loading) && "opacity-50 cursor-not-allowed",
           )}
         >
           {loading ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <SpinnerLoading size={16} noWrapper className="mr-2" />
           ) : (
             "Thêm vào giỏ"
           )}
         </button>
-        
+
         <button
           onClick={onBuyNow}
           disabled={disabled || loading}
           className={cn(
             "flex-1 h-12 rounded-full bg-[#E53935] text-white font-bold text-sm flex items-center justify-center gap-2",
-            (disabled || loading) && "opacity-50 cursor-not-allowed"
+            (disabled || loading) && "opacity-50 cursor-not-allowed",
           )}
         >
           {loading ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <SpinnerLoading size={16} noWrapper className="mr-2" />
           ) : (
             "Mua ngay"
           )}

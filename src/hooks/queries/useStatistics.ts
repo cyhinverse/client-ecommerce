@@ -8,7 +8,6 @@ import { extractApiData } from "@/api";
 import { STALE_TIME, REFETCH_INTERVAL } from "@/constants/cache";
 import { statisticsKeys } from "@/lib/queryKeys";
 
-// ============ Types ============
 export interface DashboardStats {
   // Flat structure (new format)
   totalUsers: number;
@@ -92,7 +91,6 @@ export interface OrderStats {
   }>;
 }
 
-// ============ API Functions ============
 const statisticsApi = {
   getDashboard: async (): Promise<DashboardStats> => {
     const response = await instance.get("/statistics/dashboard");
@@ -121,8 +119,6 @@ const statisticsApi = {
     return extractApiData(response);
   },
 };
-
-// ============ Query Hooks ============
 
 /**
  * Get dashboard statistics (Admin)

@@ -15,7 +15,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { AddressDialogProps, AddressFormData } from "@/types/address";
-import { MapPin, Navigation, Loader2, Home } from "lucide-react";
+import { MapPin, Navigation, Home } from "lucide-react";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 export default function AddressDialog({
   open,
@@ -182,7 +183,7 @@ export default function AddressDialog({
           const { latitude, longitude } = position.coords;
 
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&accept-language=vi`
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&accept-language=vi`,
           );
 
           if (!response.ok) {
@@ -237,7 +238,7 @@ export default function AddressDialog({
         enableHighAccuracy: true,
         timeout: 15000,
         maximumAge: 60000,
-      }
+      },
     );
   };
 
@@ -287,7 +288,7 @@ export default function AddressDialog({
       toast.error(
         `${
           editingAddress ? "Failed to update address" : "Failed to add address"
-        }: ${errorMessage}`
+        }: ${errorMessage}`,
       );
     } finally {
       setIsSubmitting(false);
@@ -370,7 +371,7 @@ export default function AddressDialog({
                 className="h-8 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50"
               >
                 {isGettingLocation ? (
-                  <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                  <SpinnerLoading size={14} noWrapper className="mr-1.5" />
                 ) : (
                   <Navigation className="h-3.5 w-3.5 mr-1.5" />
                 )}

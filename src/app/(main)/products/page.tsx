@@ -77,7 +77,7 @@ export default function ProductsPage() {
   const debouncedFilters = useDebounce(filters, 300);
   const debouncedCategory = useDebounce(activeCategory, 300);
 
-  // Build query params for React Query
+
   const queryParams = useMemo(() => {
     const params: Record<string, string | number | boolean> = {
       page: 1,

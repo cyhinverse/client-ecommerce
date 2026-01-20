@@ -1,11 +1,11 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Package,
   ShoppingCart,
   DollarSign,
   TrendingUp,
-  Eye,
   Star,
   Users,
   ArrowRight,
@@ -13,9 +13,11 @@ import {
   CheckCircle2,
   XCircle,
   Truck,
+  RotateCcw,
 } from "lucide-react";
-import { useMyShop } from "@/hooks/queries/useShop";
-import { useShopProducts } from "@/hooks/queries/useProducts";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
+import { useShopStatistics } from "@/hooks/queries/useShop";
+import { formatCurrency } from "@/utils/format";
 
 const formatPrice = (price: number): string => {
   if (price >= 1000000) {
@@ -28,46 +30,82 @@ const formatPrice = (price: number): string => {
 };
 
 export default function SellerDashboardPage() {
-  const { data: myShop } = useMyShop();
-  const { data: productsData } = useShopProducts(myShop?._id || "", {
-    page: 1,
-    limit: 1,
-  });
+  const { data: statistics, isLoading, error, refetch } = useShopStatistics();
 
-  const totalProducts = productsData?.pagination?.total || 0;
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="flex flex-col items-center gap-4">
+          <SpinnerLoading size={32} />
+          <p className="text-sm text-gray-500 font-medium">
+            Đang tải thống kê...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <XCircle className="h-12 w-12 text-red-500" />
+          <p className="text-gray-600">Không thể tải thống kê shop</p>
+          <button
+            onClick={() => refetch()}
+            className="flex items-center gap-2 text-primary hover:underline"
+          >
+            <RotateCcw className="h-4 w-4" />
+            Thử lại
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const shop = statistics?.shop;
+  const stats = statistics?.stats;
+  const ordersByStatus = stats?.ordersByStatus || {
+    pending: 0,
+    confirmed: 0,
+    processing: 0,
+    shipped: 0,
+    delivered: 0,
+    cancelled: 0,
+  };
 
   const orderStats = [
     {
       label: "Chờ xác nhận",
-      value: 0,
+      value: ordersByStatus.pending,
       icon: Clock,
       color: "text-yellow-600",
       bg: "bg-yellow-50",
     },
     {
       label: "Đang xử lý",
-      value: 0,
+      value: ordersByStatus.processing + ordersByStatus.confirmed,
       icon: Package,
       color: "text-blue-600",
       bg: "bg-blue-50",
     },
     {
       label: "Đang giao",
-      value: 0,
+      value: ordersByStatus.shipped,
       icon: Truck,
       color: "text-purple-600",
       bg: "bg-purple-50",
     },
     {
       label: "Hoàn thành",
-      value: 0,
+      value: ordersByStatus.delivered,
       icon: CheckCircle2,
       color: "text-green-600",
       bg: "bg-green-50",
     },
     {
       label: "Đã hủy",
-      value: 0,
+      value: ordersByStatus.cancelled,
       icon: XCircle,
       color: "text-red-600",
       bg: "bg-red-50",
@@ -82,7 +120,7 @@ export default function SellerDashboardPage() {
         <div className="absolute right-20 bottom-0 w-32 h-32 bg-white/10 rounded-full translate-y-1/2" />
         <div className="relative">
           <h1 className="text-2xl font-bold mb-1">
-            Xin chào, {myShop?.name}! 👋
+            Xin chào, {shop?.name}! 👋
           </h1>
           <p className="text-white/80 text-sm">
             Chào mừng bạn đến với Kênh Người Bán. Quản lý shop của bạn tại đây.
@@ -94,25 +132,30 @@ export default function SellerDashboardPage() {
       <div className="grid grid-cols-4 gap-4">
         <StatCard
           title="Sản phẩm"
-          value={totalProducts}
+          value={stats?.totalProducts || 0}
           icon={Package}
           color="blue"
           href="/seller/products"
         />
         <StatCard
           title="Đơn hàng"
-          value={0}
+          value={stats?.totalOrders || 0}
           icon={ShoppingCart}
           color="green"
           href="/seller/orders"
         />
         <StatCard
           title="Doanh thu"
-          value={`₫${formatPrice(0)}`}
+          value={`₫${formatPrice(stats?.totalRevenue || 0)}`}
           icon={DollarSign}
           color="yellow"
         />
-        <StatCard title="Lượt xem" value="0" icon={Eye} color="purple" />
+        <StatCard
+          title="Người theo dõi"
+          value={shop?.followers || 0}
+          icon={Users}
+          color="purple"
+        />
       </div>
 
       {/* Order Status */}
@@ -153,14 +196,14 @@ export default function SellerDashboardPage() {
             <div>
               <p className="text-sm text-gray-500">Đánh giá</p>
               <p className="text-xl font-bold">
-                {myShop?.rating?.toFixed(1) || "0.0"}
+                {shop?.rating?.toFixed(1) || "0.0"}
               </p>
             </div>
           </div>
           <div className="h-1.5 bg-white rounded-full overflow-hidden">
             <div
               className="h-full bg-yellow-500 rounded-full"
-              style={{ width: `${((myShop?.rating || 0) / 5) * 100}%` }}
+              style={{ width: `${((shop?.rating || 0) / 5) * 100}%` }}
             />
           </div>
         </div>
@@ -172,10 +215,10 @@ export default function SellerDashboardPage() {
             </div>
             <div>
               <p className="text-sm text-gray-500">Người theo dõi</p>
-              <p className="text-xl font-bold">{myShop?.followers || 0}</p>
+              <p className="text-xl font-bold">{shop?.followers || 0}</p>
             </div>
           </div>
-          <p className="text-xs text-gray-400">+0 trong tuần này</p>
+          <p className="text-xs text-gray-400">Tổng số người theo dõi shop</p>
         </div>
 
         <div className="bg-[#f7f7f7] rounded-2xl p-5">
@@ -185,16 +228,14 @@ export default function SellerDashboardPage() {
             </div>
             <div>
               <p className="text-sm text-gray-500">Tỷ lệ phản hồi</p>
-              <p className="text-xl font-bold">
-                {myShop?.metrics?.responseRate || 0}%
-              </p>
+              <p className="text-xl font-bold">{shop?.responseRate || 0}%</p>
             </div>
           </div>
           <p className="text-xs text-gray-400">Trong 24 giờ qua</p>
         </div>
       </div>
 
-      {/* Quick Actions */}
+      {/* Quick Actions & Top Products */}
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-[#f7f7f7] rounded-2xl p-6">
           <h3 className="font-semibold text-gray-800 mb-4">Thao tác nhanh</h3>
@@ -226,12 +267,48 @@ export default function SellerDashboardPage() {
           <h3 className="font-semibold text-gray-800 mb-4">
             Sản phẩm bán chạy
           </h3>
-          <div className="flex items-center justify-center py-8 text-gray-400">
-            <div className="text-center">
-              <Package className="h-10 w-10 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">Chưa có dữ liệu</p>
+          {statistics?.topProducts && statistics.topProducts.length > 0 ? (
+            <div className="space-y-3">
+              {statistics.topProducts.slice(0, 4).map((product, index) => (
+                <div
+                  key={product._id}
+                  className="flex items-center gap-3 bg-white rounded-xl p-2"
+                >
+                  <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-xs font-bold text-gray-500">
+                    {product.image ? (
+                      <Image
+                        src={product.image}
+                        alt={product.name}
+                        width={32}
+                        height={32}
+                        className="rounded-lg object-cover"
+                      />
+                    ) : (
+                      index + 1
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-800 truncate">
+                      {product.name}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Đã bán: {product.sold}
+                    </p>
+                  </div>
+                  <p className="text-sm font-semibold text-primary">
+                    {formatCurrency(product.revenue)}
+                  </p>
+                </div>
+              ))}
             </div>
-          </div>
+          ) : (
+            <div className="flex items-center justify-center py-8 text-gray-400">
+              <div className="text-center">
+                <Package className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">Chưa có dữ liệu</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

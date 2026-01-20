@@ -1,4 +1,4 @@
-// components/EditCategoryModal.tsx
+
 "use client";
 import { useEffect } from "react";
 import { useForm, Resolver } from "react-hook-form";
@@ -70,7 +70,7 @@ export function EditCategoryModal({
     },
   });
 
-  // Reset form khi category thay đổi
+
   useEffect(() => {
     if (category) {
       form.reset({
@@ -82,7 +82,7 @@ export function EditCategoryModal({
     }
   }, [category, form]);
 
-  // Auto-generate slug từ name
+
   const generateSlug = (name: string) => {
     return name
       .toLowerCase()
@@ -97,7 +97,7 @@ export function EditCategoryModal({
     const currentSlug = form.getValues("slug");
     const originalSlug = category ? generateSlug(category.name || "") : "";
 
-    // Auto-generate slug nếu slug chưa được chỉnh sửa thủ công
+
     if (!currentSlug || currentSlug === originalSlug) {
       form.setValue("slug", generateSlug(name), { shouldValidate: true });
     }

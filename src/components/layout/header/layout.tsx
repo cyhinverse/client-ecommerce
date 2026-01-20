@@ -13,10 +13,10 @@ import {
   Camera,
   Trash2,
   Search,
-  Loader2,
   Heart,
   Store,
 } from "lucide-react";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { usePathname, useRouter } from "next/navigation";
 import NotificationModel from "@/components/notifications/NotificationModel";
 import { useUnreadNotificationCount } from "@/hooks/queries/useNotifications";
@@ -72,7 +72,7 @@ export default function HeaderLayout() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { isAuthenticated, token, data } = useAppSelector(
-    (state) => state.auth
+    (state) => state.auth,
   );
   const { data: cartData } = useAppSelector((state) => state.cart);
   const { data: unreadCountData } = useUnreadNotificationCount();
@@ -82,7 +82,19 @@ export default function HeaderLayout() {
   // Search State
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [recentSearches, setRecentSearches] = useState<string[]>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("recentSearches");
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+    return [];
+  });
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
   const path = usePathname();
@@ -93,22 +105,10 @@ export default function HeaderLayout() {
   // Use React Query for search
   const { data: searchResults, isLoading: isSearching } = useSearchSuggestions(
     debouncedSearchQuery.trim(),
-    8
+    8,
   );
 
-  // Load recent searches
-  useEffect(() => {
-    const saved = localStorage.getItem("recentSearches");
-    if (saved) {
-      try {
-        setRecentSearches(JSON.parse(saved));
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  }, []);
 
-  // Handle outside click to close search dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -254,7 +254,7 @@ export default function HeaderLayout() {
                 <div
                   className={cn(
                     "flex flex-col w-full max-w-[700px] transition-all duration-200 relative",
-                    isSearchFocused ? "z-60" : "z-10"
+                    isSearchFocused ? "z-60" : "z-10",
                   )}
                 >
                   {/* Search Input Container */}
@@ -264,7 +264,7 @@ export default function HeaderLayout() {
                       "flex items-center w-full h-[40px] border-2 border-[#E53935] bg-white transition-all relative z-20 hover:border-[#E53935]",
                       isSearchFocused
                         ? "rounded-t-2xl rounded-b-none border-b-0"
-                        : "rounded-full"
+                        : "rounded-full",
                     )}
                   >
                     {/* Left Category Trigger (Mock) */}
@@ -289,7 +289,11 @@ export default function HeaderLayout() {
                       />
                       {/* Loading or Camera Icon */}
                       {isSearching ? (
-                        <Loader2 className="w-5 h-5 text-[#E53935] animate-spin absolute right-2" />
+                        <SpinnerLoading
+                          size={20}
+                          noWrapper
+                          className="text-[#E53935] absolute right-2"
+                        />
                       ) : (
                         <Camera className="w-5 h-5 text-gray-400 hover:text-[#E53935] cursor-pointer absolute right-2 transition-colors" />
                       )}
@@ -300,7 +304,7 @@ export default function HeaderLayout() {
                       type="submit"
                       className={cn(
                         "h-[38px] px-8 bg-[#E53935] text-white text-base font-bold transition-colors -mr-[2px] -my-[2px] hover:bg-orange-600",
-                        isSearchFocused ? "rounded-tr-2xl" : "rounded-r-full"
+                        isSearchFocused ? "rounded-tr-2xl" : "rounded-r-full",
                       )}
                     >
                       Tìm kiếm
@@ -316,7 +320,7 @@ export default function HeaderLayout() {
                           "cursor-pointer hover:text-[#E53935] transition-colors",
                           i === 0
                             ? "text-[#E53935] font-medium"
-                            : "text-gray-500"
+                            : "text-gray-500",
                         )}
                         onClick={() => handleSearchSubmit(undefined, text)}
                       >
@@ -333,7 +337,11 @@ export default function HeaderLayout() {
                         <div className="p-4 border-b border-gray-100">
                           {isSearching ? (
                             <div className="flex items-center justify-center py-8">
-                              <Loader2 className="w-6 h-6 text-[#E53935] animate-spin" />
+                              <SpinnerLoading
+                                size={24}
+                                noWrapper
+                                className="text-[#E53935]"
+                              />
                               <span className="ml-2 text-sm text-gray-500">
                                 Đang tìm kiếm...
                               </span>
@@ -442,7 +450,7 @@ export default function HeaderLayout() {
                                                     ?.discountPrice ||
                                                     product.price
                                                       ?.currentPrice ||
-                                                    0
+                                                    0,
                                                 )}
                                               </span>
                                               {product.price?.discountPrice &&
@@ -451,7 +459,8 @@ export default function HeaderLayout() {
                                                     ?.discountPrice && (
                                                   <span className="text-xs text-gray-400 line-through">
                                                     {formatCurrency(
-                                                      product.price.currentPrice
+                                                      product.price
+                                                        .currentPrice,
                                                     )}
                                                   </span>
                                                 )}
@@ -574,7 +583,7 @@ export default function HeaderLayout() {
                           "group flex flex-col items-center gap-0.5 transition-colors relative",
                           isOpen
                             ? "text-[#E53935]"
-                            : "text-gray-500 hover:text-[#E53935]"
+                            : "text-gray-500 hover:text-[#E53935]",
                         )}
                       >
                         <div className="relative">

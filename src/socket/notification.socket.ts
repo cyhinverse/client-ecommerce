@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 export const handleNotificationEvents = (
   socket: Socket,
-  queryClient: QueryClient
+  queryClient: QueryClient,
 ) => {
   if (!socket) return;
 
@@ -20,12 +20,11 @@ export const handleNotificationEvents = (
     toast.message(title, {
       description: message,
     });
-    // Invalidate notification queries to refetch
+
     queryClient.invalidateQueries({ queryKey: notificationKeys.all });
   });
 
   socket.on("unread_count", (count) => {
-    // Update unread count in cache
     queryClient.setQueryData(notificationKeys.unreadCount(), count);
   });
 };

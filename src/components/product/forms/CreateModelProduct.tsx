@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -78,13 +78,11 @@ export function CreateModelProduct({
   const [newSize, setNewSize] = useState("");
 
   const resetForm = () => {
-    // Cleanup variant image previews
     formData.variants.forEach((v) => {
       v.images.previews.forEach((url) => URL.revokeObjectURL(url));
     });
-    // Cleanup description images previews
     formData.descriptionImages.previews.forEach((url) =>
-      URL.revokeObjectURL(url)
+      URL.revokeObjectURL(url),
     );
     setFormData(initialFormData);
     setNewTag("");
@@ -97,7 +95,6 @@ export function CreateModelProduct({
     onOpenChange(isOpen);
   };
 
-  // Add new variant (color variant)
   const addVariant = () => {
     const newVariant: VariantFormCreate = {
       _id: `temp-${Date.now()}`,
@@ -113,11 +110,10 @@ export function CreateModelProduct({
     }));
   };
 
-  // Update variant field
   const updateVariant = (
     index: number,
     field: keyof VariantFormCreate,
-    value: unknown
+    value: unknown,
   ) => {
     setFormData((prev) => ({
       ...prev,
@@ -128,7 +124,6 @@ export function CreateModelProduct({
     }));
   };
 
-  // Add size to product
   const addSize = () => {
     if (newSize.trim() && !formData.sizes.includes(newSize.trim())) {
       setFormData((prev) => ({
@@ -139,7 +134,6 @@ export function CreateModelProduct({
     }
   };
 
-  // Remove size from product
   const removeSize = (sizeToRemove: string) => {
     setFormData((prev) => ({
       ...prev,
@@ -147,7 +141,6 @@ export function CreateModelProduct({
     }));
   };
 
-  // Remove variant
   const removeVariant = (index: number) => {
     const variant = formData.variants[index];
     variant.images.previews.forEach((url) => URL.revokeObjectURL(url));
@@ -157,10 +150,9 @@ export function CreateModelProduct({
     }));
   };
 
-  // Handle variant image upload
   const handleVariantImageChange = (
     variantIndex: number,
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
@@ -189,7 +181,6 @@ export function CreateModelProduct({
     }));
   };
 
-  // Remove variant image
   const removeVariantImage = (variantIndex: number, imageIndex: number) => {
     setFormData((prev) => ({
       ...prev,
@@ -208,9 +199,8 @@ export function CreateModelProduct({
     }));
   };
 
-  // Handle description images upload
   const handleDescriptionImageChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
@@ -231,7 +221,6 @@ export function CreateModelProduct({
     }));
   };
 
-  // Remove description image
   const removeDescriptionImage = (index: number) => {
     setFormData((prev) => {
       URL.revokeObjectURL(prev.descriptionImages.previews[index]);
@@ -240,7 +229,7 @@ export function CreateModelProduct({
         descriptionImages: {
           files: prev.descriptionImages.files.filter((_, i) => i !== index),
           previews: prev.descriptionImages.previews.filter(
-            (_, i) => i !== index
+            (_, i) => i !== index,
           ),
         },
       };
@@ -273,7 +262,7 @@ export function CreateModelProduct({
       formDataToSend.append("dimensions", JSON.stringify(formData.dimensions));
     }
 
-    // Process variants - simple structure with color only
+    // Process variants
     if (formData.variants.length > 0) {
       const variantsForServer = formData.variants.map((v) => ({
         name: v.name,
@@ -281,8 +270,6 @@ export function CreateModelProduct({
         price: v.price,
         stock: v.stock,
         sold: 0,
-        // SKU will be auto-generated on server
-        // images will be populated after upload
       }));
       formDataToSend.append("variants", JSON.stringify(variantsForServer));
 
@@ -294,7 +281,6 @@ export function CreateModelProduct({
       });
     }
 
-    // Product-level sizes
     if (formData.sizes.length > 0) {
       formDataToSend.append("sizes", JSON.stringify(formData.sizes));
     }
@@ -317,18 +303,24 @@ export function CreateModelProduct({
   };
 
   const addTag = useCallback(() => {
-    if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
-      setFormData((prev) => ({ ...prev, tags: [...prev.tags, newTag.trim()] }));
+    if (newTag.trim()) {
+      setFormData((prev) => {
+        if (prev.tags.includes(newTag.trim())) return prev;
+        return { ...prev, tags: [...prev.tags, newTag.trim()] };
+      });
       setNewTag("");
     }
-  }, [newTag, formData.tags]);
+  }, [newTag, setFormData, setNewTag]);
 
-  const removeTag = useCallback((tagToRemove: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      tags: prev.tags.filter((tag) => tag !== tagToRemove),
-    }));
-  }, []);
+  const removeTag = useCallback(
+    (tagToRemove: string) => {
+      setFormData((prev) => ({
+        ...prev,
+        tags: prev.tags.filter((tag) => tag !== tagToRemove),
+      }));
+    },
+    [setFormData],
+  );
 
   const addAttribute = () => {
     if (newAttribute.name.trim() && newAttribute.value.trim()) {
@@ -359,7 +351,6 @@ export function CreateModelProduct({
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Basic Info */}
           <div className="space-y-4">
             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider border-b pb-2">
               Thông tin cơ bản
@@ -471,7 +462,6 @@ export function CreateModelProduct({
             </div>
           </div>
 
-          {/* Description Images */}
           <div className="space-y-4">
             <div className="border-b pb-2">
               <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
@@ -519,7 +509,6 @@ export function CreateModelProduct({
             </div>
           </div>
 
-          {/* Pricing & Status */}
           <div className="space-y-4">
             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider border-b pb-2">
               Giá & Trạng thái
@@ -634,7 +623,6 @@ export function CreateModelProduct({
             </div>
           </div>
 
-          {/* Shipping */}
           <div className="space-y-4">
             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider border-b pb-2">
               Thông tin vận chuyển

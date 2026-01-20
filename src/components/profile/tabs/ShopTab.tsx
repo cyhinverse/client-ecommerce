@@ -1,33 +1,21 @@
 "use client";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import {
-  Store,
-  MapPin,
-  Settings,
-  Package,
-  BarChart3,
-  Loader2,
-} from "lucide-react";
+import { Store, MapPin, Settings, Package, BarChart3 } from "lucide-react";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { Button } from "@/components/ui/button";
-import { useAppSelector } from "@/hooks/hooks";
 import { useMyShop } from "@/hooks/queries/useShop";
 
 export default function ShopTab() {
   const router = useRouter();
   const { data: myShop, isLoading } = useMyShop();
-  const { data } = useAppSelector((state) => state.auth);
 
-  const canHaveShop =
-    data?.roles === "seller" ||
-    data?.roles === "admin" ||
-    (Array.isArray(data?.roles) &&
-      (data.roles.includes("seller") || data.roles.includes("admin")));
+  // canHaveShop check removed as it was unused and logic is handled by backend/middleware
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <SpinnerLoading size={32} />
       </div>
     );
   }
@@ -61,7 +49,7 @@ export default function ShopTab() {
       {/* Shop Header */}
       <div className="relative">
         {/* Banner */}
-        <div className="h-32 rounded-xl overflow-hidden bg-gradient-to-r from-primary/20 to-primary/5">
+        <div className="h-32 rounded-xl overflow-hidden bg-linear-to-r from-primary/20 to-primary/5">
           {myShop.banner && (
             <Image
               src={myShop.banner}

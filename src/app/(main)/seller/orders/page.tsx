@@ -7,7 +7,6 @@ import {
   Search,
   Filter,
   Eye,
-  Loader2,
   MoreHorizontal,
   Clock,
   Package,
@@ -16,6 +15,7 @@ import {
   XCircle,
   RefreshCw,
 } from "lucide-react";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -109,7 +109,7 @@ export default function SellerOrdersPage() {
   const [page, setPage] = useState(1);
   const limit = 10;
 
-  // React Query hooks
+
   const { data: ordersData, isLoading: isLoadingShopOrders } = useShopOrders(
     myShop?._id || "",
     {
@@ -125,7 +125,7 @@ export default function SellerOrdersPage() {
               | "delivered"
               | "cancelled")
           : undefined,
-    }
+    },
   );
   const updateStatusMutation = useUpdateOrderStatus();
   const isUpdating = updateStatusMutation.isPending;
@@ -133,7 +133,7 @@ export default function SellerOrdersPage() {
   const orders = ordersData?.orders || [];
   const shopOrdersPagination = ordersData?.pagination;
 
-  // Modal states
+
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [updateStatusModalOpen, setUpdateStatusModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -270,8 +270,8 @@ export default function SellerOrdersPage() {
       {/* Orders List */}
       <div className="bg-[#f7f7f7] rounded-2xl overflow-hidden">
         {isLoadingShopOrders ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="flex justify-center py-20">
+            <SpinnerLoading size={32} />
           </div>
         ) : orders.length === 0 ? (
           <div className="text-center py-20">
@@ -590,7 +590,7 @@ export default function SellerOrdersPage() {
                         <SelectItem key={status} value={status}>
                           {statusConfig[status]?.label}
                         </SelectItem>
-                      )
+                      ),
                     )}
                   </SelectContent>
                 </Select>
@@ -610,7 +610,7 @@ export default function SellerOrdersPage() {
               className="bg-primary"
             >
               {isUpdating ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <SpinnerLoading size={16} noWrapper className="mr-2" />
               ) : null}
               Cập nhật
             </Button>

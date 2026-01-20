@@ -27,7 +27,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   const { loading, isAuthenticated, token } = useAppSelector(
-    (state) => state.auth
+    (state) => state.auth,
   );
 
   const form = useForm({
@@ -53,7 +53,8 @@ export default function LoginPage() {
         router.push("/");
       } else {
         const errorMessage =
-          (result.payload as { message: string })?.message || "Đăng nhập thất bại";
+          (result.payload as { message: string })?.message ||
+          "Đăng nhập thất bại";
         toast.error(errorMessage);
       }
     } catch {

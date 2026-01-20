@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
-import { useAppSelector } from "@/hooks/hooks";
+import { useAppSelector, useAppDispatch } from "@/hooks/hooks";
 import { useQueryClient } from "@tanstack/react-query";
 import { initSocketEvents } from "@/socket/index";
 import { SocketContextType } from "@/types/socket";
@@ -18,6 +18,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const queryClient = useQueryClient();
+  const dispatch = useAppDispatch();
   const { token, isAuthenticated } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
@@ -45,7 +46,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     // Initialize events (listen for notifications)
-    initSocketEvents(socketInstance, queryClient);
+    initSocketEvents(socketInstance, queryClient, dispatch);
 
     // Save socket to state
     setSocket(socketInstance);
@@ -55,7 +56,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       socketInstance.disconnect();
       setSocket(null);
     };
-  }, [isAuthenticated, token, queryClient]);
+  }, [isAuthenticated, token, queryClient, dispatch]);
 
   return (
     <SocketContext.Provider value={{ socket, isConnected }}>

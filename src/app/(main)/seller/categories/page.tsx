@@ -1,15 +1,7 @@
 "use client";
 import { useState } from "react";
-import {
-  Tag,
-  Plus,
-  Edit2,
-  Trash2,
-  Loader2,
-  Save,
-  X,
-  GripVertical,
-} from "lucide-react";
+import { Tag, Plus, Edit2, Trash2, Save, X, GripVertical } from "lucide-react";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,7 +17,7 @@ import {
 import { ShopCategory, CreateShopCategoryPayload } from "@/types/shopCategory";
 
 export default function SellerCategoriesPage() {
-  // React Query hooks
+
   const { data: categories = [], isLoading } = useMyShopCategories();
   const createMutation = useCreateShopCategory();
   const updateMutation = useUpdateShopCategory();
@@ -204,7 +196,7 @@ export default function SellerCategoriesPage() {
                 className="bg-primary hover:bg-primary/90 rounded-xl h-11 px-5"
               >
                 {createMutation.isPending || updateMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <SpinnerLoading size={16} className="mr-2" />
                 ) : (
                   <Save className="h-4 w-4 mr-2" />
                 )}
@@ -227,7 +219,7 @@ export default function SellerCategoriesPage() {
       <div className="bg-[#f7f7f7] rounded-2xl overflow-hidden">
         {isLoading ? (
           <div className="flex justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <SpinnerLoading size={32} />
           </div>
         ) : categories.length === 0 ? (
           <div className="text-center py-20">

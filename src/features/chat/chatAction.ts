@@ -3,12 +3,11 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { SendMessagePayload, StartConversationPayload } from "@/types/chat";
 import { extractApiData, extractApiError } from "@/api";
 
-// Start a new conversation with a shop
 export const startConversation = createAsyncThunk(
   "chat/startConversation",
   async (data: StartConversationPayload, { rejectWithValue }) => {
     try {
-      const response = await instance.post("/chat/conversations", data);
+      const response = await instance.post("/chat/start", data);
       return extractApiData(response);
     } catch (error) {
       return rejectWithValue(extractApiError(error));
@@ -16,7 +15,6 @@ export const startConversation = createAsyncThunk(
   }
 );
 
-// Get user's conversations
 export const getMyConversations = createAsyncThunk(
   "chat/getMyConversations",
   async (_, { rejectWithValue }) => {
@@ -29,7 +27,6 @@ export const getMyConversations = createAsyncThunk(
   }
 );
 
-// Get messages in a conversation
 export const getMessages = createAsyncThunk(
   "chat/getMessages",
   async (
@@ -38,7 +35,7 @@ export const getMessages = createAsyncThunk(
   ) => {
     try {
       const response = await instance.get(
-        `/chat/conversations/${conversationId}/messages?page=${page}&limit=${limit}`
+        `/chat/messages/${conversationId}?page=${page}&limit=${limit}`
       );
       return {
         conversationId,
@@ -51,16 +48,11 @@ export const getMessages = createAsyncThunk(
   }
 );
 
-// Send a message
 export const sendMessage = createAsyncThunk(
   "chat/sendMessage",
   async (data: SendMessagePayload, { rejectWithValue }) => {
     try {
-      const { conversationId, ...messageData } = data;
-      const response = await instance.post(
-        `/chat/conversations/${conversationId}/messages`,
-        messageData
-      );
+      const response = await instance.post("/chat/message", data);
       return extractApiData(response);
     } catch (error) {
       return rejectWithValue(extractApiError(error));
@@ -68,15 +60,15 @@ export const sendMessage = createAsyncThunk(
   }
 );
 
-// Mark messages as read
 export const markMessagesAsRead = createAsyncThunk(
   "chat/markAsRead",
   async (conversationId: string, { rejectWithValue }) => {
     try {
-      await instance.put(`/chat/conversations/${conversationId}/read`);
-      return conversationId;
+      const response = await instance.put(`/chat/conversations/${conversationId}/read`);
+      return { conversationId, ...extractApiData(response) };
     } catch (error) {
       return rejectWithValue(extractApiError(error));
     }
   }
 );
+

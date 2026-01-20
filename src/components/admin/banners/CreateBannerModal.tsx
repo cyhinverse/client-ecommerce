@@ -33,7 +33,7 @@ import { Loader2, Plus, Upload, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { CreateBannerPayload } from "@/types/banner";
 
-// Zod validation schema
+
 const createBannerSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
   subtitle: z.string().min(1, { message: "Subtitle is required" }),
@@ -62,7 +62,7 @@ export function CreateBannerModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  // Initialize form
+
   const form = useForm<CreateBannerData>({
     resolver: zodResolver(createBannerSchema),
     defaultValues: {

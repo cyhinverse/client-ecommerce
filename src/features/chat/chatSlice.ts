@@ -39,17 +39,34 @@ export const chatSlice = createSlice({
       state.error = null;
     },
     addMessage: (state, action: PayloadAction<Message>) => {
-      // Add message from socket
-      const exists = state.messages.some((m) => m._id === action.payload._id);
-      if (!exists) {
-        state.messages.push(action.payload);
+      const message = action.payload;
+      const messageConversationId = message.conversation;
+      const currentConversationId = state.currentConversation?._id;
+      const isActiveConversation = currentConversationId === messageConversationId;
+
+      // Only add message to messages array if it's for the current (active) conversation
+      // Validates: Requirements 3.4
+      if (isActiveConversation) {
+        const exists = state.messages.some((m) => m._id === message._id);
+        if (!exists) {
+          state.messages.push(message);
+        }
       }
+
       // Update last message in conversation
+      // Validates: Requirements 3.6
       const convIndex = state.conversations.findIndex(
-        (c) => c._id === action.payload.conversation
+        (c) => c._id === messageConversationId
       );
       if (convIndex !== -1) {
-        state.conversations[convIndex].lastMessage = action.payload;
+        state.conversations[convIndex].lastMessage = message;
+
+        // Increment unread count if message is for a non-active conversation
+        // Validates: Requirements 3.5, 7.2
+        if (!isActiveConversation) {
+          state.conversations[convIndex].unreadCount = 
+            (state.conversations[convIndex].unreadCount || 0) + 1;
+        }
       }
     },
     updateUnreadCount: (state, action: PayloadAction<{ conversationId: string; count: number }>) => {

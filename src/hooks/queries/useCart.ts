@@ -5,13 +5,11 @@
  */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/api";
+import { extractApiData } from "@/api";
 import { errorHandler } from "@/services/errorHandler";
-import { STALE_TIME } from "@/constants/cache";
 import { cartKeys } from "@/lib/queryKeys";
-import { CartItem, Cart } from "@/types/cart";
+import { Cart } from "@/types/cart";
 
-// ============ Types ============
 export interface AddToCartData {
   productId: string;
   shopId: string;
@@ -25,7 +23,6 @@ export interface UpdateCartItemData {
   quantity: number;
 }
 
-// ============ API Functions ============
 const cartApi = {
   get: async (): Promise<Cart> => {
     const response = await instance.get("/cart");
@@ -65,8 +62,6 @@ const cartApi = {
   },
 };
 
-// ============ Query Hooks ============
-
 /**
  * Get current cart
  */
@@ -78,8 +73,6 @@ export function useCart(options?: { enabled?: boolean }) {
     staleTime: 1 * 60 * 1000, // 1 minute
   });
 }
-
-// ============ Mutation Hooks ============
 
 /**
  * Add to cart mutation
@@ -176,7 +169,7 @@ export function useOptimisticAddToCart() {
 
   return useMutation({
     mutationFn: cartApi.add,
-    onMutate: async (newItem) => {
+    onMutate: async () => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: cartKeys.current() });
 
@@ -185,7 +178,7 @@ export function useOptimisticAddToCart() {
 
       return { previousCart };
     },
-    onError: (err, newItem, context) => {
+    onError: (_err, _variables, context) => {
       // Rollback on error
       if (context?.previousCart) {
         queryClient.setQueryData(cartKeys.current(), context.previousCart);

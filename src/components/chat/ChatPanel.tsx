@@ -21,6 +21,8 @@ import {
 import { setChatOpen, setCurrentConversation } from "@/features/chat/chatSlice";
 import { Conversation, Message } from "@/types/chat";
 import MessageInput from "./MessageInput";
+import { useSocket } from "@/context/SocketContext";
+import { joinConversation, leaveConversation } from "@/socket/chat.socket";
 
 export default function ChatPanel() {
   const dispatch = useAppDispatch();
@@ -33,6 +35,9 @@ export default function ChatPanel() {
     isLoadingMessages,
   } = useAppSelector((state) => state.chat);
   const { isAuthenticated } = useAppSelector((state) => state.auth);
+
+  // Socket connection (Requirement 8.4)
+  const { socket } = useSocket();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -53,15 +58,42 @@ export default function ChatPanel() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Cleanup: Leave conversation room on unmount (Requirement 8.4)
+  useEffect(() => {
+    return () => {
+      if (socket && currentConversation) {
+        leaveConversation(socket, currentConversation._id);
+      }
+    };
+  }, [socket, currentConversation]);
+
   const handleSelectConversation = (conv: Conversation) => {
+    // Leave previous conversation room if there was one (Requirement 8.4)
+    if (socket && currentConversation) {
+      leaveConversation(socket, currentConversation._id);
+    }
+
     dispatch(setCurrentConversation(conv));
+
+    // Join new conversation room (Requirement 8.4)
+    if (socket) {
+      joinConversation(socket, conv._id);
+    }
   };
 
   const handleBack = () => {
+    // Leave conversation room when going back (Requirement 8.4)
+    if (socket && currentConversation) {
+      leaveConversation(socket, currentConversation._id);
+    }
     dispatch(setCurrentConversation(null));
   };
 
   const handleClose = () => {
+    // Leave conversation room when closing panel (Requirement 8.4)
+    if (socket && currentConversation) {
+      leaveConversation(socket, currentConversation._id);
+    }
     dispatch(setChatOpen(false));
   };
 
