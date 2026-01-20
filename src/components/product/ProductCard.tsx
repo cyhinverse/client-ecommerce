@@ -103,8 +103,15 @@ export const ProductCard = ({ product }: { product: Product }) => {
             />
           </div>
 
-          {/* Discount Badge - Orange */}
-          {discountPercent > 0 && (
+          {/* Flash Sale Badge */}
+          {product.flashSale && (
+            <div className="absolute top-0 left-0 bg-[#E53935] text-white text-[10px] font-bold px-2 py-1 rounded-br-lg z-20 flex items-center gap-1 shadow-sm animate-pulse">
+              <span className="text-xs">🔥</span> FLASH SALE
+            </div>
+          )}
+
+          {/* Discount Badge - Orange (Only if not flash sale) */}
+          {discountPercent > 0 && !product.flashSale && (
             <div className="absolute top-2 left-2 bg-[#FF9800] text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
               -{discountPercent}%
             </div>

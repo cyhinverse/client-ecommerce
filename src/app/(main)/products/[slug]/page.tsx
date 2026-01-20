@@ -21,13 +21,17 @@ import { ProductReviews } from "./_components/ProductReviews";
 
 // Shared components
 import RelatedProducts from "@/components/product/RelatedProducts";
+import { RecentlyViewedSection } from "@/components/product/RecommendationSection";
+import { useRecommendation } from "@/hooks/queries/useRecommendations";
 
 export default function ProductDetailPage() {
   const params = useParams();
   const slug = params.slug as string;
+  const { trackView } = useRecommendation();
 
   const {
     product,
+    // ... other destructures
     selectedVariant,
     selectedVariantIndex,
     selectedSize,
@@ -49,6 +53,13 @@ export default function ProductDetailPage() {
     handleBuyNow,
     setQuantity,
   } = useProductDetail({ slug });
+
+  // Track view for recommendation system
+  useEffect(() => {
+    if (product?._id) {
+      trackView(product._id);
+    }
+  }, [product?._id, trackView]);
 
   // Tab state
   const [activeTab, setActiveTab] = useState<TabId>("reviews");
@@ -164,6 +175,9 @@ export default function ProductDetailPage() {
         <div id="section-related">
           <RelatedProducts productId={product._id} />
         </div>
+
+        {/* Recently Viewed */}
+        <RecentlyViewedSection className="mt-12 pt-8 border-t border-border/50" />
       </div>
     </div>
   );

@@ -36,6 +36,7 @@ import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { groupCartItemsByShop, CartItem } from "@/types/cart";
+import { ForYouSection } from "@/components/product/RecommendationSection";
 
 export default function CartPage() {
   const {
@@ -626,6 +627,14 @@ export default function CartPage() {
               </p>
             </div>
           </div>
+        </div>
+
+        {/* Recommendations Section */}
+        <div className="mt-12">
+          <div className="bg-[#f7f7f7] rounded-sm p-4 mb-6">
+            <h2 className="text-xl font-bold text-gray-800">Có thể bạn cũng thích</h2>
+          </div>
+          <ForYouSection className="px-0" />
         </div>
       </div>
     </div>
