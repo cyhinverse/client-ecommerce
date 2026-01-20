@@ -12,6 +12,7 @@ import {
   BarChart3,
   MessageSquare,
   Tag,
+  Star,
 } from "lucide-react";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { cn } from "@/lib/utils";
@@ -37,6 +38,7 @@ const menuItems = [
     items: [
       { name: "Tất cả sản phẩm", href: "/seller/products", icon: Package },
       { name: "Danh mục shop", href: "/seller/categories", icon: Tag },
+      { name: "Đánh giá", href: "/seller/reviews", icon: Star },
     ],
   },
   {

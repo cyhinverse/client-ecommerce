@@ -21,8 +21,11 @@ export interface Review {
   product: string;
   rating: number;
   comment: string;
+  reply?: string;
+  replyAt?: string;
   images?: string[];
   createdAt: string;
+
   updatedAt: string;
 }
 
@@ -104,11 +107,29 @@ const reviewApi = {
   },
 
   getUserReviews: async (): Promise<Review[]> => {
-    const response = await instance.get("/reviews/user");
+    const response = await instance.get("/reviews/user/me");
+    return extractApiData(response);
+  },
+
+  // Seller APIs
+  getMyShopReviews: async (params: ReviewListParams = {}): Promise<ReviewListResponse> => {
+    const { page = 1, limit = 10, rating } = params;
+    const response = await instance.get("/reviews/seller/me", {
+      params: { page, limit, rating },
+    });
+    return extractApiData(response);
+  },
+
+  replyReview: async (data: { reviewId: string; content: string }) => {
+    const response = await instance.post(
+      `/reviews/seller/${data.reviewId}/reply`,
+      { content: data.content }
+    );
     return extractApiData(response);
   },
 
   // Mutations
+
   create: async (data: CreateReviewData): Promise<Review> => {
     const response = await instance.post("/reviews", data);
     return extractApiData(response);
@@ -165,7 +186,36 @@ export function useUserReviews() {
   });
 }
 
+/**
+ * Get reviews for seller's own shop
+ */
+export function useMyShopReviews(params?: ReviewListParams) {
+  return useQuery({
+    queryKey: ["seller-reviews", params],
+    queryFn: () => reviewApi.getMyShopReviews(params),
+    staleTime: STALE_TIME.SHORT,
+  });
+}
+
+/**
+ * Reply to review mutation
+ */
+export function useReplyReview() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: reviewApi.replyReview,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["seller-reviews"] });
+    },
+    onError: (error) => {
+      errorHandler.log(error, { context: "Reply review failed" });
+    },
+  });
+}
+
 // ============ Mutation Hooks ============
+
 
 /**
  * Create review mutation
