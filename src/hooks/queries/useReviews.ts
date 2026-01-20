@@ -191,7 +191,7 @@ export function useUserReviews() {
  */
 export function useMyShopReviews(params?: ReviewListParams) {
   return useQuery({
-    queryKey: ["seller-reviews", params],
+    queryKey: reviewKeys.seller(params),
     queryFn: () => reviewApi.getMyShopReviews(params),
     staleTime: STALE_TIME.SHORT,
   });
@@ -206,7 +206,7 @@ export function useReplyReview() {
   return useMutation({
     mutationFn: reviewApi.replyReview,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["seller-reviews"] });
+      queryClient.invalidateQueries({ queryKey: reviewKeys.seller() });
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Reply review failed" });

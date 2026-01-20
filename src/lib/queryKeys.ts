@@ -139,8 +139,10 @@ export const reviewKeys = {
     [...reviewKeys.all, "product", productId, params] as const,
   shop: (shopId: string, params?: unknown) =>
     [...reviewKeys.all, "shop", shopId, params] as const,
+  seller: (params?: unknown) => [...reviewKeys.all, "seller", params] as const,
   user: () => [...reviewKeys.all, "user"] as const,
 };
+
 
 // Notification query keys
 export const notificationKeys = {
