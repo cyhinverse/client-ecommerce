@@ -2,8 +2,8 @@
 import React, { useState } from "react";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
 import { useQuery } from "@tanstack/react-query";
-import instance from "@/services/api";
-import { extractApiData } from "@/utils/api-helpers";
+import instance from "@/api/api";
+import { extractApiData } from "@/api";
 import { MessageSquare, Calendar, User, Clock } from "lucide-react";
 import { PaginationControls } from "@/components/common/Pagination";
 import SpinnerLoading from "@/components/common/SpinnerLoading";

@@ -2,8 +2,8 @@
 import React, { useMemo } from "react";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import instance from "@/services/api";
-import { extractApiData } from "@/utils/api-helpers";
+import instance from "@/api/api";
+import { extractApiData } from "@/api";
 import { Star, Search, Trash2, ExternalLink } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";

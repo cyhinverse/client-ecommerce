@@ -33,6 +33,8 @@ export default function OrdersAdminPage() {
         paymentMethod: "",
         userId: "",
         shop: "",
+        startDate: "",
+        endDate: "",
       },
       basePath: "/admin/orders",
     });

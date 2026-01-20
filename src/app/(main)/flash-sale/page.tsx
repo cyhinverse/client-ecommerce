@@ -5,12 +5,12 @@ import { useAppSelector } from "@/hooks/hooks";
 import { cn } from "@/lib/utils";
 import { Zap } from "lucide-react";
 import { ProductCard } from "@/components/product/ProductCard";
-import { useFlashSale } from "@/hooks/queries/useFlashSale";
+import { useFlashSaleWithCountdown } from "@/hooks/queries/useFlashSale";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 export default function FlashSalePage() {
   const { isOpen: isChatOpen } = useAppSelector((state) => state.chat);
-  const { products = [], isLoading, error } = useFlashSale();
+  const { products = [], isLoading, error } = useFlashSaleWithCountdown();
 
   return (
     <main className="w-full min-h-screen bg-gray-50 py-8">
