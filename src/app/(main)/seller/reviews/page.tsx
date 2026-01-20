@@ -218,7 +218,7 @@ export default function SellerReviewsPage() {
               value={replyContent}
               onChange={(e) => setReplyContent(e.target.value)}
               rows={4}
-              disabled={!!selectedReview?.reply} // Disable if already replied (view only mode if needed)
+              disabled={!!selectedReview?.reply}
             />
           </div>
           <DialogFooter>
@@ -227,4 +227,14 @@ export default function SellerReviewsPage() {
             </Button>
             <Button
               onClick={handleReplySubmit}
-         
+              disabled={!replyContent.trim() || replyMutation.isPending || !!selectedReview?.reply}
+              className="bg-[#E53935] hover:bg-[#D32F2F]"
+            >
+              {replyMutation.isPending ? "Đang gửi..." : "Gửi phản hồi"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
