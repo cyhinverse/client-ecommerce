@@ -64,9 +64,24 @@ export interface ChatState {
   error: string | null;
 }
 
-export interface ChatbotState {
-  messages: ChatbotMessage[];
-  isLoading: boolean;
+export interface ChatPagination {
+  currentPage: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+export interface ChatState {
+  isOpen: boolean;
+  conversations: Conversation[];
+  currentConversation: Conversation | null;
+  messages: Message[];
+  pagination: ChatPagination | null;
+  isLoadingConversations: boolean;
+  isLoadingMessages: boolean;
+  isSending: boolean;
   error: string | null;
 }
 

@@ -37,10 +37,11 @@ export const getMessages = createAsyncThunk(
       const response = await instance.get(
         `/chat/messages/${conversationId}?page=${page}&limit=${limit}`
       );
+      const data = extractApiData(response);
       return {
         conversationId,
-        messages: extractApiData(response),
-        pagination: response.data.pagination,
+        messages: data.data,
+        pagination: data.pagination,
       };
     } catch (error) {
       return rejectWithValue(extractApiError(error));

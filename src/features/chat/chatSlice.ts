@@ -17,6 +17,7 @@ const initialState: ChatState = {
   isLoadingMessages: false,
   isSending: false,
   error: null,
+  pagination: null,
 };
 
 export const chatSlice = createSlice({
@@ -119,7 +120,17 @@ export const chatSlice = createSlice({
       })
       .addCase(getMessages.fulfilled, (state, action) => {
         state.isLoadingMessages = false;
-        state.messages = action.payload.messages;
+        const { messages, pagination } = action.payload;
+        
+        // If it's the first page, replace messages. Otherwise prepend (since we load older messages)
+        // Assuming the UI displays messages chronologically and we load older ones by scrolling up
+        if (pagination.currentPage === 1) {
+           state.messages = messages;
+        } else {
+           state.messages = [...messages, ...state.messages];
+        }
+        
+        state.pagination = pagination;
       })
       .addCase(getMessages.rejected, (state, action) => {
         state.isLoadingMessages = false;

@@ -157,7 +157,8 @@ const productApi = {
     productId: string;
     formData: FormData;
   }): Promise<Product> => {
-    const response = await instance.put(`/products/${productId}`, formData, {
+    // Admin uses seller endpoint now as per server refactor
+    const response = await instance.put(`/products/seller/${productId}`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return extractApiData(response);
@@ -197,7 +198,7 @@ const productApi = {
   }): Promise<Product> => {
     const { productId, modelId, updateData } = params;
     const response = await instance.put(
-      `/products/${productId}/models/${modelId}`,
+      `/products/seller/${productId}/variants/${modelId}`,
       updateData,
     );
     return extractApiData(response);
@@ -207,8 +208,9 @@ const productApi = {
     productId: string;
     modelId: string;
   }): Promise<void> => {
+    const { productId, modelId } = params;
     await instance.delete(
-      `/products/${params.productId}/models/${params.modelId}`,
+      `/products/seller/${productId}/variants/${modelId}`,
     );
   },
 };

@@ -52,11 +52,6 @@ const cartApi = {
     return extractApiData(response);
   },
 
-  removeByShop: async (shopId: string): Promise<Cart> => {
-    const response = await instance.delete(`/cart/shop/${shopId}`);
-    return extractApiData(response);
-  },
-
   clear: async (): Promise<void> => {
     await instance.delete("/cart");
   },
@@ -122,23 +117,6 @@ export function useRemoveFromCart() {
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Remove from cart failed" });
-    },
-  });
-}
-
-/**
- * Remove items by shop mutation
- */
-export function useRemoveCartByShop() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: cartApi.removeByShop,
-    onSuccess: (data) => {
-      queryClient.setQueryData(cartKeys.current(), data);
-    },
-    onError: (error) => {
-      errorHandler.log(error, { context: "Remove cart by shop failed" });
     },
   });
 }

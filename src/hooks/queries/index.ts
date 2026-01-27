@@ -158,7 +158,6 @@ export {
   useAddToCart,
   useUpdateCartItem,
   useRemoveFromCart,
-  useRemoveCartByShop,
   useClearCart,
   useOptimisticAddToCart,
   type AddToCartData,
