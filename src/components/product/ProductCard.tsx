@@ -1,8 +1,10 @@
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Product } from "@/types/product";
 import { formatCurrency } from "@/utils/format";
 import WishlistButton from "@/components/common/WishlistButton";
+import { Store } from "lucide-react";
 
 // Helper function to get price range from variants (new) or models (old)
 const getPriceRange = (
@@ -65,6 +67,7 @@ export const ProductCard = ({
   product: Product;
   index?: number;
 }) => {
+  const [imageError, setImageError] = useState(false);
   const displayPrice = getDisplayPrice(product);
   const productImage = getProductImage(product);
   const priceRange = getPriceRange(product);
@@ -81,12 +84,12 @@ export const ProductCard = ({
   return (
     <Link
       href={`/products/${product.slug || product._id}`}
-      className="group block h-full"
+      className="group block h-full w-full"
     >
-      <div className="flex flex-col bg-white rounded overflow-hidden border border-transparent hover:border-[#f0f0f0] hover:bg-[#fafafa] transition-all duration-200 h-full">
+      <div className="flex flex-col bg-white rounded overflow-hidden border border-transparent hover:border-[#f0f0f0] hover:bg-[#fafafa] transition-all duration-200 h-full w-full">
         {/* Image Container */}
-        <div className="relative aspect-square overflow-hidden bg-gray-50">
-          {productImage ? (
+        <div className="relative aspect-square w-full overflow-hidden bg-gray-50">
+          {productImage && !imageError ? (
             <Image
               src={productImage}
               alt={product.name || "Product image"}
@@ -95,10 +98,14 @@ export const ProductCard = ({
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
               loading={index < 8 ? "eager" : "lazy"}
               priority={index < 4}
+              onError={() => setImageError(true)}
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gray-50">
-              <span className="text-gray-400 text-xs">Không có ảnh</span>
+            <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 text-gray-400 gap-2 p-4">
+              <Store className="w-8 h-8 opacity-20" />
+              <span className="text-[10px] text-center opacity-60 line-clamp-1 px-2">
+                {product.name || "Không có ảnh"}
+              </span>
             </div>
           )}
 
