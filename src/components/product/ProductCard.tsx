@@ -58,7 +58,13 @@ const getDiscountPercent = (original: number, sale: number): number => {
 };
 
 // ProductCard Component - Taobao Light Style
-export const ProductCard = ({ product }: { product: Product }) => {
+export const ProductCard = ({
+  product,
+  index = 0,
+}: {
+  product: Product;
+  index?: number;
+}) => {
   const displayPrice = getDisplayPrice(product);
   const productImage = getProductImage(product);
   const priceRange = getPriceRange(product);
@@ -87,6 +93,8 @@ export const ProductCard = ({ product }: { product: Product }) => {
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-102"
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+              loading={index < 8 ? "eager" : "lazy"}
+              priority={index < 4}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gray-50">

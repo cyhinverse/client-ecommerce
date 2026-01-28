@@ -4,7 +4,7 @@
  */
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import instance from "@/api/api";
 import { extractApiData } from "@/api";
@@ -127,6 +127,27 @@ const productApi = {
     return result.data || [];
   },
 
+  getByCategoryPaginated: async (
+    categorySlug: string,
+    page: number = 1,
+    limit: number = 20
+  ): Promise<ProductListResponse> => {
+    const response = await instance.get(`/products/category/${categorySlug}`, {
+      params: { page, limit },
+    });
+    const serverData = extractApiData<ServerProductListResponse & { data?: Product[] }>(response);
+
+    return {
+      products: serverData.data || [],
+      pagination: {
+        page: serverData.pagination?.currentPage || serverData.pagination?.page || 1,
+        limit: serverData.pagination?.pageSize || serverData.pagination?.limit || 20,
+        total: serverData.pagination?.totalItems || serverData.pagination?.total || 0,
+        totalPages: serverData.pagination?.totalPages || 1,
+      },
+    };
+  },
+
   getRelated: async (productId: string): Promise<Product[]> => {
     const response = await instance.get(`/products/related/${productId}`);
     return extractApiData(response);
@@ -229,6 +250,27 @@ export function useProducts(
 }
 
 /**
+ * Infinite scroll products hook
+ * Uses useInfiniteQuery for paginated data fetching
+ */
+export function useInfiniteProducts(
+  params: Omit<ProductListParams, "page"> = { limit: 20 },
+) {
+  return useInfiniteQuery({
+    queryKey: productKeys.infinite(params),
+    queryFn: async ({ pageParam = 1 }) => {
+      return productApi.getAll({ ...params, page: pageParam });
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const { page, totalPages } = lastPage.pagination;
+      return page < totalPages ? page + 1 : undefined;
+    },
+    staleTime: STALE_TIME.LONG,
+  });
+}
+
+/**
  * Get product by slug (for product detail page)
  */
 export function useProduct(slug: string, options?: { enabled?: boolean }) {
@@ -298,6 +340,30 @@ export function useProductsByCategory(
     queryKey: productKeys.byCategory(categorySlug),
     queryFn: () => productApi.getByCategory(categorySlug),
     enabled: options?.enabled ?? !!categorySlug,
+  });
+}
+
+/**
+ * Infinite scroll products by category
+ */
+export function useInfiniteProductsByCategory(
+  categorySlug: string,
+  options?: { enabled?: boolean; limit?: number },
+) {
+  const limit = options?.limit || 20;
+
+  return useInfiniteQuery({
+    queryKey: productKeys.infiniteByCategory(categorySlug),
+    queryFn: async ({ pageParam = 1 }) => {
+      return productApi.getByCategoryPaginated(categorySlug, pageParam, limit);
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const { page, totalPages } = lastPage.pagination;
+      return page < totalPages ? page + 1 : undefined;
+    },
+    enabled: options?.enabled ?? !!categorySlug,
+    staleTime: STALE_TIME.LONG,
   });
 }
 

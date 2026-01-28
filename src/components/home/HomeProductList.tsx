@@ -1,14 +1,15 @@
 "use client";
-import React from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import { useAppSelector } from "@/hooks/hooks";
 import {
-  useProducts,
-  useProductsByCategory,
+  useInfiniteProducts,
+  useInfiniteProductsByCategory,
 } from "@/hooks/queries/useProducts";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { ProductCard } from "@/components/product/ProductCard";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 
 interface HomeProductListProps {
   selectedCategorySlug: string | null;
@@ -18,39 +19,73 @@ export default function HomeProductList({
   selectedCategorySlug,
 }: HomeProductListProps) {
   const { isOpen: isChatOpen } = useAppSelector((state) => state.chat);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
-  // Use category hook when a category is selected
+  // Use infinite category products when a category is selected
   const {
-    data: byCategory = [],
+    data: categoryData,
     isLoading: categoryLoading,
     error: categoryError,
-  } = useProductsByCategory(selectedCategorySlug || "", {
+    fetchNextPage: fetchNextCategoryPage,
+    hasNextPage: hasNextCategoryPage,
+    isFetchingNextPage: isFetchingNextCategoryPage,
+  } = useInfiniteProductsByCategory(selectedCategorySlug || "", {
     enabled: !!selectedCategorySlug,
+    limit: 20,
   });
 
-  // Use all products when no category is selected
+  // Use infinite products when no category is selected
   const {
-    data: allProducts,
+    data: infiniteData,
     isLoading: allLoading,
     error: allError,
-  } = useProducts({ page: 1, limit: 20 });
+    fetchNextPage: fetchNextAllPage,
+    hasNextPage: hasNextAllPage,
+    isFetchingNextPage: isFetchingNextAllPage,
+  } = useInfiniteProducts({ limit: 20 });
 
-  // Determine which list to show
+  // Determine which data to use
   const isLoading = selectedCategorySlug ? categoryLoading : allLoading;
   const error = selectedCategorySlug ? categoryError : allError;
-  const products = selectedCategorySlug
-    ? byCategory
-    : allProducts?.products || [];
+  const fetchNextPage = selectedCategorySlug
+    ? fetchNextCategoryPage
+    : fetchNextAllPage;
+  const hasNextPage = selectedCategorySlug
+    ? hasNextCategoryPage
+    : hasNextAllPage;
+  const isFetchingNextPage = selectedCategorySlug
+    ? isFetchingNextCategoryPage
+    : isFetchingNextAllPage;
 
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.05,
-      },
+  // Flatten infinite pages into single array
+  const products = selectedCategorySlug
+    ? categoryData?.pages.flatMap((page) => page.products) || []
+    : infiniteData?.pages.flatMap((page) => page.products) || [];
+
+  // Intersection Observer for infinite scroll
+  const handleObserver = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      const [target] = entries;
+      if (target.isIntersecting && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
     },
-  };
+    [fetchNextPage, hasNextPage, isFetchingNextPage]
+  );
+
+  useEffect(() => {
+    const element = loadMoreRef.current;
+    if (!element) return;
+
+    const observer = new IntersectionObserver(handleObserver, {
+      root: null,
+      rootMargin: "100px",
+      threshold: 0,
+    });
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [handleObserver]);
 
   const item = {
     hidden: { opacity: 0, y: 20 },
@@ -89,9 +124,16 @@ export default function HomeProductList({
           )}
         >
           {products && products.length > 0
-            ? products.map((p) => (
-                <motion.div key={p._id} layout>
-                  <ProductCard product={p} />
+            ? products.map((p, index) => (
+                <motion.div
+                  key={`${p._id}-${index}`}
+                  variants={item}
+                  initial="hidden"
+                  animate="show"
+                  transition={{ delay: Math.min(index * 0.02, 0.5) }}
+                  layout
+                >
+                  <ProductCard product={p} index={index} />
                 </motion.div>
               ))
             : !isLoading && (
@@ -102,6 +144,26 @@ export default function HomeProductList({
                 </div>
               )}
         </motion.div>
+
+        {/* Load More Trigger & Loading Spinner */}
+        <div
+          ref={loadMoreRef}
+          className="flex justify-center items-center py-8 mt-4"
+        >
+          {isFetchingNextPage && (
+            <div className="flex flex-col items-center gap-2">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <span className="text-sm text-muted-foreground">
+                Loading more products...
+              </span>
+            </div>
+          )}
+          {!hasNextPage && products.length > 0 && !isLoading && (
+            <p className="text-sm text-muted-foreground">
+              You&apos;ve reached the end
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

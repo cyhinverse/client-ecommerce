@@ -13,6 +13,7 @@ export const productKeys = {
   all: ["products"] as const,
   lists: () => [...productKeys.all, "list"] as const,
   list: (filters: unknown) => [...productKeys.lists(), filters] as const,
+  infinite: (filters?: unknown) => [...productKeys.all, "infinite", filters] as const,
   details: () => [...productKeys.all, "detail"] as const,
   detail: (slug: string) => [...productKeys.details(), slug] as const,
   detailById: (id: string) => [...productKeys.all, "detail-by-id", id] as const,
@@ -21,6 +22,8 @@ export const productKeys = {
   onSale: () => [...productKeys.all, "on-sale"] as const,
   byCategory: (categorySlug: string) =>
     [...productKeys.all, "category", categorySlug] as const,
+  infiniteByCategory: (categorySlug: string) =>
+    [...productKeys.all, "infinite-category", categorySlug] as const,
   shopProducts: (shopId: string, filters?: unknown) =>
     [...productKeys.all, "shop", shopId, filters] as const,
   related: (productId: string) =>
