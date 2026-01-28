@@ -61,9 +61,22 @@ export function ProductGallery({
 
   if (!images.length) {
     return (
-      <div className="w-full aspect-square bg-gray-100 flex items-center justify-center rounded-sm">
-        <span className="text-gray-400 text-sm">Không có ảnh</span>
-      </div>
+      <>
+        {/* Desktop - Fixed size */}
+        <div className="hidden lg:flex w-[420px] h-[420px] bg-gray-100 items-center justify-center rounded-sm shrink-0">
+          <div className="flex flex-col items-center justify-center text-gray-400">
+            <Store className="w-16 h-16 opacity-20 mb-2" />
+            <span className="text-sm">Không có ảnh</span>
+          </div>
+        </div>
+        {/* Mobile - Aspect ratio */}
+        <div className="lg:hidden -mx-4 w-full aspect-square bg-gray-100 flex flex-col items-center justify-center">
+          <div className="flex flex-col items-center justify-center text-gray-400">
+            <Store className="w-12 h-12 opacity-20 mb-2" />
+            <span className="text-sm">Không có ảnh</span>
+          </div>
+        </div>
+      </>
     );
   }
 

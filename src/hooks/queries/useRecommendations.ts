@@ -210,7 +210,7 @@ export function useRecommendation(options?: {
   const homepageQuery = useHomepageRecommendations();
 
   // Track view mutation
-  const trackViewMutation = useTrackProductView();
+  const { mutate: trackMutate } = useTrackProductView();
 
   // Extract data from queries
   const forYou = forYouQuery.data || [];
@@ -272,12 +272,12 @@ export function useRecommendation(options?: {
 
       trackTimeout.current = setTimeout(() => {
         trackingQueue.current.forEach((id) => {
-          trackViewMutation.mutate(id);
+          trackMutate(id);
         });
         trackingQueue.current.clear();
       }, 500);
     },
-    [trackViewMutation]
+    [trackMutate]
   );
 
   // Reset cache
