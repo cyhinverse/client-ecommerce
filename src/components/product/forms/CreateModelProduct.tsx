@@ -67,9 +67,10 @@ export function CreateModelProduct({
 }: CreateModelProductProps) {
   const { data: categories = [] } = useCategoryTree();
   const { data: myShop } = useMyShop();
-  const { data: shopCategories = [] } = useShopCategories(myShop?._id || "", {
+  const { data: shopCategoriesData } = useShopCategories(myShop?._id || "", {
     enabled: !!myShop?._id,
   });
+  const shopCategories = shopCategoriesData?.categories || [];
   const flatCategories = flattenCategories(categories);
 
   const [formData, setFormData] = useState(initialFormData);
