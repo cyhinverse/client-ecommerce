@@ -10,7 +10,6 @@ import {
 
 const initialState: ChatState = {
   isOpen: false,
-  isBotOpen: false,
   conversations: [],
   currentConversation: null,
   messages: [],
@@ -28,14 +27,8 @@ export const chatSlice = createSlice({
     toggleChat: (state) => {
       state.isOpen = !state.isOpen;
     },
-    toggleBot: (state) => {
-      state.isBotOpen = !state.isBotOpen;
-    },
     setChatOpen: (state, action: PayloadAction<boolean>) => {
       state.isOpen = action.payload;
-    },
-    setBotOpen: (state, action: PayloadAction<boolean>) => {
-      state.isBotOpen = action.payload;
     },
     setCurrentConversation: (state, action: PayloadAction<Conversation | null>) => {
       state.currentConversation = action.payload;
@@ -179,9 +172,7 @@ export const chatSlice = createSlice({
 
 export const {
   toggleChat,
-  toggleBot,
   setChatOpen,
-  setBotOpen,
   setCurrentConversation,
   clearChatError,
   addMessage,

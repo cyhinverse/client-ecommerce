@@ -55,7 +55,26 @@ export interface ChatbotMessage {
 
 export interface ChatState {
   isOpen: boolean;
-  isBotOpen: boolean;
+  conversations: Conversation[];
+  currentConversation: Conversation | null;
+  messages: Message[];
+  isLoadingConversations: boolean;
+  isLoadingMessages: boolean;
+  isSending: boolean;
+  error: string | null;
+}
+
+export interface ChatPagination {
+  currentPage: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+export interface ChatState {
+  isOpen: boolean;
   conversations: Conversation[];
   currentConversation: Conversation | null;
   messages: Message[];
