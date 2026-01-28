@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Store } from "lucide-react";
 
 interface ProductGalleryProps {
   images: string[];
@@ -19,6 +19,12 @@ export function ProductGallery({
   onIndexChange 
 }: ProductGalleryProps) {
   const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [imageError, setImageError] = useState(false);
+
+  // Reset error state when selected image changes
+  useEffect(() => {
+    setImageError(false);
+  }, [selectedIndex, images]);
 
   // Handle swipe on mobile
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -89,15 +95,23 @@ export function ProductGallery({
         </div>
 
         {/* Main Image */}
-        <div className="w-[420px] h-[420px] relative border border-gray-100 rounded-sm overflow-hidden bg-white group">
-          <Image
-            src={images[selectedIndex] || ""}
-            alt={productName}
-            fill
-            className="object-contain p-2 transition-transform group-hover:scale-105"
-            priority
-            sizes="420px"
-          />
+        <div className="w-[420px] h-[420px] relative border border-gray-100 rounded-sm overflow-hidden bg-white group shrink-0">
+          {images[selectedIndex] && !imageError ? (
+            <Image
+              src={images[selectedIndex]}
+              alt={productName}
+              fill
+              className="object-contain p-2 transition-transform group-hover:scale-105"
+              priority
+              sizes="420px"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 text-gray-400">
+              <Store className="w-16 h-16 opacity-20 mb-2" />
+              <span className="text-sm">Không có ảnh</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -107,15 +121,23 @@ export function ProductGallery({
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        <div className="relative aspect-square w-full overflow-hidden">
-          <Image
-            src={images[selectedIndex] || ""}
-            alt={productName}
-            fill
-            className="object-cover"
-            priority
-            sizes="100vw"
-          />
+        <div className="relative aspect-square w-full overflow-hidden bg-white">
+          {images[selectedIndex] && !imageError ? (
+            <Image
+              src={images[selectedIndex]}
+              alt={productName}
+              fill
+              className="object-contain"
+              priority
+              sizes="100vw"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 text-gray-400">
+              <Store className="w-12 h-12 opacity-20 mb-2" />
+              <span className="text-sm">Không có ảnh</span>
+            </div>
+          )}
           
           {/* Navigation Arrows */}
           {images.length > 1 && (
