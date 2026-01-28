@@ -67,6 +67,51 @@ export default function ShopPage() {
 
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
+  // Intersection Observer for infinite scroll
+  const handleObserver = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      const [target] = entries;
+      if (target.isIntersecting && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    },
+    [fetchNextPage, hasNextPage, isFetchingNextPage]
+  );
+
+  useEffect(() => {
+    const element = loadMoreRef.current;
+    if (!element) return;
+
+    const observer = new IntersectionObserver(handleObserver, {
+      root: null,
+      rootMargin: "100px",
+      threshold: 0,
+    });
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [handleObserver]);
+
+  const handleFollow = () => {
+    setIsFollowing(!isFollowing);
+    toast.success(isFollowing ? "Đã bỏ theo dõi shop" : "Đã theo dõi shop");
+  };
+
+  const handleChat = async () => {
+    if (!isAuthenticated) {
+      toast.error("Vui lòng đăng nhập để chat với shop");
+      return;
+    }
+    if (!currentShop?._id) return;
+
+    try {
+      await dispatch(startConversation({ shopId: currentShop._id })).unwrap();
+      dispatch(setChatOpen(true));
+    } catch {
+      toast.error("Không thể bắt đầu cuộc trò chuyện");
+    }
+  };
+
   const formatNumber = (num: number) => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
     if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
