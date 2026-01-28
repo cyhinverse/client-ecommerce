@@ -26,6 +26,8 @@ export const productKeys = {
     [...productKeys.all, "infinite-category", categorySlug] as const,
   shopProducts: (shopId: string, filters?: unknown) =>
     [...productKeys.all, "shop", shopId, filters] as const,
+  infiniteShopProducts: (shopId: string, filters?: unknown) =>
+    [...productKeys.all, "infinite-shop", shopId, filters] as const,
   related: (productId: string) =>
     [...productKeys.all, "related", productId] as const,
   search: (keyword: string, limit?: number) =>

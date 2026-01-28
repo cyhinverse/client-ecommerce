@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,6 +13,7 @@ import {
   Search,
   Grid3X3,
   List,
+  Loader2,
 } from "lucide-react";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { Button } from "@/components/ui/button";
@@ -21,7 +22,7 @@ import ProductCard from "@/components/product/ProductCard";
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { useShopBySlug, useShopCategories } from "@/hooks/queries/useShop";
-import { useShopProducts } from "@/hooks/queries/useProducts";
+import { useInfiniteShopProducts } from "@/hooks/queries/useProducts";
 import { startConversation } from "@/features/chat/chatAction";
 import { setChatOpen } from "@/features/chat/chatSlice";
 
@@ -29,25 +30,64 @@ export default function ShopPage() {
   const params = useParams();
   const dispatch = useAppDispatch();
   const slug = params.slug as string;
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const {
     data: currentShop,
     isLoading: shopLoading,
     error: shopError,
   } = useShopBySlug(slug);
-  const { data: categories = [], isLoading: categoriesLoading } =
+  const { data: categoriesData, isLoading: categoriesLoading } =
     useShopCategories(currentShop?._id || "", { enabled: !!currentShop?._id });
-  const { data: productsData, isLoading: productsLoading } = useShopProducts(
-    currentShop?._id || "",
-    { page: 1, limit: 50 },
-  );
-  const products = productsData?.products || [];
+  
+  const categories = categoriesData?.categories || [];
+  const totalProducts = categoriesData?.totalProducts || 0;
+
+  // Use infinite scroll for products
+  const {
+    data: productsData,
+    isLoading: productsLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteShopProducts(currentShop?._id || "", { limit: 24 });
+
+  // Flatten all pages into single array
+  const allProducts = useMemo(() => {
+    return productsData?.pages.flatMap((page) => page.products) || [];
+  }, [productsData]);
+
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
   const [isFollowing, setIsFollowing] = useState(false);
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
+  // Intersection Observer for infinite scroll
+  const handleObserver = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      const [target] = entries;
+      if (target.isIntersecting && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    },
+    [fetchNextPage, hasNextPage, isFetchingNextPage]
+  );
+
+  useEffect(() => {
+    const element = loadMoreRef.current;
+    if (!element) return;
+
+    const observer = new IntersectionObserver(handleObserver, {
+      root: null,
+      rootMargin: "100px",
+      threshold: 0,
+    });
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [handleObserver]);
 
   const handleFollow = () => {
     setIsFollowing(!isFollowing);
@@ -76,25 +116,24 @@ export default function ShopPage() {
   };
 
   // Filter products by shop category and search
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch =
-      !searchQuery ||
-      product.name.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredProducts = useMemo(() => {
+    return allProducts.filter((product) => {
+      const matchesSearch =
+        !searchQuery ||
+        product.name.toLowerCase().includes(searchQuery.toLowerCase());
 
-    // Filter by shop category (not general category)
-    const productShopCategoryId =
-      typeof product.shopCategory === "object"
-        ? product.shopCategory?._id
-        : product.shopCategory;
-    const selectedCategory = categories.find(
-      (cat) => cat.slug === activeCategory,
-    );
-    const matchesCategory =
-      activeCategory === "all" ||
-      productShopCategoryId === selectedCategory?._id;
+      // Filter by shop category ID
+      const productShopCategoryId =
+        typeof product.shopCategory === "object"
+          ? product.shopCategory?._id
+          : product.shopCategory;
+      const matchesCategory =
+        activeCategory === "all" ||
+        productShopCategoryId === activeCategory;
 
-    return matchesSearch && matchesCategory;
-  });
+      return matchesSearch && matchesCategory;
+    });
+  }, [allProducts, searchQuery, activeCategory]);
 
   if (shopLoading) {
     return (
@@ -246,7 +285,7 @@ export default function ShopPage() {
         <div className="flex flex-col lg:flex-row gap-4">
           {/* Categories Sidebar */}
           <div className="lg:w-[200px] shrink-0">
-            <div className="bg-white rounded border border-[#f0f0f0] p-3">
+            <div className="bg-white rounded border border-[#f0f0f0] p-3 lg:sticky lg:top-24">
               <h3 className="font-medium text-gray-800 mb-2">Danh mục Shop</h3>
               {categoriesLoading ? (
                 <div className="flex justify-center py-4">
@@ -265,27 +304,24 @@ export default function ShopPage() {
                     >
                       Tất cả
                       <span className="text-gray-400 ml-1">
-                        ({products.length})
+                        ({totalProducts})
                       </span>
                     </button>
                   </li>
                   {categories.map((cat) => (
                     <li key={cat._id}>
                       <button
-                        onClick={() => setActiveCategory(cat.slug)}
+                        onClick={() => setActiveCategory(cat._id)}
                         className={`w-full text-left px-2 py-1.5 rounded text-sm transition-colors ${
-                          activeCategory === cat.slug
+                          activeCategory === cat._id
                             ? "bg-[#FFEBEE] text-[#E53935]"
                             : "text-gray-600 hover:bg-gray-50"
                         }`}
                       >
                         {cat.name}
-                        {(cat as { productCount?: number }).productCount !==
-                          undefined && (
-                          <span className="text-gray-400 ml-1">
-                            ({(cat as { productCount?: number }).productCount})
-                          </span>
-                        )}
+                        <span className="text-gray-400 ml-1">
+                          ({cat.productCount})
+                        </span>
                       </button>
                     </li>
                   ))}
@@ -342,11 +378,31 @@ export default function ShopPage() {
               </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                {filteredProducts.map((product) => (
-                  <ProductCard key={product._id} product={product} />
+                {filteredProducts.map((product, index) => (
+                  <ProductCard key={`${product._id}-${index}`} product={product} index={index} />
                 ))}
               </div>
             )}
+
+            {/* Load More Trigger & Spinner */}
+            <div
+              ref={loadMoreRef}
+              className="flex justify-center items-center py-8 mt-4"
+            >
+              {isFetchingNextPage && (
+                <div className="flex flex-col items-center gap-2">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <span className="text-sm text-muted-foreground">
+                    Đang tải thêm sản phẩm...
+                  </span>
+                </div>
+              )}
+              {!hasNextPage && allProducts.length > 0 && !productsLoading && (
+                <p className="text-sm text-muted-foreground">
+                  Đã hiển thị tất cả {allProducts.length} sản phẩm
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>

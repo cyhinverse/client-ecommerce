@@ -45,11 +45,27 @@ const shopApi = {
 
   getCategories: async (
     shopId: string,
-  ): Promise<
-    { _id: string; name: string; slug: string; isActive?: boolean }[]
-  > => {
+  ): Promise<{
+    categories: { _id: string; name: string; slug?: string; isActive?: boolean; productCount: number }[];
+    totalProducts: number;
+  }> => {
     const response = await instance.get(`/shop-categories/${shopId}`);
-    return extractApiData(response);
+    const data = extractApiData<{
+      categories?: { _id: string; name: string; slug?: string; isActive?: boolean; productCount: number }[];
+      totalProducts?: number;
+    } | { _id: string; name: string; slug?: string; isActive?: boolean; productCount?: number }[]>(response);
+    
+    // Handle both old format (array) and new format (object with categories)
+    if (Array.isArray(data)) {
+      return {
+        categories: data.map(c => ({ ...c, productCount: c.productCount || 0 })),
+        totalProducts: 0,
+      };
+    }
+    return {
+      categories: data.categories || [],
+      totalProducts: data.totalProducts || 0,
+    };
   },
 
   // Admin: Get all shops

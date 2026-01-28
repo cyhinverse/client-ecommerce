@@ -397,6 +397,30 @@ export function useShopProducts(
 }
 
 /**
+ * Infinite scroll shop products
+ */
+export function useInfiniteShopProducts(
+  shopId: string,
+  params?: Omit<ProductListParams, "shop" | "page">,
+) {
+  const limit = params?.limit || 20;
+
+  return useInfiniteQuery({
+    queryKey: productKeys.infiniteShopProducts(shopId, params),
+    queryFn: async ({ pageParam = 1 }) => {
+      return productApi.getAll({ ...params, shop: shopId, page: pageParam, limit });
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const { page, totalPages } = lastPage.pagination;
+      return page < totalPages ? page + 1 : undefined;
+    },
+    enabled: !!shopId,
+    staleTime: STALE_TIME.LONG,
+  });
+}
+
+/**
  * Search products
  */
 export function useProductSearch(keyword: string, limit?: number) {
