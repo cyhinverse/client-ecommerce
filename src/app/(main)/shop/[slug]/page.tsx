@@ -43,14 +43,17 @@ export default function ShopPage() {
   const categories = categoriesData?.categories || [];
   const totalProducts = categoriesData?.totalProducts || 0;
 
-  // Use infinite scroll for products
+  // Use infinite scroll for products with server-side filtering
   const {
     data: productsData,
     isLoading: productsLoading,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useInfiniteShopProducts(currentShop?._id || "", { limit: 24 });
+  } = useInfiniteShopProducts(currentShop?._id || "", {
+    limit: 24,
+    shopCategory: activeCategory === "all" ? undefined : activeCategory,
+  });
 
   // Flatten all pages into single array
   const allProducts = useMemo(() => {
@@ -64,76 +67,13 @@ export default function ShopPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  // Intersection Observer for infinite scroll
-  const handleObserver = useCallback(
-    (entries: IntersectionObserverEntry[]) => {
-      const [target] = entries;
-      if (target.isIntersecting && hasNextPage && !isFetchingNextPage) {
-        fetchNextPage();
-      }
-    },
-    [fetchNextPage, hasNextPage, isFetchingNextPage]
-  );
-
-  useEffect(() => {
-    const element = loadMoreRef.current;
-    if (!element) return;
-
-    const observer = new IntersectionObserver(handleObserver, {
-      root: null,
-      rootMargin: "100px",
-      threshold: 0,
-    });
-
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [handleObserver]);
-
-  const handleFollow = () => {
-    setIsFollowing(!isFollowing);
-    toast.success(isFollowing ? "Đã bỏ theo dõi shop" : "Đã theo dõi shop");
-  };
-
-  const handleChat = async () => {
-    if (!isAuthenticated) {
-      toast.error("Vui lòng đăng nhập để chat với shop");
-      return;
-    }
-    if (!currentShop?._id) return;
-
-    try {
-      await dispatch(startConversation({ shopId: currentShop._id })).unwrap();
-      dispatch(setChatOpen(true));
-    } catch {
-      toast.error("Không thể bắt đầu cuộc trò chuyện");
-    }
-  };
-
-  const formatNumber = (num: number) => {
-    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
-    return num.toString();
-  };
-
-  // Filter products by shop category and search
+  // Client-side search filtering (optional, can also move to server-side)
   const filteredProducts = useMemo(() => {
-    return allProducts.filter((product) => {
-      const matchesSearch =
-        !searchQuery ||
-        product.name.toLowerCase().includes(searchQuery.toLowerCase());
-
-      // Filter by shop category ID
-      const productShopCategoryId =
-        typeof product.shopCategory === "object"
-          ? product.shopCategory?._id
-          : product.shopCategory;
-      const matchesCategory =
-        activeCategory === "all" ||
-        productShopCategoryId === activeCategory;
-
-      return matchesSearch && matchesCategory;
-    });
-  }, [allProducts, searchQuery, activeCategory]);
+    if (!searchQuery) return allProducts;
+    return allProducts.filter((product) =>
+      product.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [allProducts, searchQuery]);
 
   if (shopLoading) {
     return (

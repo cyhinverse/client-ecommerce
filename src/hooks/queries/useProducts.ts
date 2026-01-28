@@ -30,6 +30,7 @@ export interface ProductListParams {
   colors?: string;
   sizes?: string;
   shop?: string;
+  shopCategory?: string;
 }
 
 export interface ProductListResponse {
@@ -76,6 +77,7 @@ const productApi = {
     if (params.colors) queryParams.colors = params.colors;
     if (params.sizes) queryParams.sizes = params.sizes;
     if (params.shop) queryParams.shop = params.shop;
+    if (params.shopCategory) queryParams.shopCategory = params.shopCategory;
 
     const response = await instance.get("/products", { params: queryParams });
     const serverData = extractApiData<ServerProductListResponse>(response);
