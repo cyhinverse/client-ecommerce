@@ -30,7 +30,6 @@ export default function MainLayout({
       <ChatWidgetWrapper />
 
       {/* User-Shop Chat Components */}
-      <ChatButton />
       <ChatPanel />
     </div>
   );
