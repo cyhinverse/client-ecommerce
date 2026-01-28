@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { setChatOpen } from "@/features/chat/chatSlice";
+import { setBotOpen } from "@/features/chat/chatSlice";
 import { ChatbotMessage } from "@/types/chat";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -30,7 +30,7 @@ const QUICK_ACTIONS = [
 
 export default function ChatWidget() {
   const dispatch = useAppDispatch();
-  const { isOpen } = useAppSelector((state) => state.chat);
+  const { isBotOpen: isOpen } = useAppSelector((state) => state.chat);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -195,7 +195,7 @@ export default function ChatWidget() {
           <span className="text-[11px] text-gray-500">Sẵn sàng hỗ trợ</span>
         </div>
         <button
-          onClick={() => dispatch(setChatOpen(false))}
+          onClick={() => dispatch(setBotOpen(false))}
           className="text-[11px] text-gray-500 hover:text-[#E53935] transition-colors"
         >
           Đóng
