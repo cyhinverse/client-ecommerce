@@ -184,7 +184,7 @@ export default function ChatWidget() {
   return (
     <div
       className={cn(
-        "fixed top-0 right-0 h-full w-[380px] z-50 bg-white border-l border-gray-100 transform transition-transform duration-300 ease-in-out flex flex-col shadow-2xl",
+        "fixed top-0 right-0 h-full w-[380px] z-50 bg-white transform transition-transform duration-300 ease-in-out flex flex-col",
         isOpen ? "translate-x-0" : "translate-x-full",
       )}
     >
