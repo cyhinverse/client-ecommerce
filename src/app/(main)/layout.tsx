@@ -3,6 +3,7 @@ import { useAppSelector } from "@/hooks/hooks";
 import HeaderLayout from "@/components/layout/header/layout";
 import FooterLayout from "@/components/layout/footer/page";
 import ChatWidgetWrapper from "@/components/chatbot/ChatWidgetWrapper";
+import ChatButton from "@/components/chat/ChatButton";
 import ChatPanel from "@/components/chat/ChatPanel";
 import { cn } from "@/lib/utils";
 
