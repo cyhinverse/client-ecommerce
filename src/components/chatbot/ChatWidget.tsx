@@ -9,6 +9,7 @@ import ReactMarkdown from "react-markdown";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { setChatOpen } from "@/features/chat/chatSlice";
 import { ChatbotMessage } from "@/types/chat";
+import Link from "next/link";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -294,17 +295,34 @@ export default function ChatWidget() {
                     <div className="prose prose-sm max-w-none [&>p]:mb-2 [&>p:last-child]:mb-0 [&>ul]:mb-2 [&>li]:mb-0.5">
                       <ReactMarkdown
                         components={{
-                          a: ({ href, children }) => (
-                            <a
-                              href={href}
-                              className="text-[#E53935] hover:underline"
-                              target={
-                                href?.startsWith("http") ? "_blank" : undefined
-                              }
-                            >
-                              {children}
-                            </a>
-                          ),
+                          a: ({ href, children }) => {
+                            if (!href) return <span>{children}</span>;
+                            
+                            // Check if link is internal (starts with / or current domain)
+                            const isInternal = href.startsWith("/");
+                            
+                            if (isInternal) {
+                              return (
+                                <Link
+                                  href={href}
+                                  className="text-[#E53935] hover:underline"
+                                >
+                                  {children}
+                                </Link>
+                              );
+                            }
+
+                            return (
+                              <a
+                                href={href}
+                                className="text-[#E53935] hover:underline"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {children}
+                              </a>
+                            );
+                          },
                         }}
                       >
                         {msg.content}
