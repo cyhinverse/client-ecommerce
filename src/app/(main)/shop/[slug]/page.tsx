@@ -43,6 +43,11 @@ export default function ShopPage() {
   const categories = categoriesData?.categories || [];
   const totalProducts = categoriesData?.totalProducts || 0;
 
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [activeCategory, setActiveCategory] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
   // Use infinite scroll for products with server-side filtering
   const {
     data: productsData,
@@ -61,11 +66,6 @@ export default function ShopPage() {
   }, [productsData]);
 
   const { isAuthenticated } = useAppSelector((state) => state.auth);
-
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [activeCategory, setActiveCategory] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   // Client-side search filtering (optional, can also move to server-side)
   const filteredProducts = useMemo(() => {
