@@ -67,6 +67,12 @@ export default function ShopPage() {
 
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
+  const formatNumber = (num: number) => {
+    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+    return num.toString();
+  };
+
   // Client-side search filtering (optional, can also move to server-side)
   const filteredProducts = useMemo(() => {
     if (!searchQuery) return allProducts;
