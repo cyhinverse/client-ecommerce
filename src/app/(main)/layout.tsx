@@ -2,7 +2,6 @@
 import { useAppSelector } from "@/hooks/hooks";
 import HeaderLayout from "@/components/layout/header/layout";
 import FooterLayout from "@/components/layout/footer/page";
-import ChatWidgetWrapper from "@/components/chatbot/ChatWidgetWrapper";
 import ChatPanel from "@/components/chat/ChatPanel";
 import { cn } from "@/lib/utils";
 
@@ -24,9 +23,6 @@ export default function MainLayout({
         <main className="flex-1">{children}</main>
         <FooterLayout />
       </div>
-
-      {/* AI Chat Sidebar */}
-      <ChatWidgetWrapper />
 
       {/* User-Shop Chat Components */}
       <ChatPanel />
