@@ -9,6 +9,7 @@ import ReactMarkdown from "react-markdown";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { setChatOpen } from "@/features/chat/chatSlice";
 import { ChatbotMessage } from "@/types/chat";
+import { motion } from "framer-motion";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -182,11 +183,14 @@ export default function ChatWidget() {
   };
 
   return (
-    <div
-      className={cn(
-        "fixed top-0 right-0 h-full w-[380px] z-50 bg-white border-l border-gray-100 transform transition-transform duration-300 ease-in-out flex flex-col",
-        isOpen ? "translate-x-0" : "translate-x-full",
-      )}
+    <motion.div
+      initial={{ x: "100%", opacity: 0.5 }}
+      animate={{ 
+        x: isOpen ? "0%" : "100%",
+        opacity: isOpen ? 1 : 0.5
+      }}
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      className="fixed top-0 right-0 h-full w-[380px] z-50 bg-white border-l border-gray-100 flex flex-col shadow-2xl"
     >
       {/* Top Bar - Match với TopBar của header chính */}
       <div className="h-8 bg-[#fafafa] border-b border-gray-100 flex items-center justify-between px-4">
@@ -378,6 +382,6 @@ export default function ChatWidget() {
           </Button>
         </form>
       </div>
-    </div>
+    </motion.div>
   );
 }
