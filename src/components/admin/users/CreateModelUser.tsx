@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Plus, ChevronDown, ChevronUp, Shield } from "lucide-react";
 import { RESOURCES, ACTIONS } from "@/constants/permissions";
 import { getRolePermissions } from "@/api/permission";

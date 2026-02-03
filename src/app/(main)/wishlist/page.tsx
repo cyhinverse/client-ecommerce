@@ -13,7 +13,6 @@ import {
 } from "@/hooks/queries/useWishlist";
 import { useAddToCart } from "@/hooks/queries/useCart";
 import { Product } from "@/types/product";
-import { formatCurrency } from "@/utils/format";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { useRouter } from "next/navigation";
 

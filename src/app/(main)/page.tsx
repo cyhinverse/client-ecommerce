@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useAppSelector } from "@/hooks/hooks";
 import HeroSection from "@/components/home/HeroSection";
 import Category from "@/components/category/Category";

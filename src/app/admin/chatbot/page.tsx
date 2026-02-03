@@ -1,10 +1,6 @@
 "use client";
-import React, { useState } from "react";
-import { useUrlFilters } from "@/hooks/useUrlFilters";
-import { useQuery } from "@tanstack/react-query";
-import instance from "@/api/api";
-import { extractApiData } from "@/api";
-import { MessageSquare, Calendar, User, Clock } from "lucide-react";
+import { useState } from "react";
+
 import { PaginationControls } from "@/components/common/Pagination";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { format } from "date-fns";

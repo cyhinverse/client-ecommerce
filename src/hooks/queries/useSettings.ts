@@ -20,50 +20,8 @@ const settingsApi = {
     return extractApiData(response);
   },
 
-  getSection: async (section: string): Promise<unknown> => {
-    const response = await instance.get(`/settings/${section}`);
-    return extractApiData(response);
-  },
 
-  updateSection: async (params: {
-    section: string;
-    data: unknown;
-  }): Promise<Settings> => {
-    const response = await instance.put(
-      `/settings/${params.section}`,
-      params.data,
-    );
-    return extractApiData(response);
-  },
-
-  resetSettings: async (): Promise<Settings> => {
-    const response = await instance.post("/settings/reset");
-    return extractApiData(response);
-  },
 };
-
-/**
- * Get all settings
- */
-export function useSettings() {
-  return useQuery({
-    queryKey: settingsKeys.current(),
-    queryFn: settingsApi.getSettings,
-    staleTime: STALE_TIME.STATIC,
-  });
-}
-
-/**
- * Get specific settings section
- */
-export function useSettingsSection(section: string) {
-  return useQuery({
-    queryKey: settingsKeys.section(section),
-    queryFn: () => settingsApi.getSection(section),
-    staleTime: STALE_TIME.STATIC,
-    enabled: !!section,
-  });
-}
 
 /**
  * Update settings (partial update)
@@ -79,30 +37,21 @@ export function useUpdateSettings() {
   });
 }
 
+
+
+
 /**
- * Update specific settings section
+ * Update settings (partial update)
  */
-export function useUpdateSettingsSection() {
+export function useUpdateSettings() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: settingsApi.updateSection,
+    mutationFn: settingsApi.updateSettings,
     onSuccess: (data) => {
       queryClient.setQueryData(settingsKeys.current(), data);
     },
   });
 }
 
-/**
- * Reset settings to default
- */
-export function useResetSettings() {
-  const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: settingsApi.resetSettings,
-    onSuccess: (data) => {
-      queryClient.setQueryData(settingsKeys.current(), data);
-    },
-  });
-}

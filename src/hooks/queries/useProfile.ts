@@ -104,7 +104,7 @@ const userApi = {
   },
 
   changePassword: async (data: {
-    currentPassword: string;
+    oldPassword: string;
     newPassword: string;
   }): Promise<void> => {
     await instance.post("/users/change-password", data);
@@ -112,36 +112,36 @@ const userApi = {
 
   // Address mutations
   createAddress: async (data: CreateAddressData): Promise<Address> => {
-    const response = await instance.post("/users/address", data);
+    const response = await instance.post("/users/addresses", data);
     return extractApiData(response);
   },
 
   updateAddress: async (data: UpdateAddressData): Promise<Address> => {
     const { addressId, ...updateData } = data;
     const response = await instance.put(
-      `/users/address/${addressId}`,
+      `/users/addresses/${addressId}`,
       updateData
     );
     return extractApiData(response);
   },
 
   deleteAddress: async (addressId: string): Promise<void> => {
-    await instance.delete(`/users/address/${addressId}`);
+    await instance.delete(`/users/addresses/${addressId}`);
   },
 
   setDefaultAddress: async (addressId: string): Promise<Address[]> => {
-    const response = await instance.put(`/users/address/${addressId}/default`);
+    const response = await instance.put(`/users/addresses/${addressId}/default`);
     return extractApiData(response);
   },
 
   // Admin mutations
   createUser: async (data: CreateUserData): Promise<User> => {
-    const response = await instance.post("/users/create", data);
+    const response = await instance.post("/users", data);
     return extractApiData(response);
   },
 
   updateUser: async (data: UpdateUserData): Promise<User> => {
-    const response = await instance.post("/users/update", data);
+    const response = await instance.put("/users", data);
     return extractApiData(response);
   },
 
@@ -149,6 +149,7 @@ const userApi = {
     await instance.delete(`/users/${userId}`);
   },
 };
+
 
 // ============ Query Hooks ============
 

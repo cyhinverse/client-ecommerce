@@ -9,7 +9,8 @@
 
 import { describe, it, expect } from "vitest";
 import * as fc from "fast-check";
-import { groupCartItemsByShop, CartItem, Shop, CartItemsByShop } from "@/types/cart";
+import { groupCartItemsByShop, CartItem, Shop } from "@/types/cart";
+
 
 // Helper to create a valid cart item
 const createCartItem = (overrides: Partial<CartItem> = {}): CartItem => ({

@@ -5,8 +5,8 @@
  * Property 4: Required Fields Display (Vouchers)
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+
 import * as fc from "fast-check";
 import "@testing-library/jest-dom";
 

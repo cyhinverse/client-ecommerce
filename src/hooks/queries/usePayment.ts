@@ -27,7 +27,8 @@ export interface PaymentDetails {
 // ============ API Functions ============
 const paymentApi = {
   createUrl: async (orderId: string): Promise<PaymentUrlResponse> => {
-    const response = await instance.post("/payment/create", { orderId });
+    const response = await instance.post("/payment", { orderId });
+
     return extractApiData(response);
   },
 

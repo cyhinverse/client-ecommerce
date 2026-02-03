@@ -1,5 +1,6 @@
 "use client";
-import { memo, useMemo } from "react";
+import { memo } from "react";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Zap, ChevronRight } from "lucide-react";

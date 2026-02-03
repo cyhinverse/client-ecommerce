@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo } from "react";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
 import { toast } from "sonner";
 import {

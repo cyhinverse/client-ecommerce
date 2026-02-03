@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Store, Package, ShoppingCart, Star, ExternalLink } from "lucide-react";
+import { Store, Package, ShoppingCart, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Shop, ShopOwner, ShopStatus } from "@/types/shop";

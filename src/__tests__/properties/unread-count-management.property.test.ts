@@ -7,7 +7,8 @@
  * When a new message arrives for a non-active conversation, the count SHALL increment.
  * When the user opens the conversation, the count SHALL reset to zero.
  */
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
+
 import * as fc from "fast-check";
 import { configureStore } from "@reduxjs/toolkit";
 import chatReducer, {

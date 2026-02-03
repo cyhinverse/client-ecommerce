@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -22,10 +22,7 @@ import { Switch } from "@/components/ui/switch";
 // Updated: Import from voucher types with backward compatibility aliases
 import { UpdateVoucherData, Voucher } from "@/types/voucher";
 import { useProducts } from "@/hooks/queries/useProducts";
-import { X, Search, Loader2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Loader2 } from "lucide-react";
 
 interface UpdateModelDiscountProps {
   open: boolean;

@@ -6,8 +6,9 @@
  * Property 7: Price Display Format
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { render } from "@testing-library/react";
+
 import * as fc from "fast-check";
 import "@testing-library/jest-dom";
 
@@ -27,7 +28,8 @@ vi.mock("next/image", () => ({
 // Import components after mocks
 import { ProductCard } from "@/components/product/ProductCard";
 import { ProductGrid } from "@/components/product/ProductGrid";
-import { Product, Category, Price, ProductModel, findModelByTierIndex, getVariationDisplay } from "@/types/product";
+import { Product, Category, Price } from "@/types/product";
+
 
 // Helper to create a valid product
 const createProduct = (overrides: Partial<Product> = {}): Product => ({

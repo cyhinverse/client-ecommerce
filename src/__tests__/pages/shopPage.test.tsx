@@ -5,12 +5,9 @@
  * Property: Shop page data fetching and display
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
-import * as fc from "fast-check";
-import "@testing-library/jest-dom";
-import { Provider } from "react-redux";
-import { configureStore } from "@reduxjs/toolkit";
+import { describe, it, expect, vi } from "vitest";
+import { render, waitFor } from "@testing-library/react";
+
 
 // Mock Next.js
 vi.mock("next/navigation", () => ({

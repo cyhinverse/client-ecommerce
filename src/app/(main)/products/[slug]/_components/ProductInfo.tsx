@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Star, ShieldCheck, Truck, Heart, Share2 } from "lucide-react";
+import { Star, ShieldCheck, Truck, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Product, Variant, Price, FlashSaleInfo } from "@/types/product";
 import { Shop } from "@/types/shop";

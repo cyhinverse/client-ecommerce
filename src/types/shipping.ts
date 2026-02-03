@@ -47,24 +47,4 @@ export interface ShippingState {
   error: string | null;
 }
 
-// Helper function to calculate shipping fee
-export function calculateShippingFee(
-  rule: ShippingRule,
-  weight?: number,
-  quantity?: number
-): number {
-  switch (rule.type) {
-    case "fixed":
-      return rule.baseFee;
-    case "weight_based":
-      if (!weight || !rule.stepUnit || !rule.stepFee) return rule.baseFee;
-      const weightSteps = Math.ceil(weight / rule.stepUnit);
-      return rule.baseFee + (weightSteps - 1) * rule.stepFee;
-    case "quantity_based":
-      if (!quantity || !rule.stepUnit || !rule.stepFee) return rule.baseFee;
-      const quantitySteps = Math.ceil(quantity / rule.stepUnit);
-      return rule.baseFee + (quantitySteps - 1) * rule.stepFee;
-    default:
-      return rule.baseFee;
-  }
-}
+

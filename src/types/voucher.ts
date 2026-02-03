@@ -118,35 +118,4 @@ export interface VoucherStatistics {
   totalUsage: number;
 }
 
-// Helper function to calculate discount
-export function calculateVoucherDiscount(
-  voucher: Voucher,
-  orderAmount: number
-): number {
-  if (orderAmount < voucher.minOrderValue) return 0;
 
-  if (voucher.type === "fixed_amount") {
-    return Math.min(voucher.value, orderAmount);
-  }
-
-  // Percentage type
-  const discount = (orderAmount * voucher.value) / 100;
-  if (voucher.maxValue) {
-    return Math.min(discount, voucher.maxValue);
-  }
-  return discount;
-}
-
-// Helper function to check if voucher is valid
-export function isVoucherValid(voucher: Voucher): boolean {
-  if (!voucher.isActive) return false;
-
-  const now = new Date();
-  const startDate = new Date(voucher.startDate);
-  const endDate = new Date(voucher.endDate);
-
-  if (now < startDate || now > endDate) return false;
-  if (voucher.usageCount >= voucher.usageLimit) return false;
-
-  return true;
-}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -21,11 +21,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Loader2 } from "lucide-react";
 import { useProducts } from "@/hooks/queries/useProducts";
-import { Product } from "@/types/product";
-import { X, Search } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Checkbox } from "@/components/ui/checkbox";
 // Updated: Import from voucher types with backward compatibility alias
 import { CreateVoucherData } from "@/types/voucher";
 

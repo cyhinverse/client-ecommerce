@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { Folder, Layers, Share2 } from "lucide-react";
+import { Folder, Layers } from "lucide-react";
 import { Category } from "@/types/category";
 
 export const getStatusBadge = (status: boolean) => {

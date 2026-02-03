@@ -66,7 +66,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
 
     try {
       await changePasswordMutation.mutateAsync({
-        currentPassword: passwordData.currentPassword,
+        oldPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword,
       });
 

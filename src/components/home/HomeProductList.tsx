@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { useAppSelector } from "@/hooks/hooks";
 import {
   useInfiniteProducts,

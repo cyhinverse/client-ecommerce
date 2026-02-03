@@ -1,5 +1,4 @@
 import { BaseEntity, PaginationData } from "./common";
-import { User } from "./user";
 import { Shop } from "./shop";
 import { ShopCategory } from "./shopCategory";
 
@@ -104,20 +103,7 @@ export function getVariantDisplay(variant: Variant): string {
   return "Mặc định";
 }
 
-export function findVariantByColor(
-  product: Product,
-  color: string,
-): Variant | undefined {
-  return product.variants?.find((v) => v.color === color);
-}
 
-export function getUniqueColors(variants: Variant[]): string[] {
-  const colors = new Set<string>();
-  variants.forEach((v) => {
-    if (v.color) colors.add(v.color);
-  });
-  return Array.from(colors);
-}
 
 export interface ProductState {
 
@@ -197,60 +183,4 @@ export interface VariantFormUpdate {
 }
 
 export type VariantForm = VariantFormCreate | VariantFormUpdate;
-
-export function isVariantFormCreate(
-  variant: VariantForm,
-): variant is VariantFormCreate {
-  return "files" in variant.images && "previews" in variant.images;
-}
-
-export function isVariantFormUpdate(
-  variant: VariantForm,
-): variant is VariantFormUpdate {
-  return "newFiles" in variant.images && "newPreviews" in variant.images;
-}
-
-export function createEmptyVariantForm(
-  defaultPrice: number = 0,
-): VariantFormCreate {
-  return {
-    _id: `temp-${Date.now()}`,
-    name: "",
-    color: "",
-    price: defaultPrice,
-    stock: 0,
-    sold: 0,
-    images: { files: [], previews: [] },
-  };
-}
-
-export function createEmptyVariantFormUpdate(
-  defaultPrice: number = 0,
-): VariantFormUpdate {
-  return {
-    _id: `temp-${Date.now()}`,
-    name: "",
-    color: "",
-    price: defaultPrice,
-    stock: 0,
-    sold: 0,
-    images: { existing: [], newFiles: [], newPreviews: [] },
-  };
-}
-
-export function variantToForm(variant: Variant): VariantFormUpdate {
-  return {
-    _id: variant._id,
-    name: variant.name,
-    color: variant.color || "",
-    price: variant.price,
-    stock: variant.stock,
-    sold: variant.sold || 0,
-    images: {
-      existing: variant.images || [],
-      newFiles: [],
-      newPreviews: [],
-    },
-  };
-}
 

@@ -1,5 +1,4 @@
 "use client";
-import React, { useMemo } from "react";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import instance from "@/api/api";

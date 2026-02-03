@@ -1,5 +1,4 @@
 "use client";
-import React from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, XCircle, AlertCircle, ShoppingBag, Home, RefreshCcw } from "lucide-react";

@@ -1,5 +1,4 @@
 "use client";
-import React from "react";
 import FlashSaleSection from "@/components/product/FlashSaleSection";
 import { useAppSelector } from "@/hooks/hooks";
 import { cn } from "@/lib/utils";

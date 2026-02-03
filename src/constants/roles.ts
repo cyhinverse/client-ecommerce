@@ -25,9 +25,4 @@ export function isSeller(role: string): boolean {
   return role === USER_ROLES.SELLER;
 }
 
-/**
- * Check if a role can manage shop
- */
-export function canManageShop(role: string): boolean {
-  return role === USER_ROLES.ADMIN || role === USER_ROLES.SELLER;
-}
+

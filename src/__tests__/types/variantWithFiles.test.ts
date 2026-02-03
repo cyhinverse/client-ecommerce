@@ -10,17 +10,8 @@
 
 import { describe, it, expect } from "vitest";
 import * as fc from "fast-check";
-import {
-  VariantFormCreate,
-  VariantFormUpdate,
-  VariantForm,
-  isVariantFormCreate,
-  isVariantFormUpdate,
-  createEmptyVariantForm,
-  createEmptyVariantFormUpdate,
-  variantToForm,
-  Variant,
-} from "@/types/product";
+import { Variant } from "@/types/product";
+
 
 // Arbitrary generators for testing - simplified structure with color only
 const variantFormCreateArb: fc.Arbitrary<VariantFormCreate> = fc.record({

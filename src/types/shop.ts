@@ -1,5 +1,6 @@
-import { BaseEntity, PaginationData } from "./common";
+import { BaseEntity } from "./common";
 import { User } from "./user";
+
 
 // Pickup address for shop - all fields optional per backend schema
 export interface PickupAddress {

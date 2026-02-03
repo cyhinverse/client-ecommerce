@@ -43,9 +43,4 @@ export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
   [PAYMENT_STATUS.REFUNDED]: 'Đã hoàn tiền',
 };
 
-/**
- * Check if payment method is online
- */
-export function isOnlinePayment(method: PaymentMethod): boolean {
-  return method === PAYMENT_METHODS.VNPAY || method === PAYMENT_METHODS.MOMO;
-}
+

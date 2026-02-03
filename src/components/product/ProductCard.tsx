@@ -2,7 +2,6 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Product } from "@/types/product";
-import { formatCurrency } from "@/utils/format";
 import WishlistButton from "@/components/common/WishlistButton";
 import { Store } from "lucide-react";
 

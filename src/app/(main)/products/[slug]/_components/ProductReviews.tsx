@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import ReviewItem from "@/components/review/ReviewItem";
 import { useProductReviews } from "@/hooks/queries/useReviews";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Review, ReviewsResponse, RatingBreakdown } from "@/types/review";
+import { Review, RatingBreakdown } from "@/types/review";
 
 interface ProductReviewsProps {
   productId: string;

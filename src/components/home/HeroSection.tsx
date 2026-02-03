@@ -1,5 +1,4 @@
 "use client";
-import React from "react";
 import { useAppSelector } from "@/hooks/hooks";
 import CategorySidebar from "./CategorySidebar";
 import Banner from "./Banner";
