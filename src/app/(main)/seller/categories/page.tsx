@@ -98,7 +98,7 @@ export default function SellerCategoriesPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-[#f7f7f7] rounded-xl flex items-center justify-center">
             <Tag className="h-6 w-6 text-orange-600" />
@@ -113,7 +113,7 @@ export default function SellerCategoriesPage() {
         {!showForm && (
           <Button
             onClick={() => setShowForm(true)}
-            className="bg-primary hover:bg-primary/90 rounded-xl h-11 px-5"
+            className="bg-primary hover:bg-primary/90 rounded-xl h-11 px-5 w-full sm:w-auto"
           >
             <Plus className="h-4 w-4 mr-2" />
             Thêm danh mục
@@ -139,7 +139,7 @@ export default function SellerCategoriesPage() {
             </Button>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label className="text-gray-600">Tên danh mục *</Label>
                 <Input
@@ -188,8 +188,17 @@ export default function SellerCategoriesPage() {
                 placeholder="https://..."
                 className="mt-1.5 h-11 rounded-xl border-0 bg-white"
               />
+              {formData.image ? (
+                <div className="mt-3 w-16 h-16 rounded-lg overflow-hidden border border-gray-200 bg-white">
+                  <img
+                    src={formData.image}
+                    alt="Category preview"
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              ) : null}
             </div>
-            <div className="flex gap-3 pt-2">
+            <div className="flex flex-col gap-3 pt-2 sm:flex-row">
               <Button
                 type="submit"
                 disabled={createMutation.isPending || updateMutation.isPending}
@@ -245,12 +254,23 @@ export default function SellerCategoriesPage() {
             {categories.map((category, idx) => (
               <div
                 key={category._id}
-                className={`p-4 flex items-center justify-between ${
+                className={`p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between ${
                   idx % 2 === 0 ? "bg-white" : "bg-white/50"
                 } ${!category.isActive && "opacity-60"}`}
               >
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 flex-wrap">
                   <GripVertical className="h-4 w-4 text-gray-300 cursor-grab" />
+                  <div className="w-10 h-10 rounded-lg overflow-hidden bg-[#f7f7f7] border border-gray-200 flex items-center justify-center">
+                    {category.image ? (
+                      <img
+                        src={category.image}
+                        alt={category.name}
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <Tag className="h-4 w-4 text-gray-400" />
+                    )}
+                  </div>
                   <div className="w-8 h-8 bg-[#f7f7f7] rounded-lg flex items-center justify-center text-sm font-medium text-gray-500">
                     {category.sortOrder}
                   </div>
@@ -274,7 +294,7 @@ export default function SellerCategoriesPage() {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 sm:justify-end">
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-gray-500">
                       {category.isActive ? "Hiện" : "Ẩn"}
@@ -312,3 +332,4 @@ export default function SellerCategoriesPage() {
     </div>
   );
 }
+

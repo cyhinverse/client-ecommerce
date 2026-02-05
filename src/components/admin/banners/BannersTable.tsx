@@ -95,9 +95,9 @@ export function BannersTable({
   return (
     <div className="space-y-4">
       {/* Search and Filters */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-[#f7f7f7] p-4 rounded-2xl">
-        <div className="flex flex-1 items-center space-x-2">
-          <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col gap-4 bg-[#f7f7f7] p-4 rounded-2xl lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="relative w-full sm:flex-1 sm:min-w-[220px] sm:max-w-sm">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search banners..."
@@ -122,7 +122,7 @@ export function BannersTable({
           </Button>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex w-full items-center gap-2 sm:w-auto">
           <Label htmlFor="pageSize" className="text-sm font-medium text-muted-foreground">
             Show:
           </Label>
@@ -130,7 +130,7 @@ export function BannersTable({
             id="pageSize"
             value={pageSize}
             onChange={(e) => onPageSizeChange(Number(e.target.value))}
-            className="h-9 rounded-lg border-0 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E53935]/20"
+            className="h-9 w-full rounded-lg border-0 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E53935]/20 sm:w-auto"
           >
             <option value="5">5</option>
             <option value="10">10</option>

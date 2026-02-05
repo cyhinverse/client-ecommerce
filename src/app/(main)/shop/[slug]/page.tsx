@@ -241,7 +241,7 @@ export default function ShopPage() {
           </div>
 
           {/* Metrics */}
-          <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-[#f0f0f0]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4 pt-4 border-t border-[#f0f0f0]">
             <div className="text-center">
               <div className="flex items-center justify-center gap-1 text-[#4CAF50]">
                 <MessageCircle className="h-4 w-4" />
@@ -324,8 +324,8 @@ export default function ShopPage() {
           {/* Products Grid */}
           <div className="flex-1">
             {/* Search & Filter Bar */}
-            <div className="bg-white rounded border border-[#f0f0f0] p-3 mb-4 flex items-center gap-3">
-              <div className="relative flex-1 max-w-[300px]">
+            <div className="bg-white rounded border border-[#f0f0f0] p-3 mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="relative flex-1 w-full sm:max-w-[300px]">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   placeholder="Tìm trong shop..."
@@ -334,7 +334,7 @@ export default function ShopPage() {
                   className="pl-9 h-9 border-gray-200 focus:border-[#E53935]"
                 />
               </div>
-              <div className="flex items-center gap-1 ml-auto">
+              <div className="flex items-center gap-1 sm:ml-auto">
                 <button
                   onClick={() => setViewMode("grid")}
                   className={`p-2 rounded ${

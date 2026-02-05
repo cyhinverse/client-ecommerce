@@ -212,7 +212,7 @@ export default function SellerOrdersPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
         <div className="w-12 h-12 bg-[#f7f7f7] rounded-xl flex items-center justify-center">
           <ShoppingCart className="h-6 w-6 text-green-600" />
         </div>
@@ -246,7 +246,7 @@ export default function SellerOrdersPage() {
 
       {/* Filters */}
       <div className="bg-[#f7f7f7] rounded-2xl p-4">
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
@@ -259,7 +259,7 @@ export default function SellerOrdersPage() {
           </div>
           <Button
             variant="outline"
-            className="h-11 rounded-xl px-4 border-0 bg-white"
+            className="h-11 rounded-xl px-4 border-0 bg-white w-full sm:w-auto"
           >
             <Filter className="h-4 w-4 mr-2" />
             Bộ lọc
@@ -301,7 +301,7 @@ export default function SellerOrdersPage() {
                       idx % 2 === 0 ? "bg-white" : "bg-white/50"
                     }`}
                   >
-                    <div className="flex items-start justify-between mb-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-4">
                       <div>
                         <div className="flex items-center gap-3">
                           <span className="font-semibold text-gray-800">
@@ -356,7 +356,7 @@ export default function SellerOrdersPage() {
                       </DropdownMenu>
                     </div>
 
-                    <div className="flex gap-6">
+                    <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
                       {/* Products */}
                       <div className="flex-1">
                         <div className="flex items-center gap-3">
@@ -396,7 +396,7 @@ export default function SellerOrdersPage() {
                       </div>
 
                       {/* Customer */}
-                      <div className="w-48">
+                      <div className="w-full lg:w-48">
                         <p className="text-sm font-medium text-gray-800">
                           {getCustomerName(order)}
                         </p>
@@ -406,7 +406,7 @@ export default function SellerOrdersPage() {
                       </div>
 
                       {/* Total */}
-                      <div className="text-right">
+                      <div className="text-left lg:text-right">
                         <p className="text-lg font-bold text-primary">
                           {formatCurrency(order.totalAmount)}
                         </p>
@@ -419,7 +419,7 @@ export default function SellerOrdersPage() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between px-6 py-4 bg-white/50">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-6 py-4 bg-white/50">
                 <p className="text-sm text-gray-500">
                   Hiển thị {orders.length} / {total} đơn hàng
                 </p>

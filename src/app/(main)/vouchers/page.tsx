@@ -90,7 +90,7 @@ export default function VouchersPage() {
       {/* Simple Header */}
       <div className="bg-[#f7f7f7] py-8 px-4">
         <div className="max-w-[1200px] mx-auto">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
                 <Gift className="w-5 h-5 text-primary" />
@@ -118,7 +118,7 @@ export default function VouchersPage() {
       <div className="max-w-[1200px] mx-auto px-4 mt-6">
         <div className="bg-[#f7f7f7] rounded-2xl overflow-hidden">
           {/* Section Header */}
-          <div className="flex items-center justify-between px-5 py-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-5 py-4">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-primary" />
               <span className="font-semibold text-gray-800">
@@ -128,7 +128,7 @@ export default function VouchersPage() {
                 {dailyVouchers.length} mã
               </span>
             </div>
-            <button className="flex items-center gap-1 text-primary text-sm hover:opacity-80 transition-opacity">
+            <button className="flex items-center gap-1 text-primary text-sm hover:opacity-80 transition-opacity self-start sm:self-auto">
               Xem tất cả <ChevronRight className="w-4 h-4" />
             </button>
           </div>

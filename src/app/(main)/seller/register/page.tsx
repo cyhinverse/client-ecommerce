@@ -9,7 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { useAppSelector } from "@/hooks/hooks";
+import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { authSlice } from "@/features/auth/authSlice";
+import instance from "@/api/api";
 import {
   useMyShop,
   useRegisterShop,
@@ -20,6 +22,7 @@ import { CreateShopPayload } from "@/types/shop";
 
 export default function SellerRegisterPage() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const { data: myShop, isLoading } = useMyShop();
   const registerShopMutation = useRegisterShop();
   const uploadLogoMutation = useUploadShopLogo();
@@ -119,6 +122,19 @@ export default function SellerRegisterPage() {
 
     try {
       await registerShopMutation.mutateAsync(formData);
+      try {
+        await instance.post("/auth/refresh-token");
+        const profileResponse = await instance.get("/users/profile");
+        const user = profileResponse?.data?.data;
+        if (user) {
+          dispatch(authSlice.actions.setIsAuthenticated(true));
+          dispatch(authSlice.actions.setUserData(user));
+        }
+      } catch {
+        toast.warning(
+          "Đăng ký shop thành công, vui lòng tải lại để cập nhật quyền"
+        );
+      }
       toast.success("Đăng ký shop thành công!");
       router.push("/seller/settings");
     } catch {
@@ -227,7 +243,7 @@ export default function SellerRegisterPage() {
                   />
                 </div>
                 {/* Shop Images */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label>Logo Shop</Label>
                     <input
@@ -305,7 +321,7 @@ export default function SellerRegisterPage() {
                   <MapPin className="h-4 w-4" />
                   Địa chỉ lấy hàng
                 </h2>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="fullName">Họ tên *</Label>
                     <Input
@@ -358,7 +374,7 @@ export default function SellerRegisterPage() {
                     </p>
                   )}
                 </div>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="city">Tỉnh/Thành *</Label>
                     <Input

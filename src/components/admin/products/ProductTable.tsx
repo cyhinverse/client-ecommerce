@@ -197,9 +197,9 @@ export function ProductsTable({
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-[#f7f7f7] p-4 rounded-2xl">
-        <div className="flex flex-1 items-center space-x-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar">
-          <div className="relative flex-1 min-w-[200px] max-w-sm">
+      <div className="flex flex-col gap-4 bg-[#f7f7f7] p-4 rounded-2xl lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="relative w-full sm:flex-1 sm:min-w-[220px] sm:max-w-sm">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search products..."
@@ -214,7 +214,7 @@ export function ProductsTable({
             value={selectedCategory}
             onValueChange={onCategoryFilterChange}
           >
-            <SelectTrigger className="w-[160px] rounded-xl border-0 bg-white focus:ring-0">
+            <SelectTrigger className="w-full rounded-xl border-0 bg-white focus:ring-0 sm:w-[160px]">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent className="rounded-xl border-0">
@@ -229,7 +229,7 @@ export function ProductsTable({
 
           {/* Brand Filter */}
           <Select value={selectedBrand} onValueChange={onBrandFilterChange}>
-            <SelectTrigger className="w-[140px] rounded-xl border-0 bg-white focus:ring-0">
+            <SelectTrigger className="w-full rounded-xl border-0 bg-white focus:ring-0 sm:w-[140px]">
               <SelectValue placeholder="Brand" />
             </SelectTrigger>
             <SelectContent className="rounded-xl border-0">
@@ -246,7 +246,7 @@ export function ProductsTable({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="flex items-center gap-2 rounded-xl border-0 bg-white hover:bg-white/80"
+                className="flex w-full items-center justify-start gap-2 rounded-xl border-0 bg-white hover:bg-white/80 sm:w-auto sm:justify-center"
               >
                 <Filter className="h-4 w-4" />
                 Price
@@ -294,7 +294,7 @@ export function ProductsTable({
               }
             }}
           >
-            <SelectTrigger className="w-[140px] rounded-xl border-0 bg-white focus:ring-0">
+            <SelectTrigger className="w-full rounded-xl border-0 bg-white focus:ring-0 sm:w-[140px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent className="rounded-xl border-0">
@@ -307,7 +307,7 @@ export function ProductsTable({
           {/* Shop Filter */}
           {onShopFilterChange && shops.length > 0 && (
             <Select value={selectedShop} onValueChange={onShopFilterChange}>
-              <SelectTrigger className="w-[160px] rounded-xl border-0 bg-white focus:ring-0">
+              <SelectTrigger className="w-full rounded-xl border-0 bg-white focus:ring-0 sm:w-[160px]">
                 <Store className="h-4 w-4 mr-2 text-muted-foreground" />
                 <SelectValue placeholder="Shop" />
               </SelectTrigger>
@@ -324,262 +324,266 @@ export function ProductsTable({
         </div>
 
         {/* Page Size Filter */}
-        <Select
-          value={pageSize.toString()}
-          onValueChange={(value) => onPageSizeChange(Number(value))}
-        >
-          <SelectTrigger className="w-[120px] rounded-xl border-0 bg-white focus:ring-0">
-            <SelectValue placeholder="Show" />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl border-0">
-            <SelectItem value="10">10 / page</SelectItem>
-            <SelectItem value="20">20 / page</SelectItem>
-            <SelectItem value="50">50 / page</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="w-full sm:w-auto">
+          <Select
+            value={pageSize.toString()}
+            onValueChange={(value) => onPageSizeChange(Number(value))}
+          >
+            <SelectTrigger className="w-full rounded-xl border-0 bg-white focus:ring-0 sm:w-[120px]">
+              <SelectValue placeholder="Show" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl border-0">
+              <SelectItem value="10">10 / page</SelectItem>
+              <SelectItem value="20">20 / page</SelectItem>
+              <SelectItem value="50">50 / page</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Table */}
       <div className="rounded-2xl bg-white overflow-hidden">
-        <Table>
-          <TableHeader className="bg-[#f7f7f7]">
-            <TableRow className="border-0 hover:bg-transparent">
-              <TableHead className="w-[70px] uppercase text-xs font-bold tracking-wider text-muted-foreground pl-6">
-                Image
-              </TableHead>
-              <TableHead className="w-[220px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                Product Name
-              </TableHead>
-              <TableHead className="w-[140px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                Shop
-              </TableHead>
-              <TableHead className="w-[120px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                Category
-              </TableHead>
-              <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                Brand
-              </TableHead>
-              <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                Price
-              </TableHead>
-              <TableHead className="w-[80px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                Stock
-              </TableHead>
-              <TableHead className="w-[80px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                Sold
-              </TableHead>
-              <TableHead className="w-[90px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                Status
-              </TableHead>
-              <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                Created At
-              </TableHead>
-              <TableHead className="w-[50px] uppercase text-xs font-bold tracking-wider text-muted-foreground text-right pr-6">
-                Actions
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading && (
-              <TableRow>
-                <TableCell colSpan={11} className="h-32 text-center">
-                  <div className="flex justify-center items-center">
-                    <SpinnerLoading />
-                  </div>
-                </TableCell>
+        <div className="overflow-x-auto no-scrollbar">
+          <Table>
+            <TableHeader className="bg-[#f7f7f7]">
+              <TableRow className="border-0 hover:bg-transparent">
+                <TableHead className="w-[70px] uppercase text-xs font-bold tracking-wider text-muted-foreground pl-6">
+                  Image
+                </TableHead>
+                <TableHead className="w-[220px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
+                  Product Name
+                </TableHead>
+                <TableHead className="w-[140px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
+                  Shop
+                </TableHead>
+                <TableHead className="w-[120px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
+                  Category
+                </TableHead>
+                <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
+                  Brand
+                </TableHead>
+                <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
+                  Price
+                </TableHead>
+                <TableHead className="w-[80px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
+                  Stock
+                </TableHead>
+                <TableHead className="w-[80px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
+                  Sold
+                </TableHead>
+                <TableHead className="w-[90px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
+                  Status
+                </TableHead>
+                <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
+                  Created At
+                </TableHead>
+                <TableHead className="w-[50px] uppercase text-xs font-bold tracking-wider text-muted-foreground text-right pr-6">
+                  Actions
+                </TableHead>
               </TableRow>
-            )}
-            {!isLoading && products.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={11}
-                  className="h-32 text-center text-muted-foreground"
-                >
-                  No products found.
-                </TableCell>
-              </TableRow>
-            ) : (
-              products.map((product) => (
-                <TableRow
-                  key={product._id}
-                  className={`border-0 hover:bg-[#f7f7f7]/50 transition-colors ${
-                    isLoading ? "opacity-50 pointer-events-none" : ""
-                  }`}
-                >
-                  <TableCell className="pl-6">
-                    {getMainImage(product) ? (
-                      <div className="relative h-12 w-12 rounded-xl overflow-hidden bg-[#f7f7f7]">
-                        <Image
-                          src={getMainImage(product)!}
-                          alt={product.name}
-                          width={48}
-                          height={48}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div className="h-12 w-12 rounded-xl bg-[#f7f7f7] flex items-center justify-center">
-                        <Package className="h-5 w-5 text-muted-foreground" />
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    <div className="max-w-[250px]">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="text-foreground truncate font-medium text-sm"
-                          title={product.name}
-                        >
-                          {product.name}
-                        </div>
-                        <div className="flex items-center gap-1 shrink-0">
-                          {product.isNewArrival && (
-                            <Badge
-                              variant="secondary"
-                              className="h-5 px-1.5 text-[10px] rounded-md bg-blue-50 text-blue-600 border-0"
-                            >
-                              New
-                            </Badge>
-                          )}
-                          {product.isFeatured && (
-                            <Badge
-                              variant="secondary"
-                              className="h-5 px-1.5 text-[10px] rounded-md bg-purple-50 text-purple-600 border-0"
-                            >
-                              Hot
-                            </Badge>
-                          )}
-                          {product.onSale && (
-                            <Badge
-                              variant="secondary"
-                              className="h-5 px-1.5 text-[10px] rounded-md bg-red-50 text-red-600 border-0"
-                            >
-                              Sale
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                      <div
-                        className="text-xs text-muted-foreground font-normal truncate mt-0.5"
-                        title={product.slug}
-                      >
-                        {product.slug}
-                      </div>
+            </TableHeader>
+            <TableBody>
+              {isLoading && (
+                <TableRow>
+                  <TableCell colSpan={11} className="h-32 text-center">
+                    <div className="flex justify-center items-center">
+                      <SpinnerLoading />
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2 max-w-[140px]">
-                      {getShopInfo(product.shop).logo ? (
-                        <div className="relative h-6 w-6 rounded-md overflow-hidden bg-[#f7f7f7] shrink-0">
+                </TableRow>
+              )}
+              {!isLoading && products.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={11}
+                    className="h-32 text-center text-muted-foreground"
+                  >
+                    No products found.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                products.map((product) => (
+                  <TableRow
+                    key={product._id}
+                    className={`border-0 hover:bg-[#f7f7f7]/50 transition-colors ${
+                      isLoading ? "opacity-50 pointer-events-none" : ""
+                    }`}
+                  >
+                    <TableCell className="pl-6">
+                      {getMainImage(product) ? (
+                        <div className="relative h-12 w-12 rounded-xl overflow-hidden bg-[#f7f7f7]">
                           <Image
-                            src={getShopInfo(product.shop).logo!}
-                            alt={getShopInfo(product.shop).name}
-                            width={24}
-                            height={24}
+                            src={getMainImage(product)!}
+                            alt={product.name}
+                            width={48}
+                            height={48}
                             className="h-full w-full object-cover"
                           />
                         </div>
                       ) : (
-                        <div className="h-6 w-6 rounded-md bg-[#f7f7f7] flex items-center justify-center shrink-0">
-                          <Store className="h-3 w-3 text-muted-foreground" />
+                        <div className="h-12 w-12 rounded-xl bg-[#f7f7f7] flex items-center justify-center">
+                          <Package className="h-5 w-5 text-muted-foreground" />
                         </div>
                       )}
-                      <span
-                        className="text-sm text-muted-foreground truncate"
-                        title={getShopInfo(product.shop).name}
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      <div className="max-w-[250px]">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="text-foreground truncate font-medium text-sm"
+                            title={product.name}
+                          >
+                            {product.name}
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            {product.isNewArrival && (
+                              <Badge
+                                variant="secondary"
+                                className="h-5 px-1.5 text-[10px] rounded-md bg-blue-50 text-blue-600 border-0"
+                              >
+                                New
+                              </Badge>
+                            )}
+                            {product.isFeatured && (
+                              <Badge
+                                variant="secondary"
+                                className="h-5 px-1.5 text-[10px] rounded-md bg-purple-50 text-purple-600 border-0"
+                              >
+                                Hot
+                              </Badge>
+                            )}
+                            {product.onSale && (
+                              <Badge
+                                variant="secondary"
+                                className="h-5 px-1.5 text-[10px] rounded-md bg-red-50 text-red-600 border-0"
+                              >
+                                Sale
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                        <div
+                          className="text-xs text-muted-foreground font-normal truncate mt-0.5"
+                          title={product.slug}
+                        >
+                          {product.slug}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2 max-w-[140px]">
+                        {getShopInfo(product.shop).logo ? (
+                          <div className="relative h-6 w-6 rounded-md overflow-hidden bg-[#f7f7f7] shrink-0">
+                            <Image
+                              src={getShopInfo(product.shop).logo!}
+                              alt={getShopInfo(product.shop).name}
+                              width={24}
+                              height={24}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="h-6 w-6 rounded-md bg-[#f7f7f7] flex items-center justify-center shrink-0">
+                            <Store className="h-3 w-3 text-muted-foreground" />
+                          </div>
+                        )}
+                        <span
+                          className="text-sm text-muted-foreground truncate"
+                          title={getShopInfo(product.shop).name}
+                        >
+                          {getShopInfo(product.shop).name}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      <div
+                        className="max-w-[140px] truncate"
+                        title={getCategoryName(product.category)}
                       >
-                        {getShopInfo(product.shop).name}
+                        {getCategoryName(product.category)}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      <div
+                        className="max-w-[120px] truncate"
+                        title={product.brand || "None"}
+                      >
+                        {product.brand || "None"}
+                      </div>
+                    </TableCell>
+                    <TableCell>{getPriceDisplay(product.price)}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className="rounded-lg border-0 font-normal bg-[#f7f7f7]"
+                      >
+                        {getStockCount(product)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm text-muted-foreground">
+                        {product.soldCount || 0}
                       </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">
-                    <div
-                      className="max-w-[140px] truncate"
-                      title={getCategoryName(product.category)}
-                    >
-                      {getCategoryName(product.category)}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">
-                    <div
-                      className="max-w-[120px] truncate"
-                      title={product.brand || "None"}
-                    >
-                      {product.brand || "None"}
-                    </div>
-                  </TableCell>
-                  <TableCell>{getPriceDisplay(product.price)}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className="rounded-lg border-0 font-normal bg-[#f7f7f7]"
-                    >
-                      {getStockCount(product)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-sm text-muted-foreground">
-                      {product.soldCount || 0}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={product.isActive ? "default" : "secondary"}
-                      className={`rounded-lg font-medium px-2.5 py-0.5 shadow-none border-0 ${
-                        product.isActive
-                          ? "bg-green-100 text-green-700 hover:bg-green-100"
-                          : "bg-gray-100 text-gray-600 hover:bg-gray-100"
-                      }`}
-                    >
-                      {product.isActive ? "Active" : "Inactive"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
-                    {new Date(product.createdAt).toLocaleDateString("vi-VN")}
-                  </TableCell>
-                  <TableCell className="text-right pr-6">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          className="h-8 w-8 p-0 rounded-lg hover:bg-[#f7f7f7]"
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent
-                        align="end"
-                        className="rounded-xl border-0 shadow-lg"
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={product.isActive ? "default" : "secondary"}
+                        className={`rounded-lg font-medium px-2.5 py-0.5 shadow-none border-0 ${
+                          product.isActive
+                            ? "bg-green-100 text-green-700 hover:bg-green-100"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-100"
+                        }`}
                       >
-                        <DropdownMenuItem
-                          onClick={() => onView(product)}
-                          className="cursor-pointer gap-2"
+                        {product.isActive ? "Active" : "Inactive"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
+                      {new Date(product.createdAt).toLocaleDateString("vi-VN")}
+                    </TableCell>
+                    <TableCell className="text-right pr-6">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            className="h-8 w-8 p-0 rounded-lg hover:bg-[#f7f7f7]"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="end"
+                          className="rounded-xl border-0 shadow-lg"
                         >
-                          <Eye className="h-4 w-4" />
-                          View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => onEdit(product)}
-                          className="cursor-pointer gap-2"
-                        >
-                          <Edit className="h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => onDelete(product)}
-                          className="text-destructive cursor-pointer focus:text-destructive focus:bg-destructive/10 gap-2"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+                          <DropdownMenuItem
+                            onClick={() => onView(product)}
+                            className="cursor-pointer gap-2"
+                          >
+                            <Eye className="h-4 w-4" />
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => onEdit(product)}
+                            className="cursor-pointer gap-2"
+                          >
+                            <Edit className="h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => onDelete(product)}
+                            className="text-destructive cursor-pointer focus:text-destructive focus:bg-destructive/10 gap-2"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   );

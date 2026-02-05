@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { MessageCircle, Reply, Star } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,6 +20,8 @@ import {
 } from "@/components/ui/dialog";
 import { PaginationControls } from "@/components/common/Pagination";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
+import { useUrlFilters } from "@/hooks/useUrlFilters";
+import { useMyShopReviews, useReplyReview } from "@/hooks/queries/useReviews";
 import { toast } from "sonner";
 import Image from "next/image";
 import { format } from "date-fns";
@@ -72,12 +75,12 @@ export default function SellerReviewsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold text-gray-800">Đánh giá từ khách hàng</h1>
       </div>
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex gap-4 items-center">
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-4 sm:flex-row sm:items-center">
         <Select
           value={String(filters.rating)}
           onValueChange={(val) => updateFilter("rating", val)}
@@ -117,7 +120,7 @@ export default function SellerReviewsPage() {
               key={review._id}
               className="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
             >
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
                 {/* Product Image */}
                 <div className="relative h-16 w-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
                   <Image
@@ -130,7 +133,7 @@ export default function SellerReviewsPage() {
 
                 <div className="flex-1">
                   {/* Header */}
-                  <div className="flex justify-between items-start mb-2">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between mb-2">
                     <div>
                       <h3 className="font-medium text-gray-900">
                         {review.product?.name}
@@ -161,7 +164,7 @@ export default function SellerReviewsPage() {
                         size="sm"
                         variant="outline"
                         onClick={() => handleOpenReply(review)}
-                        className="gap-2"
+                        className="gap-2 w-full sm:w-auto"
                       >
                         <Reply className="h-3.5 w-3.5" />
                         Trả lời

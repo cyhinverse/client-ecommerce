@@ -1,8 +1,12 @@
 "use client";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 import { PaginationControls } from "@/components/common/Pagination";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
+import { useUrlFilters } from "@/hooks/useUrlFilters";
+import instance from "@/api/api";
+import { extractApiData } from "@/api";
 import { format } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
@@ -56,7 +60,7 @@ export default function AdminChatbotPage() {
 
   return (
     <div className="space-y-6 p-1">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold text-gray-800">Quản lý Chatbot AI</h1>
       </div>
 
@@ -66,7 +70,8 @@ export default function AdminChatbotPage() {
             <SpinnerLoading />
           </div>
         ) : (
-          <table className="w-full text-sm text-left">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[720px] text-sm text-left">
             <thead className="bg-gray-50 text-gray-600 font-medium border-b">
               <tr>
                 <th className="px-6 py-4">Session ID</th>
@@ -114,7 +119,8 @@ export default function AdminChatbotPage() {
                 ))
               )}
             </tbody>
-          </table>
+            </table>
+          </div>
         )}
       </div>
 

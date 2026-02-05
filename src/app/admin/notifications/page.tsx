@@ -121,7 +121,7 @@ export default function AdminNotificationsPage() {
                   </div>
 
                   <div className="flex-1 space-y-1">
-                    <div className="flex items-center justify-between gap-2">
+                    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                       <p
                         className={cn(
                           "text-sm font-medium leading-none",

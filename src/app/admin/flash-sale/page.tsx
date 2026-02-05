@@ -208,7 +208,7 @@ export default function AdminFlashSalePage() {
             key={stat.label}
             className="rounded-2xl bg-[#f7f7f7] dark:bg-[#1C1C1E] p-5"
           >
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-muted-foreground">{stat.label}</p>
               <stat.icon className={`h-4 w-4 ${stat.color}`} />
             </div>
@@ -250,7 +250,7 @@ export default function AdminFlashSalePage() {
 
       {/* Products Grid */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <h3 className="font-semibold">Flash Sale Products</h3>
           <div className="relative max-w-xs">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -372,7 +372,7 @@ export default function AdminFlashSalePage() {
                 className="rounded-xl"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Sale Price</Label>
                 <Input
@@ -413,7 +413,7 @@ export default function AdminFlashSalePage() {
                 className="rounded-xl"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Start Time</Label>
                 <Input

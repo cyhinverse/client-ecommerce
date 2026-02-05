@@ -181,68 +181,74 @@ export default function ProductsPage() {
           </div>
 
           {/* Sort Tabs */}
-          <div className="flex items-center gap-1 py-2 border-t border-gray-100">
-            <span className="text-sm text-gray-500 mr-2">Sắp xếp theo</span>
-            {SORT_TABS.map((tab) => (
-              <button
-                key={tab.value}
-                onClick={() => handleSortTabClick(tab.value)}
-                className={`flex items-center gap-1 px-4 py-1.5 text-sm font-medium rounded transition-colors ${
-                  filters.sortBy === tab.value ||
-                  (tab.value === "price" && filters.sortBy?.startsWith("price"))
-                    ? "bg-[#E53935] text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                {tab.label}
-                {tab.hasDropdown && (
-                  <ChevronDown
-                    className={`h-3.5 w-3.5 transition-transform ${
-                      priceSort === "desc" ? "rotate-180" : ""
-                    }`}
-                  />
-                )}
-              </button>
-            ))}
-
-            {/* Mobile Filter Button */}
-            <Sheet
-              open={isMobileFilterOpen}
-              onOpenChange={setIsMobileFilterOpen}
-            >
-              <SheetTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="lg:hidden ml-auto rounded h-8 border-gray-200"
-                >
-                  <SlidersHorizontal className="w-4 h-4 mr-1.5" />
-                  Lọc
-                </Button>
-              </SheetTrigger>
-              <SheetContent
-                side="left"
-                className="w-[280px] overflow-y-auto p-0"
-              >
-                <SheetHeader className="p-4 border-b">
-                  <SheetTitle>Bộ lọc</SheetTitle>
-                </SheetHeader>
-                <div className="p-4">
-                  <ProductFilter
-                    filters={filters}
-                    onFilterChange={handleFilterChange}
-                    onClearFilters={handleClearFilters}
-                  />
-                </div>
-              </SheetContent>
-            </Sheet>
-
-            {/* Product Count */}
-            <div className="hidden lg:flex items-center ml-auto text-sm text-gray-500">
-              <span className="font-medium text-gray-800">
-                {products?.length || 0}
+          <div className="flex flex-col gap-2 py-2 border-t border-gray-100 sm:flex-row sm:items-center">
+            <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
+              <span className="text-sm text-gray-500 mr-2 shrink-0">
+                Sắp xếp theo
               </span>
-              <span className="ml-1">sản phẩm</span>
+              {SORT_TABS.map((tab) => (
+                <button
+                  key={tab.value}
+                  onClick={() => handleSortTabClick(tab.value)}
+                  className={`flex items-center gap-1 px-4 py-1.5 text-sm font-medium rounded transition-colors shrink-0 ${
+                    filters.sortBy === tab.value ||
+                    (tab.value === "price" && filters.sortBy?.startsWith("price"))
+                      ? "bg-[#E53935] text-white"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }`}
+                >
+                  {tab.label}
+                  {tab.hasDropdown && (
+                    <ChevronDown
+                      className={`h-3.5 w-3.5 transition-transform ${
+                        priceSort === "desc" ? "rotate-180" : ""
+                      }`}
+                    />
+                  )}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2 sm:ml-auto">
+              {/* Mobile Filter Button */}
+              <Sheet
+                open={isMobileFilterOpen}
+                onOpenChange={setIsMobileFilterOpen}
+              >
+                <SheetTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="lg:hidden rounded h-8 border-gray-200"
+                  >
+                    <SlidersHorizontal className="w-4 h-4 mr-1.5" />
+                    Lọc
+                  </Button>
+                </SheetTrigger>
+                <SheetContent
+                  side="left"
+                  className="w-[280px] overflow-y-auto p-0"
+                >
+                  <SheetHeader className="p-4 border-b">
+                    <SheetTitle>Bộ lọc</SheetTitle>
+                  </SheetHeader>
+                  <div className="p-4">
+                    <ProductFilter
+                      filters={filters}
+                      onFilterChange={handleFilterChange}
+                      onClearFilters={handleClearFilters}
+                    />
+                  </div>
+                </SheetContent>
+              </Sheet>
+
+              {/* Product Count */}
+              <div className="hidden lg:flex items-center text-sm text-gray-500">
+                <span className="font-medium text-gray-800">
+                  {products?.length || 0}
+                </span>
+                <span className="ml-1">sản phẩm</span>
+              </div>
             </div>
           </div>
         </div>

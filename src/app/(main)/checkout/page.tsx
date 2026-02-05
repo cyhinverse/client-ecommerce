@@ -254,7 +254,7 @@ export default function CheckoutPage() {
     <div className="w-full min-h-screen bg-background py-4 -mt-4 -mx-4 px-4">
       <div className="max-w-[1200px] mx-auto">
         {/* Header */}
-        <div className="bg-[#f7f7f7] rounded-sm mb-4 p-4 flex items-center justify-between">
+        <div className="bg-[#f7f7f7] rounded-sm mb-4 p-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <Link href="/cart" className="text-gray-500 hover:text-[#E53935]">
               <ChevronLeft className="h-5 w-5" />
@@ -418,7 +418,7 @@ export default function CheckoutPage() {
                   {shopGroup.items.map((item) => (
                     <div
                       key={item._id}
-                      className="flex items-center gap-4 p-4 border-b border-gray-50 last:border-0"
+                      className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 border-b border-gray-50 last:border-0"
                     >
                       <div className="relative w-16 h-16 bg-gray-100 rounded overflow-hidden shrink-0">
                         {getItemImage(item) ? (
@@ -459,7 +459,7 @@ export default function CheckoutPage() {
                           x{item.quantity}
                         </p>
                       </div>
-                      <div className="text-right">
+                      <div className="text-left sm:text-right">
                         <span className="text-[#E53935] font-medium">
                           {formatCurrency(getEffectivePrice(item) * item.quantity)}
                         </span>
@@ -468,14 +468,14 @@ export default function CheckoutPage() {
                   ))}
 
                   {/* Shop Voucher */}
-                  <div className="flex items-center justify-between p-4 bg-gray-50/50 border-t border-gray-100">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between p-4 bg-gray-50/50 border-t border-gray-100">
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Tag className="h-4 w-4 text-[#E53935]" />
                       <span>Voucher của Shop</span>
                     </div>
                     <button
                       type="button"
-                      className="flex items-center gap-1 text-sm text-[#E53935]"
+                      className="flex items-center gap-1 text-sm text-[#E53935] self-start sm:self-auto"
                     >
                       <span>Chọn voucher</span>
                       <ChevronRight className="h-4 w-4" />
@@ -486,20 +486,20 @@ export default function CheckoutPage() {
 
               {/* Platform Voucher */}
               <div className="bg-[#f7f7f7] rounded-sm p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-2">
                     <Tag className="h-5 w-5 text-[#E53935]" />
                     <span className="font-medium text-gray-800">
                       Voucher nền tảng
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                     <Input
                       placeholder="Nhập mã voucher"
                       value={promoCode}
                       onChange={(e) => setPromoCode(e.target.value)}
                       disabled={!!appliedPlatformVoucher}
-                      className="h-9 w-40 text-sm rounded border-gray-200"
+                      className="h-9 w-full sm:w-40 text-sm rounded border-gray-200"
                     />
                     {appliedPlatformVoucher ? (
                       <Button
@@ -507,7 +507,7 @@ export default function CheckoutPage() {
                         size="sm"
                         variant="outline"
                         onClick={handleRemoveVoucher}
-                        className="h-9 text-red-500 border-red-200 hover:bg-red-50"
+                        className="h-9 text-red-500 border-red-200 hover:bg-red-50 w-full sm:w-auto"
                       >
                         Xóa
                       </Button>
@@ -517,7 +517,7 @@ export default function CheckoutPage() {
                         size="sm"
                         onClick={handleApplyVoucher}
                         disabled={voucherLoading || !promoCode}
-                        className="h-9 bg-[#E53935] hover:bg-[#D32F2F]"
+                        className="h-9 bg-[#E53935] hover:bg-[#D32F2F] w-full sm:w-auto"
                       >
                         Áp dụng
                       </Button>

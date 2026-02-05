@@ -60,13 +60,13 @@ export default function AdminReviewsPage() {
 
   return (
     <div className="space-y-6 p-1">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold text-gray-800">Quản lý Đánh giá</h1>
       </div>
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-wrap gap-4 items-center">
-        <div className="relative flex-1 min-w-[200px]">
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+        <div className="relative w-full sm:flex-1 sm:min-w-[220px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             placeholder="Tìm kiếm nội dung đánh giá..."
@@ -80,7 +80,7 @@ export default function AdminReviewsPage() {
           value={String(filters.rating)}
           onValueChange={(val) => updateFilter("rating", val)}
         >
-          <SelectTrigger className="w-[150px]">
+          <SelectTrigger className="w-full sm:w-[150px]">
             <SelectValue placeholder="Số sao" />
           </SelectTrigger>
           <SelectContent>
@@ -93,7 +93,7 @@ export default function AdminReviewsPage() {
           </SelectContent>
         </Select>
 
-        <Button variant="outline" onClick={resetFilters}>
+        <Button variant="outline" onClick={resetFilters} className="w-full sm:w-auto">
           Reset
         </Button>
       </div>
@@ -105,7 +105,8 @@ export default function AdminReviewsPage() {
             <SpinnerLoading />
           </div>
         ) : (
-          <table className="w-full text-sm text-left">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[720px] text-sm text-left">
             <thead className="bg-gray-50 text-gray-600 font-medium border-b">
               <tr>
                 <th className="px-6 py-4">Sản phẩm</th>
@@ -183,7 +184,8 @@ export default function AdminReviewsPage() {
                 ))
               )}
             </tbody>
-          </table>
+            </table>
+          </div>
         )}
       </div>
 

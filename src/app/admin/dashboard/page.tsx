@@ -254,7 +254,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Revenue Chart */}
         <div className="rounded-2xl bg-[#f7f7f7] dark:bg-[#1C1C1E] p-6">
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h3 className="font-semibold text-lg text-foreground">Revenue</h3>
               <p className="text-sm text-muted-foreground">
@@ -335,7 +335,7 @@ export default function AdminDashboard() {
 
         {/* Orders Chart */}
         <div className="rounded-2xl bg-[#f7f7f7] dark:bg-[#1C1C1E] p-6">
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h3 className="font-semibold text-lg text-foreground">Orders</h3>
               <p className="text-sm text-muted-foreground">
@@ -395,7 +395,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Recent Orders Table */}
         <div className="rounded-2xl bg-[#f7f7f7] dark:bg-[#1C1C1E] p-6 flex flex-col">
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h3 className="font-semibold text-lg text-foreground">
                 Recent Orders
@@ -454,7 +454,7 @@ export default function AdminDashboard() {
 
         {/* Top Products List */}
         <div className="rounded-2xl bg-[#f7f7f7] dark:bg-[#1C1C1E] p-6 flex flex-col">
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h3 className="font-semibold text-lg text-foreground">
                 Top Products

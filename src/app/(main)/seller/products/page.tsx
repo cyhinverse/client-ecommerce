@@ -170,7 +170,7 @@ export default function SellerProductsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-[#f7f7f7] rounded-xl flex items-center justify-center">
             <Package className="h-6 w-6 text-blue-600" />
@@ -186,7 +186,7 @@ export default function SellerProductsPage() {
         </div>
         <Button
           onClick={handleOpenCreate}
-          className="bg-[#E53935] hover:bg-[#D32F2F] rounded-xl h-11 px-5"
+          className="bg-[#E53935] hover:bg-[#D32F2F] rounded-xl h-11 px-5 w-full sm:w-auto"
         >
           <Plus className="h-4 w-4 mr-2" />
           Thêm sản phẩm
@@ -195,7 +195,7 @@ export default function SellerProductsPage() {
 
       {/* Filters */}
       <div className="bg-[#f7f7f7] rounded-2xl p-4">
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
@@ -207,7 +207,7 @@ export default function SellerProductsPage() {
           </div>
           <Button
             variant="outline"
-            className="h-11 rounded-xl px-4 bg-white border-0"
+            className="h-11 rounded-xl px-4 bg-white border-0 w-full sm:w-auto"
           >
             <Filter className="h-4 w-4 mr-2" />
             Bộ lọc
@@ -242,7 +242,8 @@ export default function SellerProductsPage() {
           </div>
         ) : (
           <>
-            <table className="w-full">
+            <div className="w-full overflow-x-auto">
+              <table className="w-full min-w-[720px]">
               <thead>
                 <tr className="bg-white/50">
                   <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -377,11 +378,12 @@ export default function SellerProductsPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+              </table>
+            </div>
 
             {/* Pagination */}
             {(productPagination?.totalPages || 0) > 1 && (
-              <div className="flex items-center justify-between px-6 py-4 bg-white/50">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-6 py-4 bg-white/50">
                 <p className="text-sm text-gray-500">
                   Hiển thị {products.length} / {productPagination?.total || 0}{" "}
                   sản phẩm

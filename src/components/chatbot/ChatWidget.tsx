@@ -185,7 +185,7 @@ export default function ChatWidget() {
   return (
     <div
       className={cn(
-        "fixed top-0 right-0 h-full w-[380px] z-50 bg-white transform transition-transform duration-300 ease-in-out flex flex-col",
+        "fixed top-0 right-0 h-full w-full sm:w-[360px] md:w-[380px] z-50 bg-white transform transition-transform duration-300 ease-in-out flex flex-col",
         isOpen ? "translate-x-0" : "translate-x-full",
       )}
     >
@@ -249,7 +249,7 @@ export default function ChatWidget() {
             </div>
 
             {/* Quick Actions - Grid 2x2 */}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {QUICK_ACTIONS.map((action, i) => (
                 <button
                   key={i}

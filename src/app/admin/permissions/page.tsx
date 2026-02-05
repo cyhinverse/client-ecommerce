@@ -83,7 +83,7 @@ export default function AdminPermissionsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Shield className="h-6 w-6 text-primary" />
@@ -113,8 +113,8 @@ export default function AdminPermissionsPage() {
 
         {/* All Permissions Tab */}
         <TabsContent value="permissions" className="space-y-4">
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1 max-w-sm">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative w-full sm:flex-1 sm:max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Tìm kiếm permission..."
@@ -123,7 +123,7 @@ export default function AdminPermissionsPage() {
                 className="pl-9"
               />
             </div>
-            <Badge variant="outline">
+            <Badge variant="outline" className="w-fit">
               {filteredPermissions.length} permissions
             </Badge>
           </div>
@@ -193,8 +193,9 @@ export default function AdminPermissionsPage() {
 
         {/* Audit Logs Tab */}
         <TabsContent value="audit">
-          <div className="border rounded-lg">
-            <Table>
+          <div className="border rounded-lg overflow-hidden">
+            <div className="overflow-x-auto no-scrollbar">
+              <Table className="min-w-[640px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>Thời gian</TableHead>
@@ -248,7 +249,8 @@ export default function AdminPermissionsPage() {
                   ))
                 )}
               </TableBody>
-            </Table>
+              </Table>
+            </div>
           </div>
         </TabsContent>
       </Tabs>

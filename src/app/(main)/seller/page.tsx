@@ -129,7 +129,7 @@ export default function SellerDashboardPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Sản phẩm"
           value={stats?.totalProducts || 0}
@@ -169,7 +169,7 @@ export default function SellerDashboardPage() {
             Xem tất cả <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-        <div className="grid grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
           {orderStats.map((stat) => {
             const Icon = stat.icon;
             return (
@@ -187,7 +187,7 @@ export default function SellerDashboardPage() {
       </div>
 
       {/* Shop Performance */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         <div className="bg-[#f7f7f7] rounded-2xl p-5">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
@@ -236,10 +236,10 @@ export default function SellerDashboardPage() {
       </div>
 
       {/* Quick Actions & Top Products */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="bg-[#f7f7f7] rounded-2xl p-6">
           <h3 className="font-semibold text-gray-800 mb-4">Thao tác nhanh</h3>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <QuickAction
               href="/seller/products"
               icon={Package}

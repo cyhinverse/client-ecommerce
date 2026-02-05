@@ -7,7 +7,7 @@ interface CategoriesHeaderProps {
 
 export function CategoriesHeader({ onAddCategory }: CategoriesHeaderProps) {
   return (
-    <div className="flex items-center justify-between pb-6">
+    <div className="flex flex-col gap-4 pb-6 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground uppercase">
           Category Management
@@ -18,7 +18,7 @@ export function CategoriesHeader({ onAddCategory }: CategoriesHeaderProps) {
       </div>
       <Button 
         onClick={onAddCategory}
-        className="flex items-center gap-2 rounded-xl bg-[#E53935] hover:bg-[#D32F2F] text-white"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#E53935] text-white hover:bg-[#D32F2F] sm:w-auto"
       >
         <Plus className="h-4 w-4" />
         Add Category

@@ -141,7 +141,7 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-8 p-1">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-xl font-semibold tracking-tight text-foreground">
             Settings
@@ -258,7 +258,7 @@ export default function SettingsPage() {
             </div>
 
             <div className="space-y-6 max-w-2xl">
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-[#f7f7f7]">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between p-4 rounded-2xl bg-[#f7f7f7]">
                 <div className="flex flex-col space-y-1">
                   <Label htmlFor="new-orders" className="text-base font-medium">
                     New Orders
@@ -276,7 +276,7 @@ export default function SettingsPage() {
                 />
               </div>
 
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-[#f7f7f7]">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between p-4 rounded-2xl bg-[#f7f7f7]">
                 <div className="flex flex-col space-y-1">
                   <Label htmlFor="low-stock" className="text-base font-medium">
                     Low Stock Alerts
@@ -324,7 +324,7 @@ export default function SettingsPage() {
             </div>
 
             <div className="space-y-6 max-w-2xl">
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-[#f7f7f7]">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between p-4 rounded-2xl bg-[#f7f7f7]">
                 <div className="flex flex-col space-y-1">
                   <Label htmlFor="dark-mode" className="text-base font-medium">
                     Dark Mode Preferences

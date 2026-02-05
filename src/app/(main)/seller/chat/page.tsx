@@ -101,9 +101,9 @@ export default function SellerChatPage() {
   if (!myShop) return null;
 
   return (
-    <div className="bg-[#f7f7f7] rounded-2xl overflow-hidden h-[calc(100vh-180px)]">
-      <div className="flex h-full">
-        <div className="w-80 bg-white flex flex-col">
+    <div className="bg-[#f7f7f7] rounded-2xl overflow-hidden min-h-[70vh] lg:h-[calc(100vh-180px)]">
+      <div className="flex h-full flex-col lg:flex-row">
+        <div className="w-full lg:w-80 bg-white flex flex-col border-b lg:border-b-0 lg:border-r border-[#f0f0f0]">
           <div className="p-4">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 bg-[#f7f7f7] rounded-xl flex items-center justify-center">
@@ -194,7 +194,7 @@ export default function SellerChatPage() {
         <div className="flex-1 flex flex-col bg-[#f7f7f7]">
           {currentConversation ? (
             <>
-              <div className="p-4 bg-white flex items-center justify-between">
+              <div className="p-4 bg-white flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full overflow-hidden bg-[#f7f7f7]">
                     {currentConversation.user.avatar ? (
@@ -218,7 +218,7 @@ export default function SellerChatPage() {
                     <p className="text-xs text-green-500">Đang hoạt động</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 sm:gap-2">
                   <Button variant="ghost" size="icon" className="rounded-lg">
                     <Phone className="h-4 w-4 text-gray-500" />
                   </Button>
@@ -275,7 +275,7 @@ export default function SellerChatPage() {
                 <div ref={messagesEndRef} />
               </div>
               <div className="p-4 bg-white">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <Button
                     variant="ghost"
                     size="icon"
@@ -302,7 +302,7 @@ export default function SellerChatPage() {
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-                    className="flex-1 h-11 rounded-xl bg-[#f7f7f7] border-0"
+                    className="flex-1 min-w-[200px] h-11 rounded-xl bg-[#f7f7f7] border-0"
                     disabled={isSending}
                   />
                   <Button

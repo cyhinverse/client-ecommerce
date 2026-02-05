@@ -117,7 +117,7 @@ export function SettingsForm({ myShop }: SettingsFormProps) {
         {/* Banner & Logo */}
         <div className="bg-[#f7f7f7] rounded-2xl overflow-hidden">
           {/* Banner */}
-          <div className="relative h-48 bg-linear-to-r from-gray-200 to-gray-300">
+          <div className="relative h-36 sm:h-48 bg-linear-to-r from-gray-200 to-gray-300">
             <input
               type="file"
               ref={bannerInputRef}
@@ -149,7 +149,7 @@ export function SettingsForm({ myShop }: SettingsFormProps) {
 
           {/* Logo */}
           <div className="px-6 pb-6">
-            <div className="flex items-end gap-4 -mt-12">
+            <div className="flex flex-col sm:flex-row sm:items-end gap-4 -mt-10 sm:-mt-12">
               <div className="relative">
                 <input
                   type="file"
@@ -237,7 +237,7 @@ export function SettingsForm({ myShop }: SettingsFormProps) {
             <h3 className="font-semibold text-gray-800">Địa chỉ lấy hàng</h3>
           </div>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label className="text-gray-600">Họ tên người gửi</Label>
                 <Input
@@ -266,7 +266,7 @@ export function SettingsForm({ myShop }: SettingsFormProps) {
                 placeholder="Số nhà, tên đường..."
               />
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <Label className="text-gray-600">Tỉnh/Thành phố</Label>
                 <Input
@@ -298,11 +298,11 @@ export function SettingsForm({ myShop }: SettingsFormProps) {
         </div>
 
         {/* Submit */}
-        <div className="flex justify-end">
+        <div className="flex flex-col sm:flex-row sm:justify-end">
           <Button
             type="submit"
             disabled={isUpdating}
-            className="bg-primary hover:bg-primary/90 rounded-xl h-11 px-6"
+            className="bg-primary hover:bg-primary/90 rounded-xl h-11 px-6 w-full sm:w-auto"
           >
             {isUpdating ? (
               <>

@@ -190,7 +190,7 @@ export default function ProfilePage() {
                 orientation="vertical"
                 className="w-full"
               >
-                <TabsList className="flex flex-col h-auto w-full bg-transparent p-0">
+                <TabsList className="flex w-full flex-row md:flex-col h-auto bg-transparent p-2 md:p-0 overflow-x-auto md:overflow-visible gap-2 md:gap-0">
                   {tabs.map((tab) => {
                     const Icon = tab.icon;
                     return (
@@ -198,16 +198,16 @@ export default function ProfilePage() {
                         key={tab.value}
                         value={tab.value}
                         className={cn(
-                          "w-full justify-start px-4 py-3 rounded-none text-sm font-medium border-l-2",
+                          "flex-none md:flex-1 w-auto md:w-full justify-start px-3 md:px-4 py-2.5 md:py-3 rounded-md md:rounded-none text-sm font-medium border border-border/40 md:border-0 md:border-l-2 md:border-l-transparent shrink-0",
                           "transition-all duration-200",
-                          "hover:bg-muted/50 text-muted-foreground hover:text-foreground",
-                          "data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:border-l-primary",
-                          "data-[state=inactive]:border-l-transparent",
+                          "bg-background md:bg-transparent hover:bg-muted/50 text-muted-foreground hover:text-foreground",
+                          "data-[state=active]:bg-primary/10 md:data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:border-primary md:data-[state=active]:border-l-primary",
+                          "data-[state=inactive]:border-border/40 md:data-[state=inactive]:border-l-transparent",
                         )}
                       >
                         <Icon className="h-4 w-4 mr-3 shrink-0" />
                         <span className="flex-1 text-left">{tab.label}</span>
-                        <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+                        <ChevronRight className="h-4 w-4 text-muted-foreground/50 hidden md:block" />
                       </TabsTrigger>
                     );
                   })}

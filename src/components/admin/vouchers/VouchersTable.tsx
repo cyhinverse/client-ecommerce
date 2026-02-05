@@ -187,9 +187,9 @@ export function DiscountsTable({
   return (
     <div className="space-y-4">
       {/* Filters and Search Bar */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-white/50 dark:bg-white/5 p-4 rounded-[1.5rem] backdrop-blur-xl border border-border/50">
-        <div className="flex flex-1 items-center gap-3">
-          <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col gap-4 bg-white/50 dark:bg-white/5 p-4 rounded-[1.5rem] backdrop-blur-xl border border-border/50 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="relative w-full sm:flex-1 sm:min-w-[220px] sm:max-w-sm">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search by code..."
@@ -199,12 +199,12 @@ export function DiscountsTable({
             />
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
             <Select
               value={selectedDiscountType}
               onValueChange={onDiscountTypeFilterChange}
             >
-              <SelectTrigger className="w-[160px] rounded-xl border-gray-200 bg-white/80 shadow-sm hover:bg-gray-50 h-10">
+              <SelectTrigger className="w-full rounded-xl border-gray-200 bg-white/80 shadow-sm hover:bg-gray-50 h-10 sm:w-[160px]">
                 <SelectValue placeholder="Discount Type" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-border/50 shadow-lg">
@@ -222,7 +222,7 @@ export function DiscountsTable({
                 onActiveFilterChange(value === "all" ? null : value === "true")
               }
             >
-              <SelectTrigger className="w-[140px] rounded-xl border-gray-200 bg-white/80 shadow-sm hover:bg-gray-50 h-10">
+              <SelectTrigger className="w-full rounded-xl border-gray-200 bg-white/80 shadow-sm hover:bg-gray-50 h-10 sm:w-[140px]">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-border/50 shadow-lg">
@@ -234,7 +234,7 @@ export function DiscountsTable({
 
             {onScopeFilterChange && (
               <Select value={selectedScope} onValueChange={onScopeFilterChange}>
-                <SelectTrigger className="w-[140px] rounded-xl border-gray-200 bg-white/80 shadow-sm hover:bg-gray-50 h-10">
+                <SelectTrigger className="w-full rounded-xl border-gray-200 bg-white/80 shadow-sm hover:bg-gray-50 h-10 sm:w-[140px]">
                   <SelectValue placeholder="Scope" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-border/50 shadow-lg">
@@ -247,7 +247,7 @@ export function DiscountsTable({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex w-full items-center gap-2 sm:w-auto">
           <span className="text-sm font-medium text-muted-foreground">
             Show:
           </span>
@@ -255,7 +255,7 @@ export function DiscountsTable({
             value={pageSize.toString()}
             onValueChange={(value) => onPageSizeChange(Number(value))}
           >
-            <SelectTrigger className="w-[100px] h-9 rounded-lg border-gray-200 bg-white/80 shadow-sm">
+            <SelectTrigger className="w-full h-9 rounded-lg border-gray-200 bg-white/80 shadow-sm sm:w-[100px]">
               <SelectValue placeholder="Size" />
             </SelectTrigger>
             <SelectContent className="rounded-xl border-border/50">

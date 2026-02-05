@@ -124,13 +124,13 @@ export default function CategoryDetailPage() {
         {/* Filter & Sort Bar - Taobao Style */}
         <div className="bg-card sticky top-[60px] z-40">
           <div className="container-taobao py-2">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               {/* Sort Tabs */}
-              <div className="flex items-center">
+              <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
                 <button
                   onClick={() => setSortBy("default")}
                   className={cn(
-                    "px-4 py-1.5 text-xs font-medium rounded-sm transition-colors",
+                    "px-4 py-1.5 text-xs font-medium rounded-sm transition-colors shrink-0",
                     sortBy === "default"
                       ? "bg-primary text-white"
                       : "text-foreground hover:text-primary"
@@ -141,7 +141,7 @@ export default function CategoryDetailPage() {
                 <button
                   onClick={() => setSortBy("sales")}
                   className={cn(
-                    "px-4 py-1.5 text-xs font-medium transition-colors",
+                    "px-4 py-1.5 text-xs font-medium transition-colors shrink-0",
                     sortBy === "sales"
                       ? "text-primary"
                       : "text-foreground hover:text-primary"
@@ -156,7 +156,7 @@ export default function CategoryDetailPage() {
                     )
                   }
                   className={cn(
-                    "px-4 py-1.5 text-xs font-medium transition-colors flex items-center gap-0.5",
+                    "px-4 py-1.5 text-xs font-medium transition-colors flex items-center gap-0.5 shrink-0",
                     sortBy === "price-asc" || sortBy === "price-desc"
                       ? "text-primary"
                       : "text-foreground hover:text-primary"
@@ -172,13 +172,13 @@ export default function CategoryDetailPage() {
                 </button>
 
                 {/* Price Range */}
-                <div className="flex items-center gap-1 ml-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1 ml-2 text-xs text-muted-foreground shrink-0">
                   <span className="text-primary">Khoảng giá</span>
                   <ChevronDown className="w-3 h-3" />
                 </div>
 
                 {/* Brand filter */}
-                <div className="flex items-center gap-1 ml-3 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1 ml-3 text-xs text-muted-foreground shrink-0">
                   <span>Thương hiệu</span>
                   <ChevronDown className="w-3 h-3" />
                 </div>
@@ -187,7 +187,7 @@ export default function CategoryDetailPage() {
                 <button
                   onClick={() => setSortBy("newest")}
                   className={cn(
-                    "px-3 py-1.5 text-xs font-medium transition-colors ml-2",
+                    "px-3 py-1.5 text-xs font-medium transition-colors ml-2 shrink-0",
                     sortBy === "newest"
                       ? "text-primary"
                       : "text-foreground hover:text-primary"
@@ -198,7 +198,7 @@ export default function CategoryDetailPage() {
               </div>
 
               {/* Right side - View mode & count */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 self-start sm:self-auto">
                 <span className="text-xs text-muted-foreground">
                   {sortedProducts.length} sản phẩm
                 </span>

@@ -148,9 +148,9 @@ export function UsersTable({
   return (
     <div className="space-y-4">
       {/* Search and Filters */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-[#f7f7f7] p-4 rounded-2xl">
-        <div className="flex flex-1 items-center space-x-2">
-          <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col gap-4 bg-[#f7f7f7] p-4 rounded-2xl lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="relative w-full sm:flex-1 sm:min-w-[220px] sm:max-w-sm">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search users..."
@@ -165,7 +165,7 @@ export function UsersTable({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="rounded-xl border-0 bg-white hover:bg-white/80"
+                className="w-full justify-start rounded-xl border-0 bg-white hover:bg-white/80 sm:w-auto sm:justify-center"
               >
                 <Shield className="h-4 w-4 mr-2 text-muted-foreground" />
                 {selectedRole === "admin"
@@ -206,7 +206,7 @@ export function UsersTable({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="rounded-xl border-0 bg-white hover:bg-white/80"
+                className="w-full justify-start rounded-xl border-0 bg-white hover:bg-white/80 sm:w-auto sm:justify-center"
               >
                 <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
                 {selectedVerified === true
@@ -251,7 +251,7 @@ export function UsersTable({
            </Button>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex w-full items-center gap-2 sm:w-auto">
           <span className="text-sm font-medium text-muted-foreground">
             Show:
           </span>
@@ -259,7 +259,7 @@ export function UsersTable({
             id="pageSize"
             value={pageSize}
             onChange={(e) => onPageSizeChange(Number(e.target.value))}
-            className="h-9 rounded-lg border-0 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E53935]/20"
+            className="h-9 w-full rounded-lg border-0 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E53935]/20 sm:w-auto"
           >
             <option value="5">5</option>
             <option value="10">10</option>

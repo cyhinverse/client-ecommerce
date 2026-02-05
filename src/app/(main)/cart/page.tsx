@@ -316,7 +316,7 @@ export default function CartPage() {
 
             {/* Select All Header */}
             {hasCartItems && (
-              <div className="bg-[#f7f7f7] rounded-sm p-4 flex items-center gap-4 text-sm">
+              <div className="bg-[#f7f7f7] rounded-sm p-4 flex flex-col gap-3 sm:flex-row sm:items-center text-sm">
                 <Checkbox
                   checked={isAllSelected}
                   onCheckedChange={() =>
@@ -329,7 +329,7 @@ export default function CartPage() {
                 </span>
                 <button
                   onClick={handleClearCart}
-                  className="ml-auto text-gray-500 hover:text-red-500 flex items-center gap-1"
+                  className="sm:ml-auto text-gray-500 hover:text-red-500 flex items-center gap-1"
                 >
                   <Trash2 className="h-4 w-4" />
                   Xóa tất cả
@@ -340,7 +340,7 @@ export default function CartPage() {
             {/* Warning for deleted products */}
             {deletedItems.length > 0 && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-sm p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-2 text-yellow-700">
                     <span className="text-sm">
                       ⚠️ Có {deletedItems.length} sản phẩm không còn tồn tại và
@@ -401,7 +401,7 @@ export default function CartPage() {
                   {shopGroup.items.map((item) => (
                     <div
                       key={item._id}
-                      className="flex items-center gap-4 p-4 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors"
+                      className="flex flex-wrap sm:flex-nowrap items-center gap-4 p-4 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors"
                     >
                       {/* Checkbox */}
                       <Checkbox
@@ -441,7 +441,7 @@ export default function CartPage() {
                       </Link>
 
                       {/* Product Info */}
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1 min-w-0 basis-full sm:basis-auto">
                         <Link
                           href={`/products/${
                             typeof item.productId === "object" && item.productId
@@ -479,39 +479,41 @@ export default function CartPage() {
                       </div>
 
                       {/* Quantity Controls */}
-                      <div className="flex items-center shrink-0">
+                      <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto">
+                        <div className="flex items-center shrink-0">
+                          <button
+                            onClick={() =>
+                              updateQuantity(item._id, item.quantity - 1)
+                            }
+                            disabled={item.quantity <= 1}
+                            className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-l text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                          >
+                            <Minus className="h-3 w-3" />
+                          </button>
+                          <input
+                            type="text"
+                            value={item.quantity}
+                            readOnly
+                            className="w-10 h-7 text-center text-sm border-y border-gray-200 focus:outline-none bg-white"
+                          />
+                          <button
+                            onClick={() =>
+                              updateQuantity(item._id, item.quantity + 1)
+                            }
+                            className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-r text-gray-500 hover:bg-gray-50"
+                          >
+                            <Plus className="h-3 w-3" />
+                          </button>
+                        </div>
+
+                        {/* Remove */}
                         <button
-                          onClick={() =>
-                            updateQuantity(item._id, item.quantity - 1)
-                          }
-                          disabled={item.quantity <= 1}
-                          className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-l text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                          onClick={() => handleRemoveItem(item._id)}
+                          className="text-gray-400 hover:text-red-500 shrink-0"
                         >
-                          <Minus className="h-3 w-3" />
-                        </button>
-                        <input
-                          type="text"
-                          value={item.quantity}
-                          readOnly
-                          className="w-10 h-7 text-center text-sm border-y border-gray-200 focus:outline-none bg-white"
-                        />
-                        <button
-                          onClick={() =>
-                            updateQuantity(item._id, item.quantity + 1)
-                          }
-                          className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-r text-gray-500 hover:bg-gray-50"
-                        >
-                          <Plus className="h-3 w-3" />
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
-
-                      {/* Remove */}
-                      <button
-                        onClick={() => handleRemoveItem(item._id)}
-                        className="text-gray-400 hover:text-red-500 shrink-0 ml-2"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
                     </div>
                   ))}
                 </motion.div>

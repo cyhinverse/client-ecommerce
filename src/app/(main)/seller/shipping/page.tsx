@@ -139,7 +139,7 @@ export default function SellerShippingPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-[#f7f7f7] rounded-xl flex items-center justify-center">
             <Truck className="h-6 w-6 text-purple-600" />
@@ -154,7 +154,7 @@ export default function SellerShippingPage() {
         {!showForm && (
           <Button
             onClick={() => setShowForm(true)}
-            className="bg-primary hover:bg-primary/90 rounded-xl h-11 px-5"
+            className="bg-primary hover:bg-primary/90 rounded-xl h-11 px-5 w-full sm:w-auto"
           >
             <Plus className="h-4 w-4 mr-2" />
             Thêm template
@@ -180,7 +180,7 @@ export default function SellerShippingPage() {
             </Button>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label className="text-gray-600">Tên template *</Label>
                 <Input
@@ -227,10 +227,10 @@ export default function SellerShippingPage() {
                 {formData.rules.map((rule, index) => (
                   <div
                     key={index}
-                    className="flex items-center gap-3 p-3 bg-white rounded-xl"
+                    className="flex flex-col md:flex-row md:items-center gap-3 p-3 bg-white rounded-xl"
                   >
                     <Input
-                      className="flex-1 h-10 rounded-lg border-0 bg-[#f7f7f7]"
+                      className="w-full md:flex-1 h-10 rounded-lg border-0 bg-[#f7f7f7]"
                       placeholder="Tên quy tắc"
                       value={rule.name}
                       onChange={(e) =>
@@ -247,7 +247,7 @@ export default function SellerShippingPage() {
                         )
                       }
                     >
-                      <SelectTrigger className="w-[150px] h-10 rounded-lg border-0 bg-[#f7f7f7]">
+                      <SelectTrigger className="w-full md:w-[150px] h-10 rounded-lg border-0 bg-[#f7f7f7]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -260,7 +260,7 @@ export default function SellerShippingPage() {
                     </Select>
                     <Input
                       type="number"
-                      className="w-[130px] h-10 rounded-lg border-0 bg-[#f7f7f7]"
+                      className="w-full md:w-[130px] h-10 rounded-lg border-0 bg-[#f7f7f7]"
                       placeholder="Phí cơ bản"
                       value={rule.baseFee}
                       onChange={(e) =>
@@ -277,7 +277,7 @@ export default function SellerShippingPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleRemoveRule(index)}
-                        className="h-9 w-9 rounded-lg shrink-0"
+                        className="h-9 w-9 rounded-lg shrink-0 self-end md:self-auto"
                       >
                         <Trash2 className="h-4 w-4 text-red-500" />
                       </Button>
@@ -287,7 +287,7 @@ export default function SellerShippingPage() {
               </div>
             </div>
 
-            <div className="flex gap-3 pt-2">
+            <div className="flex flex-col gap-3 pt-2 sm:flex-row">
               <Button
                 type="submit"
                 disabled={isCreating || isUpdating}
@@ -345,7 +345,7 @@ export default function SellerShippingPage() {
                 key={template._id}
                 className={`p-5 ${idx % 2 === 0 ? "bg-white" : "bg-white/50"}`}
               >
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-[#f7f7f7] rounded-lg flex items-center justify-center">
                       <Package className="h-5 w-5 text-purple-600" />

@@ -43,7 +43,7 @@ export default function SellerStatisticsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-[#f7f7f7] rounded-xl flex items-center justify-center">
             <BarChart3 className="h-6 w-6 text-indigo-600" />
@@ -55,7 +55,7 @@ export default function SellerStatisticsPage() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 bg-[#f7f7f7] p-1 rounded-xl">
+        <div className="flex flex-wrap items-center gap-2 bg-[#f7f7f7] p-1 rounded-xl">
           {periods.map((p) => (
             <button
               key={p.key}
@@ -73,7 +73,7 @@ export default function SellerStatisticsPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Doanh thu"
           value={`₫${formatPrice(0)}`}
@@ -105,7 +105,7 @@ export default function SellerStatisticsPage() {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Revenue Chart */}
         <div className="bg-[#f7f7f7] rounded-2xl p-6">
           <div className="flex items-center justify-between mb-6">
