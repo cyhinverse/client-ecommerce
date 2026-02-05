@@ -2,7 +2,11 @@
  * Settings React Query Hooks (Admin)
  * Hooks for managing system settings
  */
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import instance from "@/api/api";
 import { extractApiData } from "@/api";
 import { STALE_TIME } from "@/constants/cache";
@@ -19,26 +23,23 @@ const settingsApi = {
     const response = await instance.put("/settings", data);
     return extractApiData(response);
   },
-
-
 };
 
 /**
- * Update settings (partial update)
+ * Fetch current settings
  */
-export function useUpdateSettings() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: settingsApi.updateSettings,
-    onSuccess: (data) => {
-      queryClient.setQueryData(settingsKeys.current(), data);
-    },
+export function useSettings() {
+  return useQuery<
+    Settings,
+    Error,
+    Settings,
+    ReturnType<typeof settingsKeys.current>
+  >({
+    queryKey: settingsKeys.current(),
+    queryFn: settingsApi.getSettings,
+    staleTime: STALE_TIME.STATIC,
   });
 }
-
-
-
 
 /**
  * Update settings (partial update)
@@ -53,5 +54,3 @@ export function useUpdateSettings() {
     },
   });
 }
-
-

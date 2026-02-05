@@ -46,7 +46,7 @@ const Divider = () => (
 );
 
 export default function TopBar() {
-  const { isAuthenticated, data, token } = useAppSelector(
+  const { isAuthenticated, data } = useAppSelector(
     (state) => state.auth
   );
   const { data: myShop } = useMyShop({ enabled: isAuthenticated });

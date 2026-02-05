@@ -19,10 +19,10 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [isConnected, setIsConnected] = useState(false);
   const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
-  const { token, isAuthenticated } = useAppSelector((state) => state.auth);
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
-    if (!isAuthenticated || !token) return;
+    if (!isAuthenticated) return;
 
     // Create socket connection
     const socketUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -33,8 +33,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     const socketInstance = io(socketUrl, {
-      auth: { token },
       transports: ["websocket"],
+      withCredentials: true,
     });
 
     socketInstance.on("connect", () => {
@@ -51,12 +51,12 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     // Save socket to state
     setSocket(socketInstance);
 
-    // Cleanup on unmount or token change
+    // Cleanup on unmount or auth change
     return () => {
       socketInstance.disconnect();
       setSocket(null);
     };
-  }, [isAuthenticated, token, queryClient, dispatch]);
+  }, [isAuthenticated, queryClient, dispatch]);
 
   return (
     <SocketContext.Provider value={{ socket, isConnected }}>

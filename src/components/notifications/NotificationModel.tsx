@@ -17,7 +17,7 @@ export default function NotificationModel({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const { token } = useAppSelector((state) => state.auth);
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
 
   const { data, isLoading } = useNotifications({ page: 1, limit: 10 });
   const markAllAsReadMutation = useMarkAllNotificationsAsRead();
@@ -37,16 +37,13 @@ export default function NotificationModel({
     };
   }, [isOpen]);
 
-  if (!isOpen || !token) return null;
+  if (!isOpen || !isAuthenticated) return null;
 
   return (
     <>
       {/* Backdrop - subtle */}
-      <div
-        className="fixed inset-0 z-[60] bg-black/5"
-        onClick={onClose}
-      />
-      
+      <div className="fixed inset-0 z-60 bg-black/5" onClick={onClose} />
+
       {/* Panel */}
       <div className="fixed right-4 top-14 w-[340px] max-h-[75vh] flex flex-col bg-white z-[70] rounded-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
         {/* Header - clean, minimal */}

@@ -28,15 +28,15 @@ export default function VerifyCodePage() {
 
   // Auto-submit if code is present in URL
   React.useEffect(() => {
-    if (codeParam && codeParam.length === 6) {
-      handleAutoSubmit(codeParam);
+    if (codeParam && codeParam.length === 6 && emailParam) {
+      handleAutoSubmit(codeParam, emailParam);
     }
-  }, [codeParam]);
+  }, [codeParam, emailParam]);
 
-  const handleAutoSubmit = async (code: string) => {
+  const handleAutoSubmit = async (code: string, email: string) => {
     setIsLoading(true);
     try {
-      await dispatch(verifyCode(code)).unwrap();
+      await dispatch(verifyCode({ email, code })).unwrap();
       toast.success("Xác thực email thành công!");
       router.push("/login");
     } catch {
@@ -49,10 +49,14 @@ export default function VerifyCodePage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (otp.length !== 6) return;
+    if (!emailParam) {
+      toast.error("Thiếu email để xác thực");
+      return;
+    }
 
     setIsLoading(true);
     try {
-      await dispatch(verifyCode(otp)).unwrap();
+      await dispatch(verifyCode({ email: emailParam, code: otp })).unwrap();
       toast.success("Xác thực email thành công!");
       router.push("/login");
     } catch {

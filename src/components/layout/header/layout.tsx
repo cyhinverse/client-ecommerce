@@ -71,7 +71,7 @@ const SUGGESTIONS = ["Ốp iPhone 16", "Giày nam", "Áo khoác", "Bàn phím ga
 export default function HeaderLayout() {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { isAuthenticated, token, data } = useAppSelector(
+  const { isAuthenticated, data } = useAppSelector(
     (state) => state.auth,
   );
   const { data: cartData } = useAppSelector((state) => state.cart);
@@ -554,7 +554,7 @@ export default function HeaderLayout() {
 
               {/* Actions - Taobao Style Refined (Horizontal & Lighter) */}
               <div className="flex items-center gap-6 shrink-0 pt-2">
-                {isAuthenticated && token ? (
+                {isAuthenticated ? (
                   <>
                     {/* Horizontal Layout for Actions */}
                     <div className="flex items-center gap-5">

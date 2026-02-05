@@ -26,7 +26,7 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const { loading, isAuthenticated, token } = useAppSelector(
+  const { loading, isAuthenticated } = useAppSelector(
     (state) => state.auth,
   );
 
@@ -39,10 +39,10 @@ export default function LoginPage() {
   });
 
   useEffect(() => {
-    if (isAuthenticated && token) {
+    if (isAuthenticated) {
       router.push("/");
     }
-  }, [isAuthenticated, token, router]);
+  }, [isAuthenticated, router]);
 
   async function onSubmit(data: z.infer<typeof loginSchema>) {
     try {

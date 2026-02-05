@@ -51,9 +51,15 @@ export const sendCode = createAsyncThunk(
 
 export const verifyCode = createAsyncThunk(
   "auth/verify-email",
-  async (code: string, { rejectWithValue }) => {
+  async (
+    { email, code }: { email: string; code: string },
+    { rejectWithValue }
+  ) => {
     try {
-      const response = await instance.post("/auth/verify-code", { code });
+      const response = await instance.post("/auth/verify-code", {
+        email,
+        code,
+      });
       return extractApiData(response);
     } catch (error) {
       return rejectWithValue(extractApiError(error));

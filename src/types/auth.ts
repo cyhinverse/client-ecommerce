@@ -30,7 +30,6 @@ export interface User {
 export interface AuthState {
   loading: boolean;
   isAuthenticated: boolean;
-  token: string | null;
   data: User | null;
 }
 

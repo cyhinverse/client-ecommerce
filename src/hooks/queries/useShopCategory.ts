@@ -14,31 +14,80 @@ import {
   UpdateShopCategoryPayload,
 } from "@/types/shopCategory";
 
+const normalizeCategory = (category: any): ShopCategory => ({
+  _id: category?._id ?? "",
+  shop: category?.shopId ?? category?.shop ?? "",
+  name: category?.name ?? "",
+  slug: category?.slug ?? "",
+  description: category?.description ?? "",
+  image: category?.image ?? "",
+  productCount: category?.productCount ?? 0,
+  isActive: typeof category?.isActive === "boolean" ? category.isActive : true,
+  sortOrder:
+    typeof category?.sortOrder === "number"
+      ? category.sortOrder
+      : typeof category?.displayOrder === "number"
+        ? category.displayOrder
+        : 0,
+  createdAt: category?.createdAt ?? "",
+  updatedAt: category?.updatedAt ?? "",
+});
+
+const normalizeCategoryList = (data: any): ShopCategory[] => {
+  if (Array.isArray(data)) {
+    return data.map(normalizeCategory);
+  }
+  if (data?.categories && Array.isArray(data.categories)) {
+    return data.categories.map(normalizeCategory);
+  }
+  return [];
+};
+
+const mapCategoryPayload = (
+  payload: CreateShopCategoryPayload | UpdateShopCategoryPayload
+) => {
+  const { sortOrder, ...rest } = payload;
+  return {
+    ...rest,
+    ...(typeof sortOrder === "number" ? { displayOrder: sortOrder } : {}),
+  };
+};
+
 // ============ API Functions ============
 const shopCategoryApi = {
   // Get seller's own categories
   getMy: async (): Promise<ShopCategory[]> => {
     const response = await instance.get("/shop-categories/my");
-    return extractApiData(response);
+    const data = extractApiData(response);
+    return normalizeCategoryList(data);
   },
 
   // Get public shop categories by shop ID
   getByShop: async (shopId: string): Promise<ShopCategory[]> => {
     const response = await instance.get(`/shop-categories/${shopId}`);
-    return extractApiData(response);
+    const data = extractApiData(response);
+    return normalizeCategoryList(data);
   },
 
   create: async (data: CreateShopCategoryPayload): Promise<ShopCategory> => {
-    const response = await instance.post("/shop-categories", data);
-    return extractApiData(response);
+    const response = await instance.post(
+      "/shop-categories",
+      mapCategoryPayload(data)
+    );
+    const result = extractApiData(response);
+    return normalizeCategory(result);
   },
 
   update: async (
     categoryId: string,
     data: UpdateShopCategoryPayload
   ): Promise<ShopCategory> => {
-    const response = await instance.put(`/shop-categories/${categoryId}`, data);
-    return extractApiData(response);
+    const response = await instance.put(
+      `/shop-categories/${categoryId}`,
+      mapCategoryPayload(data)
+    );
+    const result = extractApiData(response);
+    return normalizeCategory(result);
   },
 
   delete: async (categoryId: string): Promise<string> => {

@@ -37,7 +37,6 @@ describe('Header - Authentication State Display', () => {
     const authenticatedState = {
       auth: {
         isAuthenticated: true,
-        token: 'valid-token',
         data: {
           username: 'testuser',
           avatar: '/images/avatar.jpg',
@@ -68,7 +67,6 @@ describe('Header - Authentication State Display', () => {
     const unauthenticatedState = {
       auth: {
         isAuthenticated: false,
-        token: null,
         data: null,
       },
       cart: { data: { items: [] } },
@@ -99,13 +97,12 @@ describe('Header - Authentication State Display', () => {
     // 2. User is not authenticated AND login buttons are shown AND avatar is hidden
     
     const states = [
-      { isAuthenticated: true, token: 'token', data: { username: 'user' } },
-      { isAuthenticated: false, token: null, data: null },
+      { isAuthenticated: true, data: { username: 'user' } },
+      { isAuthenticated: false, data: null },
     ];
 
     states.forEach(state => {
       if (state.isAuthenticated) {
-        expect(state.token).toBeTruthy();
         expect(state.data).toBeTruthy();
       } else {
         // When not authenticated, login buttons should be shown
