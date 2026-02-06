@@ -17,7 +17,6 @@ export default function AuthLayout({
               fill
               className="object-cover object-center scale-110 mix-blend-multiply"
               priority
-              unoptimized
             />
           </div>
         </Link>

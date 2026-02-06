@@ -1,0 +1,171 @@
+"use client";
+
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
+import { Button } from "@/components/ui/button";
+import SpinnerLoading from "@/components/common/SpinnerLoading";
+import { useAppDispatch } from "@/hooks/hooks";
+import { verifyCode } from "@/features/auth/authAction";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+
+type VerifyCodeClientProps = {
+  initialEmail?: string | null;
+  initialCode?: string | null;
+};
+
+const OTP_LENGTH = 6;
+const OTP_SLOT_CLASS =
+  "w-12 h-12 text-lg rounded-xl border-gray-200 focus:border-[#E53935] focus:ring-[#E53935]/20";
+
+function isValidOtp(value: string | null | undefined): value is string {
+  return typeof value === "string" && /^\d{6}$/.test(value);
+}
+
+export default function VerifyCodeClient({
+  initialEmail,
+  initialCode,
+}: VerifyCodeClientProps) {
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+
+  const email = useMemo(() => (initialEmail ?? "").trim(), [initialEmail]);
+  const canVerify = email.length > 0;
+
+  const [otp, setOtp] = useState<string>(() =>
+    isValidOtp(initialCode) ? initialCode : "",
+  );
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const autoSubmittedRef = useRef(false);
+
+  const submitVerification = useCallback(
+    async (code: string) => {
+      if (!canVerify) {
+        toast.error("Thiếu email để xác thực. Vui lòng nhập lại email.");
+        return;
+      }
+      if (!/^\d{6}$/.test(code)) return;
+
+      setIsLoading(true);
+      try {
+        await dispatch(verifyCode({ email, code })).unwrap();
+        toast.success("Xác thực email thành công!");
+        router.replace("/login");
+      } catch {
+        toast.error("Xác thực email thất bại");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [canVerify, dispatch, email, router],
+  );
+
+  useEffect(() => {
+    if (autoSubmittedRef.current) return;
+    if (!isValidOtp(initialCode)) return;
+    if (!canVerify) return;
+
+    autoSubmittedRef.current = true;
+    void submitVerification(initialCode);
+  }, [canVerify, initialCode, submitVerification]);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    await submitVerification(otp);
+  };
+
+  const handleOtpChange = (value: string) => {
+    // Be defensive: keep digits only, max length 6.
+    const digits = value.replace(/[^\d]/g, "").slice(0, OTP_LENGTH);
+    setOtp(digits);
+  };
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="text-center space-y-2">
+        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+          Kiểm tra email
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Chúng tôi đã gửi mã xác nhận đến{" "}
+          {canVerify ? (
+            <span className="font-medium text-gray-900">{email}</span>
+          ) : (
+            "email của bạn"
+          )}
+        </p>
+      </div>
+
+      {!canVerify ? (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          Thiếu email để xác thực. Quay lại trang gửi mã để nhập email.
+          <div className="mt-2">
+            <Link
+              href="/send-code"
+              className="text-[#E53935] hover:underline underline-offset-4 font-medium"
+            >
+              Đi đến trang gửi mã
+            </Link>
+          </div>
+        </div>
+      ) : null}
+
+      <form onSubmit={handleSubmit} className="grid gap-6">
+        <div className="flex flex-col items-center gap-3">
+          <InputOTP
+            value={otp}
+            onChange={handleOtpChange}
+            maxLength={OTP_LENGTH}
+            disabled={isLoading || !canVerify}
+            inputMode="numeric"
+            autoFocus
+            aria-label="Mã xác thực 6 số"
+          >
+            <InputOTPGroup>
+              {[0, 1, 2].map((i) => (
+                <InputOTPSlot key={i} index={i} className={OTP_SLOT_CLASS} />
+              ))}
+            </InputOTPGroup>
+            <InputOTPSeparator className="text-gray-300" />
+            <InputOTPGroup>
+              {[3, 4, 5].map((i) => (
+                <InputOTPSlot key={i} index={i} className={OTP_SLOT_CLASS} />
+              ))}
+            </InputOTPGroup>
+          </InputOTP>
+          <p className="text-xs text-muted-foreground">
+            Vui lòng nhập mã 6 số đã được gửi
+          </p>
+        </div>
+
+        <Button
+          type="submit"
+          disabled={!canVerify || isLoading || otp.length !== OTP_LENGTH}
+          className="w-full h-11 bg-[#E53935] hover:bg-[#D32F2F] rounded-full text-base font-medium"
+        >
+          {isLoading ? (
+            <SpinnerLoading noWrapper size={18} className="mr-2 text-white" />
+          ) : null}
+          Xác nhận
+        </Button>
+      </form>
+
+      <Link
+        href="/login"
+        className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-[#E53935] transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Quay lại đăng nhập
+      </Link>
+    </div>
+  );
+}
+

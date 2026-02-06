@@ -1,17 +1,20 @@
 "use client";
-import { useForm } from "react-hook-form";
-import z from "zod";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Check, Eye, EyeOff } from "lucide-react";
+import { toast } from "sonner";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
+import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { register as registerAction } from "@/features/auth/authAction";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { register } from "@/features/auth/authAction";
-import { toast } from "sonner";
-import { Eye, EyeOff, Check } from "lucide-react";
-import Link from "next/link";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { cn } from "@/lib/utils";
 
@@ -29,55 +32,14 @@ const registerSchema = z
     path: ["confirmPassword"],
   });
 
-export default function RegisterPage() {
-  const dispatch = useAppDispatch();
-  const router = useRouter();
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { loading } = useAppSelector((state) => state.auth);
+type RegisterFormData = z.infer<typeof registerSchema>;
 
-  const form = useForm({
-    resolver: zodResolver(registerSchema),
-    defaultValues: {
-      username: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    },
-  });
-
-  const password = form.watch("password");
-
-  async function onSubmit(data: z.infer<typeof registerSchema>) {
-    try {
-      const result = await dispatch(register(data));
-      if (register.fulfilled.match(result)) {
-        toast.success(
-          "Tạo tài khoản thành công! Vui lòng kiểm tra email để lấy mã xác thực."
-        );
-        router.push(`/verify-code?email=${encodeURIComponent(data.email)}`);
-      } else {
-        const errorMessage =
-          (result.payload as { message: string })?.message ||
-          "Đăng ký thất bại";
-        toast.error(errorMessage);
-      }
-    } catch {
-      toast.error("Đã có lỗi xảy ra");
-    }
-  }
-
-  const PasswordRequirement = ({
-    met,
-    text,
-  }: {
-    met: boolean;
-    text: string;
-  }) => (
+function PasswordRequirement({ met, text }: { met: boolean; text: string }) {
+  return (
     <div
       className={cn(
         "flex items-center gap-1.5 text-xs transition-colors",
-        met ? "text-green-600" : "text-gray-400"
+        met ? "text-green-600" : "text-gray-400",
       )}
     >
       {met ? (
@@ -88,10 +50,44 @@ export default function RegisterPage() {
       <span>{text}</span>
     </div>
   );
+}
+
+export default function RegisterPage() {
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { loading } = useAppSelector((state) => state.auth);
+
+  const form = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      username: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
+
+  const password = useWatch({ control: form.control, name: "password" }) ?? "";
+
+  const onSubmit = async (data: RegisterFormData) => {
+    try {
+      await dispatch(registerAction(data)).unwrap();
+      toast.success(
+        "Tạo tài khoản thành công! Vui lòng kiểm tra email để lấy mã xác thực.",
+      );
+      router.push(`/verify-code?email=${encodeURIComponent(data.email)}`);
+    } catch (error) {
+      toast.error(
+        (error as { message?: string })?.message || "Đăng ký thất bại",
+      );
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Header */}
       <div className="text-center space-y-2">
         <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
           Tạo tài khoản
@@ -101,9 +97,7 @@ export default function RegisterPage() {
         </p>
       </div>
 
-      {/* Form */}
       <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
-        {/* Username */}
         <div className="grid gap-2">
           <Label htmlFor="username" className="text-sm font-medium">
             Tên người dùng
@@ -117,14 +111,13 @@ export default function RegisterPage() {
             {...form.register("username")}
             className="h-11 rounded-xl border-gray-200 focus:border-[#E53935] focus:ring-[#E53935]/20"
           />
-          {form.formState.errors.username && (
+          {form.formState.errors.username ? (
             <p className="text-sm text-red-500">
               {form.formState.errors.username.message}
             </p>
-          )}
+          ) : null}
         </div>
 
-        {/* Email */}
         <div className="grid gap-2">
           <Label htmlFor="email" className="text-sm font-medium">
             Email
@@ -140,14 +133,13 @@ export default function RegisterPage() {
             {...form.register("email")}
             className="h-11 rounded-xl border-gray-200 focus:border-[#E53935] focus:ring-[#E53935]/20"
           />
-          {form.formState.errors.email && (
+          {form.formState.errors.email ? (
             <p className="text-sm text-red-500">
               {form.formState.errors.email.message}
             </p>
-          )}
+          ) : null}
         </div>
 
-        {/* Password */}
         <div className="grid gap-2">
           <Label htmlFor="password" className="text-sm font-medium">
             Mật khẩu
@@ -164,7 +156,9 @@ export default function RegisterPage() {
             />
             <button
               type="button"
-              onClick={() => setShowPassword(!showPassword)}
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+              aria-pressed={showPassword}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
             >
               {showPassword ? (
@@ -174,29 +168,18 @@ export default function RegisterPage() {
               )}
             </button>
           </div>
-          {/* Password Strength Indicators */}
-          {password && (
+          {password ? (
             <div className="grid grid-cols-2 gap-x-4 gap-y-1 pt-1">
               <PasswordRequirement met={password.length >= 6} text="6+ ký tự" />
-              <PasswordRequirement
-                met={/[A-Z]/.test(password)}
-                text="Chữ hoa"
-              />
-              <PasswordRequirement
-                met={/[a-z]/.test(password)}
-                text="Chữ thường"
-              />
-              <PasswordRequirement met={/\d/.test(password)} text="Số" />
             </div>
-          )}
-          {form.formState.errors.password && (
+          ) : null}
+          {form.formState.errors.password ? (
             <p className="text-sm text-red-500">
               {form.formState.errors.password.message}
             </p>
-          )}
+          ) : null}
         </div>
 
-        {/* Confirm Password */}
         <div className="grid gap-2">
           <Label htmlFor="confirmPassword" className="text-sm font-medium">
             Xác nhận mật khẩu
@@ -213,7 +196,9 @@ export default function RegisterPage() {
             />
             <button
               type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              onClick={() => setShowConfirmPassword((v) => !v)}
+              aria-label={showConfirmPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+              aria-pressed={showConfirmPassword}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
             >
               {showConfirmPassword ? (
@@ -223,27 +208,25 @@ export default function RegisterPage() {
               )}
             </button>
           </div>
-          {form.formState.errors.confirmPassword && (
+          {form.formState.errors.confirmPassword ? (
             <p className="text-sm text-red-500">
               {form.formState.errors.confirmPassword.message}
             </p>
-          )}
+          ) : null}
         </div>
 
-        {/* Submit Button */}
         <Button
           type="submit"
           disabled={loading}
           className="w-full h-11 bg-[#E53935] hover:bg-[#D32F2F] rounded-full text-base font-medium mt-2"
         >
-          {loading && (
+          {loading ? (
             <SpinnerLoading noWrapper size={18} className="mr-2 text-white" />
-          )}
+          ) : null}
           Tạo tài khoản
         </Button>
       </form>
 
-      {/* Footer */}
       <p className="text-center text-sm text-muted-foreground">
         Đã có tài khoản?{" "}
         <Link
@@ -256,3 +239,4 @@ export default function RegisterPage() {
     </div>
   );
 }
+

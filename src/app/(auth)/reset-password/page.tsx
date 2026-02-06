@@ -1,94 +1,54 @@
 "use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowLeft, Check, Eye, EyeOff } from "lucide-react";
+import { toast } from "sonner";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
+import { useAppDispatch } from "@/hooks/hooks";
+import { resetPassword } from "@/features/auth/authAction";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, ArrowLeft, Check } from "lucide-react";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import z from "zod";
-import { useAppDispatch } from "@/hooks/hooks";
-import { useRouter } from "next/navigation";
-import { resetPassword } from "@/features/auth/authAction";
-import { toast } from "sonner";
-import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 const resetPasswordSchema = z
   .object({
     email: z.string().email("Email không hợp lệ"),
-    code: z.string().length(6, "Mã xác nhận phải có 6 ký tự"),
+    code: z
+      .string()
+      .length(6, "Mã xác nhận phải có 6 ký tự")
+      .regex(/^\d+$/, "Mã xác nhận chỉ được chứa số"),
     newPassword: z
       .string()
       .min(8, "Mật khẩu phải có ít nhất 8 ký tự")
       .regex(
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-        "Mật khẩu phải chứa chữ hoa, chữ thường và số"
+        "Mật khẩu phải chứa chữ hoa, chữ thường và số",
       ),
-    confirmPassword: z.string().min(8, "Xác nhận mật khẩu phải có ít nhất 8 ký tự"),
+    confirmPassword: z
+      .string()
+      .min(8, "Xác nhận mật khẩu phải có ít nhất 8 ký tự"),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
     message: "Mật khẩu không khớp",
     path: ["confirmPassword"],
   });
 
-type FormData = z.infer<typeof resetPasswordSchema>;
+type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
-export default function ResetPasswordPage() {
-  const dispatch = useAppDispatch();
-  const router = useRouter();
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch,
-  } = useForm<FormData>({
-    resolver: zodResolver(resetPasswordSchema),
-    defaultValues: {
-      email: "",
-      code: "",
-      newPassword: "",
-      confirmPassword: "",
-    },
-  });
-
-  const onSubmit = async (data: FormData) => {
-    setIsLoading(true);
-    try {
-      const result = await dispatch(
-        resetPassword({
-          email: data.email,
-          code: data.code,
-          newPassword: data.newPassword,
-        })
-      );
-
-      if (resetPassword.fulfilled.match(result)) {
-        toast.success("Đặt lại mật khẩu thành công!");
-        router.push("/login");
-      } else {
-        toast.error("Không thể đặt lại mật khẩu");
-      }
-    } catch (error) {
-      const errorMessage = (error as Error)?.message || "Không thể đặt lại mật khẩu";
-      toast.error(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const newPassword = watch("newPassword");
-
-  const PasswordRequirement = ({ met, text }: { met: boolean; text: string }) => (
+function PasswordRequirement({ met, text }: { met: boolean; text: string }) {
+  return (
     <div
       className={cn(
         "flex items-center gap-1.5 text-xs transition-colors",
-        met ? "text-green-600" : "text-gray-400"
+        met ? "text-green-600" : "text-gray-400",
       )}
     >
       {met ? (
@@ -99,10 +59,60 @@ export default function ResetPasswordPage() {
       <span>{text}</span>
     </div>
   );
+}
+
+export default function ResetPasswordPage() {
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const emailFromUrl = (searchParams.get("email") ?? "").trim();
+
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+  } = useForm<ResetPasswordFormData>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      email: emailFromUrl,
+      code: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
+  });
+
+  const newPassword = watch("newPassword");
+
+  const onSubmit = async (data: ResetPasswordFormData) => {
+    setIsLoading(true);
+    try {
+      await dispatch(
+        resetPassword({
+          email: data.email,
+          code: data.code,
+          newPassword: data.newPassword,
+        }),
+      ).unwrap();
+
+      toast.success("Đặt lại mật khẩu thành công!");
+      router.replace("/login");
+    } catch (error) {
+      toast.error(
+        (error as { message?: string })?.message || "Không thể đặt lại mật khẩu",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Header */}
       <div className="text-center space-y-2">
         <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
           Đặt lại mật khẩu
@@ -112,58 +122,60 @@ export default function ResetPasswordPage() {
         </p>
       </div>
 
-      {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
-        {/* Email */}
         <div className="grid gap-2">
           <Label htmlFor="email" className="text-sm font-medium">
             Email
           </Label>
           <Input
             {...register("email")}
+            id="email"
             type="email"
             placeholder="name@example.com"
             className="h-11 rounded-xl border-gray-200 focus:border-[#E53935] focus:ring-[#E53935]/20"
             disabled={isLoading}
           />
-          {errors.email && (
+          {errors.email ? (
             <p className="text-sm text-red-500">{errors.email.message}</p>
-          )}
+          ) : null}
         </div>
 
-        {/* Verification Code */}
         <div className="grid gap-2">
           <Label htmlFor="code" className="text-sm font-medium">
             Mã xác nhận
           </Label>
           <Input
             {...register("code")}
+            id="code"
             placeholder="Nhập mã 6 số"
             maxLength={6}
+            inputMode="numeric"
             className="h-11 rounded-xl border-gray-200 focus:border-[#E53935] focus:ring-[#E53935]/20"
             disabled={isLoading}
           />
-          {errors.code && (
+          {errors.code ? (
             <p className="text-sm text-red-500">{errors.code.message}</p>
-          )}
+          ) : null}
         </div>
 
-        {/* New Password */}
         <div className="grid gap-2">
           <Label htmlFor="newPassword" className="text-sm font-medium">
             Mật khẩu mới
           </Label>
           <div className="relative">
             <Input
-              type={showNewPassword ? "text" : "password"}
               {...register("newPassword")}
+              id="newPassword"
+              type={showNewPassword ? "text" : "password"}
               placeholder="••••••••"
               className="h-11 rounded-xl border-gray-200 focus:border-[#E53935] focus:ring-[#E53935]/20 pr-11"
               disabled={isLoading}
             />
             <button
               type="button"
-              onClick={() => setShowNewPassword(!showNewPassword)}
+              onClick={() => setShowNewPassword((v) => !v)}
+              aria-label={showNewPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+              aria-pressed={showNewPassword}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
             >
               {showNewPassword ? (
@@ -173,36 +185,40 @@ export default function ResetPasswordPage() {
               )}
             </button>
           </div>
-          {/* Password Requirements */}
-          {newPassword && (
+          {newPassword ? (
             <div className="grid grid-cols-2 gap-x-4 gap-y-1 pt-1">
               <PasswordRequirement met={newPassword.length >= 8} text="8+ ký tự" />
               <PasswordRequirement met={/[A-Z]/.test(newPassword)} text="Chữ hoa" />
-              <PasswordRequirement met={/[a-z]/.test(newPassword)} text="Chữ thường" />
+              <PasswordRequirement
+                met={/[a-z]/.test(newPassword)}
+                text="Chữ thường"
+              />
               <PasswordRequirement met={/\d/.test(newPassword)} text="Số" />
             </div>
-          )}
-          {errors.newPassword && (
+          ) : null}
+          {errors.newPassword ? (
             <p className="text-sm text-red-500">{errors.newPassword.message}</p>
-          )}
+          ) : null}
         </div>
 
-        {/* Confirm Password */}
         <div className="grid gap-2">
           <Label htmlFor="confirmPassword" className="text-sm font-medium">
             Xác nhận mật khẩu
           </Label>
           <div className="relative">
             <Input
-              type={showConfirmPassword ? "text" : "password"}
               {...register("confirmPassword")}
+              id="confirmPassword"
+              type={showConfirmPassword ? "text" : "password"}
               placeholder="••••••••"
               className="h-11 rounded-xl border-gray-200 focus:border-[#E53935] focus:ring-[#E53935]/20 pr-11"
               disabled={isLoading}
             />
             <button
               type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              onClick={() => setShowConfirmPassword((v) => !v)}
+              aria-label={showConfirmPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+              aria-pressed={showConfirmPassword}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
             >
               {showConfirmPassword ? (
@@ -212,25 +228,25 @@ export default function ResetPasswordPage() {
               )}
             </button>
           </div>
-          {errors.confirmPassword && (
-            <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
-          )}
+          {errors.confirmPassword ? (
+            <p className="text-sm text-red-500">
+              {errors.confirmPassword.message}
+            </p>
+          ) : null}
         </div>
 
-        {/* Submit Button */}
         <Button
           type="submit"
           disabled={isLoading}
           className="w-full h-11 bg-[#E53935] hover:bg-[#D32F2F] rounded-full text-base font-medium mt-2"
         >
-          {isLoading && (
+          {isLoading ? (
             <SpinnerLoading noWrapper size={18} className="mr-2 text-white" />
-          )}
+          ) : null}
           Đặt lại mật khẩu
         </Button>
       </form>
 
-      {/* Footer */}
       <Link
         href="/login"
         className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-[#E53935] transition-colors"
@@ -241,3 +257,4 @@ export default function ResetPasswordPage() {
     </div>
   );
 }
+
