@@ -27,30 +27,30 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 const menuItems = [
   {
-    title: "TỔNG QUAN",
+    title: "T?NG QUAN",
     items: [{ name: "Dashboard", href: "/seller", icon: LayoutDashboard }],
   },
   {
-    title: "QUẢN LÝ ĐƠN HÀNG",
+    title: "QU?N L? ??N H?NG",
     items: [
-      { name: "Tất cả đơn hàng", href: "/seller/orders", icon: ShoppingCart },
-      { name: "Vận chuyển", href: "/seller/shipping", icon: Truck },
+      { name: "T?t c? ??n h?ng", href: "/seller/orders", icon: ShoppingCart },
+      { name: "V?n chuy?n", href: "/seller/shipping", icon: Truck },
     ],
   },
   {
-    title: "QUẢN LÝ SẢN PHẨM",
+    title: "QU?N L? S?N PH?M",
     items: [
-      { name: "Tất cả sản phẩm", href: "/seller/products", icon: Package },
-      { name: "Danh mục shop", href: "/seller/categories", icon: Tag },
-      { name: "Đánh giá", href: "/seller/reviews", icon: Star },
+      { name: "T?t c? s?n ph?m", href: "/seller/products", icon: Package },
+      { name: "Danh m?c shop", href: "/seller/categories", icon: Tag },
+      { name: "??nh gi?", href: "/seller/reviews", icon: Star },
     ],
   },
   {
-    title: "KHÁC",
+    title: "KH?C",
     items: [
-      { name: "Thống kê", href: "/seller/statistics", icon: BarChart3 },
+      { name: "Th?ng k?", href: "/seller/statistics", icon: BarChart3 },
       { name: "Chat", href: "/seller/chat", icon: MessageSquare },
-      { name: "Cài đặt Shop", href: "/seller/settings", icon: Settings },
+      { name: "C?i ??t Shop", href: "/seller/settings", icon: Settings },
     ],
   },
 ];
@@ -138,14 +138,12 @@ export default function SellerLayout({
       <div className="flex items-center justify-center py-20">
         <div className="text-center">
           <Store className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-          <h2 className="text-xl font-bold mb-2">Bạn chưa có shop</h2>
-          <p className="text-gray-500 mb-6">Đăng ký để bắt đầu bán hàng</p>
+          <h2 className="text-xl font-bold mb-2">B?n ch?a c? shop</h2>
+          <p className="text-gray-500 mb-6">??ng k? ?? b?t ??u b?n h?ng</p>
           <Button
             onClick={() => router.push("/seller/register")}
             className="bg-primary"
-          >
-            Đăng ký bán hàng
-          </Button>
+          >??ng k? b?n h?ng</Button>
         </div>
       </div>
     );
@@ -193,7 +191,7 @@ export default function SellerLayout({
                         />
                         <span className="text-xs text-gray-500">
                           {myShop?.status === "active"
-                            ? "Hoáº¡t Ä‘á»™ng"
+                            ? "Hoạt động"
                             : myShop?.status}
                         </span>
                       </div>
@@ -240,7 +238,7 @@ export default function SellerLayout({
                 />
                 <span className="text-xs text-muted-foreground">
                   {myShop?.status === "active"
-                    ? "Hoáº¡t Ä‘á»™ng"
+                    ? "Hoạt động"
                     : myShop?.status}
                 </span>
               </div>
@@ -282,7 +280,7 @@ export default function SellerLayout({
                       />
                       <span className="text-xs text-gray-500">
                         {myShop?.status === "active"
-                          ? "Hoáº¡t Ä‘á»™ng"
+                          ? "Hoạt động"
                           : myShop?.status}
                       </span>
                     </div>
