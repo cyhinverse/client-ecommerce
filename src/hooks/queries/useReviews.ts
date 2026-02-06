@@ -18,7 +18,14 @@ export interface Review {
     username: string;
     avatar?: string;
   };
-  product: string;
+  product:
+    | string
+    | {
+        _id: string;
+        name: string;
+        slug?: string;
+        images?: string[];
+      };
   rating: number;
   comment: string;
   reply?: string;

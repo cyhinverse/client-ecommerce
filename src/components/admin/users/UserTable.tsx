@@ -116,7 +116,10 @@ export function UsersTable({
   const [localSearch, setLocalSearch] = useState(searchTerm);
   const debouncedSearch = useDebounce(localSearch);
   const onSearchRef = useRef(onSearch);
-  onSearchRef.current = onSearch;
+
+  useEffect(() => {
+    onSearchRef.current = onSearch;
+  }, [onSearch]);
 
   useEffect(() => {
     setLocalSearch(searchTerm);

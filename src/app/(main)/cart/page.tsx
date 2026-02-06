@@ -38,6 +38,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { groupCartItemsByShop, CartItem } from "@/types/cart";
 import { ForYouSection } from "@/components/product/RecommendationSection";
 
+const EMPTY_CART_ITEMS: CartItem[] = [];
+
 export default function CartPage() {
   const {
     data: cartData,
@@ -53,9 +55,6 @@ export default function CartPage() {
     useState<ApplyVoucherResult | null>(null);
   const applyVoucherMutation = useApplyVoucher();
 
-  // Derived voucher states for backward compatibility
-  const appliedShopVoucher =
-    appliedVoucher?.scope === "shop" ? appliedVoucher : null;
   const appliedPlatformVoucher =
     appliedVoucher?.scope === "platform" ? appliedVoucher : null;
   const voucherLoading = applyVoucherMutation.isPending;
@@ -166,20 +165,19 @@ export default function CartPage() {
 
   const hasCartItems = cartData?.items && cartData.items.length > 0;
   const hasSelectedItems = selectedItems && selectedItems.length > 0;
+  const cartItems = cartData?.items ?? EMPTY_CART_ITEMS;
 
   // Group cart items by shop for display (filter out items with null productId)
   const itemsByShop = useMemo(() => {
-    if (!cartData?.items) return [];
     // Filter out items where productId is null (deleted products)
-    const validItems = cartData.items.filter((item) => item.productId !== null);
+    const validItems = cartItems.filter((item) => item.productId !== null);
     return groupCartItemsByShop(validItems);
-  }, [cartData?.items]);
+  }, [cartItems]);
 
   // Get deleted product items (productId is null)
   const deletedItems = useMemo(() => {
-    if (!cartData?.items) return [];
-    return cartData.items.filter((item) => item.productId === null);
-  }, [cartData?.items]);
+    return cartItems.filter((item) => item.productId === null);
+  }, [cartItems]);
 
   // Helper to get item image
   const getItemImage = (item: CartItem): string | null => {

@@ -39,22 +39,20 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
     socketInstance.on("connect", () => {
       setIsConnected(true);
+      setSocket(socketInstance);
     });
 
     socketInstance.on("disconnect", () => {
       setIsConnected(false);
+      setSocket(null);
     });
 
     // Initialize events (listen for notifications)
     initSocketEvents(socketInstance, queryClient, dispatch);
 
-    // Save socket to state
-    setSocket(socketInstance);
-
     // Cleanup on unmount or auth change
     return () => {
       socketInstance.disconnect();
-      setSocket(null);
     };
   }, [isAuthenticated, queryClient, dispatch]);
 

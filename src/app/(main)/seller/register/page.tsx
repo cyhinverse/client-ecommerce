@@ -60,21 +60,19 @@ export default function SellerRegisterPage() {
   const logoInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
-  if (!data) return <SpinnerLoading fullPage />;
-  if (!isAuthenticated) return null;
-
   // Redirect if user already has a shop
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
+    if (!isAuthenticated || !data) return;
+
     if (myShop) {
       toast.info("Bạn đã có shop, chuyển đến trang quản lý");
       router.replace("/seller/settings");
     }
-  }, [myShop, router]);
+  }, [data, isAuthenticated, myShop, router]);
 
   // Also redirect if user is seller/admin (they likely have a shop)
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
+    if (!isAuthenticated || !data) return;
     if (canHaveShop && !isLoading) {
       const timer = setTimeout(() => {
         if (canHaveShop && !myShop) {
@@ -84,7 +82,10 @@ export default function SellerRegisterPage() {
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [canHaveShop, isLoading, myShop, router]);
+  }, [canHaveShop, data, isAuthenticated, isLoading, myShop, router]);
+
+  if (!isAuthenticated) return null;
+  if (!data) return <SpinnerLoading fullPage />;
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};

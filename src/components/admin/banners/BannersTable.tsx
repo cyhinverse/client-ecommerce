@@ -76,7 +76,10 @@ export function BannersTable({
   const [localSearch, setLocalSearch] = useState(searchTerm);
   const debouncedSearch = useDebounce(localSearch, 500);
   const onSearchRef = useRef(onSearch);
-  onSearchRef.current = onSearch;
+
+  useEffect(() => {
+    onSearchRef.current = onSearch;
+  }, [onSearch]);
 
   useEffect(() => {
     setLocalSearch(searchTerm);

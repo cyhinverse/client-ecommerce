@@ -14,31 +14,51 @@ import {
   UpdateShopCategoryPayload,
 } from "@/types/shopCategory";
 
-const normalizeCategory = (category: any): ShopCategory => ({
-  _id: category?._id ?? "",
-  shop: category?.shopId ?? category?.shop ?? "",
-  name: category?.name ?? "",
-  slug: category?.slug ?? "",
-  description: category?.description ?? "",
-  image: category?.image ?? "",
-  productCount: category?.productCount ?? 0,
-  isActive: typeof category?.isActive === "boolean" ? category.isActive : true,
-  sortOrder:
-    typeof category?.sortOrder === "number"
-      ? category.sortOrder
-      : typeof category?.displayOrder === "number"
-        ? category.displayOrder
-        : 0,
-  createdAt: category?.createdAt ?? "",
-  updatedAt: category?.updatedAt ?? "",
-});
+const normalizeCategory = (category: unknown): ShopCategory => {
+  const c =
+    category && typeof category === "object"
+      ? (category as Record<string, unknown>)
+      : ({} as Record<string, unknown>);
 
-const normalizeCategoryList = (data: any): ShopCategory[] => {
+  const shopId = c.shopId;
+  const shop = c.shop;
+  const sortOrder = c.sortOrder;
+  const displayOrder = c.displayOrder;
+
+  return {
+    _id: typeof c._id === "string" ? c._id : "",
+    shop:
+      typeof shopId === "string"
+        ? shopId
+        : typeof shop === "string"
+          ? shop
+          : "",
+    name: typeof c.name === "string" ? c.name : "",
+    slug: typeof c.slug === "string" ? c.slug : "",
+    description: typeof c.description === "string" ? c.description : "",
+    image: typeof c.image === "string" ? c.image : "",
+    productCount: typeof c.productCount === "number" ? c.productCount : 0,
+    isActive: typeof c.isActive === "boolean" ? c.isActive : true,
+    sortOrder:
+      typeof sortOrder === "number"
+        ? sortOrder
+        : typeof displayOrder === "number"
+          ? displayOrder
+          : 0,
+    createdAt: typeof c.createdAt === "string" ? c.createdAt : "",
+    updatedAt: typeof c.updatedAt === "string" ? c.updatedAt : "",
+  };
+};
+
+const normalizeCategoryList = (data: unknown): ShopCategory[] => {
   if (Array.isArray(data)) {
     return data.map(normalizeCategory);
   }
-  if (data?.categories && Array.isArray(data.categories)) {
-    return data.categories.map(normalizeCategory);
+  if (data && typeof data === "object") {
+    const categories = (data as Record<string, unknown>).categories;
+    if (Array.isArray(categories)) {
+      return categories.map(normalizeCategory);
+    }
   }
   return [];
 };

@@ -3,9 +3,9 @@
  * Replaces flashSaleAction.ts async thunks with React Query
  */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/api";
+import { extractApiData } from "@/api";
 import { errorHandler } from "@/services/errorHandler";
 import { STALE_TIME, REFETCH_INTERVAL } from "@/constants/cache";
 import { flashSaleKeys } from "@/lib/queryKeys";
@@ -168,10 +168,7 @@ export function useFlashSaleWithCountdown() {
     refetch: refetchSchedule,
   } = useFlashSaleSchedule();
 
-  // Local state for countdown
-  const [countdown, setCountdown] = useState<number>(0);
-  const countdownInterval = useRef<NodeJS.Timeout | null>(null);
-  const isMounted = useRef(true);
+  const [nowMs, setNowMs] = useState(0);
 
   // Extract data from React Query response (matching FlashSaleResponse type)
   const products = flashSaleData?.data || [];
@@ -182,59 +179,40 @@ export function useFlashSaleWithCountdown() {
   // Get endTime from first product's flashSaleInfo if available
   const endTime = products[0]?.flashSaleInfo?.endTime;
 
-  // Calculate initial countdown when endTime changes
-  useEffect(() => {
-    if (endTime) {
-      const remaining = Math.max(
-        0,
-        Math.floor((new Date(endTime).getTime() - Date.now()) / 1000)
-      );
-      setCountdown(remaining);
-    }
+  const endTimeMs = useMemo(() => {
+    if (!endTime) return null;
+    const ms = new Date(endTime).getTime();
+    return Number.isFinite(ms) ? ms : null;
   }, [endTime]);
 
-  // Start countdown
-  const startCountdown = useCallback(() => {
-    if (countdownInterval.current) {
-      clearInterval(countdownInterval.current);
-    }
-
-    countdownInterval.current = setInterval(() => {
-      if (isMounted.current) {
-        setCountdown((prev) => {
-          if (prev <= 0) {
-            refetchFlashSale();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }
-    }, 1000);
-  }, [refetchFlashSale]);
-
-  // Stop countdown
-  const stopCountdown = useCallback(() => {
-    if (countdownInterval.current) {
-      clearInterval(countdownInterval.current);
-      countdownInterval.current = null;
-    }
-  }, []);
-
-  // Auto start/stop countdown based on products
+  // Keep "now" in state. This avoids calling Date.now() during render (purity rule).
   useEffect(() => {
-    isMounted.current = true;
+    if (!endTimeMs || products.length === 0) return;
 
-    if (products.length > 0 && countdown > 0) {
-      startCountdown();
-    } else {
-      stopCountdown();
-    }
+    const initId = setTimeout(() => {
+      setNowMs(Date.now());
+    }, 0);
+    const intervalId = setInterval(() => {
+      setNowMs(Date.now());
+    }, 1000);
 
     return () => {
-      isMounted.current = false;
-      stopCountdown();
+      clearTimeout(initId);
+      clearInterval(intervalId);
     };
-  }, [products.length, countdown, startCountdown, stopCountdown]);
+  }, [endTimeMs, products.length]);
+
+  const countdown = useMemo(() => {
+    if (!endTimeMs || !nowMs) return 0;
+    return Math.max(0, Math.floor((endTimeMs - nowMs) / 1000));
+  }, [endTimeMs, nowMs]);
+
+  useEffect(() => {
+    if (!endTimeMs || !nowMs) return;
+    if (countdown === 0) {
+      refetchFlashSale();
+    }
+  }, [countdown, endTimeMs, nowMs, refetchFlashSale]);
 
   // Format time helper
   const formatTime = useCallback((seconds: number) => {
@@ -269,8 +247,6 @@ export function useFlashSaleWithCountdown() {
     error,
     fetchFlashSale: refetchFlashSale,
     fetchSchedule: refetchSchedule,
-    startCountdown,
-    stopCountdown,
     formatTime,
   };
 }

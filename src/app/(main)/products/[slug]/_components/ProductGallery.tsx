@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, Store } from "lucide-react";
@@ -19,12 +19,8 @@ export function ProductGallery({
   onIndexChange 
 }: ProductGalleryProps) {
   const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [imageError, setImageError] = useState(false);
-
-  // Reset error state when selected image changes
-  useEffect(() => {
-    setImageError(false);
-  }, [selectedIndex, images]);
+  const [failedImageIndex, setFailedImageIndex] = useState<number | null>(null);
+  const imageError = failedImageIndex === selectedIndex;
 
   // Handle swipe on mobile
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -117,7 +113,7 @@ export function ProductGallery({
               className="object-contain p-2 transition-transform group-hover:scale-105"
               priority
               sizes="420px"
-              onError={() => setImageError(true)}
+              onError={() => setFailedImageIndex(selectedIndex)}
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 text-gray-400">
@@ -143,7 +139,7 @@ export function ProductGallery({
               className="object-contain"
               priority
               sizes="100vw"
-              onError={() => setImageError(true)}
+              onError={() => setFailedImageIndex(selectedIndex)}
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 text-gray-400">

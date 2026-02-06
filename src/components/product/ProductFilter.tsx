@@ -85,8 +85,16 @@ export default function ProductFilter({
   const [searchTerm, setSearchTerm] = useState(filters.search);
 
   useEffect(() => {
-    setSearchTerm(filters.search);
-  }, [filters.search]);
+    if (filters.search === searchTerm) return;
+
+    // Sync local input value to external filter changes (e.g. "clear filters")
+    // without setting state directly inside an effect body.
+    const id = setTimeout(() => {
+      setSearchTerm(filters.search);
+    }, 0);
+
+    return () => clearTimeout(id);
+  }, [filters.search, searchTerm]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {

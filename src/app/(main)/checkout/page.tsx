@@ -723,7 +723,7 @@ export default function CheckoutPage() {
                 </Button>
 
                 <p className="text-center text-xs text-gray-400 mt-3">
-                  Nhấn "Đặt hàng" đồng nghĩa với việc bạn đồng ý tuân theo Điều
+                  Nhấn &quot;Đặt hàng&quot; đồng nghĩa với việc bạn đồng ý tuân theo Điều
                   khoản của chúng tôi
                 </p>
               </div>

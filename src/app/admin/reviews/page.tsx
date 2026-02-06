@@ -13,10 +13,27 @@ import { toast } from "sonner";
 import Image from "next/image";
 import Link from "next/link";
 import { format } from "date-fns";
+import type { PaginationData } from "@/types/common";
+
+type AdminReview = {
+  _id: string;
+  user?: { _id: string; username: string; email?: string };
+  product?:
+    | string
+    | { _id: string; name: string; slug?: string; images?: string[] };
+  rating: number;
+  comment?: string;
+  createdAt: string;
+};
+
+type AdminReviewsResponse = {
+  data: AdminReview[];
+  pagination: PaginationData | null;
+};
 
 export default function AdminReviewsPage() {
   const queryClient = useQueryClient();
-  const { filters, updateFilter, updateFilters, resetFilters } = useUrlFilters({
+  const { filters, updateFilter, resetFilters } = useUrlFilters({
     defaultFilters: {
       page: 1,
       limit: 10,
@@ -29,19 +46,20 @@ export default function AdminReviewsPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["admin-reviews", filters],
     queryFn: async () => {
-      const params = new URLSearchParams();
-      params.append("page", String(filters.page));
-      params.append("limit", String(filters.limit));
-      if (filters.rating !== "all") params.append("rating", String(filters.rating));
-      if (filters.search) params.append("search", String(filters.search));
-      
-      const res = await instance.get("/api/reviews", { params });
-      return extractApiData(res);
+      const params: Record<string, string | number> = {
+        page: String(filters.page),
+        limit: String(filters.limit),
+      };
+      if (filters.rating !== "all") params.rating = String(filters.rating);
+      if (filters.search) params.search = String(filters.search);
+
+      const res = await instance.get("/reviews", { params });
+      return extractApiData<AdminReviewsResponse>(res);
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => instance.delete(`/api/reviews/${id}`),
+    mutationFn: (id: string) => instance.delete(`/reviews/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-reviews"] });
       toast.success("Đã xóa đánh giá thành công");
@@ -124,19 +142,24 @@ export default function AdminReviewsPage() {
                   </td>
                 </tr>
               ) : (
-                reviews.map((review: any) => (
+                reviews.map((review) => {
+                  const product =
+                    typeof review.product === "string" ? undefined : review.product;
+
+                  return (
                   <tr key={review._id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3 max-w-[250px]">
                         <div className="relative w-10 h-10 rounded overflow-hidden flex-shrink-0">
                           <Image
-                            src={review.product?.images?.[0] || "/images/placeholder.png"}
+                            src={product?.images?.[0] || "/images/placeholder.png"}
                             alt=""
                             fill
                             className="object-cover"
+                            sizes="40px"
                           />
                         </div>
-                        <span className="truncate font-medium">{review.product?.name}</span>
+                        <span className="truncate font-medium">{product?.name}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -156,7 +179,7 @@ export default function AdminReviewsPage() {
                           ))}
                         </div>
                         <p className="text-gray-600 line-clamp-2 italic">
-                          "{review.comment || "Không có nội dung"}"
+                          &quot;{review.comment || "Không có nội dung"}&quot;
                         </p>
                       </div>
                     </td>
@@ -165,11 +188,13 @@ export default function AdminReviewsPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
-                        <Link href={`/products/${review.product?.slug}`} target="_blank">
-                          <Button variant="ghost" size="icon" title="Xem sản phẩm">
-                            <ExternalLink className="h-4 w-4" />
-                          </Button>
-                        </Link>
+                        {product?.slug ? (
+                          <Link href={`/products/${product.slug}`} target="_blank">
+                            <Button variant="ghost" size="icon" title="Xem sản phẩm">
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                        ) : null}
                         <Button
                           variant="ghost"
                           size="icon"
@@ -181,7 +206,8 @@ export default function AdminReviewsPage() {
                       </div>
                     </td>
                   </tr>
-                ))
+                );
+                })
               )}
             </tbody>
             </table>

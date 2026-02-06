@@ -1,5 +1,5 @@
 "use client";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { Heart, ShoppingCart, Trash2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -20,7 +20,6 @@ export default function WishlistPage() {
   const router = useRouter();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
-
   const { data: wishlistData, isLoading } = useWishlist({ page: 1, limit: 20 });
   const removeFromWishlistMutation = useRemoveFromWishlist();
   const addToCartMutation = useAddToCart();
@@ -28,12 +27,6 @@ export default function WishlistPage() {
   // Extract items from React Query response
   const items = wishlistData?.data || [];
   const pagination = wishlistData?.pagination;
-
-  // Redirect to login if not authenticated
-  if (!isAuthenticated) {
-    router.push("/login?redirect=/wishlist");
-    return null;
-  }
 
   const handleRemoveItem = useCallback(
     async (productId: string) => {
@@ -66,6 +59,15 @@ export default function WishlistPage() {
     },
     [addToCartMutation]
   );
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace("/login?redirect=/wishlist");
+    }
+  }, [isAuthenticated, router]);
+
+  if (!isAuthenticated) return null;
 
   // Loading state
   if (isLoading && items.length === 0) {

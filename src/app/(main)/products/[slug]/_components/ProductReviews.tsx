@@ -55,16 +55,17 @@ export function ProductReviews({
 
   const { data, isLoading } = useProductReviews(productId, { page, limit: 5 });
 
+  const rawReviews = data?.reviews;
   const reviews = useMemo(() => {
-    if (!data?.reviews) return [];
-    return data.reviews.map((review) => ({
+    const list = rawReviews ?? [];
+    return list.map((review) => ({
       ...review,
       user: {
         ...review.user,
         name: review.user.username,
       },
     }));
-  }, [data?.reviews]);
+  }, [rawReviews]);
 
   const totalPages = data?.pagination?.totalPages || 1;
   const ratingBreakdown: RatingBreakdown = useMemo(() => {

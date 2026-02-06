@@ -37,7 +37,7 @@ export default function AdminChatbotPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["admin-chatbot-sessions", filters],
     queryFn: async () => {
-      const res = await instance.get("/api/chatbot/admin/sessions", {
+      const res = await instance.get("/chatbot/admin/sessions", {
         params: { page: filters.page, limit: filters.limit },
       });
       return extractApiData(res);
@@ -49,7 +49,7 @@ export default function AdminChatbotPage() {
     queryKey: ["admin-chatbot-history", selectedSession],
     queryFn: async () => {
       if (!selectedSession) return null;
-      const res = await instance.get(`/api/chatbot/history/${selectedSession}`);
+      const res = await instance.get(`/chatbot/history/${selectedSession}`);
       return extractApiData(res);
     },
     enabled: !!selectedSession,

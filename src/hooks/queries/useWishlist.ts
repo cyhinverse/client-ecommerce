@@ -3,7 +3,7 @@
  * Replaces wishlistAction.ts async thunks with React Query
  */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import instance from "@/api/api";
 import { extractApiData, extractApiError } from "@/api";
 import { errorHandler } from "@/services/errorHandler";
@@ -220,14 +220,15 @@ export function useWishlistManager(isAuthenticated: boolean) {
   const addMutation = useAddToWishlist();
   const removeMutation = useRemoveFromWishlist();
 
-  // Track checked products for batch checking
-  const checkedProductIds = useRef<string[]>([]);
+  // Track checked products for batch checking (state drives the query hook)
+  const [checkedProductIds, setCheckedProductIds] = useState<string[]>([]);
+  const pendingCheckedIds = useRef<string[]>([]);
   const checkTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Use React Query to check multiple products
   const { data: wishlistMap = {} } = useCheckMultipleInWishlist(
-    checkedProductIds.current,
-    { enabled: checkedProductIds.current.length > 0 }
+    checkedProductIds,
+    { enabled: checkedProductIds.length > 0 }
   );
 
   // Batch check products - debounced
@@ -235,13 +236,8 @@ export function useWishlistManager(isAuthenticated: boolean) {
     (productIds: string[]) => {
       if (!isAuthenticated) return;
 
-      const newIds = productIds.filter(
-        (id) => !checkedProductIds.current.includes(id)
-      );
-      if (newIds.length === 0) return;
-
-      checkedProductIds.current = [
-        ...new Set([...checkedProductIds.current, ...newIds]),
+      pendingCheckedIds.current = [
+        ...new Set([...pendingCheckedIds.current, ...productIds]),
       ];
 
       if (checkTimeout.current) {
@@ -249,12 +245,15 @@ export function useWishlistManager(isAuthenticated: boolean) {
       }
 
       checkTimeout.current = setTimeout(() => {
-        queryClient.invalidateQueries({
-          queryKey: wishlistKeys.checkMultiple(checkedProductIds.current),
-        });
+        const next = pendingCheckedIds.current;
+        pendingCheckedIds.current = [];
+
+        if (next.length === 0) return;
+
+        setCheckedProductIds((prev) => [...new Set([...prev, ...next])]);
       }, 100);
     },
-    [isAuthenticated, queryClient]
+    [isAuthenticated]
   );
 
   // Check if product is in wishlist

@@ -21,7 +21,11 @@ import {
 import { PaginationControls } from "@/components/common/Pagination";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
-import { useMyShopReviews, useReplyReview } from "@/hooks/queries/useReviews";
+import {
+  useMyShopReviews,
+  useReplyReview,
+  type Review as ShopReview,
+} from "@/hooks/queries/useReviews";
 import { toast } from "sonner";
 import Image from "next/image";
 import { format } from "date-fns";
@@ -44,13 +48,13 @@ export default function SellerReviewsPage() {
 
   const replyMutation = useReplyReview();
   const [replyModalOpen, setReplyModalOpen] = useState(false);
-  const [selectedReview, setSelectedReview] = useState<any>(null);
+  const [selectedReview, setSelectedReview] = useState<ShopReview | null>(null);
   const [replyContent, setReplyContent] = useState("");
 
   const reviews = data?.reviews || [];
   const pagination = data?.pagination;
 
-  const handleOpenReply = (review: any) => {
+  const handleOpenReply = (review: ShopReview) => {
     setSelectedReview(review);
     setReplyContent(review.reply || "");
     setReplyModalOpen(true);
@@ -115,7 +119,11 @@ export default function SellerReviewsPage() {
             <p className="text-gray-500">Chưa có đánh giá nào</p>
           </div>
         ) : (
-          reviews.map((review: any) => (
+          reviews.map((review) => {
+            const product =
+              typeof review.product === "string" ? undefined : review.product;
+
+            return (
             <div
               key={review._id}
               className="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
@@ -124,10 +132,11 @@ export default function SellerReviewsPage() {
                 {/* Product Image */}
                 <div className="relative h-16 w-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
                   <Image
-                    src={review.product?.images?.[0] || "/images/placeholder.png"}
+                    src={product?.images?.[0] || "/images/placeholder.png"}
                     alt=""
                     fill
                     className="object-cover"
+                    sizes="64px"
                   />
                 </div>
 
@@ -136,7 +145,7 @@ export default function SellerReviewsPage() {
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between mb-2">
                     <div>
                       <h3 className="font-medium text-gray-900">
-                        {review.product?.name}
+                        {product?.name}
                       </h3>
                       <div className="flex items-center gap-2 mt-1">
                         <div className="flex text-yellow-400">
@@ -181,7 +190,10 @@ export default function SellerReviewsPage() {
                   {review.reply && (
                     <div className="mt-3 pl-4 border-l-2 border-[#E53935]">
                       <p className="text-xs font-bold text-[#E53935] mb-1">
-                        Phản hồi của Shop • {format(new Date(review.replyAt), "dd/MM/yyyy")}
+                        Phản hồi của Shop
+                        {review.replyAt
+                          ? ` • ${format(new Date(review.replyAt), "dd/MM/yyyy")}`
+                          : ""}
                       </p>
                       <p className="text-sm text-gray-600">{review.reply}</p>
                     </div>
@@ -189,7 +201,8 @@ export default function SellerReviewsPage() {
                 </div>
               </div>
             </div>
-          ))
+          );
+          })
         )}
       </div>
 
@@ -211,7 +224,7 @@ export default function SellerReviewsPage() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="bg-gray-50 p-3 rounded-lg text-sm text-gray-600 italic">
-              "{selectedReview?.comment}"
+              &quot;{selectedReview?.comment}&quot;
             </div>
             <Textarea
               placeholder="Nhập nội dung phản hồi của bạn..."
