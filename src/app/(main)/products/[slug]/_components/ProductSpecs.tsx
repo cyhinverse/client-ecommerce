@@ -146,7 +146,7 @@ export function ProductSpecs({ product }: ProductSpecsProps) {
                     }}
                   />
                 )}
-                {variant.name || variant.color || `Variant ${idx + 1}`}
+                {variant.name || variant.color || `Phân loại ${idx + 1}`}
               </span>
             ))}
           </div>

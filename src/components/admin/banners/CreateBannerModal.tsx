@@ -35,9 +35,9 @@ import { CreateBannerPayload } from "@/types/banner";
 
 
 const createBannerSchema = z.object({
-  title: z.string().min(1, { message: "Title is required" }),
-  subtitle: z.string().min(1, { message: "Subtitle is required" }),
-  imageUrl: z.string().min(1, { message: "Image is required" }),
+  title: z.string().min(1, { message: "Tiêu đề là bắt buộc" }),
+  subtitle: z.string().min(1, { message: "Phụ đề là bắt buộc" }),
+  imageUrl: z.string().min(1, { message: "Hình ảnh là bắt buộc" }),
   link: z.string().optional(),
   theme: z.enum(["light", "dark"]),
   isActive: z.boolean(),
@@ -105,10 +105,10 @@ export function CreateBannerModal({
       <DialogContent className="rounded-[2rem] border-border/50 bg-white/80 dark:bg-[#1C1C1E]/80 backdrop-blur-xl shadow-2xl p-6 sm:max-w-[550px] max-h-[90vh] flex flex-col no-scrollbar">
         <DialogHeader className="shrink-0 pb-6 border-b border-border/50">
           <DialogTitle className="flex items-center gap-2 text-2xl font-bold tracking-tight">
-            Create Banner
+            Tạo Banner
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            Design a new homepage hero slide
+            Thiết kế slide mới cho trang chủ
           </DialogDescription>
         </DialogHeader>
 
@@ -124,11 +124,11 @@ export function CreateBannerModal({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium">
-                      Banner Title
+                      Tiêu đề Banner
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="e.g. The Future of Fluidity"
+                        placeholder="VD: Tương lai của sự mượt mà"
                         {...field}
                         className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all shadow-sm"
                       />
@@ -144,11 +144,11 @@ export function CreateBannerModal({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium">
-                      Subtitle
+                      Phụ đề
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="e.g. Experience the ultimate collection..."
+                        placeholder="VD: Trải nghiệm bộ sưu tập tối thượng..."
                         {...field}
                         className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all shadow-sm"
                       />
@@ -165,7 +165,7 @@ export function CreateBannerModal({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-medium">
-                        Action Link
+                        Liên kết hành động
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -185,7 +185,7 @@ export function CreateBannerModal({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-medium">
-                        Text Theme
+                        Chủ đề văn bản
                       </FormLabel>
                       <Select
                         value={field.value}
@@ -193,15 +193,15 @@ export function CreateBannerModal({
                       >
                         <FormControl>
                           <SelectTrigger className="rounded-xl border-gray-200 bg-gray-50/50">
-                            <SelectValue placeholder="Select theme" />
+                            <SelectValue placeholder="Chọn chủ đề" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="rounded-xl">
                           <SelectItem value="dark">
-                            Dark (White Text)
+                            Tối (Chữ trắng)
                           </SelectItem>
                           <SelectItem value="light">
-                            Light (Black Text)
+                            Sáng (Chữ đen)
                           </SelectItem>
                         </SelectContent>
                       </Select>
@@ -217,7 +217,7 @@ export function CreateBannerModal({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium">
-                      Slide Image
+                      Hình ảnh Slide
                     </FormLabel>
                     <FormControl>
                       <div className="space-y-3">
@@ -236,7 +236,7 @@ export function CreateBannerModal({
                             <div className="relative aspect-[21/9] w-full rounded-lg overflow-hidden border border-border/50 group">
                               <Image
                                 src={field.value}
-                                alt="Preview"
+                                alt="Xem trước"
                                 fill
                                 className="object-cover"
                                 sizes="(max-width: 768px) 100vw, 500px"
@@ -253,7 +253,7 @@ export function CreateBannerModal({
                                   className="rounded-full shadow-lg"
                                 >
                                   <Trash2 className="h-4 w-4 mr-1" />
-                                  Remove
+                                  Xóa
                                 </Button>
                               </div>
                             </div>
@@ -263,7 +263,7 @@ export function CreateBannerModal({
                                 <Upload className="h-5 w-5 text-muted-foreground" />
                               </div>
                               <p className="text-sm font-medium text-foreground">
-                                Click to upload high-res banner image
+                                Nhấn để tải lên hình ảnh banner chất lượng cao
                               </p>
                             </div>
                           )}
@@ -282,7 +282,7 @@ export function CreateBannerModal({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-medium">
-                        Display Order
+                        Thứ tự hiển thị
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -306,7 +306,7 @@ export function CreateBannerModal({
                     <FormItem className="flex items-center justify-between rounded-xl border border-border/50 bg-gray-50/50 p-4 mt-2">
                       <div className="space-y-0.5">
                         <FormLabel className="text-sm font-medium block">
-                          Active Status
+                          Trạng thái hoạt động
                         </FormLabel>
                       </div>
                       <FormControl>
@@ -329,7 +329,7 @@ export function CreateBannerModal({
                 disabled={isLoading}
                 className="flex-1 rounded-xl h-11 border-gray-200"
               >
-                Cancel
+                Hủy
               </Button>
               <Button
                 type="submit"
@@ -341,7 +341,7 @@ export function CreateBannerModal({
                 ) : (
                   <Plus className="h-4 w-4 mr-2" />
                 )}
-                Create Banner
+                Tạo Banner
               </Button>
             </DialogFooter>
           </form>

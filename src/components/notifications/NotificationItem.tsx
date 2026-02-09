@@ -45,7 +45,7 @@ export default function NotificationItem({ notification, onClose }: Notification
     <div
       className={cn(
         "flex gap-3 px-4 py-3 transition-colors hover:bg-gray-50/80",
-        !notification.isRead && "bg-primary/[0.03]"
+        !notification.isRead && "bg-primary/3"
       )}
     >
       {/* Icon */}

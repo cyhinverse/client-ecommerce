@@ -139,9 +139,9 @@ export function UpdateModelUser({
         <DialogHeader className="p-6 pb-4 border-b border-border/50">
           <div className="flex justify-between items-start">
             <div className="space-y-1">
-              <DialogTitle className="text-xl font-semibold tracking-tight">Edit User</DialogTitle>
+              <DialogTitle className="text-xl font-semibold tracking-tight">Chỉnh sửa người dùng</DialogTitle>
               <DialogDescription className="text-muted-foreground">
-                Update account for {user.username}
+                Cập nhật tài khoản cho {user.username}
               </DialogDescription>
             </div>
             <Badge className={cn(
@@ -150,7 +150,7 @@ export function UpdateModelUser({
                 ? "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400"
                 : "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
             )}>
-              {formData.roles.charAt(0).toUpperCase() + formData.roles.slice(1)}
+              {formData.roles === "admin" ? "Quản trị viên" : "Người dùng"}
             </Badge>
           </div>
         </DialogHeader>
@@ -162,11 +162,11 @@ export function UpdateModelUser({
                 <TabsList className="grid w-full grid-cols-2 rounded-xl bg-gray-100/80 dark:bg-white/5 p-1">
                   <TabsTrigger value="info" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-white/10">
                     <UserIcon className="h-4 w-4" />
-                    Info
+                    Thông tin
                   </TabsTrigger>
                   <TabsTrigger value="permissions" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-white/10">
                     <Key className="h-4 w-4" />
-                    Permissions
+                    Quyền hạn
                     {formData.permissions.length > 0 && (
                       <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
                         {formData.permissions.length}
@@ -181,7 +181,7 @@ export function UpdateModelUser({
                 <div className="space-y-2">
                   <Label htmlFor="username" className="text-sm font-medium flex items-center gap-2">
                     <UserIcon className="h-3.5 w-3.5 text-muted-foreground" />
-                    Username
+                    Tên người dùng
                   </Label>
                   <Input
                     id="username"
@@ -215,7 +215,7 @@ export function UpdateModelUser({
                   <div className="space-y-2">
                     <Label htmlFor="roles" className="text-sm font-medium flex items-center gap-2">
                       <Shield className="h-3.5 w-3.5 text-muted-foreground" />
-                      Role
+                      Vai trò
                     </Label>
                     <Select
                       value={formData.roles}
@@ -226,9 +226,9 @@ export function UpdateModelUser({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="rounded-xl border-border/50 shadow-lg">
-                        <SelectItem value="user">User</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="moderator">Moderator</SelectItem>
+                        <SelectItem value="user">Người dùng</SelectItem>
+                        <SelectItem value="admin">Quản trị viên</SelectItem>
+                        <SelectItem value="moderator">Điều hành viên</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -236,7 +236,7 @@ export function UpdateModelUser({
                   <div className="space-y-2">
                     <Label htmlFor="isVerifiedEmail" className="text-sm font-medium flex items-center gap-2">
                       <CheckCircle className="h-3.5 w-3.5 text-muted-foreground" />
-                      Verification
+                      Xác minh
                     </Label>
                     <Select
                       value={formData.isVerifiedEmail.toString()}
@@ -247,8 +247,8 @@ export function UpdateModelUser({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="rounded-xl border-border/50 shadow-lg">
-                        <SelectItem value="true">Verified</SelectItem>
-                        <SelectItem value="false">Unverified</SelectItem>
+                        <SelectItem value="true">Đã xác minh</SelectItem>
+                        <SelectItem value="false">Chưa xác minh</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -319,7 +319,7 @@ export function UpdateModelUser({
               disabled={isLoading}
               className="rounded-xl border-gray-200"
             >
-              Cancel
+              Hủy
             </Button>
             <Button
               type="submit"
@@ -329,10 +329,10 @@ export function UpdateModelUser({
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Updating...
+                  Đang cập nhật...
                 </>
               ) : (
-                "Update User"
+                "Cập nhật người dùng"
               )}
             </Button>
           </DialogFooter>

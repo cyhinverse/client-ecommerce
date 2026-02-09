@@ -15,28 +15,28 @@ export function VouchersStats({
 }: VouchersStatsProps) {
   const stats = [
     {
-      title: "Total Vouchers",
+      title: "Tổng Mã giảm giá",
       value: totalVouchers,
       icon: Ticket,
-      description: "All voucher codes",
+      description: "Tất cả mã giảm giá",
     },
     {
-      title: "Active",
+      title: "Đang hoạt động",
       value: activeVouchers,
       icon: BarChart3,
-      description: "Active codes",
+      description: "Mã đang hiệu lực",
     },
     {
-      title: "Expired",
+      title: "Đã hết hạn",
       value: expiredVouchers,
       icon: Clock,
-      description: "Expired codes",
+      description: "Mã đã quá hạn",
     },
     {
-      title: "Running Out",
+      title: "Sắp hết lượt",
       value: highUsageVouchers,
       icon: AlertCircle,
-      description: "Used >80% limit",
+      description: "Đã dùng >80% giới hạn",
     },
   ];
 

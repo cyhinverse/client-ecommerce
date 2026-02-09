@@ -125,6 +125,12 @@ export default function CheckoutPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isLoading) return;
+
+    if (!formData.city) {
+      toast.error("Vui lòng chọn Tỉnh/Thành phố");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -153,10 +159,11 @@ export default function CheckoutPage() {
         if (paymentMethod === "vnpay") {
           try {
             toast.loading("Đang chuyển đến VNPay...");
-            const orderId = result._id;
-            if (!orderId) throw new Error("Missing order ID");
+            const orders = (result as unknown as { orders: { _id: string }[] }).orders;
+            const firstOrder = orders?.[0];
+            if (!firstOrder?._id) throw new Error("Missing order ID");
 
-            const paymentResult = await paymentMutation.mutateAsync(orderId);
+            const paymentResult = await paymentMutation.mutateAsync(firstOrder._id);
 
             if (paymentResult.paymentUrl) {
               window.location.href = paymentResult.paymentUrl;
@@ -343,6 +350,7 @@ export default function CheckoutPage() {
                       onValueChange={(value) =>
                         handleSelectChange(value, "city")
                       }
+                      required
                     >
                       <SelectTrigger className="h-10 rounded border-gray-200 focus:ring-[#E53935]/20">
                         <SelectValue placeholder="Chọn tỉnh/thành" />
@@ -410,7 +418,7 @@ export default function CheckoutPage() {
                       {shopGroup.shop.name}
                     </span>
                     <span className="text-xs text-[#E53935] border border-[#E53935] px-1.5 py-0.5 rounded">
-                      Mall
+                      Chính hãng
                     </span>
                   </div>
 
@@ -428,14 +436,14 @@ export default function CheckoutPage() {
                               typeof item.productId === "object" &&
                               item.productId
                                 ? item.productId.name
-                                : "Product"
+                                : "Sản phẩm"
                             }
                             fill
                             className="object-cover"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-                            No Image
+                            Không có hình ảnh
                           </div>
                         )}
                       </div>
@@ -681,7 +689,7 @@ export default function CheckoutPage() {
 
                   {shopDiscount > 0 && (
                     <div className="flex justify-between text-green-600">
-                      <span>Voucher Shop</span>
+                      <span>Voucher Cửa hàng</span>
                       <span>-{formatCurrency(shopDiscount)}</span>
                     </div>
                   )}

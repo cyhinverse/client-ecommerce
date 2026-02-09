@@ -26,13 +26,13 @@ import { Category } from "@/types/category";
 import { useState } from "react";
 import Image from "next/image";
 
-const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-};
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString("vi-VN", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
 
 interface ViewCategoryModalProps {
   isOpen: boolean;
@@ -59,7 +59,7 @@ export function ViewCategoryModal({
     return status ? (
       <Badge className="bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-500/10 dark:text-green-400 border-0 rounded-lg px-2.5 py-0.5 shadow-none">
         <CheckCircle className="h-3 w-3 mr-1" />
-        Active
+        Đang hoạt động
       </Badge>
     ) : (
       <Badge
@@ -67,7 +67,7 @@ export function ViewCategoryModal({
         className="bg-gray-100 text-gray-600 border-0 rounded-lg px-2.5 py-0.5 shadow-none"
       >
         <XCircle className="h-3 w-3 mr-1" />
-        Inactive
+        Ngừng hoạt động
       </Badge>
     );
   };
@@ -82,10 +82,10 @@ export function ViewCategoryModal({
             <div className="flex items-center justify-between">
               <div>
                 <DialogTitle className="text-2xl font-bold tracking-tight">
-                  Category Details
+                  Chi tiết danh mục
                 </DialogTitle>
                 <DialogDescription className="text-muted-foreground mt-1">
-                  Information and configuration for this category
+                  Thông tin và cấu hình cho danh mục này
                 </DialogDescription>
               </div>
               {getStatusBadge(category.isActive)}
@@ -122,7 +122,7 @@ export function ViewCategoryModal({
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 rounded-2xl bg-white/40 border border-border/50 flex flex-col gap-1">
                 <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Product Count
+                  Số lượng sản phẩm
                 </span>
                 <div className="flex items-center gap-2">
                   <Package className="h-4 w-4 text-muted-foreground" />
@@ -133,7 +133,7 @@ export function ViewCategoryModal({
               </div>
               <div className="p-4 rounded-2xl bg-white/40 border border-border/50 flex flex-col gap-1">
                 <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Created Date
+                  Ngày tạo
                 </span>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -147,7 +147,7 @@ export function ViewCategoryModal({
             {/* Images Section */}
             <div>
               <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
-                Images ({images.length})
+                Hình ảnh ({images.length})
               </h4>
               {images.length > 0 ? (
                 <div className="grid grid-cols-4 gap-3">
@@ -173,7 +173,7 @@ export function ViewCategoryModal({
               ) : (
                 <div className="p-8 border-2 border-dashed border-border/50 rounded-2xl flex flex-col items-center justify-center text-muted-foreground bg-gray-50/30">
                   <ImageIcon className="h-8 w-8 mb-2 opacity-30" />
-                  <p className="text-sm">No images uploaded</p>
+                  <p className="text-sm">Chưa có hình ảnh</p>
                 </div>
               )}
             </div>
@@ -181,7 +181,7 @@ export function ViewCategoryModal({
             {/* Parent Category & Misc */}
             <div className="space-y-4">
               <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                Hierarchy & Links
+                Phân cấp & Liên kết
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {category.parentCategory ? (
@@ -191,7 +191,7 @@ export function ViewCategoryModal({
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground uppercase font-bold">
-                        Parent Category
+                        Danh mục cha
                       </p>
                       <p className="font-medium text-sm">
                         {typeof category.parentCategory === "object"
@@ -207,9 +207,9 @@ export function ViewCategoryModal({
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground uppercase font-bold">
-                        Category Level
+                        Cấp độ danh mục
                       </p>
-                      <p className="font-medium text-sm">Root Category</p>
+                      <p className="font-medium text-sm">Danh mục gốc</p>
                     </div>
                   </div>
                 )}
@@ -220,7 +220,7 @@ export function ViewCategoryModal({
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-muted-foreground uppercase font-bold">
-                      Public URL
+                      URL Công khai
                     </p>
                     <p className="font-medium text-sm truncate text-blue-600 hover:underline cursor-pointer">
                       /categories/{category.slug}
@@ -239,7 +239,7 @@ export function ViewCategoryModal({
               onClick={onClose}
               className="rounded-xl h-10 border-gray-200"
             >
-              Close
+              Đóng
             </Button>
             <Button
               type="button"
@@ -247,7 +247,7 @@ export function ViewCategoryModal({
               className="rounded-xl h-10 bg-black text-white hover:bg-black/90 dark:bg-[#0071e3] gap-2 px-5"
             >
               <Edit className="h-4 w-4" />
-              Edit Category
+              Sửa danh mục
             </Button>
           </div>
         </DialogContent>

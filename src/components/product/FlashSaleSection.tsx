@@ -130,7 +130,7 @@ export const FlashSaleSection = memo(function FlashSaleSection() {
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5 text-[#E53935]">
             <Zap className="h-5 w-5 fill-current" />
-            <span className="font-bold text-lg">FLASH SALE</span>
+            <span className="font-bold text-lg">GIÁ SỐC</span>
           </div>
 
           {remainingSeconds > 0 && (

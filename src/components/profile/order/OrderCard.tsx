@@ -15,12 +15,12 @@ interface OrderCardProps {
 export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancelling }: OrderCardProps) {
     const getStatusConfig = (status: Order["status"]) => {
         switch (status) {
-            case "pending": return { icon: Clock, color: "text-amber-500", bg: "bg-amber-50", label: "Pending" };
-            case "confirmed": return { icon: CheckCircle, color: "text-blue-500", bg: "bg-blue-50", label: "Confirmed" };
-            case "processing": return { icon: RefreshCw, color: "text-indigo-500", bg: "bg-indigo-50", label: "Processing" };
-            case "shipped": return { icon: Truck, color: "text-purple-500", bg: "bg-purple-50", label: "On the way" };
-            case "delivered": return { icon: CheckCircle, color: "text-green-500", bg: "bg-green-50", label: "Delivered" };
-            case "cancelled": return { icon: XCircle, color: "text-red-500", bg: "bg-red-50", label: "Cancelled" };
+            case "pending": return { icon: Clock, color: "text-amber-500", bg: "bg-amber-50", label: "Chờ xử lý" };
+            case "confirmed": return { icon: CheckCircle, color: "text-blue-500", bg: "bg-blue-50", label: "Đã xác nhận" };
+            case "processing": return { icon: RefreshCw, color: "text-indigo-500", bg: "bg-indigo-50", label: "Đang xử lý" };
+            case "shipped": return { icon: Truck, color: "text-purple-500", bg: "bg-purple-50", label: "Đang giao hàng" };
+            case "delivered": return { icon: CheckCircle, color: "text-green-500", bg: "bg-green-50", label: "Đã giao hàng" };
+            case "cancelled": return { icon: XCircle, color: "text-red-500", bg: "bg-red-50", label: "Đã hủy" };
             default: return { icon: Package, color: "text-gray-500", bg: "bg-gray-50", label: status };
         }
     };
@@ -29,16 +29,16 @@ export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancell
     const StatusIcon = statusConfig.icon;
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat("en-US", {
+        return new Intl.NumberFormat("vi-VN", {
             style: "currency",
             currency: "VND",
         }).format(amount);
     };
 
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString("en-US", {
+        return new Date(dateString).toLocaleDateString("vi-VN", {
             day: "numeric",
-            month: "short",
+            month: "long",
             year: "numeric",
         });
     };
@@ -62,13 +62,13 @@ export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancell
                         </div>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                        Ordered on {formatDate(order.createdAt)}
+                        Đã đặt vào ngày {formatDate(order.createdAt)}
                     </p>
                 </div>
                 <div className="text-left md:text-right">
                     <p className="text-xl font-semibold tracking-tight">{formatCurrency(order.totalAmount)}</p>
                     <p className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
-                        {order.paymentStatus}
+                        {order.paymentStatus === "paid" ? "Đã thanh toán" : "Chưa thanh toán"}
                     </p>
                 </div>
             </div>
@@ -101,7 +101,7 @@ export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancell
                         {order.products?.[0]?.name}
                      </p>
                      <p className="text-xs text-muted-foreground">
-                        {(order.products?.length || 0) > 1 ? `and ${order.products!.length - 1} other items` : "x" + (order.products?.[0]?.quantity || 1)}
+                        {(order.products?.length || 0) > 1 ? `và ${order.products!.length - 1} sản phẩm khác` : "x" + (order.products?.[0]?.quantity || 1)}
                      </p>
                 </div>
             </div>
@@ -123,7 +123,7 @@ export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancell
                     className="rounded-sm flex-1 md:flex-none"
                     variant="secondary"
                 >
-                   View Details
+                   Xem chi tiết
                 </Button>
 
                 {(order.status === "pending" || order.status === "confirmed") && order.paymentStatus !== "paid" && (
@@ -133,7 +133,7 @@ export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancell
                         disabled={isCancelling}
                         className="rounded-sm text-red-500 hover:text-red-600 hover:bg-red-50 md:flex-none flex-1"
                     >
-                        {isCancelling ? "Cancelling..." : "Cancel Order"}
+                        {isCancelling ? "Đang hủy..." : "Hủy đơn hàng"}
                     </Button>
                 )}
             </div>

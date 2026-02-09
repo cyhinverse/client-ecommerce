@@ -124,8 +124,6 @@ export const shopKeys = {
   statistics: () => [...shopKeys.all, "statistics"] as const,
   detail: (shopId: string) => [...shopKeys.all, "detail", shopId] as const,
   detailBySlug: (slug: string) => [...shopKeys.all, "slug", slug] as const,
-  categories: (shopId: string) =>
-    [...shopKeys.all, "categories", shopId] as const,
   list: (params?: unknown) => [...shopKeys.all, "list", params] as const,
 };
 
@@ -135,6 +133,9 @@ export const shopCategoryKeys = {
   myCategories: () => [...shopCategoryKeys.all, "my"] as const,
   byShop: (shopId: string) =>
     [...shopCategoryKeys.all, "shop", shopId] as const,
+  // Same endpoint as byShop(), but for consumers that expect `{ categories, totalProducts }`.
+  byShopWithTotals: (shopId: string) =>
+    [...shopCategoryKeys.all, "shop-with-totals", shopId] as const,
 };
 
 // Review query keys

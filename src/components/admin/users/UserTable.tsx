@@ -60,7 +60,7 @@ export const getVerifiedBadge = (isVerified: boolean) => {
   return isVerified ? (
     <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-0 rounded-lg px-2.5 py-0.5 shadow-none">
       <CheckCircle className="h-3 w-3 mr-1" />
-      Verified
+      Đã xác minh
     </Badge>
   ) : (
     <Badge
@@ -68,7 +68,7 @@ export const getVerifiedBadge = (isVerified: boolean) => {
       className="bg-gray-100 text-gray-600 border-0 rounded-lg px-2.5 py-0.5 shadow-none"
     >
       <XCircle className="h-3 w-3 mr-1" />
-      Unverified
+      Chưa xác minh
     </Badge>
   );
 };
@@ -80,8 +80,8 @@ export const getRoleBadge = (roles: string) => {
   };
 
   const roleNames: { [key: string]: string } = {
-    admin: "Admin",
-    user: "User",
+    admin: "Quản trị viên",
+    user: "Người dùng",
   };
 
   return (
@@ -95,7 +95,7 @@ export const getRoleBadge = (roles: string) => {
 };
 
 export const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString("en-US");
+  return new Date(date).toLocaleDateString("vi-VN");
 };
 
 export function UsersTable({
@@ -144,7 +144,7 @@ export function UsersTable({
   };
 
   const getPrimaryAddress = (addresses: Address[]) => {
-    if (!addresses || addresses.length === 0) return "No address";
+    if (!addresses || addresses.length === 0) return "Chưa có địa chỉ";
     return addresses[0].address;
   };
 
@@ -156,7 +156,7 @@ export function UsersTable({
           <div className="relative w-full sm:flex-1 sm:min-w-[220px] sm:max-w-sm">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search users..."
+              placeholder="Tìm kiếm người dùng..."
               value={localSearch}
               onChange={handleSearch}
               className="pl-9 rounded-xl border-0 bg-white focus-visible:ring-0 transition-all"
@@ -172,34 +172,34 @@ export function UsersTable({
               >
                 <Shield className="h-4 w-4 mr-2 text-muted-foreground" />
                 {selectedRole === "admin"
-                  ? "Admin"
+                  ? "Quản trị viên"
                   : selectedRole === "user"
-                  ? "User"
-                  : "All Roles"}
+                  ? "Người dùng"
+                  : "Tất cả vai trò"}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="rounded-xl border-0 shadow-lg p-1">
               <DropdownMenuLabel className="text-muted-foreground text-xs uppercase tracking-wider px-2 py-1.5">
-                Filter by Role
+                Lọc theo vai trò
               </DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-[#f7f7f7]" />
               <DropdownMenuItem
                 onClick={() => handleRoleFilter("")}
                  className={`cursor-pointer rounded-lg ${!selectedRole ? "bg-[#f7f7f7] font-medium" : ""}`}
               >
-                All Roles
+                Tất cả vai trò
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleRoleFilter("admin")}
                 className={`cursor-pointer rounded-lg ${selectedRole === "admin" ? "bg-[#f7f7f7] font-medium" : ""}`}
               >
-                Admin
+                Quản trị viên
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleRoleFilter("user")}
                  className={`cursor-pointer rounded-lg ${selectedRole === "user" ? "bg-[#f7f7f7] font-medium" : ""}`}
               >
-                User
+                Người dùng
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -213,34 +213,34 @@ export function UsersTable({
               >
                 <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
                 {selectedVerified === true
-                  ? "Verified"
+                  ? "Đã xác minh"
                   : selectedVerified === false
-                  ? "Unverified"
-                  : "Status"}
+                  ? "Chưa xác minh"
+                  : "Trạng thái"}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="rounded-xl border-0 shadow-lg p-1">
               <DropdownMenuLabel className="text-muted-foreground text-xs uppercase tracking-wider px-2 py-1.5">
-                Filter by Verification
+                Lọc theo xác minh
               </DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-[#f7f7f7]" />
               <DropdownMenuItem
                 onClick={() => handleVerifiedFilter(null)}
                 className={`cursor-pointer rounded-lg ${selectedVerified === null ? "bg-[#f7f7f7] font-medium" : ""}`}
               >
-                All Status
+                Tất cả trạng thái
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleVerifiedFilter(true)}
                  className={`cursor-pointer rounded-lg ${selectedVerified === true ? "bg-[#f7f7f7] font-medium" : ""}`}
               >
-                Verified
+                Đã xác minh
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleVerifiedFilter(false)}
                  className={`cursor-pointer rounded-lg ${selectedVerified === false ? "bg-[#f7f7f7] font-medium" : ""}`}
               >
-                Unverified
+                Chưa xác minh
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -256,7 +256,7 @@ export function UsersTable({
 
         <div className="flex w-full items-center gap-2 sm:w-auto">
           <span className="text-sm font-medium text-muted-foreground">
-            Show:
+            Hiển thị:
           </span>
           <select
             id="pageSize"
@@ -279,22 +279,22 @@ export function UsersTable({
             <TableHeader className="bg-[#f7f7f7]">
                 <TableRow className="border-0 hover:bg-transparent">
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground pl-6">
-                    User
+                    Người dùng
                 </TableHead>
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                    Role
+                    Vai trò
                 </TableHead>
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                    Address
+                    Địa chỉ
                 </TableHead>
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                    Email Verified
+                    Xác minh Email
                 </TableHead>
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                    Created At
+                    Ngày tạo
                 </TableHead>
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground text-right pr-6">
-                    Actions
+                    Thao tác
                 </TableHead>
                 </TableRow>
             </TableHeader>
@@ -314,7 +314,7 @@ export function UsersTable({
                     <div className="flex flex-col items-center justify-center text-muted-foreground">
                         <UserIcon className="h-12 w-12 mb-3 opacity-20" />
                         <div className="text-muted-foreground">
-                        No users found
+                        Không tìm thấy người dùng
                         </div>
                     </div>
                     </TableCell>
@@ -381,20 +381,20 @@ export function UsersTable({
                             align="end"
                             className="rounded-xl border-0 shadow-lg p-1"
                         >
-                            <DropdownMenuLabel className="text-xs font-normal text-muted-foreground px-2 py-1.5">Actions</DropdownMenuLabel>
+                            <DropdownMenuLabel className="text-xs font-normal text-muted-foreground px-2 py-1.5">Thao tác</DropdownMenuLabel>
                             <DropdownMenuItem
                             onClick={() => onView(user)}
                              className="cursor-pointer rounded-lg gap-2"
                             >
                             <Eye className="h-4 w-4" />
-                            View Details
+                            Xem chi tiết
                             </DropdownMenuItem>
                             <DropdownMenuItem
                             onClick={() => onEdit(user)}
                              className="cursor-pointer rounded-lg gap-2"
                             >
                             <Edit className="h-4 w-4" />
-                            Edit User
+                            Chỉnh sửa
                             </DropdownMenuItem>
                             <DropdownMenuSeparator className="bg-[#f7f7f7] my-1" />
                             <DropdownMenuItem
@@ -402,7 +402,7 @@ export function UsersTable({
                             onClick={() => onDelete(user)}
                             >
                             <Trash2 className="h-4 w-4" />
-                            Delete User
+                            Xóa người dùng
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                         </DropdownMenu>

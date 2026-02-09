@@ -123,7 +123,7 @@ export function VoucherCard({
             {formatValue()}
           </span>
           <span className="text-[10px] text-muted-foreground">
-            {isPlatform ? "Toàn sàn" : "Shop"}
+            {isPlatform ? "Toàn sàn" : "Cửa hàng"}
           </span>
         </div>
 

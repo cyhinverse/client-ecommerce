@@ -92,7 +92,7 @@ export function DiscountsTable({
   }, [debouncedSearch, searchTerm, onSearch]);
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US");
+    return new Date(dateString).toLocaleDateString("vi-VN");
   };
 
   const isExpired = (endDate: string) => {
@@ -103,33 +103,33 @@ export function DiscountsTable({
     if (!discount.isActive) {
       return (
         <Badge className="bg-gray-100 text-gray-600 hover:bg-gray-100 border-0 rounded-lg px-2.5 py-0.5 shadow-none font-medium">
-          Inactive
+          Ngừng hoạt động
         </Badge>
       );
     }
     if (isExpired(discount.endDate)) {
       return (
         <Badge className="bg-red-50 text-red-600 hover:bg-red-50 border-red-100 rounded-lg px-2.5 py-0.5 shadow-none font-medium">
-          Expired
+          Hết hạn
         </Badge>
       );
     }
     if ((discount.usageCount ?? 0) >= discount.usageLimit) {
       return (
         <Badge className="bg-orange-50 text-orange-600 hover:bg-orange-50 border-orange-100 rounded-lg px-2.5 py-0.5 shadow-none font-medium">
-          Limit Reached
+          Hết lượt dùng
         </Badge>
       );
     }
     return (
       <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-0 rounded-lg px-2.5 py-0.5 shadow-none font-medium">
-        Active
+        Đang hoạt động
       </Badge>
     );
   };
 
   const getDiscountTypeText = (type: string | undefined) => {
-    return type === "percentage" ? "Percentage" : "Fixed Amount";
+    return type === "percentage" || type === "percent" ? "Phần trăm" : "Số tiền cố định";
   };
 
   const getDiscountValueText = (discount: Voucher) => {
@@ -142,9 +142,9 @@ export function DiscountsTable({
   const getShopInfo = (
     shopId: string | Shop | undefined
   ): { name: string; logo?: string } => {
-    if (!shopId) return { name: "N/A" };
+    if (!shopId) return { name: "Không có" };
     if (typeof shopId === "string") return { name: shopId };
-    return { name: shopId.name || "N/A", logo: shopId.logo };
+    return { name: shopId.name || "Không có", logo: shopId.logo };
   };
 
   const getScopeDisplay = (discount: Voucher) => {
@@ -152,7 +152,7 @@ export function DiscountsTable({
       return (
         <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-100 border-0 rounded-lg px-2.5 py-0.5 shadow-none font-medium">
           <Globe className="h-3 w-3 mr-1" />
-          Platform
+          Hệ thống
         </Badge>
       );
     }
@@ -192,7 +192,7 @@ export function DiscountsTable({
           <div className="relative w-full sm:flex-1 sm:min-w-[220px] sm:max-w-sm">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by code..."
+              placeholder="Tìm kiếm theo mã..."
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
               className="pl-9 rounded-xl border-gray-200 bg-white/80 focus:bg-white transition-all shadow-sm"
@@ -205,12 +205,12 @@ export function DiscountsTable({
               onValueChange={onDiscountTypeFilterChange}
             >
               <SelectTrigger className="w-full rounded-xl border-gray-200 bg-white/80 shadow-sm hover:bg-gray-50 h-10 sm:w-[160px]">
-                <SelectValue placeholder="Discount Type" />
+                <SelectValue placeholder="Loại giảm giá" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-border/50 shadow-lg">
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="percent">Percentage</SelectItem>
-                <SelectItem value="fixed">Fixed Amount</SelectItem>
+                <SelectItem value="all">Tất cả loại</SelectItem>
+                <SelectItem value="percent">Phần trăm</SelectItem>
+                <SelectItem value="fixed">Số tiền cố định</SelectItem>
               </SelectContent>
             </Select>
 
@@ -223,24 +223,24 @@ export function DiscountsTable({
               }
             >
               <SelectTrigger className="w-full rounded-xl border-gray-200 bg-white/80 shadow-sm hover:bg-gray-50 h-10 sm:w-[140px]">
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder="Trạng thái" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-border/50 shadow-lg">
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="true">Active</SelectItem>
-                <SelectItem value="false">Inactive</SelectItem>
+                <SelectItem value="all">Tất cả trạng thái</SelectItem>
+                <SelectItem value="true">Đang hoạt động</SelectItem>
+                <SelectItem value="false">Ngừng hoạt động</SelectItem>
               </SelectContent>
             </Select>
 
             {onScopeFilterChange && (
               <Select value={selectedScope} onValueChange={onScopeFilterChange}>
                 <SelectTrigger className="w-full rounded-xl border-gray-200 bg-white/80 shadow-sm hover:bg-gray-50 h-10 sm:w-[140px]">
-                  <SelectValue placeholder="Scope" />
+                  <SelectValue placeholder="Phạm vi" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-border/50 shadow-lg">
-                  <SelectItem value="all">All Scopes</SelectItem>
-                  <SelectItem value="platform">Platform</SelectItem>
-                  <SelectItem value="shop">Shop</SelectItem>
+                  <SelectItem value="all">Tất cả phạm vi</SelectItem>
+                  <SelectItem value="platform">Hệ thống</SelectItem>
+                  <SelectItem value="shop">Cửa hàng</SelectItem>
                 </SelectContent>
               </Select>
             )}
@@ -249,14 +249,14 @@ export function DiscountsTable({
 
         <div className="flex w-full items-center gap-2 sm:w-auto">
           <span className="text-sm font-medium text-muted-foreground">
-            Show:
+            Hiển thị:
           </span>
           <Select
             value={pageSize.toString()}
             onValueChange={(value) => onPageSizeChange(Number(value))}
           >
             <SelectTrigger className="w-full h-9 rounded-lg border-gray-200 bg-white/80 shadow-sm sm:w-[100px]">
-              <SelectValue placeholder="Size" />
+              <SelectValue placeholder="Số lượng" />
             </SelectTrigger>
             <SelectContent className="rounded-xl border-border/50">
               <SelectItem value="10">10</SelectItem>
@@ -274,31 +274,31 @@ export function DiscountsTable({
             <TableHeader className="bg-gray-50/50">
               <TableRow className="border-border/50 hover:bg-transparent">
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground pl-6">
-                  Code
+                  Mã
                 </TableHead>
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                  Scope/Shop
+                  Phạm vi/Cửa hàng
                 </TableHead>
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                  Type
+                  Loại
                 </TableHead>
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                  Value
+                  Giá trị
                 </TableHead>
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                  Start Date
+                  Ngày bắt đầu
                 </TableHead>
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                  End Date
+                  Ngày kết thúc
                 </TableHead>
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                  Used / Limit
+                  Đã dùng / Giới hạn
                 </TableHead>
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                  Status
+                  Trạng thái
                 </TableHead>
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground text-right pr-6">
-                  Actions
+                  Thao tác
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -322,7 +322,7 @@ export function DiscountsTable({
                       <span className="bg-gray-100 p-3 rounded-full mb-3">
                         <Filter className="h-6 w-6 text-gray-400" />
                       </span>
-                      No discount codes found.
+                      Không tìm thấy mã giảm giá.
                     </div>
                   </TableCell>
                 </TableRow>
@@ -351,9 +351,7 @@ export function DiscountsTable({
                       {getScopeDisplay(discount)}
                     </TableCell>
                     <TableCell className="text-muted-foreground font-medium align-top py-4">
-                      {getDiscountTypeText(
-                        discount.type === "percentage" ? "percent" : "fixed"
-                      )}
+                      {getDiscountTypeText(discount.type)}
                     </TableCell>
                     <TableCell className="text-foreground font-bold align-top py-4">
                       {getDiscountValueText(discount)}
@@ -384,36 +382,36 @@ export function DiscountsTable({
                             <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          align="end"
-                          className="rounded-xl border-border/50 shadow-lg p-1 bg-white/95 backdrop-blur-xl"
-                        >
-                          <DropdownMenuLabel className="text-xs font-normal text-muted-foreground px-2 py-1.5">
-                            Actions
-                          </DropdownMenuLabel>
-                          <DropdownMenuItem
-                            onClick={() => onView(discount)}
-                            className="focus:bg-gray-100 rounded-lg cursor-pointer gap-2"
-                          >
-                            <Eye className="h-4 w-4" />
-                            View Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => onEdit(discount)}
-                            className="focus:bg-gray-100 rounded-lg cursor-pointer gap-2"
-                          >
-                            <Edit className="h-4 w-4" />
-                            Edit Discount
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator className="bg-border/50 my-1" />
-                          <DropdownMenuItem
-                            onClick={() => onDelete(discount)}
-                            className="text-red-600 focus:text-red-700 focus:bg-red-50 rounded-lg cursor-pointer gap-2"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
+                         <DropdownMenuContent
+                           align="end"
+                           className="rounded-xl border-border/50 shadow-lg p-1 bg-white/95 backdrop-blur-xl"
+                         >
+                           <DropdownMenuLabel className="text-xs font-normal text-muted-foreground px-2 py-1.5">
+                             Thao tác
+                           </DropdownMenuLabel>
+                           <DropdownMenuItem
+                             onClick={() => onView(discount)}
+                             className="focus:bg-gray-100 rounded-lg cursor-pointer gap-2"
+                           >
+                             <Eye className="h-4 w-4" />
+                             Xem chi tiết
+                           </DropdownMenuItem>
+                           <DropdownMenuItem
+                             onClick={() => onEdit(discount)}
+                             className="focus:bg-gray-100 rounded-lg cursor-pointer gap-2"
+                           >
+                             <Edit className="h-4 w-4" />
+                             Chỉnh sửa
+                           </DropdownMenuItem>
+                           <DropdownMenuSeparator className="bg-border/50 my-1" />
+                           <DropdownMenuItem
+                             onClick={() => onDelete(discount)}
+                             className="text-red-600 focus:text-red-700 focus:bg-red-50 rounded-lg cursor-pointer gap-2"
+                           >
+                             <Trash2 className="h-4 w-4" />
+                             Xóa
+                           </DropdownMenuItem>
+                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>

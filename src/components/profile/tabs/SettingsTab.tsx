@@ -41,25 +41,25 @@ export default function SettingsTab({ user }: SettingsTabProps) {
       !passwordData.newPassword ||
       !passwordData.confirmPassword
     ) {
-      toast.error("Please fill in all fields");
+      toast.error("Vui lòng điền đầy đủ các trường");
       setIsChangingPassword(false);
       return;
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error("New passwords do not match");
+      toast.error("Mật khẩu mới không khớp");
       setIsChangingPassword(false);
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      toast.error("Password must be at least 6 characters");
+      toast.error("Mật khẩu phải có ít nhất 6 ký tự");
       setIsChangingPassword(false);
       return;
     }
 
     if (passwordData.currentPassword === passwordData.newPassword) {
-      toast.error("New password must be different from current password");
+      toast.error("Mật khẩu mới phải khác mật khẩu hiện tại");
       setIsChangingPassword(false);
       return;
     }
@@ -70,7 +70,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
         newPassword: passwordData.newPassword,
       });
 
-      toast.success("Password changed successfully");
+      toast.success("Đổi mật khẩu thành công");
       setPasswordData({
         currentPassword: "",
         newPassword: "",
@@ -79,7 +79,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       const errorMessage =
-        err.response?.data?.message || "Failed to change password";
+        err.response?.data?.message || "Đổi mật khẩu thất bại";
       toast.error(errorMessage);
     } finally {
       setIsChangingPassword(false);
@@ -87,11 +87,11 @@ export default function SettingsTab({ user }: SettingsTabProps) {
   };
 
   const handleEmailVerification = async () => {
-    toast.info("Email verification service is temporarily unavailable.");
+    toast.info("Dịch vụ xác minh email tạm thời không khả dụng.");
   };
 
   const handleTwoFactorToggle = async () => {
-    toast.info("Two-Factor Authentication is not yet available.");
+    toast.info("Xác thực 2 yếu tố chưa khả dụng.");
     setTwoFactorEnabled(false);
     // setTwoFactorEnabled(false);
   };
@@ -119,9 +119,9 @@ export default function SettingsTab({ user }: SettingsTabProps) {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-xl font-semibold tracking-tight">Settings</h2>
+        <h2 className="text-xl font-semibold tracking-tight">Cài đặt</h2>
         <p className="text-muted-foreground text-sm">
-          Manage your account preferences and security.
+          Quản lý các tùy chọn tài khoản và bảo mật của bạn.
         </p>
       </div>
 
@@ -129,8 +129,8 @@ export default function SettingsTab({ user }: SettingsTabProps) {
         {/* Account Security */}
         <div>
           <SectionHeader
-            title="Login & Security"
-            description="Manage your password and security preferences"
+            title="Đăng nhập & Bảo mật"
+            description="Quản lý mật khẩu và các tùy chọn bảo mật"
           />
 
           <div className="space-y-4">
@@ -141,9 +141,9 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                     <Key className="h-5 w-5" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-base">Change Password</h4>
+                    <h4 className="font-medium text-base">Đổi mật khẩu</h4>
                     <p className="text-xs text-muted-foreground">
-                      Ensure your account is using a long, random password.
+                      Đảm bảo tài khoản của bạn đang sử dụng mật khẩu dài và ngẫu nhiên.
                     </p>
                   </div>
                 </div>
@@ -156,7 +156,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                       htmlFor="currentPassword"
                       className="text-sm font-medium"
                     >
-                      Current Password
+                      Mật khẩu hiện tại
                     </Label>
                     <div className="relative">
                       <Input
@@ -190,7 +190,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                         htmlFor="newPassword"
                         className="text-sm font-medium"
                       >
-                        New Password
+                        Mật khẩu mới
                       </Label>
                       <div className="relative">
                         <Input
@@ -223,7 +223,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                         htmlFor="confirmPassword"
                         className="text-sm font-medium"
                       >
-                        Confirm Password
+                        Xác nhận mật khẩu
                       </Label>
                       <div className="relative">
                         <Input
@@ -258,7 +258,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                   disabled={isChangingPassword}
                   className="mt-2 text-white rounded-sm"
                 >
-                  {isChangingPassword ? "Updating..." : "Update Password"}
+                  {isChangingPassword ? "Đang cập nhật..." : "Cập nhật mật khẩu"}
                 </Button>
               </form>
             </div>
@@ -278,10 +278,10 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                   </div>
                   <div>
                     <h4 className="font-medium text-base">
-                      Two-Factor Authentication
+                      Xác thực 2 yếu tố
                     </h4>
                     <p className="text-xs text-muted-foreground">
-                      Add an extra layer of security to your account.
+                      Thêm một lớp bảo mật bổ sung cho tài khoản của bạn.
                     </p>
                   </div>
                 </div>
@@ -308,28 +308,28 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                   <div>
                     <div className="flex items-center gap-2">
                       <h4 className="font-medium text-base">
-                        Email Verification
+                        Xác minh Email
                       </h4>
                       {user?.isVerifiedEmail ? (
                         <Badge
                           variant="secondary"
                           className="bg-green-100 text-green-700 hover:bg-green-100 h-5 px-1.5 text-[10px]"
                         >
-                          Verified
+                          Đã xác minh
                         </Badge>
                       ) : (
                         <Badge
                           variant="outline"
                           className="text-amber-600 border-amber-200 bg-amber-50 h-5 px-1.5 text-[10px]"
                         >
-                          Unverified
+                          Chưa xác minh
                         </Badge>
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {user?.isVerifiedEmail
-                        ? "Your email is verified and secure."
-                        : "Please verify your email address."}
+                        ? "Email của bạn đã được xác minh và bảo mật."
+                        : "Vui lòng xác minh địa chỉ email của bạn."}
                     </p>
                   </div>
                 </div>
@@ -340,7 +340,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
                     onClick={handleEmailVerification}
                     className="rounded-sm"
                   >
-                    Verify Now
+                    Xác minh ngay
                   </Button>
                 )}
               </div>

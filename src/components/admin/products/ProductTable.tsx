@@ -117,7 +117,6 @@ export function ProductsTable({
     onPriceFilterChange(min, max);
   };
 
-  // Lấy danh sách categories không trùng lặp - ĐÃ SỬA
   const categories = products
     .map((p) => {
       if (!p.category) return null;
@@ -145,16 +144,16 @@ export function ProductsTable({
   );
 
   const getCategoryName = (category: string | Category | null): string => {
-    if (!category) return "None";
-    return typeof category === "string" ? category : category.name || "None";
+    if (!category) return "Không";
+    return typeof category === "string" ? category : category.name || "Không";
   };
 
   const getShopInfo = (
     shop: string | Shop | undefined
   ): { name: string; logo?: string } => {
-    if (!shop) return { name: "N/A" };
+    if (!shop) return { name: "Không có" };
     if (typeof shop === "string") return { name: shop };
-    return { name: shop.name || "N/A", logo: shop.logo };
+    return { name: shop.name || "Không có", logo: shop.logo };
   };
 
   const getPriceDisplay = (price: Price | null) => {
@@ -177,17 +176,13 @@ export function ProductsTable({
   };
 
   const getStockCount = (product: Product) => {
-    // New schema: variants with stock
     if (product.variants && product.variants.length > 0) {
       return product.variants.reduce((total, v) => total + (v.stock || 0), 0);
     }
-    // Fallback to stock field
     return product.stock || 0;
   };
 
-  // Get main image from variants or legacy tierVariations
   const getMainImage = (product: Product): string | null => {
-    // New schema: variants with images (primary source)
     if (product.variants?.[0]?.images?.[0]) {
       return product.variants[0].images[0];
     }
@@ -202,23 +197,22 @@ export function ProductsTable({
           <div className="relative w-full sm:flex-1 sm:min-w-[220px] sm:max-w-sm">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search products..."
+              placeholder="Tìm kiếm sản phẩm..."
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
               className="pl-9 rounded-xl border-0 bg-white focus-visible:ring-0 transition-all"
             />
           </div>
 
-          {/* Category Filter */}
           <Select
             value={selectedCategory}
             onValueChange={onCategoryFilterChange}
           >
             <SelectTrigger className="w-full rounded-xl border-0 bg-white focus:ring-0 sm:w-[160px]">
-              <SelectValue placeholder="Category" />
+              <SelectValue placeholder="Danh mục" />
             </SelectTrigger>
             <SelectContent className="rounded-xl border-0">
-              <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem value="all">Tất cả danh mục</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category.id} value={category.id}>
                   {category.name}
@@ -227,13 +221,12 @@ export function ProductsTable({
             </SelectContent>
           </Select>
 
-          {/* Brand Filter */}
           <Select value={selectedBrand} onValueChange={onBrandFilterChange}>
             <SelectTrigger className="w-full rounded-xl border-0 bg-white focus:ring-0 sm:w-[140px]">
-              <SelectValue placeholder="Brand" />
+              <SelectValue placeholder="Thương hiệu" />
             </SelectTrigger>
             <SelectContent className="rounded-xl border-0">
-              <SelectItem value="all">All Brands</SelectItem>
+              <SelectItem value="all">Tất cả thương hiệu</SelectItem>
               {brands.map((brand) => (
                 <SelectItem key={brand} value={brand}>
                   {brand}
@@ -249,24 +242,24 @@ export function ProductsTable({
                 className="flex w-full items-center justify-start gap-2 rounded-xl border-0 bg-white hover:bg-white/80 sm:w-auto sm:justify-center"
               >
                 <Filter className="h-4 w-4" />
-                Price
+                Giá
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-80 p-4 rounded-xl border-0">
               <DropdownMenuLabel className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                Filter by price
+                Lọc theo giá
               </DropdownMenuLabel>
               <div className="space-y-3 mt-2">
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Min"
+                    placeholder="Tối thiểu"
                     value={localMinPrice}
                     onChange={(e) => setLocalMinPrice(e.target.value)}
                     type="number"
                     className="rounded-lg border-0 bg-[#f7f7f7]"
                   />
                   <Input
-                    placeholder="Max"
+                    placeholder="Tối đa"
                     value={localMaxPrice}
                     onChange={(e) => setLocalMaxPrice(e.target.value)}
                     type="number"
@@ -277,13 +270,12 @@ export function ProductsTable({
                   onClick={handlePriceFilterApply}
                   className="w-full rounded-lg bg-[#E53935] text-white hover:bg-[#D32F2F]"
                 >
-                  Apply
+                  Áp dụng
                 </Button>
               </div>
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Status Filter */}
           <Select
             value={selectedStatus === null ? "all" : selectedStatus.toString()}
             onValueChange={(value) => {
@@ -295,24 +287,23 @@ export function ProductsTable({
             }}
           >
             <SelectTrigger className="w-full rounded-xl border-0 bg-white focus:ring-0 sm:w-[140px]">
-              <SelectValue placeholder="Status" />
+              <SelectValue placeholder="Trạng thái" />
             </SelectTrigger>
             <SelectContent className="rounded-xl border-0">
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="true">Active</SelectItem>
-              <SelectItem value="false">Inactive</SelectItem>
+              <SelectItem value="all">Tất cả trạng thái</SelectItem>
+              <SelectItem value="true">Đang bán</SelectItem>
+              <SelectItem value="false">Ngừng bán</SelectItem>
             </SelectContent>
           </Select>
 
-          {/* Shop Filter */}
           {onShopFilterChange && shops.length > 0 && (
             <Select value={selectedShop} onValueChange={onShopFilterChange}>
               <SelectTrigger className="w-full rounded-xl border-0 bg-white focus:ring-0 sm:w-[160px]">
                 <Store className="h-4 w-4 mr-2 text-muted-foreground" />
-                <SelectValue placeholder="Shop" />
+                <SelectValue placeholder="Cửa hàng" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-0">
-                <SelectItem value="all">All Shops</SelectItem>
+                <SelectItem value="all">Tất cả cửa hàng</SelectItem>
                 {shops.map((shop) => (
                   <SelectItem key={shop._id} value={shop._id}>
                     {shop.name}
@@ -322,20 +313,18 @@ export function ProductsTable({
             </Select>
           )}
         </div>
-
-        {/* Page Size Filter */}
         <div className="w-full sm:w-auto">
           <Select
             value={pageSize.toString()}
             onValueChange={(value) => onPageSizeChange(Number(value))}
           >
             <SelectTrigger className="w-full rounded-xl border-0 bg-white focus:ring-0 sm:w-[120px]">
-              <SelectValue placeholder="Show" />
+              <SelectValue placeholder="Hiển thị" />
             </SelectTrigger>
             <SelectContent className="rounded-xl border-0">
-              <SelectItem value="10">10 / page</SelectItem>
-              <SelectItem value="20">20 / page</SelectItem>
-              <SelectItem value="50">50 / page</SelectItem>
+              <SelectItem value="10">10 / trang</SelectItem>
+              <SelectItem value="20">20 / trang</SelectItem>
+              <SelectItem value="50">50 / trang</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -348,37 +337,37 @@ export function ProductsTable({
             <TableHeader className="bg-[#f7f7f7]">
               <TableRow className="border-0 hover:bg-transparent">
                 <TableHead className="w-[70px] uppercase text-xs font-bold tracking-wider text-muted-foreground pl-6">
-                  Image
+                  Hình ảnh
                 </TableHead>
                 <TableHead className="w-[220px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                  Product Name
+                  Tên sản phẩm
                 </TableHead>
                 <TableHead className="w-[140px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                  Shop
+                  Cửa hàng
                 </TableHead>
                 <TableHead className="w-[120px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                  Category
+                  Danh mục
                 </TableHead>
                 <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                  Brand
+                  Thương hiệu
                 </TableHead>
                 <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                  Price
+                  Giá
                 </TableHead>
                 <TableHead className="w-[80px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                  Stock
+                  Kho
                 </TableHead>
                 <TableHead className="w-[80px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                  Sold
+                  Đã bán
                 </TableHead>
                 <TableHead className="w-[90px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                  Status
+                  Trạng thái
                 </TableHead>
                 <TableHead className="w-[100px] uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                  Created At
+                  Ngày tạo
                 </TableHead>
                 <TableHead className="w-[50px] uppercase text-xs font-bold tracking-wider text-muted-foreground text-right pr-6">
-                  Actions
+                  Thao tác
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -398,7 +387,7 @@ export function ProductsTable({
                     colSpan={11}
                     className="h-32 text-center text-muted-foreground"
                   >
-                    No products found.
+                    Không tìm thấy sản phẩm.
                   </TableCell>
                 </TableRow>
               ) : (
@@ -436,30 +425,30 @@ export function ProductsTable({
                             {product.name}
                           </div>
                           <div className="flex items-center gap-1 shrink-0">
-                            {product.isNewArrival && (
-                              <Badge
-                                variant="secondary"
-                                className="h-5 px-1.5 text-[10px] rounded-md bg-blue-50 text-blue-600 border-0"
-                              >
-                                New
-                              </Badge>
-                            )}
-                            {product.isFeatured && (
-                              <Badge
-                                variant="secondary"
-                                className="h-5 px-1.5 text-[10px] rounded-md bg-purple-50 text-purple-600 border-0"
-                              >
-                                Hot
-                              </Badge>
-                            )}
-                            {product.onSale && (
-                              <Badge
-                                variant="secondary"
-                                className="h-5 px-1.5 text-[10px] rounded-md bg-red-50 text-red-600 border-0"
-                              >
-                                Sale
-                              </Badge>
-                            )}
+                             {product.isNewArrival && (
+                               <Badge
+                                 variant="secondary"
+                                 className="h-5 px-1.5 text-[10px] rounded-md bg-blue-50 text-blue-600 border-0"
+                               >
+                                 Mới
+                               </Badge>
+                             )}
+                             {product.isFeatured && (
+                               <Badge
+                                 variant="secondary"
+                                 className="h-5 px-1.5 text-[10px] rounded-md bg-purple-50 text-purple-600 border-0"
+                               >
+                                 Hot
+                               </Badge>
+                             )}
+                             {product.onSale && (
+                               <Badge
+                                 variant="secondary"
+                                 className="h-5 px-1.5 text-[10px] rounded-md bg-red-50 text-red-600 border-0"
+                               >
+                                 Giảm giá
+                               </Badge>
+                             )}
                           </div>
                         </div>
                         <div
@@ -506,9 +495,9 @@ export function ProductsTable({
                     <TableCell className="text-muted-foreground text-sm">
                       <div
                         className="max-w-[120px] truncate"
-                        title={product.brand || "None"}
+                        title={product.brand || "Không"}
                       >
-                        {product.brand || "None"}
+                        {product.brand || "Không"}
                       </div>
                     </TableCell>
                     <TableCell>{getPriceDisplay(product.price)}</TableCell>
@@ -534,7 +523,7 @@ export function ProductsTable({
                             : "bg-gray-100 text-gray-600 hover:bg-gray-100"
                         }`}
                       >
-                        {product.isActive ? "Active" : "Inactive"}
+                        {product.isActive ? "Đang bán" : "Ngừng bán"}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
@@ -559,21 +548,21 @@ export function ProductsTable({
                             className="cursor-pointer gap-2"
                           >
                             <Eye className="h-4 w-4" />
-                            View Details
+                            Xem chi tiết
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => onEdit(product)}
                             className="cursor-pointer gap-2"
                           >
                             <Edit className="h-4 w-4" />
-                            Edit
+                            Sửa
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => onDelete(product)}
                             className="text-destructive cursor-pointer focus:text-destructive focus:bg-destructive/10 gap-2"
                           >
                             <Trash2 className="h-4 w-4" />
-                            Delete
+                            Xóa
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

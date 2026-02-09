@@ -170,7 +170,7 @@ export default function UserPermissions({
             disabled={!hasChanges || saving}
           >
             <RotateCcw className="h-4 w-4 mr-1" />
-            Reset
+            Đặt lại
           </Button>
           <Button
             size="sm"
@@ -192,7 +192,7 @@ export default function UserPermissions({
         <table className="w-full">
           <thead className="bg-muted/50">
             <tr>
-              <th className="text-left p-3 font-medium">Resource</th>
+              <th className="text-left p-3 font-medium">Tài nguyên</th>
               {Object.values(ACTIONS).map((action) => (
                 <th key={action} className="text-center p-3 font-medium w-24">
                   {action}

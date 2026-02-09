@@ -24,7 +24,7 @@ import {
   Ticket,
 } from "lucide-react";
 
-// Icon mapping for categories - Taobao style
+
 const categoryIcons: Record<string, React.ReactNode> = {
   electronics: <Laptop className="w-4 h-4" />,
   phones: <Smartphone className="w-4 h-4" />,
@@ -84,12 +84,11 @@ export default function CategorySidebar({ className }: CategorySidebarProps) {
           className="flex items-center gap-2 px-4 py-2.5 text-primary hover:bg-white/50 transition-colors border-b border-gray-200"
         >
           <Clock className="w-4 h-4" />
-          <span className="text-[13px] font-medium">Flash Sale</span>
+          <span className="text-[13px] font-medium">Giá sốc</span>
           <span className="text-[13px] text-muted-foreground">/</span>
           <span className="text-[13px] text-primary">Giảm đến 50%</span>
         </Link>
 
-        {/* Category List - Taobao Style */}
         <ul className="py-1">
           {categories.slice(0, 10).map((category) => (
             <li

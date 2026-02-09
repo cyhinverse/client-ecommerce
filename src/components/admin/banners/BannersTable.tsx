@@ -50,7 +50,7 @@ export const getStatusBadge = (status: boolean) => {
   return status ? (
     <Badge className="bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-500/10 dark:text-green-400 border-0 rounded-lg px-2.5 py-0.5 shadow-none">
       <CheckCircle className="h-3 w-3 mr-1" />
-      Active
+      Đang hoạt động
     </Badge>
   ) : (
     <Badge
@@ -58,7 +58,7 @@ export const getStatusBadge = (status: boolean) => {
       className="bg-gray-100 text-gray-600 border-0 rounded-lg px-2.5 py-0.5 shadow-none"
     >
       <XCircle className="h-3 w-3 mr-1" />
-      Inactive
+      Ngừng hoạt động
     </Badge>
   );
 };
@@ -103,7 +103,7 @@ export function BannersTable({
           <div className="relative w-full sm:flex-1 sm:min-w-[220px] sm:max-w-sm">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search banners..."
+              placeholder="Tìm kiếm banner..."
               value={localSearch}
               onChange={handleSearch}
               className="pl-9 rounded-xl border-0 bg-white focus-visible:ring-0 transition-all"
@@ -127,7 +127,7 @@ export function BannersTable({
 
         <div className="flex w-full items-center gap-2 sm:w-auto">
           <Label htmlFor="pageSize" className="text-sm font-medium text-muted-foreground">
-            Show:
+            Hiển thị:
           </Label>
           <select
             id="pageSize"
@@ -149,16 +149,16 @@ export function BannersTable({
             <TableHeader className="bg-[#f7f7f7]">
                 <TableRow className="border-0 hover:bg-transparent">
                 <TableHead className="w-[350px] uppercase text-xs font-bold tracking-wider text-muted-foreground pl-6">
-                    Banner Content
+                    Nội dung Banner
                 </TableHead>
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                    Theme
+                    Chủ đề
                 </TableHead>
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                    Status
+                    Trạng thái
                 </TableHead>
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground text-right pr-6">
-                    Actions
+                    Thao tác
                 </TableHead>
                 </TableRow>
             </TableHeader>
@@ -177,7 +177,7 @@ export function BannersTable({
                     <TableCell colSpan={4} className="text-center py-12">
                     <div className="flex flex-col items-center justify-center text-muted-foreground">
                         <ImageIcon className="h-12 w-12 mb-3 opacity-20" />
-                        <div className="text-muted-foreground">No banners found</div>
+                        <div className="text-muted-foreground">Không tìm thấy banner</div>
                     </div>
                     </TableCell>
                 </TableRow>
@@ -219,10 +219,10 @@ export function BannersTable({
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="rounded-xl border-0 shadow-lg">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuLabel>Thao tác</DropdownMenuLabel>
                             <DropdownMenuItem onClick={() => onEdit(banner)} className="cursor-pointer gap-2">
                               <Edit className="h-4 w-4" />
-                              Edit Banner
+                              Chỉnh sửa
                             </DropdownMenuItem>
                             <DropdownMenuSeparator className="bg-[#f7f7f7]" />
                             <DropdownMenuItem
@@ -230,7 +230,7 @@ export function BannersTable({
                               className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer gap-2"
                             >
                               <Trash2 className="h-4 w-4" />
-                              Delete Banner
+                              Xóa banner
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

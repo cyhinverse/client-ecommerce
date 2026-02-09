@@ -10,10 +10,10 @@ export function BannersHeader({ onAddBanner }: BannersHeaderProps) {
     <div className="flex flex-col gap-4 pb-6 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground uppercase">
-          Banner Management
+          Quản lý Banner
         </h1>
         <p className="text-muted-foreground mt-1">
-          Control the homepage hero experience and promotions
+          Kiểm soát trải nghiệm trang chủ và khuyến mãi
         </p>
       </div>
       <Button 
@@ -21,7 +21,7 @@ export function BannersHeader({ onAddBanner }: BannersHeaderProps) {
         className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#E53935] text-white hover:bg-[#D32F2F] sm:w-auto"
       >
         <Plus className="h-4 w-4" />
-        Add Banner
+        Thêm Banner
       </Button>
     </div>
   );

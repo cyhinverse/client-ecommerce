@@ -45,14 +45,14 @@ export default function OrderDialog({
   const handlePayment = async () => {
     if (!order) return;
     try {
-      toast.loading("Redirecting to VNPay...");
+      toast.loading("Đang chuyển hướng đến VNPay...");
       const result = await paymentMutation.mutateAsync(order._id);
       if (result.paymentUrl) {
         window.location.href = result.paymentUrl;
       }
     } catch (error) {
       console.error("Payment error:", error);
-      toast.error("Unable to create payment. Please try again.");
+      toast.error("Không thể tạo thanh toán. Vui lòng thử lại.");
     }
   };
 
@@ -63,7 +63,7 @@ export default function OrderDialog({
           icon: Clock,
           color: "text-amber-500",
           bg: "bg-amber-50",
-          label: "Pending",
+          label: "Chờ xử lý",
         };
       case "confirmed":
       case "processing":
@@ -71,28 +71,28 @@ export default function OrderDialog({
           icon: RefreshCw,
           color: "text-blue-500",
           bg: "bg-blue-50",
-          label: "Processing",
+          label: "Đang xử lý",
         };
       case "shipped":
         return {
           icon: Truck,
           color: "text-purple-500",
           bg: "bg-purple-50",
-          label: "On the way",
+          label: "Đang giao hàng",
         };
       case "delivered":
         return {
           icon: CheckCircle,
           color: "text-green-500",
           bg: "bg-green-50",
-          label: "Delivered",
+          label: "Đã giao hàng",
         };
       case "cancelled":
         return {
           icon: XCircle,
           color: "text-red-500",
           bg: "bg-red-50",
-          label: "Cancelled",
+          label: "Đã hủy",
         };
       default:
         return {
@@ -108,16 +108,16 @@ export default function OrderDialog({
   const StatusIcon = statusConfig.icon;
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
     }).format(amount);
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+    return new Date(dateString).toLocaleDateString("vi-VN", {
       day: "numeric",
-      month: "short",
+      month: "long",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
@@ -135,7 +135,7 @@ export default function OrderDialog({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <DialogTitle className="text-xl font-bold tracking-tight flex items-center gap-2">
-                Order {displayId}
+                Đơn hàng {displayId}
               </DialogTitle>
               <DialogDescription className="mt-1.5 flex items-center gap-2 text-sm">
                 <Calendar className="h-4 w-4" />
@@ -160,7 +160,7 @@ export default function OrderDialog({
           <div className="overflow-y-auto p-6 lg:p-8 space-y-8 bg-background">
             <div>
               <h3 className="text-sm font-semibold mb-6 text-muted-foreground uppercase tracking-wider">
-                Items ({order.products.length})
+                Sản phẩm ({order.products.length})
               </h3>
               <div className="space-y-6">
                 {order.products.map((product, index) => (
@@ -213,20 +213,20 @@ export default function OrderDialog({
             <div>
               <h3 className="text-sm font-semibold mb-4 flex items-center gap-2 text-foreground">
                 <CreditCard className="h-4 w-4 text-muted-foreground" />
-                Payment
+                Thanh toán
               </h3>
               <div className="bg-[#f7f7f7] rounded-2xl p-4 border border-border/60 space-y-4">
                 <div className="flex justify-between text-sm items-center">
-                  <span className="text-muted-foreground">Method</span>
+                  <span className="text-muted-foreground">Phương thức</span>
                   <span className="font-medium">
                     {order.paymentMethod === "cod"
-                      ? "Cash on Delivery"
-                      : "VNPay Wallet"}
+                      ? "Thanh toán khi nhận hàng"
+                      : "Ví VNPay"}
                   </span>
                 </div>
                 <Separator className="bg-border/50" />
                 <div className="flex justify-between text-sm items-center">
-                  <span className="text-muted-foreground">Status</span>
+                  <span className="text-muted-foreground">Trạng thái</span>
                   <Badge
                     variant={
                       order.paymentStatus === "paid" ? "outline" : "secondary"
@@ -238,7 +238,7 @@ export default function OrderDialog({
                         : "bg-zinc-100 text-zinc-900"
                     )}
                   >
-                    {order.paymentStatus === "paid" ? "Paid" : "Unpaid"}
+                    {order.paymentStatus === "paid" ? "Đã thanh toán" : "Chưa thanh toán"}
                   </Badge>
                 </div>
                 {order.paymentMethod === "vnpay" &&
@@ -249,7 +249,7 @@ export default function OrderDialog({
                       className="w-full rounded-xl mt-2"
                       size="sm"
                     >
-                      {isPaying ? "Processing..." : "Pay Now"}
+                      {isPaying ? "Đang xử lý..." : "Thanh toán ngay"}
                     </Button>
                   )}
               </div>
@@ -259,7 +259,7 @@ export default function OrderDialog({
             <div>
               <h3 className="text-sm font-semibold mb-4 flex items-center gap-2 text-foreground">
                 <MapPin className="h-4 w-4 text-muted-foreground" />
-                Shipping
+                Giao hàng
               </h3>
               <div className="text-sm space-y-1.5 text-muted-foreground bg-background/50 p-4 rounded-2xl border border-border/40">
                 <p className="font-semibold text-foreground text-base">
@@ -286,13 +286,13 @@ export default function OrderDialog({
             {/* Order Calculation */}
             <div className="space-y-3">
               <div className="flex justify-between text-sm text-muted-foreground">
-                <span>Subtotal</span>
+                <span>Tạm tính</span>
                 <span>{formatCurrency(order.subtotal)}</span>
               </div>
               {(order.discountShop ?? 0) + (order.discountPlatform ?? 0) >
                 0 && (
                 <div className="flex justify-between text-sm text-emerald-600 font-medium">
-                  <span>Discount</span>
+                  <span>Giảm giá</span>
                   <span>
                     -
                     {formatCurrency(
@@ -302,12 +302,12 @@ export default function OrderDialog({
                 </div>
               )}
               <div className="flex justify-between text-sm text-muted-foreground">
-                <span>Shipping</span>
-                <span>Free</span>
+                <span>Phí vận chuyển</span>
+                <span>Miễn phí</span>
               </div>
               <Separator className="my-2 bg-border/60" />
               <div className="flex justify-between text-lg font-bold tracking-tight text-foreground">
-                <span>Total</span>
+                <span>Tổng cộng</span>
                 <span>{formatCurrency(order.totalAmount)}</span>
               </div>
             </div>

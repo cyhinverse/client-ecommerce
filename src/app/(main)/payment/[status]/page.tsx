@@ -37,15 +37,15 @@ export default function PaymentResultPage() {
                         </motion.div>
                         
                         <div className="space-y-3">
-                            <h2 className="text-4xl font-bold tracking-tight text-foreground">Payment Successful!</h2>
+                            <h2 className="text-4xl font-bold tracking-tight text-foreground">Thanh toán thành công!</h2>
                             <p className="text-muted-foreground text-lg leading-relaxed">
-                                Thank you for your purchase. We&apos;ve received your order and it will be shipped shortly.
+                                Cảm ơn bạn đã mua hàng. Chúng tôi đã nhận được đơn hàng của bạn và sẽ giao hàng sớm nhất có thể.
                             </p>
                         </div>
 
                         {orderId && (
                             <div className="bg-gray-50 dark:bg-zinc-800/50 rounded-2xl p-4 border border-dashed border-gray-200 dark:border-zinc-700">
-                                <span className="block text-xs font-medium text-muted-foreground uppercase tracking-widest mb-1">Order Reference</span>
+                                <span className="block text-xs font-medium text-muted-foreground uppercase tracking-widest mb-1">Mã đơn hàng</span>
                                 <span className="text-xl font-mono font-bold text-foreground tracking-wider">#{orderId.slice(-8).toUpperCase()}</span>
                             </div>
                         )}
@@ -56,14 +56,14 @@ export default function PaymentResultPage() {
                                 className="w-full rounded-full h-12 text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/20"
                             >
                                 <ShoppingBag className="w-5 h-5 mr-2" />
-                                View My Order
+                                Xem đơn hàng của tôi
                             </Button>
                             <Button 
                                 onClick={() => router.push("/")} 
                                 variant="ghost" 
                                 className="w-full rounded-full h-12 text-base font-medium text-muted-foreground hover:text-foreground"
                             >
-                                Continue Shopping
+                                Tiếp tục mua sắm
                             </Button>
                         </div>
                     </motion.div>
@@ -87,9 +87,9 @@ export default function PaymentResultPage() {
                         </motion.div>
                         
                         <div className="space-y-3">
-                            <h2 className="text-3xl font-bold tracking-tight text-foreground">Payment Failed</h2>
+                            <h2 className="text-3xl font-bold tracking-tight text-foreground">Thanh toán thất bại</h2>
                             <p className="text-muted-foreground text-lg leading-relaxed">
-                                We couldn&apos;t process your payment. Please check your details and try again.
+                                Chúng tôi không thể xử lý thanh toán của bạn. Vui lòng kiểm tra lại thông tin và thử lại.
                             </p>
                         </div>
 
@@ -99,14 +99,14 @@ export default function PaymentResultPage() {
                                 className="w-full rounded-full h-12 text-base font-semibold bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-600/20"
                             >
                                 <RefreshCcw className="w-5 h-5 mr-2" />
-                                Try Again
+                                Thử lại
                             </Button>
                             <Button 
                                 onClick={() => router.push("/")} 
                                 variant="ghost" 
                                 className="w-full rounded-full h-12 text-base font-medium text-muted-foreground hover:text-foreground"
                             >
-                                Return Home
+                                Quay về trang chủ
                             </Button>
                         </div>
                     </motion.div>
@@ -131,9 +131,9 @@ export default function PaymentResultPage() {
                         </motion.div>
                         
                         <div className="space-y-3">
-                            <h2 className="text-3xl font-bold tracking-tight text-foreground">Something Went Wrong</h2>
+                            <h2 className="text-3xl font-bold tracking-tight text-foreground">Đã xảy ra lỗi</h2>
                             <p className="text-muted-foreground text-lg leading-relaxed">
-                                An unexpected error occurred. Please contact our support team for assistance.
+                                Một lỗi không mong muốn đã xảy ra. Vui lòng liên hệ với đội ngũ hỗ trợ để được trợ giúp.
                             </p>
                         </div>
 
@@ -143,7 +143,7 @@ export default function PaymentResultPage() {
                                 className="w-full rounded-full h-12 text-base font-semibold"
                             >
                                 <Home className="w-5 h-5 mr-2" />
-                                Return Home
+                                Quay về trang chủ
                             </Button>
                         </div>
                     </motion.div>

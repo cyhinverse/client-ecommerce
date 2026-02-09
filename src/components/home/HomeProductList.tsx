@@ -95,7 +95,7 @@ export default function HomeProductList({
   if (error) {
     return (
       <div className="text-center py-20 text-red-500">
-        Something went wrong: {(error as Error).message}
+        Đã xảy ra lỗi: {(error as Error).message}
       </div>
     );
   }
@@ -139,7 +139,7 @@ export default function HomeProductList({
             : !isLoading && (
                 <div className="col-span-full text-center py-20">
                   <p className="text-muted-foreground text-lg">
-                    No products found in this category.
+                    Không tìm thấy sản phẩm nào trong danh mục này.
                   </p>
                 </div>
               )}
@@ -154,13 +154,13 @@ export default function HomeProductList({
             <div className="flex flex-col items-center gap-2">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
               <span className="text-sm text-muted-foreground">
-                Loading more products...
+                Đang tải thêm sản phẩm...
               </span>
             </div>
           )}
           {!hasNextPage && products.length > 0 && !isLoading && (
             <p className="text-sm text-muted-foreground">
-              You&apos;ve reached the end
+              Bạn đã xem hết sản phẩm
             </p>
           )}
         </div>

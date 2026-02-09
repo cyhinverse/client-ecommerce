@@ -29,54 +29,54 @@ export interface NavigationItem {
 
 export const ADMIN_NAVIGATION: NavigationItem[] = [
   {
-    name: "Dashboard",
+    name: "Bảng điều khiển",
     href: "/admin/dashboard",
     icon: LayoutDashboardIcon,
   },
   {
-    name: "Products",
+    name: "Sản phẩm",
     href: "/admin/products",
     icon: Package,
     permission: PERMISSIONS.PRODUCT_READ,
   },
   {
-    name: "Orders",
+    name: "Đơn hàng",
     href: "/admin/orders",
     icon: ShoppingCart,
     permission: PERMISSIONS.ORDER_READ,
   },
   {
-    name: "Users",
+    name: "Người dùng",
     href: "/admin/users",
     icon: Users,
     permission: PERMISSIONS.USER_READ,
   },
   {
-    name: "Permissions",
+    name: "Quyền hạn",
     href: "/admin/permissions",
     icon: Shield,
     permission: PERMISSIONS.USER_MANAGE,
   },
   {
-    name: "Shops",
+    name: "Cửa hàng",
     href: "/admin/shops",
     icon: Store,
     permission: PERMISSIONS.SHOP_READ,
   },
   {
-    name: "Categories",
+    name: "Danh mục",
     href: "/admin/categories",
     icon: Album,
     permission: PERMISSIONS.CATEGORY_READ,
   },
   {
-    name: "Vouchers",
+    name: "Mã giảm giá",
     href: "/admin/vouchers",
     icon: Tag,
     permission: PERMISSIONS.VOUCHER_READ,
   },
   {
-    name: "Reviews",
+    name: "Đánh giá",
     href: "/admin/reviews",
     icon: Star,
   },
@@ -85,29 +85,29 @@ export const ADMIN_NAVIGATION: NavigationItem[] = [
 
     href: "/admin/flash-sale",
     icon: Zap,
-    badge: "New",
+    badge: "Mới",
     permission: PERMISSIONS.FLASH_SALE_READ,
   },
   {
-    name: "Banners",
+    name: "Banner",
     href: "/admin/banners",
     icon: ImageIcon,
     permission: PERMISSIONS.BANNER_READ,
   },
   {
-    name: "Notifications",
+    name: "Thông báo",
     href: "/admin/notifications",
     icon: Bell,
     permission: PERMISSIONS.NOTIFICATION_READ,
   },
   {
-    name: "Chatbot AI",
+    name: "Trợ lý AI",
     href: "/admin/chatbot",
     icon: Bot,
     permission: PERMISSIONS.ADMIN_ACCESS,
   },
   {
-    name: "Settings",
+    name: "Cài đặt",
 
     href: "/admin/settings",
     icon: Settings,

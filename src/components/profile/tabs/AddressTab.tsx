@@ -40,12 +40,12 @@ export default function AddressTab({ user }: AddressTabProps) {
       await refetch();
     } catch (error) {
       console.error("Error refreshing profile:", error);
-      toast.error("Unable to update data");
+      toast.error("Không thể cập nhật dữ liệu");
     }
   };
 
   const handleDeleteAddress = async (addressId: string) => {
-    if (!confirm("Are you sure you want to delete this address?")) {
+    if (!confirm("Bạn có chắc chắn muốn xóa địa chỉ này không?")) {
       return;
     }
 
@@ -53,13 +53,13 @@ export default function AddressTab({ user }: AddressTabProps) {
 
     try {
       await deleteAddressMutation.mutateAsync(addressId);
-      toast.success("Address deleted successfully");
+      toast.success("Đã xóa địa chỉ thành công");
     } catch (error) {
       console.error("Error deleting address:", error);
       const err = error as { response?: { data?: { message?: string } } };
       const errorMessage =
         err.response?.data?.message ||
-        "Unable to delete address. Please try again.";
+        "Không thể xóa địa chỉ. Vui lòng thử lại.";
       toast.error(errorMessage);
     } finally {
       setIsDeleting(null);
@@ -71,13 +71,13 @@ export default function AddressTab({ user }: AddressTabProps) {
       <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
         <MapPin className="h-6 w-6 text-muted-foreground/50" />
       </div>
-      <h3 className="text-lg font-medium mb-2">No addresses found</h3>
+      <h3 className="text-lg font-medium mb-2">Không tìm thấy địa chỉ</h3>
       <p className="text-muted-foreground mb-6 max-w-xs text-sm">
-        Add a delivery address to ensure faster checkout.
+        Thêm địa chỉ giao hàng để đảm bảo thanh toán nhanh hơn.
       </p>
       <Button onClick={openAddDialog} className="rounded-sm px-6">
         <Plus className="h-4 w-4 mr-2" />
-        Add New Address
+        Thêm địa chỉ mới
       </Button>
     </div>
   );
@@ -100,7 +100,7 @@ export default function AddressTab({ user }: AddressTabProps) {
           {address.isDefault && (
             <Badge className="rounded-sm bg-primary/10 text-primary text-xs px-2 py-0.5 border-0">
               <Star className="h-3 w-3 mr-1 fill-current" />
-              Default
+              Mặc định
             </Badge>
           )}
         </div>
@@ -122,7 +122,7 @@ export default function AddressTab({ user }: AddressTabProps) {
           className="rounded-sm h-8 px-3 text-xs md:opacity-0 group-hover:opacity-100 transition-opacity duration-200"
         >
           <Edit className="h-3.5 w-3.5 mr-1.5" />
-          Edit
+          Sửa
         </Button>
 
         {!address.isDefault && (
@@ -134,11 +134,11 @@ export default function AddressTab({ user }: AddressTabProps) {
             className="rounded-sm h-8 px-3 text-xs text-red-500 hover:text-red-600 hover:bg-red-50 md:opacity-0 group-hover:opacity-100 transition-opacity duration-200"
           >
             {isDeleting === address._id ? (
-              <span className="animate-pulse">Deleting...</span>
+              <span className="animate-pulse">Đang xóa...</span>
             ) : (
               <>
                 <Trash2 className="h-3.5 w-3.5 mr-1.5" />
-                Delete
+                Xóa
               </>
             )}
           </Button>
@@ -154,16 +154,16 @@ export default function AddressTab({ user }: AddressTabProps) {
         <div className="flex justify-between items-center">
           <div>
             <h2 className="text-xl font-semibold tracking-tight">
-              Address Book
+              Sổ địa chỉ
             </h2>
             <p className="text-muted-foreground text-sm">
-              Manage your shipping destinations
+              Quản lý các địa điểm nhận hàng của bạn
             </p>
           </div>
           {addresses.length > 0 && (
             <Button onClick={openAddDialog} className="rounded-sm">
               <Plus className="h-4 w-4 mr-2" />
-              Add Address
+              Thêm địa chỉ
             </Button>
           )}
         </div>

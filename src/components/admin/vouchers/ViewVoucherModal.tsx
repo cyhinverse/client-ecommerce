@@ -36,9 +36,9 @@ export function ViewModelDiscount({
   if (!discount) return null;
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+    return new Date(dateString).toLocaleDateString("vi-VN", {
       year: "numeric",
-      month: "short",
+      month: "long",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
@@ -49,22 +49,22 @@ export function ViewModelDiscount({
     active: {
       bg: "bg-green-100 dark:bg-green-900/30",
       text: "text-green-600 dark:text-green-400",
-      label: "Active",
+      label: "Đang hoạt động",
     },
     expired: {
       bg: "bg-red-100 dark:bg-red-900/30",
       text: "text-red-600 dark:text-red-400",
-      label: "Expired",
+      label: "Đã hết hạn",
     },
     limit: {
       bg: "bg-orange-100 dark:bg-orange-900/30",
       text: "text-orange-600 dark:text-orange-400",
-      label: "Limit Reached",
+      label: "Hết lượt dùng",
     },
     inactive: {
       bg: "bg-gray-100 dark:bg-gray-800",
       text: "text-gray-600 dark:text-gray-400",
-      label: "Inactive",
+      label: "Ngừng hoạt động",
     },
   };
 
@@ -88,7 +88,7 @@ export function ViewModelDiscount({
                 {discount.code}
               </DialogTitle>
               <DialogDescription className="text-muted-foreground flex items-center gap-2">
-                Coupon Details
+                Chi tiết mã giảm giá
               </DialogDescription>
             </div>
             <div
@@ -109,20 +109,20 @@ export function ViewModelDiscount({
             <div className="p-4 rounded-2xl bg-gray-50/50 dark:bg-white/5 border border-border/50 space-y-2">
               <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-1.5">
                 <Tag className="w-3.5 h-3.5" />
-                Type
+                Loại
               </div>
               <div className="text-2xl font-bold tracking-tight">
-                {discount.type === "percentage" ? "Percentage" : "Fixed"}
+                {discount.type === "percentage" ? "Phần trăm" : "Cố định"}
               </div>
               <div className="text-sm text-muted-foreground">
-                Discount applied to order
+                Loại giảm giá áp dụng
               </div>
             </div>
 
             <div className="p-4 rounded-2xl bg-gray-50/50 dark:bg-white/5 border border-border/50 space-y-2">
               <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-1.5">
                 <DollarSign className="w-3.5 h-3.5" />
-                Value
+                Giá trị
               </div>
               <div className="text-2xl font-bold tracking-tight text-blue-600 dark:text-blue-400">
                 {discount.type === "percentage"
@@ -130,14 +130,14 @@ export function ViewModelDiscount({
                   : `${(discount.value ?? 0).toLocaleString()}₫`}
               </div>
               <div className="text-sm text-muted-foreground">
-                Amount reduced
+                Số tiền được giảm
               </div>
             </div>
           </div>
 
           <div className="space-y-4">
             <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider pl-1">
-              Usage & Limits
+              Sử dụng & Giới hạn
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-white/5 border border-border/50 shadow-sm">
@@ -149,7 +149,7 @@ export function ViewModelDiscount({
                     {discount.usageCount ?? 0} / {discount.usageLimit}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    Total Usage
+                    Tổng lượt sử dụng
                   </div>
                 </div>
               </div>
@@ -163,7 +163,7 @@ export function ViewModelDiscount({
                     {discount.minOrderValue?.toLocaleString() || 0} ₫
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    Min. Order Value
+                    Đơn hàng tối thiểu
                   </div>
                 </div>
               </div>
@@ -172,13 +172,13 @@ export function ViewModelDiscount({
 
           <div className="space-y-4">
             <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider pl-1">
-              Validity
+              Thời gian hiệu lực
             </h4>
             <div className="p-4 rounded-2xl bg-gray-50/50 dark:bg-white/5 border border-border/50 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">Start Date</span>
+                  <span className="text-sm">Ngày bắt đầu</span>
                 </div>
                 <span className="text-sm font-medium">
                   {formatDate(discount.startDate)}
@@ -188,7 +188,7 @@ export function ViewModelDiscount({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">End Date</span>
+                  <span className="text-sm">Ngày kết thúc</span>
                 </div>
                 <span className="text-sm font-medium">
                   {formatDate(discount.endDate)}
@@ -200,7 +200,7 @@ export function ViewModelDiscount({
           {discount.description && (
             <div className="space-y-2">
               <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider pl-1">
-                Description
+                Mô tả
               </h4>
               <div className="p-3 rounded-xl bg-gray-50/50 dark:bg-white/5 border border-border/50 text-sm">
                 {discount.description}
@@ -217,14 +217,14 @@ export function ViewModelDiscount({
             onClick={() => onOpenChange(false)}
             className="rounded-xl border-gray-200"
           >
-            Close
+            Đóng
           </Button>
           <Button
             onClick={() => onEdit(discount)}
             className="rounded-xl bg-black hover:bg-black/90 text-white dark:bg-[#0071e3] dark:hover:bg-[#0077ED] gap-2"
           >
             <Edit className="h-4 w-4" />
-            Edit Discount
+            Sửa mã giảm giá
           </Button>
         </DialogFooter>
       </DialogContent>

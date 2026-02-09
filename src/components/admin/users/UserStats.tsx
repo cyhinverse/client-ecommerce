@@ -15,34 +15,34 @@ export function UsersStats({
 }: UsersStatsProps) {
   const stats = [
     {
-      title: "Total Users",
+      title: "Tổng người dùng",
       value: totalUsers,
       icon: Users,
-      description: "Admin & Users",
+      description: "Quản trị & Người dùng",
       percentage: "+12.5%",
       trend: "up",
     },
     {
-      title: "Verified Users",
+      title: "Đã xác minh",
       value: verifiedUsers,
       icon: MailCheck,
-      description: "Email Verified",
+      description: "Đã xác minh email",
       percentage: "+4.2%",
       trend: "up",
     },
     {
-      title: "Active Addresses",
+      title: "Địa chỉ hoạt động",
       value: usersWithAddress,
       icon: MapPin,
-      description: "Users with Address",
+      description: "Người dùng có địa chỉ",
       percentage: "+2.1%",
       trend: "up",
     },
     {
-      title: "New Users",
+      title: "Người dùng mới",
       value: recentUsers,
       icon: UserCheck,
-      description: "Registered this week",
+      description: "Đăng ký tuần này",
       percentage: "+10.3%",
       trend: "up",
     },
@@ -69,7 +69,7 @@ export function UsersStats({
               <span className="text-green-500 font-medium inline-flex items-center gap-1">
                  {stat.percentage}
               </span>{" "}
-              from last month
+              so với tháng trước
             </p>
           </div>
         </div>

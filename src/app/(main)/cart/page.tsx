@@ -391,7 +391,7 @@ export default function CartPage() {
                       {shopGroup.shop.name}
                     </span>
                     <span className="text-xs text-[#E53935] border border-[#E53935] px-1.5 py-0.5 rounded">
-                      Mall
+                      Chính hãng
                     </span>
                   </div>
 
@@ -425,14 +425,14 @@ export default function CartPage() {
                                 typeof item.productId === "object" &&
                                 item.productId
                                   ? item.productId.name
-                                  : "Product"
+                                  : "Sản phẩm"
                               }
                               fill
                               className="object-cover"
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-                              No Image
+                              Không có hình ảnh
                             </div>
                           )}
                         </div>

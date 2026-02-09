@@ -86,13 +86,13 @@ export default function TopBar() {
                 🇻🇳 Việt Nam
               </DropdownMenuItem>
               <DropdownMenuItem className="text-[11px] hover:bg-[#FFEBEE] hover:text-[#E53935] cursor-pointer">
-                🇺🇸 United States
+                🇺🇸 Hoa Kỳ
               </DropdownMenuItem>
               <DropdownMenuItem className="text-[11px] hover:bg-[#FFEBEE] hover:text-[#E53935] cursor-pointer">
-                🇯🇵 Japan
+                🇯🇵 Nhật Bản
               </DropdownMenuItem>
               <DropdownMenuItem className="text-[11px] hover:bg-[#FFEBEE] hover:text-[#E53935] cursor-pointer">
-                🇰🇷 Korea
+                🇰🇷 Hàn Quốc
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -198,7 +198,7 @@ export default function TopBar() {
                 🇻🇳 Tiếng Việt
               </DropdownMenuItem>
               <DropdownMenuItem className="text-[11px] hover:bg-[#FFEBEE] hover:text-[#E53935] cursor-pointer">
-                🇺🇸 English
+                🇺🇸 Tiếng Anh
               </DropdownMenuItem>
               <DropdownMenuItem className="text-[11px] hover:bg-[#FFEBEE] hover:text-[#E53935] cursor-pointer">
                 🇯🇵 日本語

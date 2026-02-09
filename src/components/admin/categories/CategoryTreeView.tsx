@@ -5,14 +5,14 @@ import { Category } from "@/types/category";
 export const getStatusBadge = (status: boolean) => {
   return status ? (
     <Badge className="bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-500/10 dark:text-green-400 border-0 rounded-lg px-2.5 py-0.5 shadow-none">
-      Active
+      Hoạt động
     </Badge>
   ) : (
     <Badge
       variant="outline"
       className="bg-gray-100 text-gray-600 border-0 rounded-lg px-2.5 py-0.5 shadow-none"
     >
-      Inactive
+      Ngừng hoạt động
     </Badge>
   );
 };
@@ -37,7 +37,7 @@ export function CategoryTreeView({
       <div className="space-y-3">
         {rootCategories.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground bg-gray-50/50 rounded-[1.5rem] border border-dashed border-border/50">
-             No categories found
+             Không tìm thấy danh mục
           </div>
         ) : (
           rootCategories.map((category) => (
@@ -61,7 +61,7 @@ export function CategoryTreeView({
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-gray-100 px-2 py-1 rounded-lg">
-                      <span className="font-medium">{getProductCount(category)}</span> products
+                      <span className="font-medium">{getProductCount(category)}</span> sản phẩm
                   </div>
                   {getStatusBadge(category.isActive)}
                 </div>
@@ -94,7 +94,7 @@ export function CategoryTreeView({
                         </div>
                         <div className="flex items-center gap-3">
                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-gray-50 px-2 py-0.5 rounded-md border border-border/50">
-                                {getProductCount(subCategory)} products
+                                {getProductCount(subCategory)} sản phẩm
                             </div>
                            {getStatusBadge(subCategory.isActive)}
                         </div>

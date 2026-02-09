@@ -33,8 +33,8 @@ const promoItems = [
   },
   {
     id: 4,
-    title: "Flash Sale",
-    subtitle: "Giá sốc mỗi giờ",
+    title: "Giá sốc",
+    subtitle: "Giá tốt mỗi giờ",
     image:
       "https://images.unsplash.com/photo-1567113463300-102a7eb3cb26?w=200&h=200&fit=crop",
     bgColor: "from-amber-500 to-orange-500",

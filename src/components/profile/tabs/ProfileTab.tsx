@@ -26,9 +26,9 @@ export default function ProfileTab({ user }: ProfileTabProps) {
 
       try {
         await uploadAvatarMutation.mutateAsync(formData);
-        toast.success("Profile picture updated successfully");
+        toast.success("Cập nhật ảnh đại diện thành công");
       } catch {
-        toast.error("Failed to update profile picture");
+        toast.error("Cập nhật ảnh đại diện thất bại");
       } finally {
         setIsUploadingAvatar(false);
       }
@@ -69,7 +69,7 @@ export default function ProfileTab({ user }: ProfileTabProps) {
             {user.username}
           </h2>
           <p className="text-muted-foreground text-sm">
-            Member since {new Date(user.createdAt).getFullYear()}
+            Thành viên từ năm {new Date(user.createdAt).getFullYear()}
           </p>
         </div>
       </div>
@@ -78,16 +78,16 @@ export default function ProfileTab({ user }: ProfileTabProps) {
       <div className="space-y-3">
         <InfoRow
           icon={User}
-          label="Username"
+          label="Tên người dùng"
           value={user.username}
-          sublabel="Your display name visible to other users"
+          sublabel="Tên hiển thị của bạn với người dùng khác"
         />
 
         <InfoRow
           icon={Mail}
-          label="Email Address"
+          label="Địa chỉ Email"
           value={user.email}
-          sublabel="Used for sign in and notifications"
+          sublabel="Dùng để đăng nhập và nhận thông báo"
           action={
             user.isVerifiedEmail ? (
               <Badge
@@ -95,11 +95,11 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                 className="bg-green-100 text-green-700 hover:bg-green-100 gap-1 px-2 py-0.5 h-5 text-[10px]"
               >
                 <Check className="h-3 w-3" />
-                Verified
+                Đã xác minh
               </Badge>
             ) : (
               <Badge variant="outline" className="text-[10px] h-5 px-2">
-                Unverified
+                Chưa xác minh
               </Badge>
             )
           }
@@ -107,7 +107,7 @@ export default function ProfileTab({ user }: ProfileTabProps) {
 
         <InfoRow
           icon={MapPin}
-          label="Default Address"
+          label="Địa chỉ mặc định"
           value={
             user.addresses && user.addresses.length > 0
               ? `${
@@ -117,12 +117,12 @@ export default function ProfileTab({ user }: ProfileTabProps) {
                   user.addresses.find((addr: Address) => addr.isDefault)
                     ?.city || user.addresses[0]?.city
                 }`
-              : "No address set"
+              : "Chưa thiết lập địa chỉ"
           }
           sublabel={
             user.addresses && user.addresses.length > 0
-              ? "Primary delivery location"
-              : "Add an address to speed up checkout"
+              ? "Địa điểm giao hàng chính"
+              : "Thêm địa chỉ để thanh toán nhanh hơn"
           }
         />
       </div>

@@ -15,28 +15,28 @@ export function ProductsStats({
 }: ProductsStatsProps) {
   const stats = [
     {
-      title: "Total Products",
+      title: "Tổng sản phẩm",
       value: totalProducts,
       icon: Package,
-      description: "All products",
+      description: "Tất cả sản phẩm",
     },
     {
-      title: "Active",
+      title: "Đang bán",
       value: activeProducts,
       icon: BarChart3,
-      description: "Active products",
+      description: "Sản phẩm đang hoạt động",
     },
     {
-      title: "On Sale",
+      title: "Khuyến mãi",
       value: productsOnSale,
       icon: DollarSign,
-      description: "Discounted products",
+      description: "Sản phẩm đang giảm giá",
     },
     {
-      title: "Categories",
+      title: "Danh mục",
       value: totalCategories,
       icon: Tag,
-      description: "Total categories",
+      description: "Tổng số danh mục",
     },
   ];
 

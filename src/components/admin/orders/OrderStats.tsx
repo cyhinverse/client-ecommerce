@@ -71,25 +71,25 @@ export function OrdersStats({
 
   const stats = [
     {
-      title: "Total Orders",
+      title: "Tổng đơn hàng",
       value: formatNumber(calculatedStats.total),
       icon: ShoppingCart,
 
     },
     {
-      title: "Pending",
+      title: "Chờ xử lý",
       value: formatNumber(calculatedStats.pending),
       icon: Clock,
 
     },
     {
-      title: "Delivered",
+      title: "Đã giao",
       value: formatNumber(calculatedStats.delivered),
       icon: CheckCircle,
 
     },
     {
-      title: "TOTAL REVENUE",
+      title: "TỔNG DOANH THU",
       value: formatCurrency(calculatedStats.revenue),
       icon: DollarSign,
     },

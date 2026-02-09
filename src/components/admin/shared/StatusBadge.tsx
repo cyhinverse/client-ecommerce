@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Truck, Clock, XCircle, Shield } from "lucide-react";
+import { CheckCircle, Truck, Clock, XCircle, Shield, Store } from "lucide-react";
 import React from "react";
 
 interface StatusBadgeProps {
@@ -24,7 +24,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
               }`}
             >
               <CheckCircle className="h-3 w-3 mr-1" />
-              Delivered
+              Đã giao
             </Badge>
           );
         case "shipped":
@@ -35,7 +35,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
               }`}
             >
               <Truck className="h-3 w-3 mr-1" />
-              Shipped
+              Đang giao
             </Badge>
           );
         case "processing":
@@ -46,7 +46,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
               }`}
             >
               <Clock className="h-3 w-3 mr-1" />
-              Processing
+              Đang xử lý
             </Badge>
           );
         case "pending":
@@ -56,7 +56,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
               className={`border-gray-200 text-gray-600 rounded-lg px-2.5 py-0.5 shadow-none ${className || ""}`}
             >
               <Clock className="h-3 w-3 mr-1" />
-              Pending
+              Chờ xử lý
             </Badge>
           );
         case "cancelled":
@@ -68,13 +68,13 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
               }`}
             >
               <XCircle className="h-3 w-3 mr-1" />
-              Cancelled
+              Đã hủy
             </Badge>
           );
         default:
           return (
             <Badge variant="outline" className={`rounded-lg px-2.5 py-0.5 shadow-none ${className}`}>
-              Unknown
+              Không xác định
             </Badge>
           );
       }
@@ -83,24 +83,24 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
       switch (status) {
         case "active":
           return (
-            <Badge className={`bg-green-100 text-green-700 hover:bg-green-100 border-0 rounded-lg px-2.5 py-0.5 shadow-none ${className || ""}`}>Active</Badge>
+            <Badge className={`bg-green-100 text-green-700 hover:bg-green-100 border-0 rounded-lg px-2.5 py-0.5 shadow-none ${className || ""}`}>Đang bán</Badge>
           );
         case "out_of_stock":
           return (
             <Badge variant="outline" className={`bg-red-50 text-red-600 border-red-100 rounded-lg px-2.5 py-0.5 shadow-none ${className || ""}`}>
-              Out of Stock
+              Hết hàng
             </Badge>
           );
         case "inactive":
           return (
             <Badge variant="secondary" className={`bg-gray-100 text-gray-600 border-0 rounded-lg px-2.5 py-0.5 shadow-none ${className || ""}`}>
-              Inactive
+              Ngừng bán
             </Badge>
           );
         default:
           return (
             <Badge variant="outline" className={`rounded-lg px-2.5 py-0.5 shadow-none ${className}`}>
-              Unknown
+              Không xác định
             </Badge>
           );
       }
@@ -110,25 +110,25 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
         case "active":
           return (
             <Badge className={`bg-green-100 text-green-700 hover:bg-green-100 border-0 rounded-lg px-2.5 py-0.5 shadow-none ${className || ""}`}>
-              Active
+              Đang hoạt động
             </Badge>
           );
         case "inactive":
           return (
             <Badge variant="secondary" className={`bg-gray-100 text-gray-600 border-0 rounded-lg px-2.5 py-0.5 shadow-none ${className || ""}`}>
-              Inactive
+              Ngừng hoạt động
             </Badge>
           );
         case "banned":
           return (
             <Badge variant="destructive" className={`rounded-lg px-2.5 py-0.5 shadow-none ${className || ""}`}>
-              Banned
+              Bị khóa
             </Badge>
           );
         default:
           return (
             <Badge variant="outline" className={`rounded-lg px-2.5 py-0.5 shadow-none ${className || ""}`}>
-              Unknown
+              Không xác định
             </Badge>
           );
       }
@@ -143,13 +143,13 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
               }`}
             >
               <Shield className="h-3 w-3 mr-1" />
-              Admin
+              Quản trị viên
             </Badge>
           );
         case "customer":
           return (
             <Badge variant="outline" className={`rounded-lg px-2.5 py-0.5 shadow-none bg-gray-50 border-gray-200 text-gray-600 ${className || ""}`}>
-              Customer
+              Khách hàng
             </Badge>
           );
         case "vendor":
@@ -159,13 +159,14 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
                 className || ""
               }`}
             >
-              Vendor
+              <Store className="h-3 w-3 mr-1" />
+              Người bán
             </Badge>
           );
         default:
           return (
             <Badge variant="outline" className={`rounded-lg px-2.5 py-0.5 shadow-none ${className || ""}`}>
-              Unknown
+              Không xác định
             </Badge>
           );
       }
@@ -173,7 +174,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
     default:
       return (
         <Badge variant="outline" className={`rounded-lg px-2.5 py-0.5 shadow-none ${className || ""}`}>
-          Unknown
+          Không xác định
         </Badge>
       );
   }

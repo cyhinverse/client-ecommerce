@@ -65,12 +65,11 @@ export default function FooterLayout() {
               <span className="text-lg font-bold tracking-tight"> STORE</span>
             </Link>
             <p className="text-muted-foreground text-xs leading-relaxed max-w-[280px]">
-              Subscribe to our newsletter for the latest updates, exclusive
-              deals, and more.
+              Đăng ký bản tin của chúng tôi để cập nhật những thông tin mới nhất, ưu đãi độc quyền và nhiều hơn thế nữa.
             </p>
             <div className="flex gap-2 max-w-[280px]">
               <Input
-                placeholder="Email address"
+                placeholder="Địa chỉ Email"
                 className="bg-background/50 border-border/50 focus-visible:ring-1 text-xs h-9 rounded-full px-4"
               />
               <Button size="icon" className="h-9 w-9 rounded-full shrink-0">
@@ -93,33 +92,33 @@ export default function FooterLayout() {
           </div>
 
           <FooterSection
-            title="Shop"
+            title="Cửa hàng"
             links={[
               { label: "Mac", href: "/products?category=mac" },
               { label: "iPad", href: "/products?category=ipad" },
               { label: "iPhone", href: "/products?category=iphone" },
               { label: "Watch", href: "/products?category=watch" },
-              { label: "Accessories", href: "/products?category=accessories" },
+              { label: "Phụ kiện", href: "/products?category=accessories" },
             ]}
           />
 
           <FooterSection
-            title="Account"
+            title="Tài khoản"
             links={[
-              { label: "Manage Account", href: "/profile" },
-              { label: "Orders", href: "/profile?tab=orders" },
-              { label: "Returns", href: "/returns" },
-              { label: "Wishlist", href: "/wishlist" },
+              { label: "Quản lý tài khoản", href: "/profile" },
+              { label: "Đơn hàng", href: "/profile?tab=orders" },
+              { label: "Đổi trả", href: "/returns" },
+              { label: "Yêu thích", href: "/wishlist" },
             ]}
           />
 
           <FooterSection
-            title="Policy"
+            title="Chính sách"
             links={[
-              { label: "Terms of Use", href: "/terms" },
-              { label: "Privacy Policy", href: "/privacy" },
-              { label: "Cookie Policy", href: "/cookies" },
-              { label: "Shipping Policy", href: "/shipping" },
+              { label: "Điều khoản sử dụng", href: "/terms" },
+              { label: "Chính sách bảo mật", href: "/privacy" },
+              { label: "Chính sách Cookie", href: "/cookies" },
+              { label: "Chính sách vận chuyển", href: "/shipping" },
             ]}
           />
         </div>
@@ -128,24 +127,23 @@ export default function FooterLayout() {
 
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-[11px] text-muted-foreground pt-8">
           <p>
-            &copy; {new Date().getFullYear()} Apple Store Inc. All rights
-            reserved.
+            &copy; {new Date().getFullYear()} Apple Store Inc. Bảo lưu mọi quyền.
           </p>
           <div className="flex gap-6">
             <Link href="/privacy" className="hover:underline">
-              Privacy Policy
+              Chính sách bảo mật
             </Link>
             <Link href="/terms" className="hover:underline">
-              Terms of Use
+              Điều khoản sử dụng
             </Link>
             <Link href="/sales" className="hover:underline">
-              Sales and Refunds
+              Bán hàng và Hoàn tiền
             </Link>
             <Link href="/legal" className="hover:underline">
-              Legal
+              Pháp lý
             </Link>
             <Link href="/sitemap" className="hover:underline">
-              Site Map
+              Sơ đồ trang web
             </Link>
           </div>
         </div>

@@ -11,7 +11,7 @@ interface PaginationControlsProps {
 export function PaginationControls({
   pagination,
   onPageChange,
-  itemName = "entries",
+  itemName = "mục",
 }: PaginationControlsProps) {
   if (!pagination) return null;
 
@@ -23,7 +23,7 @@ export function PaginationControls({
   return (
     <div className="flex items-center justify-between px-2 w-full">
       <div className="flex-1 text-sm text-muted-foreground">
-        Showing <span className="font-medium text-foreground">{startItem}</span> to <span className="font-medium text-foreground">{endItem}</span> of <span className="font-medium text-foreground">{totalItems}</span> {itemName}
+        Hiển thị <span className="font-medium text-foreground">{startItem}</span> đến <span className="font-medium text-foreground">{endItem}</span> trong tổng số <span className="font-medium text-foreground">{totalItems}</span> {itemName}
       </div>
       <div className="flex items-center space-x-6 lg:space-x-8">
         <div className="flex items-center space-x-2">

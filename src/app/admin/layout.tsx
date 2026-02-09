@@ -48,7 +48,7 @@ export default function AdminLayout({
 
   const handleLogout = () => {
     dispatch(logout());
-    toast.success("Logged out successfully");
+    toast.success("Đăng xuất thành công");
     router.push("/");
   };
 
@@ -66,7 +66,7 @@ export default function AdminLayout({
             side="left"
             className="w-[280px] p-0 border-r-0 bg-[#f7f7f7] dark:bg-[#1C1C1E]"
           >
-            <SheetTitle className="sr-only">Admin Navigation Menu</SheetTitle>
+            <SheetTitle className="sr-only">Menu Điều hướng Admin</SheetTitle>
             <div className="flex h-full flex-col">
               {/* Mobile Logo */}
               <div className="flex h-16 items-center px-6">
@@ -75,7 +75,7 @@ export default function AdminLayout({
                     <span className="text-white font-bold text-sm">A</span>
                   </div>
                   <span className="text-lg font-bold tracking-tight">
-                    Admin
+                    Quản trị
                   </span>
                 </div>
               </div>
@@ -135,10 +135,10 @@ export default function AdminLayout({
                 </div>
                 <div className="flex flex-col">
                   <span className="text-sm font-bold tracking-tight">
-                    Admin Panel
+                    Bảng quản trị
                   </span>
                   <span className="text-[10px] text-muted-foreground">
-                    E-commerce
+                    Thương mại điện tử
                   </span>
                 </div>
               </div>
@@ -225,7 +225,7 @@ export default function AdminLayout({
                   <p className="text-sm font-medium truncate">
                     {data.username}
                   </p>
-                  <p className="text-xs text-muted-foreground">Administrator</p>
+                  <p className="text-xs text-muted-foreground">Quản trị viên</p>
                 </div>
               </div>
             )}
@@ -236,10 +236,10 @@ export default function AdminLayout({
                 isCollapsed && "justify-center px-0"
               )}
               onClick={handleLogout}
-              title="Logout"
+              title="Đăng xuất"
             >
               <LogOut className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
-              {!isCollapsed && "Sign Out"}
+              {!isCollapsed && "Đăng xuất"}
             </Button>
           </div>
         </aside>
@@ -264,7 +264,7 @@ export default function AdminLayout({
               </Button>
               <div className="hidden sm:block">
                 <h1 className="text-lg font-semibold text-foreground">
-                  {currentPage?.name || "Dashboard"}
+                  {currentPage?.name || "Bảng điều khiển"}
                 </h1>
               </div>
             </div>
@@ -289,7 +289,7 @@ export default function AdminLayout({
                       {data.username}
                     </p>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Admin
+                      Quản trị viên
                     </p>
                   </div>
                   <div className="relative h-9 w-9 rounded-full overflow-hidden">

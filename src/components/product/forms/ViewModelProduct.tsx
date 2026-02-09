@@ -594,7 +594,7 @@ export function ViewModelProduct({
                     >
                       <Image
                         src={img}
-                        alt={`Image ${idx + 1}`}
+                        alt={`Hình ảnh ${idx + 1}`}
                         fill
                         className="object-cover"
                       />

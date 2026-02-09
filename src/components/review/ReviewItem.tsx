@@ -31,12 +31,12 @@ export default function ReviewItem({
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                  <h4 className="font-semibold text-sm">{name}</h4>
-                  {verified && (
-                    <Badge variant="secondary" className="h-5 px-1.5 text-[10px] bg-green-50 text-green-700 hover:bg-green-100 gap-1 rounded-sm font-normal">
-                      <CheckCircle className="h-3 w-3" />
-                      Verified
-                    </Badge>
-                )}
+                   {verified && (
+                     <Badge variant="secondary" className="h-5 px-1.5 text-[10px] bg-green-50 text-green-700 hover:bg-green-100 gap-1 rounded-sm font-normal">
+                       <CheckCircle className="h-3 w-3" />
+                       Đã xác minh
+                     </Badge>
+                 )}
               </div>
               <div className="flex items-center gap-2">
                 <div className="flex">

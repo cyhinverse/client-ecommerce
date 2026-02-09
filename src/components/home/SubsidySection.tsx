@@ -20,7 +20,7 @@ const subsidyProducts = [
       "https://images.unsplash.com/photo-1541544741938-0af808871cc0?w=200&h=200&fit=crop",
     price: "13.900",
     originalPrice: "25.000",
-    tag: "Hot",
+    tag: "Nổi bật",
   },
   {
     id: 3,
@@ -29,7 +29,7 @@ const subsidyProducts = [
       "https://images.unsplash.com/photo-1582030043134-8da0f9919f03?w=200&h=200&fit=crop",
     price: "9.800",
     originalPrice: "19.000",
-    tag: "Deal",
+    tag: "Giá hời",
   },
   {
     id: 4,
@@ -38,7 +38,7 @@ const subsidyProducts = [
       "https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=200&h=200&fit=crop",
     price: "949.400",
     originalPrice: "1.500.000",
-    tag: "Best",
+    tag: "Bán chạy",
   },
 ];
 
@@ -49,7 +49,7 @@ export default function SubsidySection() {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Zap className="w-5 h-5 text-[#E53935] fill-[#E53935]" />
-          <h3 className="text-base font-bold text-[#E53935]">Flash Sale</h3>
+          <h3 className="text-base font-bold text-[#E53935]">Giá sốc chớp nhoáng</h3>
           <span className="bg-[#E53935] text-white text-[10px] px-2 py-0.5 rounded-full font-medium">
             Kết thúc sau 02:30:45
           </span>

@@ -98,32 +98,32 @@ export function OrdersTable({
       };
     } = {
       pending: {
-        label: "Pending",
+        label: "Chờ xử lý",
         variant: "secondary",
         className: "bg-gray-100 text-gray-700 hover:bg-gray-100",
       },
       confirmed: {
-        label: "Confirmed",
+        label: "Đã xác nhận",
         variant: "outline",
         className: "bg-blue-50 text-blue-700 border-blue-200",
       },
       processing: {
-        label: "Processing",
+        label: "Đang xử lý",
         variant: "default",
         className: "bg-indigo-100 text-indigo-700 hover:bg-indigo-100",
       },
       shipped: {
-        label: "Shipped",
+        label: "Đang giao",
         variant: "default",
         className: "bg-purple-100 text-purple-700 hover:bg-purple-100",
       },
       delivered: {
-        label: "Delivered",
+        label: "Đã giao",
         variant: "outline",
         className: "bg-green-50 text-green-700 border-green-200",
       },
       cancelled: {
-        label: "Cancelled",
+        label: "Đã hủy",
         variant: "destructive",
         className: "bg-red-50 text-red-700 border-red-200 hover:bg-red-50",
       },
@@ -154,16 +154,16 @@ export function OrdersTable({
       };
     } = {
       unpaid: {
-        label: "Unpaid",
+        label: "Chưa thanh toán",
         variant: "secondary",
         className: "bg-yellow-50 text-yellow-700 border border-yellow-200",
       },
       paid: {
-        label: "Paid",
+        label: "Đã thanh toán",
         variant: "outline",
         className: "bg-green-50 text-green-700 border border-green-200",
       },
-      refunded: { label: "Refunded", variant: "destructive" },
+      refunded: { label: "Hoàn tiền", variant: "destructive" },
     };
 
     const config = statusConfig[status] || {
@@ -182,7 +182,7 @@ export function OrdersTable({
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US");
+    return new Date(dateString).toLocaleDateString("vi-VN");
   };
 
   const formatCurrency = (amount: number) => {
@@ -195,9 +195,9 @@ export function OrdersTable({
   const getShopInfo = (
     shopId: string | Shop | undefined,
   ): { name: string; logo?: string } => {
-    if (!shopId) return { name: "N/A" };
+    if (!shopId) return { name: "Không có" };
     if (typeof shopId === "string") return { name: shopId };
-    return { name: shopId.name || "N/A", logo: shopId.logo };
+    return { name: shopId.name || "Không có", logo: shopId.logo };
   };
 
   return (
@@ -207,7 +207,7 @@ export function OrdersTable({
           <div className="relative w-full sm:flex-1 sm:min-w-[220px] sm:max-w-sm">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by order ID, customer name..."
+              placeholder="Tìm kiếm theo mã đơn hàng, tên khách hàng..."
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
               className="pl-9 rounded-xl border-0 bg-white focus-visible:ring-0 transition-all"
@@ -236,16 +236,16 @@ export function OrdersTable({
 
           <Select value={statusFilter} onValueChange={onStatusFilter}>
             <SelectTrigger className="w-full rounded-xl border-0 bg-white focus:ring-0 sm:w-[180px]">
-              <SelectValue placeholder="All Status" />
+              <SelectValue placeholder="Tất cả trạng thái" />
             </SelectTrigger>
             <SelectContent className="rounded-xl border-0">
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="confirmed">Confirmed</SelectItem>
-              <SelectItem value="processing">Processing</SelectItem>
-              <SelectItem value="shipped">Shipped</SelectItem>
-              <SelectItem value="delivered">Delivered</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
+              <SelectItem value="all">Tất cả trạng thái</SelectItem>
+              <SelectItem value="pending">Chờ xử lý</SelectItem>
+              <SelectItem value="confirmed">Đã xác nhận</SelectItem>
+              <SelectItem value="processing">Đang xử lý</SelectItem>
+              <SelectItem value="shipped">Đang giao</SelectItem>
+              <SelectItem value="delivered">Đã giao</SelectItem>
+              <SelectItem value="cancelled">Đã hủy</SelectItem>
             </SelectContent>
           </Select>
 
@@ -254,10 +254,10 @@ export function OrdersTable({
             <Select value={selectedShop} onValueChange={onShopFilterChange}>
               <SelectTrigger className="w-full rounded-xl border-0 bg-white focus:ring-0 sm:w-[160px]">
                 <Store className="h-4 w-4 mr-2 text-muted-foreground" />
-                <SelectValue placeholder="Shop" />
+                <SelectValue placeholder="Cửa hàng" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-0">
-                <SelectItem value="all">All Shops</SelectItem>
+                <SelectItem value="all">Tất cả cửa hàng</SelectItem>
                 {shops.map((shop) => (
                   <SelectItem key={shop._id} value={shop._id}>
                     {shop.name}
@@ -273,12 +273,12 @@ export function OrdersTable({
             onValueChange={(value) => onPageSizeChange(Number(value))}
           >
             <SelectTrigger className="w-full rounded-xl border-0 bg-white focus:ring-0 sm:w-[120px]">
-              <SelectValue placeholder="Show" />
+              <SelectValue placeholder="Hiển thị" />
             </SelectTrigger>
             <SelectContent className="rounded-xl border-0">
-              <SelectItem value="10">10 / page</SelectItem>
-              <SelectItem value="20">20 / page</SelectItem>
-              <SelectItem value="50">50 / page</SelectItem>
+              <SelectItem value="10">10 / trang</SelectItem>
+              <SelectItem value="20">20 / trang</SelectItem>
+              <SelectItem value="50">50 / trang</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -290,28 +290,28 @@ export function OrdersTable({
             <TableHeader className="bg-[#f7f7f7]">
               <TableRow className="border-0 hover:bg-transparent">
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground pl-6">
-                  Order ID
+                  Mã đơn hàng
                 </TableHead>
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                  Customer
+                  Khách hàng
                 </TableHead>
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                  Shop
+                  Cửa hàng
                 </TableHead>
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                  Date
+                  Ngày đặt
                 </TableHead>
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                  Total
+                  Tổng tiền
                 </TableHead>
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                  Status
+                  Trạng thái
                 </TableHead>
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground">
-                  Payment
+                  Thanh toán
                 </TableHead>
                 <TableHead className="uppercase text-xs font-bold tracking-wider text-muted-foreground w-[80px] text-right pr-6">
-                  Actions
+                  Thao tác
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -331,7 +331,7 @@ export function OrdersTable({
                     colSpan={8}
                     className="text-center py-12 text-muted-foreground"
                   >
-                    No orders found
+                    Không tìm thấy đơn hàng
                   </TableCell>
                 </TableRow>
               ) : (
@@ -409,21 +409,21 @@ export function OrdersTable({
                             className="cursor-pointer gap-2"
                           >
                             <Eye className="w-4 h-4" />
-                            View Details
+                            Xem chi tiết
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => onEdit(order)}
                             className="cursor-pointer gap-2"
                           >
                             <Edit className="w-4 h-4" />
-                            Update Status
+                            Cập nhật trạng thái
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => onDelete(order)}
                             className="text-destructive cursor-pointer gap-2"
                           >
                             <Trash2 className="w-4 h-4" />
-                            Delete
+                            Xóa
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

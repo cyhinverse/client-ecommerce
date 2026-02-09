@@ -21,7 +21,7 @@ export default function RelatedProducts({ productId }: RelatedProductsProps) {
       <div className="flex items-center gap-2">
         <Sparkles className="h-5 w-5 text-primary" />
         <h2 className="text-2xl font-bold tracking-tight">
-          You might also like
+          Sản phẩm liên quan
         </h2>
       </div>
 

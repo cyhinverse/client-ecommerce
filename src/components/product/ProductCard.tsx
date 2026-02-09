@@ -91,7 +91,7 @@ export const ProductCard = ({
           {productImage && !imageError ? (
             <Image
               src={productImage}
-              alt={product.name || "Product image"}
+              alt={product.name || "Hình ảnh sản phẩm"}
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-102"
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
@@ -120,7 +120,7 @@ export const ProductCard = ({
           {/* Flash Sale Badge */}
           {product.flashSale && (
             <div className="absolute top-0 left-0 bg-[#E53935] text-white text-[10px] font-bold px-2 py-1 rounded-br-lg z-20 flex items-center gap-1 shadow-sm animate-pulse">
-              <span className="text-xs">🔥</span> FLASH SALE
+              <span className="text-xs">🔥</span> GIÁ SỐC
             </div>
           )}
 
@@ -185,7 +185,7 @@ export const ProductCard = ({
           <div className="flex items-center justify-between text-[11px] text-[#999] pt-1 border-t border-border">
             <span className="truncate max-w-[60%]">
               {product.brand ||
-                (typeof product.shop === "object" ? product.shop.name : "Shop")}
+                (typeof product.shop === "object" ? product.shop.name : "Cửa hàng")}
             </span>
             <span className="shrink-0">
               {formatSoldCount(product.soldCount)}

@@ -15,27 +15,27 @@ export function BannersStats({
 }: BannersStatsProps) {
   const stats = [
     {
-      title: "Total Banners",
+      title: "Tổng Banner",
       value: totalBanners,
-      description: "Slides in repository",
+      description: "Số lượng trong kho",
       icon: ImageIcon,
     },
     {
-      title: "Active Slides",
+      title: "Đang hiển thị",
       value: activeBanners,
-      description: "Currently showing",
+      description: "Banner đang hoạt động",
       icon: CheckCircle,
     },
     {
-      title: "Avg CTR",
+      title: "Tỷ lệ nhấp (CTR)",
       value: clickThroughRate,
-      description: "Click through rate",
+      description: "Tỷ lệ người dùng nhấp",
       icon: MousePointer2,
     },
     {
-      title: "Total Impressions",
+      title: "Tổng lượt xem",
       value: totalViews,
-      description: "Lifetime views",
+      description: "Lượt hiển thị tích lũy",
       icon: Eye,
     },
   ];

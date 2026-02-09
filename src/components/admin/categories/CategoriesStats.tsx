@@ -15,27 +15,27 @@ export function CategoriesStats({
 }: CategoriesStatsProps) {
   const stats = [
     {
-      title: "Total Categories",
+      title: "Tổng Danh mục",
       value: totalCategories,
-      description: "All categories in the system",
+      description: "Tất cả danh mục trong hệ thống",
       icon: Folder,
     },
     {
-      title: "Active Categories",
+      title: "Danh mục Hoạt động",
       value: activeCategories,
-      description: "Displayed categories",
+      description: "Danh mục đang hiển thị",
       icon: Folder,
     },
     {
-      title: "Subcategories",
+      title: "Danh mục Con",
       value: childCategories,
-      description: "Level 2, 3 categories",
+      description: "Danh mục cấp 2, 3",
       icon: Layers,
     },
     {
-      title: "Total Products",
+      title: "Tổng Sản phẩm",
       value: totalProducts,
-      description: "Products in categories",
+      description: "Sản phẩm trong các danh mục",
       icon: Package,
     },
   ];

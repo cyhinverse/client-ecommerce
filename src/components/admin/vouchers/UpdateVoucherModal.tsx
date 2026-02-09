@@ -87,10 +87,10 @@ export function UpdateModelDiscount({
       <DialogContent className="sm:max-w-[600px] rounded-[2rem] border-border/50 bg-white/80 dark:bg-[#1C1C1E]/80 backdrop-blur-xl shadow-2xl p-6">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold tracking-tight">
-            Update Discount
+            Cập nhật mã giảm giá
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            Edit discount information for {discount?.code}.
+            Chỉnh sửa thông tin mã giảm giá cho {discount?.code}.
           </DialogDescription>
         </DialogHeader>
 
@@ -99,13 +99,13 @@ export function UpdateModelDiscount({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="code" className="text-sm font-medium">
-                  Discount Code *
+                  Mã giảm giá *
                 </Label>
                 <Input
                   id="code"
                   value={formData.code}
                   onChange={(e) => handleChange("code", e.target.value)}
-                  placeholder="Ex: SALE2024"
+                  placeholder="VD: GIAMGIA2024"
                   required
                   className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all"
                 />
@@ -113,7 +113,7 @@ export function UpdateModelDiscount({
 
               <div className="space-y-2">
                 <Label htmlFor="discountType" className="text-sm font-medium">
-                  Discount Type *
+                  Loại giảm giá *
                 </Label>
                 <Select
                   value={formData.discountType}
@@ -123,8 +123,8 @@ export function UpdateModelDiscount({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-border/50">
-                    <SelectItem value="percent">Percentage (%)</SelectItem>
-                    <SelectItem value="fixed">Fixed Amount</SelectItem>
+                    <SelectItem value="percent">Phần trăm (%)</SelectItem>
+                    <SelectItem value="fixed">Số tiền cố định</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -132,13 +132,13 @@ export function UpdateModelDiscount({
 
             <div className="space-y-2">
               <Label htmlFor="description" className="text-sm font-medium">
-                Description
+                Mô tả
               </Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => handleChange("description", e.target.value)}
-                placeholder="Discount description..."
+                placeholder="Mô tả mã giảm giá..."
                 className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all resize-none"
               />
             </div>
@@ -146,8 +146,8 @@ export function UpdateModelDiscount({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="discountValue" className="text-sm font-medium">
-                  Discount Value *{" "}
-                  {formData.discountType === "percent" ? "(%)" : "(VND)"}
+                  Giá trị giảm *{" "}
+                  {formData.discountType === "percent" ? "(%)" : "(VNĐ)"}
                 </Label>
                 <Input
                   id="discountValue"
@@ -168,7 +168,7 @@ export function UpdateModelDiscount({
 
               <div className="space-y-2">
                 <Label htmlFor="usageLimit" className="text-sm font-medium">
-                  Usage Limit *
+                  Giới hạn sử dụng *
                 </Label>
                 <Input
                   id="usageLimit"
@@ -186,7 +186,7 @@ export function UpdateModelDiscount({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="startDate" className="text-sm font-medium">
-                  Start Date *
+                  Ngày bắt đầu *
                 </Label>
                 <Input
                   id="startDate"
@@ -200,7 +200,7 @@ export function UpdateModelDiscount({
 
               <div className="space-y-2">
                 <Label htmlFor="endDate" className="text-sm font-medium">
-                  End Date *
+                  Ngày kết thúc *
                 </Label>
                 <Input
                   id="endDate"
@@ -215,7 +215,7 @@ export function UpdateModelDiscount({
 
             <div className="space-y-2">
               <Label htmlFor="minOrderValue" className="text-sm font-medium">
-                Minimum Order Value (VND)
+                Giá trị đơn hàng tối thiểu (VNĐ)
               </Label>
               <Input
                 id="minOrderValue"
@@ -238,7 +238,7 @@ export function UpdateModelDiscount({
                 htmlFor="isActive"
                 className="text-sm font-medium cursor-pointer"
               >
-                Activate discount code
+                Kích hoạt mã giảm giá
               </Label>
             </div>
           </div>
@@ -251,7 +251,7 @@ export function UpdateModelDiscount({
               disabled={isLoading}
               className="rounded-xl border-gray-200"
             >
-              Cancel
+              Hủy
             </Button>
             <Button
               type="submit"
@@ -259,9 +259,10 @@ export function UpdateModelDiscount({
               className="rounded-xl bg-black hover:bg-black/90 text-white dark:bg-[#0071e3] dark:hover:bg-[#0077ED]"
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Update
+              Cập nhật
             </Button>
           </DialogFooter>
+        </form>
         </form>
       </DialogContent>
     </Dialog>

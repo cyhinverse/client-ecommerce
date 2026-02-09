@@ -21,14 +21,14 @@ interface UpdateUserProfileProps {
 }
 
 const formSchema = z.object({
-  avatar: z.string().url({ message: "Please enter a valid URL." }),
+  avatar: z.string().url({ message: "Vui lòng nhập URL hợp lệ." }),
   username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
+    message: "Tên người dùng phải có ít nhất 2 ký tự.",
   }),
-  email: z.email({ message: "Please enter a valid email address." }),
+  email: z.string().email({ message: "Vui lòng nhập địa chỉ email hợp lệ." }),
   password: z
     .string()
-    .min(6, { message: "Password must be at least 6 characters." })
+    .min(6, { message: "Mật khẩu phải có ít nhất 6 ký tự." })
     .optional(),
 });
 
@@ -54,9 +54,9 @@ export default function UpdateUserProfile({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit Profile</DialogTitle>
+          <DialogTitle>Chỉnh sửa hồ sơ</DialogTitle>
           <DialogDescription>
-            Make changes to your profile here. Click save when you&apos;re done.
+            Chỉnh sửa thông tin hồ sơ của bạn tại đây. Nhấn lưu khi hoàn tất.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -69,12 +69,12 @@ export default function UpdateUserProfile({
               name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Username</FormLabel>
+                  <FormLabel>Tên người dùng</FormLabel>
                   <FormControl>
-                    <Input placeholder="username" {...field} />
+                    <Input placeholder="tên người dùng" {...field} />
                   </FormControl>
                   <FormDescription>
-                     Public display name.
+                     Tên hiển thị công khai.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -87,15 +87,15 @@ export default function UpdateUserProfile({
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="you@example.com" {...field} />
+                    <Input placeholder="email@vi-du.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setOpen && setOpen(false)}>Cancel</Button>
-                <Button type="submit">Save Changes</Button>
+                <Button type="button" variant="outline" onClick={() => setOpen && setOpen(false)}>Hủy</Button>
+                <Button type="submit">Lưu thay đổi</Button>
             </DialogFooter>
           </form>
         </Form>

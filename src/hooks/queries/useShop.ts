@@ -6,7 +6,7 @@ import instance from "@/api/api";
 import { extractApiData } from "@/api";
 import { errorHandler } from "@/services/errorHandler";
 import { STALE_TIME } from "@/constants/cache";
-import { shopKeys } from "@/lib/queryKeys";
+import { shopCategoryKeys, shopKeys } from "@/lib/queryKeys";
 import { Shop, CreateShopPayload, UpdateShopPayload } from "@/types/shop";
 import { PaginationData } from "@/types/common";
 
@@ -238,7 +238,7 @@ export function useShopCategories(
   options?: { enabled?: boolean },
 ) {
   return useQuery({
-    queryKey: shopKeys.categories(shopId),
+    queryKey: shopCategoryKeys.byShopWithTotals(shopId),
     queryFn: () => shopApi.getCategories(shopId),
     enabled: options?.enabled ?? !!shopId,
     staleTime: STALE_TIME.STATIC,

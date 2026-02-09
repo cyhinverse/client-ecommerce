@@ -128,7 +128,7 @@ export function VariantSelector({
             <span className="text-gray-300">•</span>
           )}
           {selectedSize && (
-            <span className="font-medium text-gray-800">Size {selectedSize}</span>
+            <span className="font-medium text-gray-800">Kích cỡ {selectedSize}</span>
           )}
           <span className="text-gray-300">|</span>
           <span>

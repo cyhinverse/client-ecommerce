@@ -47,7 +47,7 @@ export default function AdminDashboard() {
     if (!socket) return;
 
     const handleUpdate = () => {
-      toast.info("Updating dashboard...");
+      toast.info("Đang cập nhật bảng điều khiển...");
       setRefreshKey((prev) => prev + 1);
     };
 
@@ -71,41 +71,41 @@ export default function AdminDashboard() {
       case "delivered":
         return (
           <Badge className="bg-green-500/10 text-green-600 hover:bg-green-500/20 border-0">
-            Delivered
+            Đã giao
           </Badge>
         );
       case "shipped":
         return (
           <Badge className="bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 border-0">
-            Shipped
+            Đang giao
           </Badge>
         );
       case "processing":
         return (
           <Badge className="bg-orange-500/10 text-orange-600 hover:bg-orange-500/20 border-0">
-            Processing
+            Đang xử lý
           </Badge>
         );
       case "confirmed":
         return (
           <Badge className="bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 border-0">
-            Confirmed
+            Đã xác nhận
           </Badge>
         );
       case "pending":
         return (
           <Badge className="bg-gray-500/10 text-gray-600 hover:bg-gray-500/20 border-0">
-            Pending
+            Chờ xử lý
           </Badge>
         );
       case "cancelled":
         return (
           <Badge className="bg-red-500/10 text-red-600 hover:bg-red-500/20 border-0">
-            Cancelled
+            Đã hủy
           </Badge>
         );
       default:
-        return <Badge variant="outline">Unknown</Badge>;
+        return <Badge variant="outline">Không xác định</Badge>;
     }
   };
 
@@ -115,7 +115,7 @@ export default function AdminDashboard() {
         <div className="flex flex-col items-center gap-4">
           <SpinnerLoading size={32} />
           <p className="text-sm text-gray-500 font-medium">
-            Loading Overview...
+            Đang tải tổng quan...
           </p>
         </div>
       </div>
@@ -135,40 +135,40 @@ export default function AdminDashboard() {
 
   const statCards = [
     {
-      name: "Total Revenue",
+      name: "Tổng doanh thu",
       value: formatCurrency(displayStats.totalRevenue || 0),
       icon: DollarSign,
-      description: "Total earnings",
+      description: "Tổng thu nhập",
       trend: "+12.5%",
       trendUp: true,
       color: "text-blue-500",
       bg: "bg-blue-500/10",
     },
     {
-      name: "Orders",
+      name: "Đơn hàng",
       value: (displayStats.totalOrders || 0).toLocaleString(),
       icon: ShoppingCart,
-      description: "Total orders",
+      description: "Tổng đơn hàng",
       trend: "+8.2%",
       trendUp: true,
       color: "text-purple-500",
       bg: "bg-purple-500/10",
     },
     {
-      name: "Customers",
+      name: "Khách hàng",
       value: (displayStats.totalUsers || 0).toLocaleString(),
       icon: Users,
-      description: "Total users",
+      description: "Tổng người dùng",
       trend: "+4.6%",
       trendUp: true,
       color: "text-amber-500",
       bg: "bg-amber-500/10",
     },
     {
-      name: "Products",
+      name: "Sản phẩm",
       value: (displayStats.totalProducts || 0).toLocaleString(),
       icon: Package,
-      description: "Active items",
+      description: "Sản phẩm đang bán",
       trend: "0%",
       trendUp: true,
       color: "text-emerald-500",
@@ -182,10 +182,10 @@ export default function AdminDashboard() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="space-y-1">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-            Overview
+            Tổng quan
           </h1>
           <p className="text-sm text-muted-foreground">
-            Monitor your store statistics and performance
+            Theo dõi thống kê và hiệu suất của cửa hàng
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -194,7 +194,7 @@ export default function AdminDashboard() {
             className="rounded-xl bg-[#f7f7f7] h-10 gap-2 text-sm font-medium"
           >
             <Calendar className="h-3.5 w-3.5" />
-            {format(new Date(), "MMM dd, yyyy")}
+            {format(new Date(), "dd/MM/yyyy")}
           </Button>
           <Button
             onClick={handleRefresh}
@@ -206,7 +206,7 @@ export default function AdminDashboard() {
             ) : (
               <RefreshCcw className="h-3.5 w-3.5" />
             )}
-            Refresh
+            Làm mới
           </Button>
         </div>
       </div>
@@ -256,9 +256,9 @@ export default function AdminDashboard() {
         <div className="rounded-2xl bg-[#f7f7f7] dark:bg-[#1C1C1E] p-6">
           <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h3 className="font-semibold text-lg text-foreground">Revenue</h3>
+              <h3 className="font-semibold text-lg text-foreground">Doanh thu</h3>
               <p className="text-sm text-muted-foreground">
-                Monthly revenue overview
+                Tổng quan doanh thu hàng tháng
               </p>
             </div>
             <div className="p-2 rounded-full bg-white dark:bg-black/20">
@@ -311,7 +311,7 @@ export default function AdminDashboard() {
                     }}
                     formatter={(value: number) => [
                       formatCurrency(value),
-                      "Revenue",
+                      "Doanh thu",
                     ]}
                   />
                   <Area
@@ -327,7 +327,7 @@ export default function AdminDashboard() {
               </ResponsiveContainer>
             ) : (
               <div className="flex h-full items-center justify-center text-muted-foreground text-sm">
-                No data available
+                Không có dữ liệu
               </div>
             )}
           </div>
@@ -337,9 +337,9 @@ export default function AdminDashboard() {
         <div className="rounded-2xl bg-[#f7f7f7] dark:bg-[#1C1C1E] p-6">
           <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h3 className="font-semibold text-lg text-foreground">Orders</h3>
+              <h3 className="font-semibold text-lg text-foreground">Đơn hàng</h3>
               <p className="text-sm text-muted-foreground">
-                Monthly order volume
+                Số lượng đơn hàng hàng tháng
               </p>
             </div>
             <div className="p-2 rounded-full bg-white dark:bg-black/20">
@@ -385,7 +385,7 @@ export default function AdminDashboard() {
               </ResponsiveContainer>
             ) : (
               <div className="flex h-full items-center justify-center text-muted-foreground text-sm">
-                No data available
+                Không có dữ liệu
               </div>
             )}
           </div>
@@ -398,17 +398,17 @@ export default function AdminDashboard() {
           <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h3 className="font-semibold text-lg text-foreground">
-                Recent Orders
+                Đơn hàng gần đây
               </h3>
               <p className="text-sm text-muted-foreground">
-                Latest transactions
+                Các giao dịch mới nhất
               </p>
             </div>
             <Link
               href="/admin/orders"
               className="text-sm font-medium text-[#E53935] hover:underline flex items-center gap-1"
             >
-              View All <ArrowRight className="h-3 w-3" />
+              Xem tất cả <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
 
@@ -428,7 +428,7 @@ export default function AdminDashboard() {
                         #{order._id.slice(-6).toUpperCase()}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {order.user?.name || "Guest"}
+                        {order.user?.name || "Khách"}
                       </p>
                     </div>
                   </div>
@@ -446,7 +446,7 @@ export default function AdminDashboard() {
             ) : (
               <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
                 <Package className="h-8 w-8 mb-2 opacity-50" />
-                <p className="text-sm">No recent orders found</p>
+                <p className="text-sm">Không tìm thấy đơn hàng gần đây</p>
               </div>
             )}
           </div>
@@ -457,17 +457,17 @@ export default function AdminDashboard() {
           <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h3 className="font-semibold text-lg text-foreground">
-                Top Products
+                Sản phẩm bán chạy
               </h3>
               <p className="text-sm text-muted-foreground">
-                Best selling items
+                Sản phẩm được mua nhiều nhất
               </p>
             </div>
             <Link
               href="/admin/products"
               className="text-sm font-medium text-[#E53935] hover:underline flex items-center gap-1"
             >
-              View All <ArrowRight className="h-3 w-3" />
+              Xem tất cả <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
 
@@ -501,7 +501,7 @@ export default function AdminDashboard() {
                         {product.name}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {product.sold} sales
+                        {product.sold} đã bán
                       </p>
                     </div>
                   </div>
@@ -515,7 +515,7 @@ export default function AdminDashboard() {
             ) : (
               <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
                 <Package className="h-8 w-8 mb-2 opacity-50" />
-                <p className="text-sm">No products found</p>
+                <p className="text-sm">Không tìm thấy sản phẩm</p>
               </div>
             )}
           </div>

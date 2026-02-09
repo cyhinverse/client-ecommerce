@@ -102,7 +102,7 @@ export default function ShopTab() {
       <div className="grid grid-cols-3 gap-4">
         <StatCard
           icon={Store}
-          label="Followers"
+          label="Người theo dõi"
           value={myShop.followerCount || 0}
         />
         <StatCard

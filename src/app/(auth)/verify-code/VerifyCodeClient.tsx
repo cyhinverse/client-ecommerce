@@ -44,6 +44,8 @@ export default function VerifyCodeClient({
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const otpInputRef = useRef<HTMLInputElement>(null);
+
   const autoSubmittedRef = useRef(false);
 
   const submitVerification = useCallback(
@@ -125,6 +127,7 @@ export default function VerifyCodeClient({
             onChange={handleOtpChange}
             maxLength={OTP_LENGTH}
             disabled={isLoading || !canVerify}
+            ref={otpInputRef}
             inputMode="numeric"
             autoFocus
             aria-label="Mã xác thực 6 số"

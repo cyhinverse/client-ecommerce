@@ -165,12 +165,12 @@ export default function AddressDialog({
 
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
-      toast.error("Your browser does not support geolocation");
+      toast.error("Trình duyệt của bạn không hỗ trợ định vị");
       return;
     }
 
     if (locationPermissionDenied) {
-      toast.info("Please grant location permission in your browser settings");
+      toast.info("Vui lòng cấp quyền truy cập vị trí trong cài đặt trình duyệt");
       return;
     }
 
@@ -187,7 +187,7 @@ export default function AddressDialog({
           );
 
           if (!response.ok) {
-            throw new Error("Unable to fetch address information");
+            throw new Error("Không thể lấy thông tin địa chỉ");
           }
 
           const data = await response.json();
@@ -204,13 +204,13 @@ export default function AddressDialog({
               ward: parsedAddress.ward,
             }));
 
-            toast.success("Location updated");
+            toast.success("Đã cập nhật vị trí");
           } else {
-            toast.error("Address information not found for this location");
+            toast.error("Không tìm thấy thông tin địa chỉ cho vị trí này");
           }
         } catch (error) {
           console.error("Error fetching address:", error);
-          toast.error("Unable to fetch address from current location");
+          toast.error("Không thể lấy địa chỉ từ vị trí hiện tại");
         } finally {
           setIsGettingLocation(false);
         }
@@ -221,16 +221,16 @@ export default function AddressDialog({
         switch (error.code) {
           case error.PERMISSION_DENIED:
             setLocationPermissionDenied(true);
-            toast.error("You denied location access");
+            toast.error("Bạn đã từ chối quyền truy cập vị trí");
             break;
           case error.POSITION_UNAVAILABLE:
-            toast.error("Location information unavailable");
+            toast.error("Thông tin vị trí không khả dụng");
             break;
           case error.TIMEOUT:
-            toast.error("Location request timed out");
+            toast.error("Yêu cầu vị trí quá thời gian");
             break;
           default:
-            toast.error("Unable to get current location");
+            toast.error("Không thể lấy vị trí hiện tại");
             break;
         }
       },
@@ -248,15 +248,15 @@ export default function AddressDialog({
 
     // CHỈ VALIDATE CÁC TRƯỜNG TỐI THIỂU
     if (!addressForm.address.trim()) {
-      toast.error("Please enter address");
+      toast.error("Vui lòng nhập địa chỉ");
       setIsSubmitting(false);
       return;
     }
 
     try {
       const addressDataToSend = {
-        fullName: addressForm.fullName.trim() || "Customer",
-        phone: addressForm.phone.trim() || "Not updated",
+        fullName: addressForm.fullName.trim() || "Khách hàng",
+        phone: addressForm.phone.trim() || "Chưa cập nhật",
         address: addressForm.address.trim(),
         city: addressForm.city.trim(),
         district: addressForm.district.trim(),
@@ -269,10 +269,10 @@ export default function AddressDialog({
           addressId: editingAddress._id,
           ...addressDataToSend,
         });
-        toast.success("Address updated successfully");
+        toast.success("Cập nhật địa chỉ thành công");
       } else {
         await createAddressMutation.mutateAsync(addressDataToSend);
-        toast.success("Address added successfully");
+        toast.success("Thêm địa chỉ thành công");
       }
 
       onClose();
@@ -284,10 +284,10 @@ export default function AddressDialog({
         message?: string;
       };
       const errorMessage =
-        err.response?.data?.message || err.message || "An error occurred";
+        err.response?.data?.message || err.message || "Đã xảy ra lỗi";
       toast.error(
         `${
-          editingAddress ? "Failed to update address" : "Failed to add address"
+          editingAddress ? "Cập nhật địa chỉ thất bại" : "Thêm địa chỉ thất bại"
         }: ${errorMessage}`,
       );
     } finally {
@@ -317,10 +317,10 @@ export default function AddressDialog({
         <DialogHeader className="p-6 border-b bg-muted/20">
           <DialogTitle className="text-xl font-semibold flex items-center gap-2">
             <MapPin className="h-5 w-5" />
-            {editingAddress ? "Edit Address" : "Add New Address"}
+            {editingAddress ? "Sửa địa chỉ" : "Thêm địa chỉ mới"}
           </DialogTitle>
           <DialogDescription>
-            Fill in your delivery details below.
+            Điền thông tin giao hàng của bạn bên dưới.
           </DialogDescription>
         </DialogHeader>
 
@@ -328,14 +328,14 @@ export default function AddressDialog({
           {/* Personal Info */}
           <div className="space-y-4">
             <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-              Contact Info
+              Thông tin liên hệ
             </h4>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
+                <Label htmlFor="fullName">Họ và tên</Label>
                 <Input
                   id="fullName"
-                  placeholder="John Doe"
+                  placeholder="Nguyễn Văn A"
                   value={addressForm.fullName}
                   onChange={(e) =>
                     setAddressForm({ ...addressForm, fullName: e.target.value })
@@ -343,7 +343,7 @@ export default function AddressDialog({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
+                <Label htmlFor="phone">Số điện thoại</Label>
                 <Input
                   id="phone"
                   placeholder="0123 456 789"
@@ -360,7 +360,7 @@ export default function AddressDialog({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                Address Details
+                Chi tiết địa chỉ
               </h4>
               <Button
                 type="button"
@@ -375,17 +375,17 @@ export default function AddressDialog({
                 ) : (
                   <Navigation className="h-3.5 w-3.5 mr-1.5" />
                 )}
-                Use Current Location
+                Dùng vị trí hiện tại
               </Button>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="address">
-                Street Address <span className="text-destructive">*</span>
+                Địa chỉ cụ thể <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="address"
-                placeholder="House no., Street name"
+                placeholder="Số nhà, tên đường"
                 value={addressForm.address}
                 onChange={(e) =>
                   setAddressForm({ ...addressForm, address: e.target.value })
@@ -395,10 +395,10 @@ export default function AddressDialog({
 
             <div className="grid grid-cols-3 gap-3">
               <div className="space-y-2">
-                <Label htmlFor="city">City/Province</Label>
+                <Label htmlFor="city">Tỉnh/Thành phố</Label>
                 <Input
                   id="city"
-                  placeholder="City"
+                  placeholder="Tỉnh/Thành phố"
                   value={addressForm.city}
                   onChange={(e) =>
                     setAddressForm({ ...addressForm, city: e.target.value })
@@ -406,10 +406,10 @@ export default function AddressDialog({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="district">District</Label>
+                <Label htmlFor="district">Quận/Huyện</Label>
                 <Input
                   id="district"
-                  placeholder="District"
+                  placeholder="Quận/Huyện"
                   value={addressForm.district}
                   onChange={(e) =>
                     setAddressForm({ ...addressForm, district: e.target.value })
@@ -417,10 +417,10 @@ export default function AddressDialog({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="ward">Ward</Label>
+                <Label htmlFor="ward">Phường/Xã</Label>
                 <Input
                   id="ward"
-                  placeholder="Ward"
+                  placeholder="Phường/Xã"
                   value={addressForm.ward}
                   onChange={(e) =>
                     setAddressForm({ ...addressForm, ward: e.target.value })
@@ -441,10 +441,10 @@ export default function AddressDialog({
                   htmlFor="isDefault"
                   className="font-medium cursor-pointer"
                 >
-                  Set as Default Address
+                  Đặt làm địa chỉ mặc định
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  This address will be selected by default
+                  Địa chỉ này sẽ được chọn mặc định
                 </p>
               </div>
             </div>
@@ -459,10 +459,10 @@ export default function AddressDialog({
 
           <DialogFooter className="gap-2 sm:gap-0">
             <Button type="button" variant="ghost" onClick={handleClose}>
-              Cancel
+              Hủy
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : "Save Address"}
+              {isSubmitting ? "Đang lưu..." : "Lưu địa chỉ"}
             </Button>
           </DialogFooter>
         </form>

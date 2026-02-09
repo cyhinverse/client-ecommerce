@@ -22,6 +22,7 @@ import NotificationModel from "@/components/notifications/NotificationModel";
 import { useUnreadNotificationCount } from "@/hooks/queries/useNotifications";
 import { toggleChat } from "@/features/chat/chatSlice";
 import { useSearchSuggestions } from "@/hooks/queries/useSearch";
+import { useCart } from "@/hooks/queries/useCart";
 import { formatCurrency } from "@/utils/format";
 import { pathArray } from "@/constants/PathArray";
 import {
@@ -37,24 +38,24 @@ import TopBar from "./TopBar";
 // Category data with subcategories
 const categories = [
   {
-    name: "Men",
+    name: "Nam",
     slug: "men",
-    subcategories: ["Shirts", "Pants", "Shoes", "Accessories"],
+    subcategories: ["Áo sơ mi", "Quần", "Giày", "Phụ kiện"],
   },
   {
-    name: "Women",
+    name: "Nữ",
     slug: "women",
-    subcategories: ["Dresses", "Tops", "Skirts", "Bags"],
+    subcategories: ["Váy", "Áo", "Chân váy", "Túi xách"],
   },
   {
-    name: "Kids",
+    name: "Trẻ em",
     slug: "children",
-    subcategories: ["Boys", "Girls", "Baby"],
+    subcategories: ["Bé trai", "Bé gái", "Trẻ sơ sinh"],
   },
   {
-    name: "Accessories",
+    name: "Phụ kiện",
     slug: "accessories",
-    subcategories: ["Watches", "Sunglasses", "Belts", "Wallets"],
+    subcategories: ["Đồng hồ", "Kính râm", "Thắt lưng", "Ví"],
   },
 ];
 
@@ -74,7 +75,7 @@ export default function HeaderLayout() {
   const { isAuthenticated, data } = useAppSelector(
     (state) => state.auth,
   );
-  const { data: cartData } = useAppSelector((state) => state.cart);
+  const { data: cartQueryData } = useCart({ enabled: isAuthenticated });
   const { data: unreadCountData } = useUnreadNotificationCount();
   const unreadCount = unreadCountData || 0;
   const [isOpen, setIsOpen] = useState(false);
@@ -157,7 +158,7 @@ export default function HeaderLayout() {
   };
 
   const cartItemsCount =
-    cartData?.items?.reduce((total, item) => total + item.quantity, 0) || 0;
+    cartQueryData?.items?.reduce((total, item) => total + item.quantity, 0) || 0;
 
   if (pathArray.includes(path)) return null;
 
@@ -196,7 +197,7 @@ export default function HeaderLayout() {
                     >
                       <SheetHeader>
                         <SheetTitle className="text-left text-lg font-bold text-[#E53935]">
-                          Store
+                          Cửa hàng
                         </SheetTitle>
                       </SheetHeader>
                       <div className="flex flex-col gap-2 mt-8">
@@ -354,46 +355,46 @@ export default function HeaderLayout() {
                                   <div className="space-y-2">
                                     <div className="flex items-center justify-between mb-2">
                                       <h4 className="text-xs font-bold text-gray-500 flex items-center gap-1">
-                                        <Store className="w-3.5 h-3.5" /> Shop
-                                        liên quan
-                                      </h4>
-                                    </div>
-                                    {searchResults.shops.map((shop) => (
-                                      <div
-                                        key={shop._id}
-                                        onClick={() =>
-                                          handleShopClick(shop.slug)
-                                        }
-                                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors group"
-                                      >
-                                        {/* Shop Logo */}
-                                        <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
-                                          {shop.logo ? (
-                                            <Image
-                                              src={shop.logo}
-                                              alt={shop.name}
-                                              fill
-                                              className="object-cover"
-                                            />
-                                          ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-                                              <Store className="w-5 h-5 text-gray-300" />
-                                            </div>
-                                          )}
-                                        </div>
-                                        {/* Shop Info */}
-                                        <div className="flex-1 min-w-0">
-                                          <p className="text-sm font-medium text-gray-800 truncate group-hover:text-[#E53935]">
-                                            {shop.name}
-                                          </p>
-                                          <span className="text-xs text-gray-400">
-                                            Ghé thăm shop
-                                          </span>
-                                        </div>
-                                      </div>
-                                    ))}
+                                      <Store className="w-3.5 h-3.5" /> Cửa hàng
+                                      liên quan
+                                    </h4>
                                   </div>
-                                )}
+                                  {searchResults.shops.map((shop) => (
+                                    <div
+                                      key={shop._id}
+                                      onClick={() =>
+                                        handleShopClick(shop.slug)
+                                      }
+                                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors group"
+                                    >
+                                      {/* Shop Logo */}
+                                      <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
+                                        {shop.logo ? (
+                                          <Image
+                                            src={shop.logo}
+                                            alt={shop.name}
+                                            fill
+                                            className="object-cover"
+                                          />
+                                        ) : (
+                                          <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                                            <Store className="w-5 h-5 text-gray-300" />
+                                          </div>
+                                        )}
+                                      </div>
+                                      {/* Shop Info */}
+                                      <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-gray-800 truncate group-hover:text-[#E53935]">
+                                          {shop.name}
+                                        </p>
+                                        <span className="text-xs text-gray-400">
+                                          Ghé thăm cửa hàng
+                                        </span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
 
                               {/* Products Section */}
                               {searchResults?.products &&
@@ -443,15 +444,54 @@ export default function HeaderLayout() {
                                             <p className="text-sm font-medium text-gray-800 truncate group-hover:text-[#E53935]">
                                               {product.name}
                                             </p>
-                                            <div className="flex items-center gap-2 mt-0.5">
-                                              <span className="text-sm font-bold text-[#E53935]">
-                                                {formatCurrency(
-                                                  product.price
-                                                    ?.discountPrice ||
-                                                    product.price
-                                                      ?.currentPrice ||
-                                                    0,
-                                                )}
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-sm font-bold text-[#E53935]">
+                            {formatCurrency(
+                              product.price
+                                ?.discountPrice ||
+                                product.price
+                                  ?.currentPrice ||
+                                0,
+                            )}
+                          </span>
+                          {product.price?.discountPrice &&
+                            product.price?.currentPrice >
+                              product.price
+                                ?.discountPrice && (
+                              <span className="text-xs text-gray-400 line-through">
+                                {formatCurrency(
+                                  product.price
+                                    .currentPrice,
+                                )}
+                              </span>
+                            )}
+                        </div>
+                      </div>
+                      <Search className="w-4 h-4 text-gray-300 group-hover:text-[#E53935]" />
+                    </div>
+                  ))}
+              </div>
+
+              {/* View All Results */}
+              <button
+                onClick={() => handleSearchSubmit()}
+                className="w-full mt-3 py-2 text-sm font-medium text-[#E53935] hover:bg-[#E53935]/5 rounded-lg transition-colors"
+              >
+                Xem tất cả kết quả cho &quot;{searchQuery}&quot;
+              </button>
+            </div>
+          ) : (
+            <div className="py-8 text-center">
+              <Search className="w-10 h-10 text-gray-200 mx-auto mb-2" />
+              <p className="text-sm text-gray-500">
+                Không tìm thấy sản phẩm hoặc shop nào cho &quot;
+                {searchQuery}&quot;
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                Thử tìm kiếm với từ khóa khác
+              </p>
+            </div>
+          )}
                                               </span>
                                               {product.price?.discountPrice &&
                                                 product.price?.currentPrice >

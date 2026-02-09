@@ -90,7 +90,7 @@ export default function Category({
           <Heart
             className={cn("w-4 h-4", !selectedSlug ? "fill-current" : "")}
           />
-          <span className="text-[15px] whitespace-nowrap">Guess You Like</span>
+          <span className="text-[15px] whitespace-nowrap">Gợi ý cho bạn</span>
         </div>
 
         {/* Separator */}

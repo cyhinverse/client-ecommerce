@@ -45,26 +45,26 @@ export function EditOrderModal({
       <DialogContent className="sm:max-w-[400px] rounded-4xl border-border/50 bg-white/80 dark:bg-[#1C1C1E]/80 backdrop-blur-xl shadow-2xl p-6">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold tracking-tight">
-            Update Order Status
+            Cập nhật trạng thái đơn hàng
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="status" className="text-sm font-medium">
-              Order Status
+              Trạng thái đơn hàng
             </Label>
             <Select value={status} onValueChange={setStatus}>
               <SelectTrigger className="rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all">
-                <SelectValue placeholder="Select Status" />
+                <SelectValue placeholder="Chọn trạng thái" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-border/50">
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="confirmed">Confirmed</SelectItem>
-                <SelectItem value="processing">Processing</SelectItem>
-                <SelectItem value="shipped">Shipped</SelectItem>
-                <SelectItem value="delivered">Delivered</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
+                <SelectItem value="pending">Chờ xử lý</SelectItem>
+                <SelectItem value="confirmed">Đã xác nhận</SelectItem>
+                <SelectItem value="processing">Đang xử lý</SelectItem>
+                <SelectItem value="shipped">Đang giao</SelectItem>
+                <SelectItem value="delivered">Đã giao</SelectItem>
+                <SelectItem value="cancelled">Đã hủy</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -76,14 +76,14 @@ export function EditOrderModal({
               onClick={onClose}
               className="rounded-xl border-gray-200"
             >
-              Cancel
+              Hủy
             </Button>
             <Button
               type="submit"
               disabled={isLoading}
               className="rounded-xl bg-black hover:bg-black/90 text-white dark:bg-[#0071e3] dark:hover:bg-[#0077ED]"
             >
-              {isLoading ? "Saving..." : "Save Changes"}
+              {isLoading ? "Đang lưu..." : "Lưu thay đổi"}
             </Button>
           </div>
         </form>

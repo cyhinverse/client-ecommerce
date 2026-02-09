@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import { OTPInput, OTPInputContext } from "input-otp"
@@ -6,25 +6,25 @@ import { MinusIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-function InputOTP({
-  className,
-  containerClassName,
-  ...props
-}: React.ComponentProps<typeof OTPInput> & {
-  containerClassName?: string
-}) {
+const InputOTP = React.forwardRef<
+  React.ElementRef<typeof OTPInput>,
+  React.ComponentProps<typeof OTPInput> & { containerClassName?: string }
+>(function InputOTP({ className, containerClassName, ...props }, ref) {
   return (
     <OTPInput
+      ref={ref}
       data-slot="input-otp"
       containerClassName={cn(
-        "flex items-center gap-2 has-disabled:opacity-50",
-        containerClassName
+        "group flex cursor-text items-center gap-2 has-[:disabled]:opacity-50",
+        containerClassName,
       )}
       className={cn("disabled:cursor-not-allowed", className)}
       {...props}
     />
   )
-}
+})
+
+InputOTP.displayName = "InputOTP"
 
 function InputOTPGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
@@ -52,7 +52,7 @@ function InputOTPSlot({
       data-active={isActive}
       className={cn(
         "data-[active=true]:border-ring data-[active=true]:ring-ring/50 data-[active=true]:aria-invalid:ring-destructive/20 aria-invalid:border-destructive data-[active=true]:aria-invalid:border-destructive border-input relative flex h-9 w-9 items-center justify-center border-y border-r text-sm shadow-xs transition-all outline-none first:rounded-l-md first:border-l last:rounded-r-md data-[active=true]:z-10 data-[active=true]:ring-[3px]",
-        className
+        className,
       )}
       {...props}
     >

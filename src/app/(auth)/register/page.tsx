@@ -104,7 +104,7 @@ export default function RegisterPage() {
           </Label>
           <Input
             id="username"
-            placeholder="username"
+            placeholder="tên người dùng"
             autoComplete="username"
             autoCorrect="off"
             disabled={loading}

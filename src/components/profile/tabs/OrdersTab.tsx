@@ -46,19 +46,19 @@ export default function OrdersTab() {
   };
 
   const handleCancelOrder = async (orderId: string) => {
-    if (!confirm("Are you sure you want to cancel this order?")) {
+    if (!confirm("Bạn có chắc chắn muốn hủy đơn hàng này không?")) {
       return;
     }
 
     setCancellingOrder(orderId);
     try {
       await cancelOrderMutation.mutateAsync(orderId);
-      toast.success("Order cancelled successfully");
+      toast.success("Đã hủy đơn hàng thành công");
     } catch (error: unknown) {
       console.error("Error cancelling order:", error);
       const err = error as { response?: { data?: { message?: string } } };
       const errorMessage =
-        err.response?.data?.message || "Unable to cancel order";
+        err.response?.data?.message || "Không thể hủy đơn hàng";
       toast.error(errorMessage);
     } finally {
       setCancellingOrder(null);
@@ -79,27 +79,27 @@ export default function OrdersTab() {
   };
 
   const statusTabs: { value: OrderStatus; label: string; count: number }[] = [
-    { value: "all", label: "All", count: getOrderCount("all") },
-    { value: "pending", label: "Pending", count: getOrderCount("pending") },
+    { value: "all", label: "Tất cả", count: getOrderCount("all") },
+    { value: "pending", label: "Chờ xử lý", count: getOrderCount("pending") },
     {
       value: "confirmed",
-      label: "Confirmed",
+      label: "Đã xác nhận",
       count: getOrderCount("confirmed"),
     },
     {
       value: "processing",
-      label: "Processing",
+      label: "Đang xử lý",
       count: getOrderCount("processing"),
     },
-    { value: "shipped", label: "Shipping", count: getOrderCount("shipped") },
+    { value: "shipped", label: "Đang giao", count: getOrderCount("shipped") },
     {
       value: "delivered",
-      label: "Delivered",
+      label: "Đã giao",
       count: getOrderCount("delivered"),
     },
     {
       value: "cancelled",
-      label: "Cancelled",
+      label: "Đã hủy",
       count: getOrderCount("cancelled"),
     },
   ];
@@ -111,14 +111,17 @@ export default function OrdersTab() {
           <Package className="h-8 w-8 text-red-500" />
         </div>
         <h3 className="text-lg font-semibold tracking-tight mb-2">
-          Something went wrong
+          Đã xảy ra lỗi
         </h3>
         <p className="text-muted-foreground mb-8 max-w-sm text-sm">
-          We couldn&apos;t load your orders. This might be a temporary issue.
+          Chúng tôi không thể tải đơn hàng của bạn. Đây có thể là sự cố tạm thời.
         </p>
-        <Button onClick={() => refetch()} size="lg" className="rounded-sm">
-          Try Again
-        </Button>
+        <button
+          onClick={() => refetch()}
+          className="rounded-sm bg-[#E53935] text-white px-6 py-2 hover:bg-[#D32F2F] transition-colors"
+        >
+          Thử lại
+        </button>
       </div>
     );
   }
@@ -133,25 +136,24 @@ export default function OrdersTab() {
               <Package className="h-10 w-10 text-muted-foreground/50" />
             </div>
             <h3 className="text-xl font-semibold tracking-tight mb-2">
-              No orders yet
+              Chưa có đơn hàng nào
             </h3>
             <p className="text-muted-foreground mb-8 max-w-sm text-sm">
-              It looks like you haven&apos;t placed any orders yet. Start
-              shopping to fill this page!
+              Có vẻ như bạn chưa đặt đơn hàng nào. Hãy bắt đầu mua sắm để lấp đầy trang này!
             </p>
             <Button
               onClick={() => router.push("/products")}
               size="lg"
               className="rounded-sm px-8"
             >
-              Start Shopping
+              Bắt đầu mua sắm
             </Button>
           </div>
         ) : (
           <>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <h2 className="text-xl font-semibold tracking-tight">
-                Order History
+                Lịch sử đơn hàng
               </h2>
               <Button
                 variant="outline"
@@ -159,7 +161,7 @@ export default function OrdersTab() {
                 onClick={() => router.push("/products")}
                 className="rounded-sm"
               >
-                Continue Shopping
+                Tiếp tục mua sắm
               </Button>
             </div>
 
@@ -193,10 +195,10 @@ export default function OrdersTab() {
                   <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-border rounded-md bg-muted/20">
                     <Filter className="h-10 w-10 text-muted-foreground/40 mb-4" />
                     <h3 className="text-lg font-medium mb-1">
-                      No {activeStatus === "all" ? "" : activeStatus} orders
+                      Không có đơn hàng {activeStatus === "all" ? "" : statusTabs.find(t => t.value === activeStatus)?.label}
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      We couldn&apos;t find any orders with this status.
+                      Chúng tôi không tìm thấy đơn hàng nào với trạng thái này.
                     </p>
                   </div>
                 ) : (
