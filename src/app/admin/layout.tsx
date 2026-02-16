@@ -6,9 +6,9 @@ import { LogOut, Menu, ChevronLeft, ChevronRight, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import { logout } from "@/features/auth/authAction";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { cn } from "@/utils/cn";
+import { useAppSelector } from "@/hooks/hooks";
+import { useLogout } from "@/hooks/queries";
 import { toast } from "sonner";
 import Image from "next/image";
 import { ADMIN_NAVIGATION } from "@/constants";
@@ -28,7 +28,7 @@ export default function AdminLayout({
   const [notificationOpen, setNotificationOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  const dispatch = useAppDispatch();
+  const logoutMutation = useLogout();
   const { data } = useAppSelector((state) => state.auth);
   const { data: unreadCountData } = useUnreadNotificationCount();
   const unreadCount = unreadCountData || 0;
@@ -46,10 +46,14 @@ export default function AdminLayout({
     });
   }, [data?.roles, hasPermission]);
 
-  const handleLogout = () => {
-    dispatch(logout());
-    toast.success("Đăng xuất thành công");
-    router.push("/");
+  const handleLogout = async () => {
+    try {
+      await logoutMutation.mutateAsync();
+      toast.success("Đăng xuất thành công");
+      router.push("/");
+    } catch {
+      toast.error("Không thể đăng xuất");
+    }
   };
 
   // Get current page title

@@ -2,9 +2,14 @@
  * Category React Query Hooks
  * Replaces categoryAction.ts async thunks with React Query
  */
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  QueryClient,
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/api";
+import { extractApiData } from "@/api";
 import { errorHandler } from "@/services/errorHandler";
 import { STALE_TIME, GC_TIME } from "@/constants/cache";
 import { categoryKeys } from "@/lib/queryKeys";
@@ -39,6 +44,15 @@ export interface UpdateCategoryData {
 // Tree category type (with children)
 export interface CategoryTree extends Category {
   children?: CategoryTree[];
+}
+
+function invalidateAllCategoryQueries(queryClient: QueryClient) {
+  return queryClient.invalidateQueries({ queryKey: categoryKeys.all });
+}
+
+function invalidateCategoryListAndTree(queryClient: QueryClient) {
+  queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
+  queryClient.invalidateQueries({ queryKey: categoryKeys.tree() });
 }
 
 // ============ API Functions ============
@@ -152,8 +166,7 @@ export function useCreateCategory() {
   return useMutation({
     mutationFn: categoryApi.create,
     onSuccess: () => {
-      // Invalidate all category queries
-      queryClient.invalidateQueries({ queryKey: categoryKeys.all });
+      invalidateAllCategoryQueries(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Create category failed" });
@@ -170,11 +183,8 @@ export function useUpdateCategory() {
   return useMutation({
     mutationFn: categoryApi.update,
     onSuccess: (data, variables) => {
-      // Update specific category in cache
       queryClient.setQueryData(categoryKeys.detail(variables.id), data);
-      // Invalidate lists and tree
-      queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: categoryKeys.tree() });
+      invalidateCategoryListAndTree(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Update category failed" });
@@ -191,7 +201,7 @@ export function useDeleteCategory() {
   return useMutation({
     mutationFn: categoryApi.delete,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: categoryKeys.all });
+      invalidateAllCategoryQueries(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Delete category failed" });

@@ -1,7 +1,12 @@
 /**
  * Shop React Query Hooks
  */
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  QueryClient,
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import instance from "@/api/api";
 import { extractApiData } from "@/api";
 import { errorHandler } from "@/services/errorHandler";
@@ -73,7 +78,7 @@ const shopApi = {
     params: ShopListParams = {},
   ): Promise<{ shops: Shop[]; pagination: PaginationData | null }> => {
     const { page = 1, limit = 10, search, status } = params;
-    const response = await instance.get("/shops", {
+    const response = await instance.get("/shops/admin/all", {
       params: { page, limit, search, status },
     });
     const data = extractApiData<{
@@ -116,7 +121,7 @@ const shopApi = {
     status: "active" | "inactive" | "banned";
   }): Promise<Shop> => {
     const { shopId, status } = params;
-    const response = await instance.put(`/shops/${shopId}/status`, { status });
+    const response = await instance.put(`/shops/admin/${shopId}/status`, { status });
     return extractApiData(response);
   },
 
@@ -245,6 +250,18 @@ export function useShopCategories(
   });
 }
 
+function invalidateMyShop(queryClient: QueryClient) {
+  return queryClient.invalidateQueries({ queryKey: shopKeys.myShop() });
+}
+
+function invalidateAllShops(queryClient: QueryClient) {
+  return queryClient.invalidateQueries({ queryKey: shopKeys.all });
+}
+
+function invalidateShopDetail(queryClient: QueryClient, shopId: string) {
+  return queryClient.invalidateQueries({ queryKey: shopKeys.detail(shopId) });
+}
+
 /**
  * Get all shops (Admin)
  */
@@ -302,7 +319,7 @@ export function useUploadShopLogo() {
   return useMutation({
     mutationFn: shopApi.uploadLogo,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: shopKeys.myShop() });
+      invalidateMyShop(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Upload logo failed" });
@@ -319,7 +336,7 @@ export function useUploadShopBanner() {
   return useMutation({
     mutationFn: shopApi.uploadBanner,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: shopKeys.myShop() });
+      invalidateMyShop(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Upload banner failed" });
@@ -337,7 +354,7 @@ export function useUpdateShopStatus() {
     mutationFn: shopApi.updateStatus,
     onSuccess: (data, variables) => {
       queryClient.setQueryData(shopKeys.detail(variables.shopId), data);
-      queryClient.invalidateQueries({ queryKey: shopKeys.all });
+      invalidateAllShops(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Update shop status failed" });
@@ -354,7 +371,7 @@ export function useFollowShop() {
   return useMutation({
     mutationFn: shopApi.follow,
     onSuccess: (_, shopId) => {
-      queryClient.invalidateQueries({ queryKey: shopKeys.detail(shopId) });
+      invalidateShopDetail(queryClient, shopId);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Follow shop failed" });
@@ -371,7 +388,7 @@ export function useUnfollowShop() {
   return useMutation({
     mutationFn: shopApi.unfollow,
     onSuccess: (_, shopId) => {
-      queryClient.invalidateQueries({ queryKey: shopKeys.detail(shopId) });
+      invalidateShopDetail(queryClient, shopId);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Unfollow shop failed" });

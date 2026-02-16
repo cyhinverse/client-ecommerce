@@ -1,7 +1,7 @@
 "use client";
 import React, { useRef } from "react";
 import { useCategoryTree } from "@/hooks/queries/useCategories";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 import {
   Heart,
   ChevronRight,

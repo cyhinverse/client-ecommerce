@@ -35,6 +35,7 @@ import { UpdateModelProduct } from "@/components/product/forms/UpdateModelProduc
 import { ViewModelProduct } from "@/components/product/forms/ViewModelProduct";
 import { Product } from "@/types/product";
 import { formatCurrency } from "@/utils/format";
+import { getSafeErrorMessage } from "@/api";
 
 export default function SellerProductsPage() {
   const { data: myShop } = useMyShop();
@@ -44,7 +45,6 @@ export default function SellerProductsPage() {
   const {
     data: productsData,
     isLoading,
-    refetch: fetchProducts,
   } = useShopProducts(myShop?._id || "", { page, limit });
   const products = productsData?.products || [];
   const productPagination = productsData?.pagination;
@@ -60,28 +60,23 @@ export default function SellerProductsPage() {
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmitting =
+    createProductMutation.isPending || updateProductMutation.isPending;
 
   // Create product handler
   const handleCreateProduct = async (formData: FormData) => {
-    setIsSubmitting(true);
     try {
       await createProductMutation.mutateAsync(formData);
       toast.success("Tạo sản phẩm thành công!");
       setCreateModalOpen(false);
-      fetchProducts();
     } catch (error: unknown) {
-      const err = error as { message?: string };
-      toast.error(err.message || "Không thể tạo sản phẩm");
-    } finally {
-      setIsSubmitting(false);
+      toast.error(getSafeErrorMessage(error, "Không thể tạo sản phẩm"));
     }
   };
 
   // Update product handler
   const handleUpdateProduct = async (formData: FormData) => {
     if (!selectedProduct) return;
-    setIsSubmitting(true);
     try {
       await updateProductMutation.mutateAsync({
         productId: selectedProduct._id,
@@ -90,13 +85,8 @@ export default function SellerProductsPage() {
       toast.success("Cập nhật sản phẩm thành công!");
       setUpdateModalOpen(false);
       setSelectedProduct(null);
-      fetchProducts();
     } catch (error: unknown) {
-      const err = error as { message?: string } | string;
-      const message = typeof err === "string" ? err : err.message;
-      toast.error(message || "Không thể cập nhật sản phẩm");
-    } finally {
-      setIsSubmitting(false);
+      toast.error(getSafeErrorMessage(error, "Không thể cập nhật sản phẩm"));
     }
   };
 
@@ -106,11 +96,8 @@ export default function SellerProductsPage() {
     try {
       await deleteProductMutation.mutateAsync(product._id);
       toast.success("Xóa sản phẩm thành công!");
-      fetchProducts();
     } catch (error: unknown) {
-      const err = error as { message?: string } | string;
-      const message = typeof err === "string" ? err : err.message;
-      toast.error(message || "Không thể xóa sản phẩm");
+      toast.error(getSafeErrorMessage(error, "Không thể xóa sản phẩm"));
     }
   };
 

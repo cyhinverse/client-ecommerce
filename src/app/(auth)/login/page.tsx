@@ -9,13 +9,14 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { login } from "@/features/auth/authAction";
+import { useAppSelector } from "@/hooks/hooks";
+import { useLogin } from "@/hooks/queries";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
+import { getSafeErrorMessage } from "@/api";
 
 const loginSchema = z.object({
   email: z.string().email("Email không hợp lệ"),
@@ -25,11 +26,12 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const dispatch = useAppDispatch();
   const router = useRouter();
 
   const [showPassword, setShowPassword] = useState(false);
-  const { loading, isAuthenticated } = useAppSelector((state) => state.auth);
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const loginMutation = useLogin();
+  const loading = loginMutation.isPending;
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -42,13 +44,11 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      await dispatch(login(data)).unwrap();
+      await loginMutation.mutateAsync(data);
       toast.success("Chào mừng bạn trở lại!");
       router.replace("/");
-    } catch (error) {
-      toast.error(
-        (error as { message?: string })?.message || "Đăng nhập thất bại",
-      );
+    } catch (error: unknown) {
+      toast.error(getSafeErrorMessage(error, "Đăng nhập thất bại"));
     }
   };
 
@@ -153,4 +153,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

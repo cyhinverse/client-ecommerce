@@ -2,9 +2,14 @@
  * Banner React Query Hooks
  * Replaces bannerAction.ts async thunks with React Query
  */
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  QueryClient,
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/api";
+import { extractApiData } from "@/api";
 import { errorHandler } from "@/services/errorHandler";
 import { STALE_TIME } from "@/constants/cache";
 import { bannerKeys } from "@/lib/queryKeys";
@@ -45,6 +50,10 @@ interface LegacyBannerResponse {
   limit?: number;
   totalPages?: number;
   pagination?: BannerListResponse['pagination'];
+}
+
+function invalidateBannerQueries(queryClient: QueryClient) {
+  return queryClient.invalidateQueries({ queryKey: bannerKeys.all });
 }
 
 // ============ API Functions ============
@@ -136,7 +145,7 @@ export function useActiveBanners(params?: Omit<BannerListParams, "isActive">) {
   return useQuery({
     queryKey: bannerKeys.active(),
     queryFn: () => bannerApi.getActive(params),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: STALE_TIME.LONG,
   });
 }
 
@@ -147,7 +156,7 @@ export function useBanners(params?: BannerListParams) {
   return useQuery({
     queryKey: bannerKeys.list(),
     queryFn: () => bannerApi.getAll(params),
-    staleTime: 2 * 60 * 1000,
+    staleTime: STALE_TIME.MEDIUM,
   });
 }
 
@@ -162,7 +171,7 @@ export function useCreateBanner() {
   return useMutation({
     mutationFn: bannerApi.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: bannerKeys.all });
+      invalidateBannerQueries(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Create banner failed" });
@@ -180,7 +189,7 @@ export function useUpdateBanner() {
     mutationFn: ({ id, data }: { id: string; data: UpdateBannerPayload }) =>
       bannerApi.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: bannerKeys.all });
+      invalidateBannerQueries(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Update banner failed" });
@@ -197,7 +206,7 @@ export function useDeleteBanner() {
   return useMutation({
     mutationFn: bannerApi.delete,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: bannerKeys.all });
+      invalidateBannerQueries(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Delete banner failed" });

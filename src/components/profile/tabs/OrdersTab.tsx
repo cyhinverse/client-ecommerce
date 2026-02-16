@@ -10,7 +10,8 @@ import { Order } from "@/types/order";
 import OrderCard from "../order/OrderCard";
 import OrderDialog from "../order/OrderDialog";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
+import { getSafeErrorMessage } from "@/api";
 
 type OrderStatus =
   | "all"
@@ -56,10 +57,7 @@ export default function OrdersTab() {
       toast.success("Đã hủy đơn hàng thành công");
     } catch (error: unknown) {
       console.error("Error cancelling order:", error);
-      const err = error as { response?: { data?: { message?: string } } };
-      const errorMessage =
-        err.response?.data?.message || "Không thể hủy đơn hàng";
-      toast.error(errorMessage);
+      toast.error(getSafeErrorMessage(error, "Không thể hủy đơn hàng"));
     } finally {
       setCancellingOrder(null);
     }

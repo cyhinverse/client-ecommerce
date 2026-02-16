@@ -4,7 +4,7 @@ import { useAppSelector } from "@/hooks/hooks";
 import HeroSection from "@/components/home/HeroSection";
 import Category from "@/components/category/Category";
 import HomeProductList from "@/components/home/HomeProductList";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 
 export default function Home() {
   const [selectedCategorySlug, setSelectedCategorySlug] = useState<string | null>(null);

@@ -23,7 +23,7 @@ import {
 import { User } from "@/types/user";
 import Image from "next/image";
 import UserPermissions from "./UserPermissions";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 
 interface ViewModelUserProps {
   open: boolean;

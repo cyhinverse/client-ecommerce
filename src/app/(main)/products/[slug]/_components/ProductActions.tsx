@@ -1,7 +1,7 @@
 "use client";
 
 import SpinnerLoading from "@/components/common/SpinnerLoading";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 
 interface ProductActionsProps {
   onAddToCart: () => void;

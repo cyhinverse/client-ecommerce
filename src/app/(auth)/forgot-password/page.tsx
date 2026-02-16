@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
@@ -9,13 +8,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
-import { useAppDispatch } from "@/hooks/hooks";
-import { forgotPassword } from "@/features/auth/authAction";
+import { useForgotPassword } from "@/hooks/queries";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
+import { getSafeErrorMessage } from "@/api";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Email không hợp lệ"),
@@ -24,10 +23,9 @@ const forgotPasswordSchema = z.object({
 type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
 export default function ForgotPasswordPage() {
-  const dispatch = useAppDispatch();
   const router = useRouter();
-
-  const [isLoading, setIsLoading] = useState(false);
+  const forgotPasswordMutation = useForgotPassword();
+  const isLoading = forgotPasswordMutation.isPending;
 
   const {
     register,
@@ -39,17 +37,12 @@ export default function ForgotPasswordPage() {
   });
 
   const onSubmit = async (data: ForgotPasswordFormData) => {
-    setIsLoading(true);
     try {
-      await dispatch(forgotPassword(data.email)).unwrap();
+      await forgotPasswordMutation.mutateAsync(data.email);
       toast.success("Mã xác nhận đã được gửi đến email của bạn");
       router.push(`/reset-password?email=${encodeURIComponent(data.email)}`);
-    } catch (error) {
-      toast.error(
-        (error as { message?: string })?.message || "Không thể gửi mã xác nhận",
-      );
-    } finally {
-      setIsLoading(false);
+    } catch (error: unknown) {
+      toast.error(getSafeErrorMessage(error, "Không thể gửi mã xác nhận"));
     }
   };
 
@@ -104,4 +97,3 @@ export default function ForgotPasswordPage() {
     </div>
   );
 }
-

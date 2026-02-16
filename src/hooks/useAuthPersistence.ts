@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useAppDispatch } from "@/hooks/hooks";
 import { authSlice } from "@/features/auth/authSlice";
 import { useQueryClient } from "@tanstack/react-query";
-import { profileKeys } from "@/lib/queryKeys";
+import { userKeys } from "@/lib/queryKeys";
 import instance from "@/api/api";
 
 export const useAuthPersistence = () => {
@@ -25,7 +25,7 @@ export const useAuthPersistence = () => {
           dispatch(authSlice.actions.setIsAuthenticated(true));
           dispatch(authSlice.actions.setUserData(result));
           // Pre-populate React Query cache
-          queryClient.setQueryData(profileKeys.current(), result);
+          queryClient.setQueryData(userKeys.profile(), result);
         }
       } catch (error) {
         // If 401/403 or network error, assume not authenticated via cookies

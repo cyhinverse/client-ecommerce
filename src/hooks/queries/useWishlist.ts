@@ -2,20 +2,33 @@
  * Wishlist React Query Hooks
  * Replaces wishlistAction.ts async thunks with React Query
  */
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  QueryClient,
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/api";
+import { extractApiData, getSafeErrorMessage } from "@/api";
 import { errorHandler } from "@/services/errorHandler";
 import { STALE_TIME } from "@/constants/cache";
 import { wishlistKeys } from "@/lib/queryKeys";
 import { toast } from "sonner";
 import {
-  WishlistItem,
   WishlistResponse,
   CheckWishlistResponse,
   CheckMultipleWishlistResponse,
 } from "@/types/wishlist";
+
+function invalidateWishlistListAndCount(queryClient: QueryClient) {
+  queryClient.invalidateQueries({ queryKey: wishlistKeys.list() });
+  queryClient.invalidateQueries({ queryKey: wishlistKeys.count() });
+}
+
+function invalidateWishlistAll(queryClient: QueryClient) {
+  return queryClient.invalidateQueries({ queryKey: wishlistKeys.all });
+}
 
 // ============ API Functions ============
 const wishlistApi = {
@@ -130,12 +143,10 @@ export function useAddToWishlist() {
 
   return useMutation({
     mutationFn: wishlistApi.add,
-    onSuccess: (data, productId) => {
+    onSuccess: (_, productId) => {
       // Update wishlist check cache
       queryClient.setQueryData(wishlistKeys.check(productId), true);
-      // Invalidate lists and count
-      queryClient.invalidateQueries({ queryKey: wishlistKeys.list() });
-      queryClient.invalidateQueries({ queryKey: wishlistKeys.count() });
+      invalidateWishlistListAndCount(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Add to wishlist failed" });
@@ -154,9 +165,7 @@ export function useRemoveFromWishlist() {
     onSuccess: (productId) => {
       // Update wishlist check cache
       queryClient.setQueryData(wishlistKeys.check(productId), false);
-      // Invalidate lists and count
-      queryClient.invalidateQueries({ queryKey: wishlistKeys.list() });
-      queryClient.invalidateQueries({ queryKey: wishlistKeys.count() });
+      invalidateWishlistListAndCount(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Remove from wishlist failed" });
@@ -173,8 +182,7 @@ export function useClearWishlist() {
   return useMutation({
     mutationFn: wishlistApi.clear,
     onSuccess: () => {
-      // Invalidate all wishlist queries
-      queryClient.invalidateQueries({ queryKey: wishlistKeys.all });
+      invalidateWishlistAll(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Clear wishlist failed" });
@@ -293,9 +301,7 @@ export function useWishlistManager(isAuthenticated: boolean) {
           return true;
         }
       } catch (error: unknown) {
-        const errorMessage =
-          error instanceof Error ? error.message : "Có lỗi xảy ra";
-        toast.error(errorMessage);
+        toast.error(getSafeErrorMessage(error, "Có lỗi xảy ra"));
         return currentlyInWishlist;
       }
     },

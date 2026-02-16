@@ -17,6 +17,7 @@ import {
 } from "@/hooks/queries";
 import { User, UserFilters, UpdateUserData } from "@/types/user";
 import { CreateUserData } from "@/hooks/queries/useProfile";
+import { getSafeErrorMessage } from "@/api";
 
 export default function AdminUsersPage() {
   // Use URL filters hook
@@ -77,7 +78,7 @@ export default function AdminUsersPage() {
     } catch (error) {
       const err = error as Error;
       console.error("Create user error:", err);
-      toast.error(err?.message || "Error creating user. Please try again.");
+      toast.error(getSafeErrorMessage(error, "Error creating user. Please try again."));
     }
   };
 
@@ -113,8 +114,7 @@ export default function AdminUsersPage() {
       handleCloseEditModal();
       toast.success("User updated successfully");
     } catch (error) {
-      const err = error as Error;
-      toast.error(err?.message || "Failed to update user. Please try again.");
+      toast.error(getSafeErrorMessage(error, "Failed to update user. Please try again."));
     }
   };
 
@@ -180,7 +180,7 @@ export default function AdminUsersPage() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-destructive">
-          Error: {(error as Error).message}
+          Error: {getSafeErrorMessage(error, "Failed to load users")}
         </div>
       </div>
     );

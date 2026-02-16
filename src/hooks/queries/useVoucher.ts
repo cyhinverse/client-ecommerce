@@ -2,9 +2,14 @@
  * Voucher React Query Hooks
  * Replaces voucherAction.ts async thunks with React Query
  */
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  QueryClient,
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/api";
+import { extractApiData } from "@/api";
 import { voucherKeys } from "@/lib/queryKeys";
 import { errorHandler } from "@/services/errorHandler";
 import { STALE_TIME } from "@/constants/cache";
@@ -27,6 +32,14 @@ export interface VoucherListResponse {
     total: number;
     totalPages: number;
   };
+}
+
+function invalidateVoucherLists(queryClient: QueryClient) {
+  return queryClient.invalidateQueries({ queryKey: voucherKeys.lists() });
+}
+
+function invalidateVoucherStatistics(queryClient: QueryClient) {
+  return queryClient.invalidateQueries({ queryKey: voucherKeys.statistics() });
 }
 
 // ============ API Functions ============
@@ -172,8 +185,8 @@ export function useCreateVoucher() {
   return useMutation({
     mutationFn: voucherApi.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: voucherKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: voucherKeys.statistics() });
+      invalidateVoucherLists(queryClient);
+      invalidateVoucherStatistics(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Create voucher failed" });
@@ -190,7 +203,7 @@ export function useUpdateVoucher() {
   return useMutation({
     mutationFn: voucherApi.update,
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: voucherKeys.lists() });
+      invalidateVoucherLists(queryClient);
       queryClient.setQueryData(voucherKeys.detail(data._id), data);
     },
     onError: (error) => {
@@ -208,8 +221,8 @@ export function useDeleteVoucher() {
   return useMutation({
     mutationFn: voucherApi.delete,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: voucherKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: voucherKeys.statistics() });
+      invalidateVoucherLists(queryClient);
+      invalidateVoucherStatistics(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Delete voucher failed" });

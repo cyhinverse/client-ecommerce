@@ -6,20 +6,20 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
-import { useAppDispatch } from "@/hooks/hooks";
-import { sendCode } from "@/features/auth/authAction";
+import { useSendVerificationCode } from "@/hooks/queries";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
+import { getSafeErrorMessage } from "@/api";
 
 export default function SendCodePage() {
-  const dispatch = useAppDispatch();
   const router = useRouter();
+  const sendCodeMutation = useSendVerificationCode();
 
   const [email, setEmail] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const isLoading = sendCodeMutation.isPending;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -30,17 +30,12 @@ export default function SendCodePage() {
       return;
     }
 
-    setIsLoading(true);
     try {
-      await dispatch(sendCode({ email: normalizedEmail })).unwrap();
+      await sendCodeMutation.mutateAsync({ email: normalizedEmail });
       toast.success("Mã xác nhận đã được gửi đến email của bạn");
       router.push(`/verify-code?email=${encodeURIComponent(normalizedEmail)}`);
-    } catch (error) {
-      toast.error(
-        (error as { message?: string })?.message || "Không thể gửi mã xác nhận",
-      );
-    } finally {
-      setIsLoading(false);
+    } catch (error: unknown) {
+      toast.error(getSafeErrorMessage(error, "Không thể gửi mã xác nhận"));
     }
   };
 
@@ -95,4 +90,3 @@ export default function SendCodePage() {
     </div>
   );
 }
-

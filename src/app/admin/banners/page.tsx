@@ -19,6 +19,7 @@ import { BannersTable } from "@/components/admin/banners/BannersTable";
 import { CreateBannerModal } from "@/components/admin/banners/CreateBannerModal";
 import { EditBannerModal } from "@/components/admin/banners/EditBannerModal";
 import { toast } from "sonner";
+import { getSafeErrorMessage } from "@/api";
 
 interface BannerFilters extends Filters {
   page: number;
@@ -63,9 +64,8 @@ export default function BannersAdminPage() {
       await createMutation.mutateAsync(data);
       toast.success("Banner created successfully");
       setCreateModalOpen(false);
-    } catch (err: unknown) {
-      const error = err as { message?: string };
-      toast.error(error.message || "Failed to create banner");
+    } catch (error: unknown) {
+      toast.error(getSafeErrorMessage(error, "Failed to create banner"));
     }
   };
 
@@ -75,9 +75,8 @@ export default function BannersAdminPage() {
       toast.success("Banner updated successfully");
       setEditModalOpen(false);
       setSelectedBanner(null);
-    } catch (err: unknown) {
-      const error = err as { message?: string };
-      toast.error(error.message || "Failed to update banner");
+    } catch (error: unknown) {
+      toast.error(getSafeErrorMessage(error, "Failed to update banner"));
     }
   };
 
@@ -86,9 +85,8 @@ export default function BannersAdminPage() {
       try {
         await deleteMutation.mutateAsync(banner._id);
         toast.success("Banner deleted successfully");
-      } catch (err: unknown) {
-        const error = err as { message?: string };
-        toast.error(error.message || "Failed to delete banner");
+      } catch (error: unknown) {
+        toast.error(getSafeErrorMessage(error, "Failed to delete banner"));
       }
     }
   };
@@ -96,7 +94,9 @@ export default function BannersAdminPage() {
   if (error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-red-500">Error: {(error as Error).message}</div>
+        <div className="text-red-500">
+          Error: {getSafeErrorMessage(error, "Failed to load banners")}
+        </div>
       </div>
     );
   }

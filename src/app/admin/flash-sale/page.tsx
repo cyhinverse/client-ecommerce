@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Zap,
   Plus,
@@ -24,42 +24,22 @@ import {
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
-import instance from "@/api/api";
+import { getSafeErrorMessage } from "@/api";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
-
-interface FlashSaleProduct {
-  _id: string;
-  name: string;
-  slug: string;
-  variants?: { images?: string[] }[];
-  price: { currentPrice: number };
-  flashSale: {
-    isActive: boolean;
-    salePrice: number;
-    discountPercent: number;
-    stock: number;
-    soldCount: number;
-    startTime: string;
-    endTime: string;
-  };
-}
-
-interface TimeSlot {
-  startTime: Date;
-  endTime: Date;
-  status: string;
-  label: string;
-}
+import {
+  useAdminFlashSaleProducts,
+  useAdminFlashSaleSchedule,
+  useAddToFlashSale,
+  useRemoveFromFlashSale,
+  type AdminFlashSaleProduct as FlashSaleProduct,
+  type AdminFlashSaleSlot as TimeSlot,
+} from "@/hooks/queries";
 
 export default function AdminFlashSalePage() {
-  const [products, setProducts] = useState<FlashSaleProduct[]>([]);
-  const [schedule, setSchedule] = useState<TimeSlot[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState("");
-  const [isAdding, setIsAdding] = useState(false);
 
   // Form state for adding product to flash sale
   const [formData, setFormData] = useState({
@@ -70,26 +50,25 @@ export default function AdminFlashSalePage() {
     endTime: "",
   });
 
-  const fetchFlashSale = async () => {
-    try {
-      setLoading(true);
-      const [productsRes, scheduleRes] = await Promise.all([
-        instance.get("/flash-sale"),
-        instance.get("/flash-sale/schedule"),
-      ]);
-      setProducts(productsRes.data.data?.data || []);
-      setSchedule(scheduleRes.data.data || []);
-    } catch (error) {
-      console.error("Failed to fetch flash sale:", error);
-      toast.error("Failed to load flash sale data");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    data: products = [],
+    isLoading: productsLoading,
+    error: productsError,
+    refetch: refetchProducts,
+  } = useAdminFlashSaleProducts();
 
-  useEffect(() => {
-    fetchFlashSale();
-  }, []);
+  const {
+    data: schedule = [],
+    isLoading: scheduleLoading,
+    error: scheduleError,
+    refetch: refetchSchedule,
+  } = useAdminFlashSaleSchedule();
+
+  const isLoading = productsLoading || scheduleLoading;
+  const hasError = productsError || scheduleError;
+
+  const addToFlashSaleMutation = useAddToFlashSale();
+  const removeFromFlashSaleMutation = useRemoveFromFlashSale();
 
   const handleAddToFlashSale = async () => {
     if (
@@ -102,9 +81,11 @@ export default function AdminFlashSalePage() {
       return;
     }
 
-    setIsAdding(true);
     try {
-      await instance.post(`/flash-sale/${selectedProductId}`, formData);
+      await addToFlashSaleMutation.mutateAsync({
+        productId: selectedProductId,
+        data: formData,
+      });
       toast.success("Product added to flash sale");
       setAddModalOpen(false);
       setSelectedProductId("");
@@ -115,24 +96,18 @@ export default function AdminFlashSalePage() {
         startTime: "",
         endTime: "",
       });
-      fetchFlashSale();
     } catch (error) {
-      console.error("Failed to add to flash sale:", error);
-      toast.error("Failed to add product to flash sale");
-    } finally {
-      setIsAdding(false);
+      toast.error(getSafeErrorMessage(error, "Failed to add product to flash sale"));
     }
   };
 
   const handleRemoveFromFlashSale = async (productId: string) => {
     if (!confirm("Remove this product from flash sale?")) return;
     try {
-      await instance.delete(`/flash-sale/${productId}`);
+      await removeFromFlashSaleMutation.mutateAsync(productId);
       toast.success("Product removed from flash sale");
-      fetchFlashSale();
     } catch (error) {
-      console.error("Failed to remove from flash sale:", error);
-      toast.error("Failed to remove product");
+      toast.error(getSafeErrorMessage(error, "Failed to remove product"));
     }
   };
 
@@ -154,6 +129,35 @@ export default function AdminFlashSalePage() {
         ) / products.length
       )
     : 0;
+
+  if (hasError) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+            <Zap className="h-6 w-6 text-[#E53935]" />
+            Flash Sale
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Manage flash sale campaigns
+          </p>
+        </div>
+        <div className="rounded-2xl bg-[#f7f7f7] dark:bg-[#1C1C1E] p-8 text-center space-y-4">
+          <p className="text-red-500">
+            {getSafeErrorMessage(hasError, "Failed to load flash sale data")}
+          </p>
+          <div className="flex items-center justify-center gap-2">
+            <Button onClick={() => refetchProducts()} variant="outline" className="rounded-xl">
+              Reload Products
+            </Button>
+            <Button onClick={() => refetchSchedule()} className="rounded-xl">
+              Reload Schedule
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -263,7 +267,7 @@ export default function AdminFlashSalePage() {
           </div>
         </div>
 
-        {loading ? (
+        {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="rounded-2xl bg-[#f7f7f7] p-4">
@@ -448,10 +452,10 @@ export default function AdminFlashSalePage() {
             </Button>
             <Button
               onClick={handleAddToFlashSale}
-              disabled={isAdding}
+              disabled={addToFlashSaleMutation.isPending}
               className="bg-[#E53935] hover:bg-[#D32F2F] text-white rounded-xl"
             >
-              {isAdding ? "Adding..." : "Add to Flash Sale"}
+              {addToFlashSaleMutation.isPending ? "Adding..." : "Add to Flash Sale"}
             </Button>
           </DialogFooter>
         </DialogContent>

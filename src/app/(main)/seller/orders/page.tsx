@@ -48,6 +48,7 @@ import {
 } from "@/hooks/queries";
 import { formatCurrency, formatDate } from "@/utils/format";
 import { Order } from "@/types/order";
+import { getSafeErrorMessage } from "@/api";
 
 const statusConfig: Record<
   string,
@@ -171,9 +172,9 @@ export default function SellerOrdersPage() {
       setUpdateStatusModalOpen(false);
       setSelectedOrder(null);
     } catch (error: unknown) {
-      const err = error as string | { message?: string };
-      const message = typeof err === "string" ? err : err.message;
-      toast.error(message || "Không thể cập nhật trạng thái đơn hàng");
+      toast.error(
+        getSafeErrorMessage(error, "Không thể cập nhật trạng thái đơn hàng"),
+      );
     }
   };
 

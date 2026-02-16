@@ -2,7 +2,12 @@
  * Shop Category React Query Hooks
  * Replaces shopCategoryAction.ts async thunks with React Query
  */
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  QueryClient,
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import instance from "@/api/api";
 import { extractApiData } from "@/api";
 import { errorHandler } from "@/services/errorHandler";
@@ -13,6 +18,10 @@ import {
   CreateShopCategoryPayload,
   UpdateShopCategoryPayload,
 } from "@/types/shopCategory";
+
+function invalidateAllShopCategoryQueries(queryClient: QueryClient) {
+  return queryClient.invalidateQueries({ queryKey: shopCategoryKeys.all });
+}
 
 const normalizeCategory = (category: unknown): ShopCategory => {
   const c =
@@ -155,7 +164,7 @@ export function useCreateShopCategory() {
   return useMutation({
     mutationFn: shopCategoryApi.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: shopCategoryKeys.all });
+      invalidateAllShopCategoryQueries(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Create shop category failed" });
@@ -178,7 +187,7 @@ export function useUpdateShopCategory() {
       data: UpdateShopCategoryPayload;
     }) => shopCategoryApi.update(categoryId, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: shopCategoryKeys.all });
+      invalidateAllShopCategoryQueries(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Update shop category failed" });
@@ -195,7 +204,7 @@ export function useDeleteShopCategory() {
   return useMutation({
     mutationFn: shopCategoryApi.delete,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: shopCategoryKeys.all });
+      invalidateAllShopCategoryQueries(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Delete shop category failed" });

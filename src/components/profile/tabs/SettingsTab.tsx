@@ -9,7 +9,8 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { User } from "@/types/user";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
+import { getSafeErrorMessage } from "@/api";
 
 interface SettingsTabProps {
   user: User;
@@ -77,10 +78,7 @@ export default function SettingsTab({ user }: SettingsTabProps) {
         confirmPassword: "",
       });
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
-      const errorMessage =
-        err.response?.data?.message || "Đổi mật khẩu thất bại";
-      toast.error(errorMessage);
+      toast.error(getSafeErrorMessage(error, "Đổi mật khẩu thất bại"));
     } finally {
       setIsChangingPassword(false);
     }

@@ -9,8 +9,7 @@ import {
 } from "@/components/ui/input-otp";
 import { Button } from "@/components/ui/button";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
-import { useAppDispatch } from "@/hooks/hooks";
-import { verifyCode } from "@/features/auth/authAction";
+import { useVerifyCode } from "@/hooks/queries";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -33,8 +32,8 @@ export default function VerifyCodeClient({
   initialEmail,
   initialCode,
 }: VerifyCodeClientProps) {
-  const dispatch = useAppDispatch();
   const router = useRouter();
+  const verifyCodeMutation = useVerifyCode();
 
   const email = useMemo(() => (initialEmail ?? "").trim(), [initialEmail]);
   const canVerify = email.length > 0;
@@ -42,7 +41,7 @@ export default function VerifyCodeClient({
   const [otp, setOtp] = useState<string>(() =>
     isValidOtp(initialCode) ? initialCode : "",
   );
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const isLoading = verifyCodeMutation.isPending;
 
   const otpInputRef = useRef<HTMLInputElement>(null);
 
@@ -56,18 +55,15 @@ export default function VerifyCodeClient({
       }
       if (!/^\d{6}$/.test(code)) return;
 
-      setIsLoading(true);
       try {
-        await dispatch(verifyCode({ email, code })).unwrap();
+        await verifyCodeMutation.mutateAsync({ email, code });
         toast.success("Xác thực email thành công!");
         router.replace("/login");
       } catch {
         toast.error("Xác thực email thất bại");
-      } finally {
-        setIsLoading(false);
       }
     },
-    [canVerify, dispatch, email, router],
+    [canVerify, email, router, verifyCodeMutation],
   );
 
   useEffect(() => {
@@ -171,4 +167,3 @@ export default function VerifyCodeClient({
     </div>
   );
 }
-

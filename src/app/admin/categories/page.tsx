@@ -17,6 +17,7 @@ import { EditCategoryModal } from "@/components/admin/categories/UpdateModel";
 import { ViewCategoryModal } from "@/components/admin/categories/ViewModal";
 import { CreateCategoryModal } from "@/components/admin/categories/CreateModel";
 import { toast } from "sonner";
+import { getSafeErrorMessage } from "@/api";
 
 export default function CategoriesAdminPage() {
   // Use URL filters hook
@@ -191,7 +192,9 @@ export default function CategoriesAdminPage() {
   if (error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-red-500">Error: {(error as Error).message}</div>
+        <div className="text-red-500">
+          Error: {getSafeErrorMessage(error, "Failed to load categories")}
+        </div>
       </div>
     );
   }

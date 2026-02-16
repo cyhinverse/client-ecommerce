@@ -68,6 +68,8 @@ export const flashSaleKeys = {
   schedule: () => [...flashSaleKeys.all, "schedule"] as const,
   slot: (timeSlot: string) => [...flashSaleKeys.all, "slot", timeSlot] as const,
   stats: () => [...flashSaleKeys.all, "stats"] as const,
+  adminProducts: () => [...flashSaleKeys.all, "admin-products"] as const,
+  adminSchedule: () => [...flashSaleKeys.all, "admin-schedule"] as const,
 };
 
 // Wishlist query keys
@@ -147,6 +149,7 @@ export const reviewKeys = {
     [...reviewKeys.all, "shop", shopId, params] as const,
   seller: (params?: unknown) => [...reviewKeys.all, "seller", params] as const,
   user: () => [...reviewKeys.all, "user"] as const,
+  admin: (params?: unknown) => [...reviewKeys.all, "admin", params] as const,
 };
 
 
@@ -200,6 +203,7 @@ export const bannerKeys = {
 // Shipping query keys
 export const shippingKeys = {
   all: ["shipping"] as const,
+  templates: () => [...shippingKeys.all, "templates"] as const,
   methods: () => [...shippingKeys.all, "methods"] as const,
   calculate: (params: unknown) =>
     [...shippingKeys.all, "calculate", params] as const,
@@ -211,6 +215,15 @@ export const chatKeys = {
   conversations: () => [...chatKeys.all, "conversations"] as const,
   messages: (conversationId: string) =>
     [...chatKeys.all, "messages", conversationId] as const,
+};
+
+// Chatbot query keys
+export const chatbotKeys = {
+  all: ["chatbot"] as const,
+  adminSessions: (params?: unknown) =>
+    [...chatbotKeys.all, "admin-sessions", params] as const,
+  history: (sessionId: string) =>
+    [...chatbotKeys.all, "history", sessionId] as const,
 };
 
 // Search query keys

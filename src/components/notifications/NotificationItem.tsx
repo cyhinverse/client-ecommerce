@@ -1,7 +1,7 @@
 import { Notification } from "@/types/notification";
 import { ShoppingBag, Tag, Info, Bell } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 
 interface NotificationItemProps {
   notification: Notification;

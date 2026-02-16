@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { AddressDialogProps, AddressFormData } from "@/types/address";
 import { MapPin, Navigation, Home } from "lucide-react";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
+import { getSafeErrorMessage } from "@/api";
 
 export default function AddressDialog({
   open,
@@ -38,7 +39,8 @@ export default function AddressDialog({
     isDefault: false,
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmitting =
+    createAddressMutation.isPending || updateAddressMutation.isPending;
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [locationPermissionDenied, setLocationPermissionDenied] =
     useState(false);
@@ -244,12 +246,10 @@ export default function AddressDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
 
     // CHỈ VALIDATE CÁC TRƯỜNG TỐI THIỂU
     if (!addressForm.address.trim()) {
       toast.error("Vui lòng nhập địa chỉ");
-      setIsSubmitting(false);
       return;
     }
 
@@ -279,19 +279,12 @@ export default function AddressDialog({
       onSuccess();
     } catch (error: unknown) {
       console.error("Address operation error:", error);
-      const err = error as {
-        response?: { data?: { message?: string } };
-        message?: string;
-      };
-      const errorMessage =
-        err.response?.data?.message || err.message || "Đã xảy ra lỗi";
+      const errorMessage = getSafeErrorMessage(error, "Đã xảy ra lỗi");
       toast.error(
         `${
           editingAddress ? "Cập nhật địa chỉ thất bại" : "Thêm địa chỉ thất bại"
         }: ${errorMessage}`,
       );
-    } finally {
-      setIsSubmitting(false);
     }
   };
 

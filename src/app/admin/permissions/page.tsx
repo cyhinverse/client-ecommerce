@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Shield, Users, History, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -14,7 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
-import { toast } from "sonner";
+import { getSafeErrorMessage } from "@/api";
 import { RESOURCES } from "@/constants/permissions";
 import {
   getAllPermissions,
@@ -24,36 +26,43 @@ import {
 } from "@/api/permission";
 
 export default function AdminPermissionsPage() {
-  const [loading, setLoading] = useState(true);
-  const [allPermissions, setAllPermissions] = useState<string[]>([]);
-  const [rolePermissions, setRolePermissions] = useState<
-    Record<string, string[]>
-  >({});
-  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  const {
+    data: permsData,
+    isLoading: permsLoading,
+    error: permsError,
+    refetch: refetchPerms,
+  } = useQuery({
+    queryKey: ["admin-permissions-all"],
+    queryFn: getAllPermissions,
+  });
 
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const [permsData, rolesData, logs] = await Promise.all([
-        getAllPermissions(),
-        getRolePermissions(),
-        getAuditLogs({ limit: 50 }),
-      ]);
-      setAllPermissions(permsData?.permissions || []);
-      setRolePermissions(rolesData?.rolePermissions || {});
-      setAuditLogs(logs?.logs || []);
-    } catch (error) {
-      toast.error("Không thể tải dữ liệu permissions");
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    data: rolesData,
+    isLoading: rolesLoading,
+    error: rolesError,
+    refetch: refetchRoles,
+  } = useQuery({
+    queryKey: ["admin-permissions-roles"],
+    queryFn: getRolePermissions,
+  });
+
+  const {
+    data: logsData,
+    isLoading: logsLoading,
+    error: logsError,
+    refetch: refetchLogs,
+  } = useQuery({
+    queryKey: ["admin-permissions-audit"],
+    queryFn: () => getAuditLogs({ limit: 50 }),
+  });
+
+  const loading = permsLoading || rolesLoading || logsLoading;
+  const allPermissions = permsData?.permissions || [];
+  const rolePermissions = rolesData?.rolePermissions || {};
+  const auditLogs: AuditLogEntry[] = logsData?.logs || [];
+  const hasError = permsError || rolesError || logsError;
 
   // Ensure allPermissions is always an array before filtering
   const filteredPermissions = Array.isArray(allPermissions)
@@ -76,6 +85,38 @@ export default function AdminPermissionsPage() {
     return (
       <div className="flex items-center justify-center py-20">
         <SpinnerLoading size={32} />
+      </div>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <Shield className="h-6 w-6 text-primary" />
+            Permission Management
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Quản lý quyền hạn và xem lịch sử thay đổi
+          </p>
+        </div>
+        <div className="rounded-2xl bg-[#f7f7f7] dark:bg-[#1C1C1E] p-8 text-center space-y-4">
+          <p className="text-red-500">
+            {getSafeErrorMessage(hasError, "Không thể tải dữ liệu permissions")}
+          </p>
+          <div className="flex items-center justify-center gap-2">
+            <Button onClick={() => refetchPerms()} variant="outline">
+              Reload Permissions
+            </Button>
+            <Button onClick={() => refetchRoles()} variant="outline">
+              Reload Role Defaults
+            </Button>
+            <Button onClick={() => refetchLogs()}>
+              Reload Audit Logs
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }

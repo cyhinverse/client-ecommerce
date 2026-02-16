@@ -2,9 +2,14 @@
  * User/Profile React Query Hooks
  * Replaces userAction.ts async thunks with React Query
  */
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  QueryClient,
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/api";
+import { extractApiData } from "@/api";
 import { errorHandler } from "@/services/errorHandler";
 import { STALE_TIME } from "@/constants/cache";
 import { userKeys } from "@/lib/queryKeys";
@@ -59,6 +64,23 @@ export interface UpdateUserData {
   isVerifiedEmail: boolean;
   roles: string;
   permissions?: string[];
+}
+
+function invalidateProfile(queryClient: QueryClient) {
+  return queryClient.invalidateQueries({ queryKey: userKeys.profile() });
+}
+
+function invalidateAddresses(queryClient: QueryClient) {
+  return queryClient.invalidateQueries({ queryKey: userKeys.addresses() });
+}
+
+function invalidateUsers(queryClient: QueryClient) {
+  return queryClient.invalidateQueries({ queryKey: userKeys.all });
+}
+
+function invalidateAddressAndProfile(queryClient: QueryClient) {
+  invalidateAddresses(queryClient);
+  invalidateProfile(queryClient);
 }
 
 // ============ API Functions ============
@@ -216,7 +238,7 @@ export function useUploadAvatar() {
   return useMutation({
     mutationFn: userApi.uploadAvatar,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.profile() });
+      invalidateProfile(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Upload avatar failed" });
@@ -247,8 +269,7 @@ export function useCreateAddress() {
   return useMutation({
     mutationFn: userApi.createAddress,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.addresses() });
-      queryClient.invalidateQueries({ queryKey: userKeys.profile() });
+      invalidateAddressAndProfile(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Create address failed" });
@@ -265,8 +286,7 @@ export function useUpdateAddress() {
   return useMutation({
     mutationFn: userApi.updateAddress,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.addresses() });
-      queryClient.invalidateQueries({ queryKey: userKeys.profile() });
+      invalidateAddressAndProfile(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Update address failed" });
@@ -283,8 +303,7 @@ export function useDeleteAddress() {
   return useMutation({
     mutationFn: userApi.deleteAddress,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.addresses() });
-      queryClient.invalidateQueries({ queryKey: userKeys.profile() });
+      invalidateAddressAndProfile(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Delete address failed" });
@@ -302,7 +321,7 @@ export function useSetDefaultAddress() {
     mutationFn: userApi.setDefaultAddress,
     onSuccess: (data) => {
       queryClient.setQueryData(userKeys.addresses(), data);
-      queryClient.invalidateQueries({ queryKey: userKeys.profile() });
+      invalidateProfile(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Set default address failed" });
@@ -321,7 +340,7 @@ export function useCreateUser() {
   return useMutation({
     mutationFn: userApi.createUser,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      invalidateUsers(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Create user failed" });
@@ -338,7 +357,7 @@ export function useUpdateUser() {
   return useMutation({
     mutationFn: userApi.updateUser,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      invalidateUsers(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Update user failed" });
@@ -355,7 +374,7 @@ export function useDeleteUser() {
   return useMutation({
     mutationFn: userApi.deleteUser,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      invalidateUsers(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Delete user failed" });

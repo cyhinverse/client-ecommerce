@@ -18,8 +18,9 @@ import {
   useCreateOrder,
   useCreatePaymentUrl,
   useApplyVoucher,
+  useCart,
+  useClearCart,
 } from "@/hooks/queries";
-import { useClearCart } from "@/hooks/queries/useCart";
 import { formatCurrency } from "@/utils/format";
 import { toast } from "sonner";
 import { ApplyVoucherResult } from "@/types/voucher";
@@ -37,15 +38,13 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { groupCartItemsByShop } from "@/types/cart";
+import { getSafeErrorMessage } from "@/api";
 
 export default function CheckoutPage() {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "vnpay" | "momo">(
     "cod"
   );
   const [promoCode, setPromoCode] = useState<string>("");
-  const [shopVoucherCode, setShopVoucherCode] = useState<string>("");
-  const [platformVoucherCode, setPlatformVoucherCode] = useState<string>("");
   const [appliedShopVoucher, setAppliedShopVoucher] =
     useState<ApplyVoucherResult | null>(null);
   const [appliedPlatformVoucher, setAppliedPlatformVoucher] =
@@ -62,22 +61,22 @@ export default function CheckoutPage() {
   });
 
   const { data: userData } = useAppSelector((state) => state.auth);
-  const {
-    data: cartData,
-    checkoutTotal,
-    selectedItems,
-  } = useAppSelector((state) => state.cart);
+  const { checkoutTotal, selectedItems } = useAppSelector((state) => state.cart);
   const router = useRouter();
+  const cartQuery = useCart();
+  const cartData = cartQuery.data;
 
   const createOrderMutation = useCreateOrder();
   const clearCartMutation = useClearCart();
   const paymentMutation = useCreatePaymentUrl();
   const applyVoucherMutation = useApplyVoucher();
   const voucherLoading = applyVoucherMutation.isPending;
+  const isSubmitting = createOrderMutation.isPending || paymentMutation.isPending;
 
+  const hasSelectedItems = selectedItems.length > 0;
   const cartItems = useMemo(() => {
-    return selectedItems || cartData?.items || [];
-  }, [selectedItems, cartData]);
+    return hasSelectedItems ? selectedItems : (cartData?.items ?? []);
+  }, [hasSelectedItems, selectedItems, cartData]);
 
   // Group items by shop
   const itemsByShop = useMemo(() => {
@@ -93,6 +92,10 @@ export default function CheckoutPage() {
   const cartItemIds = cartItems.map((item) => item._id);
 
   useEffect(() => {
+    if (cartQuery.isLoading) {
+      return;
+    }
+
     if (!cartItems || cartItems.length === 0) {
       router.push("/cart");
       return;
@@ -111,7 +114,7 @@ export default function CheckoutPage() {
         ward: defaultAddress.ward || "",
       }));
     }
-  }, [userData, cartItems, router, formData.email]);
+  }, [userData, cartItems, cartQuery.isLoading, router, formData.email]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -124,14 +127,12 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (isLoading) return;
+    if (isSubmitting) return;
 
     if (!formData.city) {
       toast.error("Vui lòng chọn Tỉnh/Thành phố");
       return;
     }
-
-    setIsLoading(true);
 
     try {
       const orderData = {
@@ -181,11 +182,8 @@ export default function CheckoutPage() {
           router.push(`/`);
         }
       }
-    } catch (error) {
-      const errorMessage = (error as Error).message || "Đã xảy ra lỗi";
-      toast.error(errorMessage);
-    } finally {
-      setIsLoading(false);
+    } catch (error: unknown) {
+      toast.error(getSafeErrorMessage(error, "Đã xảy ra lỗi"));
     }
   };
 
@@ -209,10 +207,8 @@ export default function CheckoutPage() {
         setAppliedPlatformVoucher(result);
       }
       toast.success("Áp dụng mã giảm giá thành công!");
-    } catch (err) {
-      const errorMessage =
-        (err as Error).message || "Không thể áp dụng mã giảm giá";
-      toast.error(errorMessage);
+    } catch (error: unknown) {
+      toast.error(getSafeErrorMessage(error, "Không thể áp dụng mã giảm giá"));
     }
   };
 
@@ -220,8 +216,6 @@ export default function CheckoutPage() {
     setAppliedShopVoucher(null);
     setAppliedPlatformVoucher(null);
     setPromoCode("");
-    setShopVoucherCode("");
-    setPlatformVoucherCode("");
     toast.success("Đã xóa mã giảm giá");
   };
 
@@ -725,9 +719,9 @@ export default function CheckoutPage() {
                   type="submit"
                   form="checkout-form"
                   className="w-full h-11 mt-4 bg-[#E53935] hover:bg-[#D32F2F] rounded text-base font-medium"
-                  disabled={isLoading}
+                  disabled={isSubmitting}
                 >
-                  {isLoading ? "Đang xử lý..." : "Đặt hàng"}
+                  {isSubmitting ? "Đang xử lý..." : "Đặt hàng"}
                 </Button>
 
                 <p className="text-center text-xs text-gray-400 mt-3">

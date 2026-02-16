@@ -13,16 +13,6 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
-
-  // Tests are allowed to be more pragmatic (mocks, fixtures).
-  {
-    files: ["src/__tests__/**/*.{ts,tsx}", "**/*.test.{ts,tsx}"],
-    rules: {
-      "@typescript-eslint/no-explicit-any": "off",
-      "@next/next/no-img-element": "off",
-    },
-  },
-
 ]);
 
 export default eslintConfig;

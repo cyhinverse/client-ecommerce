@@ -2,7 +2,12 @@
  * Order React Query Hooks
  * Replaces orderAction.ts async thunks with React Query
  */
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  QueryClient,
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import instance from "@/api/api";
 import { extractApiData } from "@/api";
 import { errorHandler } from "@/services/errorHandler";
@@ -44,6 +49,15 @@ export interface CreateOrderData {
 export interface OrderListResponse {
   orders: Order[];
   pagination: PaginationData | null;
+}
+
+function invalidateOrderLists(queryClient: QueryClient) {
+  return queryClient.invalidateQueries({ queryKey: orderKeys.lists() });
+}
+
+function invalidateOrdersAndCart(queryClient: QueryClient) {
+  invalidateOrderLists(queryClient);
+  queryClient.invalidateQueries({ queryKey: cartKeys.all });
 }
 
 const orderApi = {
@@ -241,9 +255,7 @@ export function useCreateOrder() {
   return useMutation({
     mutationFn: orderApi.create,
     onSuccess: () => {
-      // Invalidate orders and cart
-      queryClient.invalidateQueries({ queryKey: orderKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: cartKeys.all });
+      invalidateOrdersAndCart(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Create order failed" });
@@ -260,9 +272,8 @@ export function useCancelOrder() {
   return useMutation({
     mutationFn: orderApi.cancel,
     onSuccess: (data, orderId) => {
-      // Update order in cache
       queryClient.setQueryData(orderKeys.detail(orderId), data);
-      queryClient.invalidateQueries({ queryKey: orderKeys.lists() });
+      invalidateOrderLists(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Cancel order failed" });
@@ -280,7 +291,7 @@ export function useUpdateOrderStatus() {
     mutationFn: orderApi.updateStatus,
     onSuccess: (data, variables) => {
       queryClient.setQueryData(orderKeys.detail(variables.orderId), data);
-      queryClient.invalidateQueries({ queryKey: orderKeys.lists() });
+      invalidateOrderLists(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Update order status failed" });
@@ -298,7 +309,7 @@ export function useConfirmDelivery() {
     mutationFn: orderApi.confirmDelivery,
     onSuccess: (data, orderId) => {
       queryClient.setQueryData(orderKeys.detail(orderId), data);
-      queryClient.invalidateQueries({ queryKey: orderKeys.lists() });
+      invalidateOrderLists(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Confirm delivery failed" });

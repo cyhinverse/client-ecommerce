@@ -263,7 +263,6 @@ export function UpdateModelDiscount({
             </Button>
           </DialogFooter>
         </form>
-        </form>
       </DialogContent>
     </Dialog>
   );

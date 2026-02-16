@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Send, Bot, RotateCcw, Search } from "lucide-react";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 import ReactMarkdown from "react-markdown";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { setChatOpen } from "@/features/chat/chatSlice";
@@ -136,7 +136,7 @@ export default function ChatWidget() {
                     ]);
                     setStreamingContent("");
                   } else if (data.type === "error") {
-                    throw new Error(data.message);
+                    throw new Error("Chatbot stream error");
                   }
                 } catch (e) {
                   console.error("Invalid JSON:", e);

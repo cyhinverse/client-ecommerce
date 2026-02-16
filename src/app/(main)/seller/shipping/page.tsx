@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Truck, Plus, Edit2, Trash2, Save, X, Package } from "lucide-react";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { Button } from "@/components/ui/button";
@@ -14,23 +14,22 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import {
-  getMyShippingTemplates,
-  createShippingTemplate,
-  updateShippingTemplate,
-  deleteShippingTemplate,
-} from "@/features/shipping/shippingAction";
-import {
-  ShippingTemplate,
-  ShippingRule,
-  CreateShippingTemplatePayload,
-} from "@/types/shipping";
+  useMyShippingTemplates,
+  useCreateShippingTemplate,
+  useUpdateShippingTemplate,
+  useDeleteShippingTemplate,
+} from "@/hooks/queries";
+import { ShippingTemplate, ShippingRule, CreateShippingTemplatePayload } from "@/types/shipping";
 
 export default function SellerShippingPage() {
-  const dispatch = useAppDispatch();
-  const { templates, isLoading, isCreating, isUpdating, isDeleting } =
-    useAppSelector((state) => state.shipping);
+  const { data: templates = [], isLoading } = useMyShippingTemplates();
+  const createTemplateMutation = useCreateShippingTemplate();
+  const updateTemplateMutation = useUpdateShippingTemplate();
+  const deleteTemplateMutation = useDeleteShippingTemplate();
+  const isCreating = createTemplateMutation.isPending;
+  const isUpdating = updateTemplateMutation.isPending;
+  const isDeleting = deleteTemplateMutation.isPending;
 
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -39,10 +38,6 @@ export default function SellerShippingPage() {
     rules: [{ name: "Phí cố định", type: "fixed", baseFee: 30000 }],
     isDefault: false,
   });
-
-  useEffect(() => {
-    dispatch(getMyShippingTemplates());
-  }, [dispatch]);
 
   const handleAddRule = () => {
     setFormData((prev) => ({
@@ -84,12 +79,13 @@ export default function SellerShippingPage() {
 
     try {
       if (editingId) {
-        await dispatch(
-          updateShippingTemplate({ templateId: editingId, data: formData }),
-        ).unwrap();
+        await updateTemplateMutation.mutateAsync({
+          templateId: editingId,
+          data: formData,
+        });
         toast.success("Cập nhật template thành công!");
       } else {
-        await dispatch(createShippingTemplate(formData)).unwrap();
+        await createTemplateMutation.mutateAsync(formData);
         toast.success("Tạo template thành công!");
       }
       resetForm();
@@ -117,7 +113,7 @@ export default function SellerShippingPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Bạn có chắc muốn xóa template này?")) return;
     try {
-      await dispatch(deleteShippingTemplate(id)).unwrap();
+      await deleteTemplateMutation.mutateAsync(id);
       toast.success("Xóa template thành công!");
     } catch {
       toast.error("Xóa template thất bại");

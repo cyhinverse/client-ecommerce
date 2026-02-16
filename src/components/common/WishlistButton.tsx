@@ -1,7 +1,7 @@
 "use client";
 import { memo, useCallback } from "react";
 import { Heart } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 import { useWishlistManager } from "@/hooks/queries/useWishlist";
 import { useAppSelector } from "@/hooks/hooks";
 

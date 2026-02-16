@@ -25,6 +25,7 @@ import {
   Flame,
   TrendingUp,
 } from "lucide-react";
+import { getSafeErrorMessage } from "@/api";
 
 // Icon mapping for categories
 const categoryIcons: Record<string, React.ReactNode> = {
@@ -65,7 +66,7 @@ export default function CategoriesPage() {
 
   useEffect(() => {
     if (error) {
-      toast.error(String(error));
+      toast.error(getSafeErrorMessage(error, "Không thể tải danh mục"));
     }
   }, [error]);
 

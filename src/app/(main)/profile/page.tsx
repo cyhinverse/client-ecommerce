@@ -1,8 +1,8 @@
 "use client";
 import { useProfile } from "@/hooks/queries/useProfile";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { useAppSelector } from "@/hooks/hooks";
 import { useState } from "react";
-import { logout } from "@/features/auth/authAction";
+import { useLogout } from "@/hooks/queries";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -27,14 +27,14 @@ import {
   Star,
   Store,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function ProfilePage() {
-  const dispatch = useAppDispatch();
   const searchParams = useSearchParams();
-  const { loading, isAuthenticated } = useAppSelector((state) => state.auth);
+  const { loading: authLoading, isAuthenticated } = useAppSelector((state) => state.auth);
   const { data: currentUser, isLoading } = useProfile();
+  const logoutMutation = useLogout();
 
   const router = useRouter();
   const tabParam = searchParams.get("tab");
@@ -50,10 +50,14 @@ export default function ProfilePage() {
     router.push(`/profile?tab=${value}`);
   };
 
-  const handleLogout = () => {
-    dispatch(logout());
-    toast.success("Đăng xuất thành công");
-    router.push("/");
+  const handleLogout = async () => {
+    try {
+      await logoutMutation.mutateAsync();
+      toast.success("Đăng xuất thành công");
+      router.push("/");
+    } catch {
+      toast.error("Không thể đăng xuất");
+    }
   };
 
   const tabs = [
@@ -96,7 +100,7 @@ export default function ProfilePage() {
     { label: "Xu", value: "1,500", icon: Gift },
   ];
 
-  if (!isAuthenticated && !loading) {
+  if (!isAuthenticated && !authLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6 text-center bg-background -mt-4 -mx-4 px-4 py-20">
         <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center">
@@ -122,14 +126,14 @@ export default function ProfilePage() {
 
   return (
     <div className="w-full min-h-screen bg-background px-4 py-6">
-      {(loading || isLoading) && (
+      {(authLoading || isLoading || logoutMutation.isPending) && (
         <SpinnerLoading className="fixed inset-0 z-50 m-auto" />
       )}
 
       <div
         className={cn(
           "max-w-[1200px] mx-auto transition-opacity duration-200",
-          (loading || isLoading) && "opacity-50 pointer-events-none",
+          (authLoading || isLoading || logoutMutation.isPending) && "opacity-50 pointer-events-none",
         )}
       >
         <div className="flex flex-col md:flex-row gap-6">
@@ -216,8 +220,10 @@ export default function ProfilePage() {
 
               {/* Logout Button */}
               <div className="border-t border-border">
-                <Button
-                  onClick={handleLogout}
+                  <Button
+                  onClick={() => {
+                    void handleLogout();
+                  }}
                   variant="ghost"
                   className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-none px-4 py-3 h-auto"
                 >

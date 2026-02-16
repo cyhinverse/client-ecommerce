@@ -8,8 +8,9 @@ import {
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { ProductCard } from "@/components/product/ProductCard";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 import { Loader2 } from "lucide-react";
+import { getSafeErrorMessage } from "@/api";
 
 interface HomeProductListProps {
   selectedCategorySlug: string | null;
@@ -95,7 +96,7 @@ export default function HomeProductList({
   if (error) {
     return (
       <div className="text-center py-20 text-red-500">
-        Đã xảy ra lỗi: {(error as Error).message}
+        Đã xảy ra lỗi: {getSafeErrorMessage(error, "Không thể tải sản phẩm")}
       </div>
     );
   }
@@ -126,7 +127,7 @@ export default function HomeProductList({
           {products && products.length > 0
             ? products.map((p, index) => (
                 <motion.div
-                  key={`${p._id}-${index}`}
+                  key={p._id}
                   variants={item}
                   initial="hidden"
                   animate="show"

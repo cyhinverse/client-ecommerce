@@ -20,6 +20,7 @@ import { EditOrderModal } from "@/components/admin/orders/UpdateOrderModel";
 import { ViewOrderModal } from "@/components/admin/orders/ViewOrderModel";
 import { Button } from "@/components/ui/button";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
+import { getSafeErrorMessage } from "@/api";
 
 export default function OrdersAdminPage() {
   const { filters, updateFilter, updateFilters, resetFilters } =
@@ -241,7 +242,7 @@ export default function OrdersAdminPage() {
             <div className="text-lg font-semibold mb-2">
               Error loading orders
             </div>
-            <div>{String(error)}</div>
+            <div>{getSafeErrorMessage(error, "Không thể tải danh sách đơn hàng")}</div>
             <Button
               onClick={() => refetch()}
               className="mt-4 rounded-xl bg-[#E53935] hover:bg-[#D32F2F] text-white"

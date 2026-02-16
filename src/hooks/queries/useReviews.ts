@@ -2,9 +2,14 @@
  * Review React Query Hooks
  * Replaces reviewAction.ts async thunks with React Query
  */
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  QueryClient,
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/api";
+import { extractApiData } from "@/api";
 import { errorHandler } from "@/services/errorHandler";
 import { STALE_TIME } from "@/constants/cache";
 import { reviewKeys, productKeys } from "@/lib/queryKeys";
@@ -36,6 +41,29 @@ export interface Review {
   updatedAt: string;
 }
 
+export interface AdminReview {
+  _id: string;
+  user?: { _id: string; username: string; email?: string };
+  product?:
+    | string
+    | { _id: string; name: string; slug?: string; images?: string[] };
+  rating: number;
+  comment?: string;
+  createdAt: string;
+}
+
+export interface AdminReviewListParams {
+  page?: number;
+  limit?: number;
+  rating?: number;
+  search?: string;
+}
+
+export interface AdminReviewListResponse {
+  data: AdminReview[];
+  pagination: PaginationData | null;
+}
+
 export interface ReviewListParams {
   page?: number;
   limit?: number;
@@ -62,6 +90,28 @@ export interface UpdateReviewData {
   rating?: number;
   comment?: string;
   images?: string[];
+}
+
+function invalidateReviewProduct(
+  queryClient: QueryClient,
+  productId: string,
+) {
+  return queryClient.invalidateQueries({
+    queryKey: reviewKeys.product(productId),
+  });
+}
+
+function invalidateUserReviews(queryClient: QueryClient) {
+  return queryClient.invalidateQueries({ queryKey: reviewKeys.user() });
+}
+
+function invalidateProductDetailRating(
+  queryClient: QueryClient,
+  productId: string,
+) {
+  return queryClient.invalidateQueries({
+    queryKey: productKeys.detailById(productId),
+  });
 }
 
 // ============ API Functions ============
@@ -115,6 +165,17 @@ const reviewApi = {
 
   getUserReviews: async (): Promise<Review[]> => {
     const response = await instance.get("/reviews/user/me");
+    return extractApiData(response);
+  },
+
+  // Admin APIs
+  getAdminReviews: async (
+    params: AdminReviewListParams = {},
+  ): Promise<AdminReviewListResponse> => {
+    const { page = 1, limit = 10, rating, search } = params;
+    const response = await instance.get("/reviews", {
+      params: { page, limit, rating, search },
+    });
     return extractApiData(response);
   },
 
@@ -194,6 +255,17 @@ export function useUserReviews() {
 }
 
 /**
+ * Get reviews for admin moderation
+ */
+export function useAdminReviews(params?: AdminReviewListParams) {
+  return useQuery({
+    queryKey: reviewKeys.admin(params),
+    queryFn: () => reviewApi.getAdminReviews(params),
+    staleTime: STALE_TIME.SHORT,
+  });
+}
+
+/**
  * Get reviews for seller's own shop
  */
 export function useMyShopReviews(params?: ReviewListParams) {
@@ -233,16 +305,9 @@ export function useCreateReview() {
   return useMutation({
     mutationFn: reviewApi.create,
     onSuccess: (_, variables) => {
-      // Invalidate product reviews
-      queryClient.invalidateQueries({
-        queryKey: reviewKeys.product(variables.productId),
-      });
-      // Invalidate product detail to update rating
-      queryClient.invalidateQueries({
-        queryKey: productKeys.detailById(variables.productId),
-      });
-      // Invalidate user reviews
-      queryClient.invalidateQueries({ queryKey: reviewKeys.user() });
+      invalidateReviewProduct(queryClient, variables.productId);
+      invalidateProductDetailRating(queryClient, variables.productId);
+      invalidateUserReviews(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Create review failed" });
@@ -259,10 +324,8 @@ export function useUpdateReview(productId: string) {
   return useMutation({
     mutationFn: reviewApi.update,
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: reviewKeys.product(productId),
-      });
-      queryClient.invalidateQueries({ queryKey: reviewKeys.user() });
+      invalidateReviewProduct(queryClient, productId);
+      invalidateUserReviews(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Update review failed" });
@@ -279,16 +342,29 @@ export function useDeleteReview(productId: string) {
   return useMutation({
     mutationFn: reviewApi.delete,
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: reviewKeys.product(productId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: productKeys.detailById(productId),
-      });
-      queryClient.invalidateQueries({ queryKey: reviewKeys.user() });
+      invalidateReviewProduct(queryClient, productId);
+      invalidateProductDetailRating(queryClient, productId);
+      invalidateUserReviews(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Delete review failed" });
+    },
+  });
+}
+
+/**
+ * Delete review mutation for admin moderation
+ */
+export function useDeleteAdminReview() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: reviewApi.delete,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: reviewKeys.admin() });
+    },
+    onError: (error) => {
+      errorHandler.log(error, { context: "Delete admin review failed" });
     },
   });
 }

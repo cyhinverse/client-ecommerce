@@ -4,7 +4,7 @@
  */
 import { useMutation, useQuery } from "@tanstack/react-query";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/api";
+import { extractApiData } from "@/api";
 import { errorHandler } from "@/services/errorHandler";
 import { paymentKeys } from "@/lib/queryKeys";
 

@@ -4,10 +4,16 @@
  */
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
+import {
+  QueryClient,
+  useQuery,
+  useMutation,
+  useQueryClient,
+  useInfiniteQuery,
+} from "@tanstack/react-query";
 import { toast } from "sonner";
 import instance from "@/api/api";
-import { extractApiData } from "@/api";
+import { extractApiData, getSafeErrorMessage } from "@/api";
 import { errorHandler } from "@/services/errorHandler";
 import { STALE_TIME } from "@/constants/cache";
 import { productKeys } from "@/lib/queryKeys";
@@ -58,44 +64,83 @@ interface ServerProductListResponse {
   };
 }
 
+type QueryParamValue = string | number | boolean;
+
+function hasValue<T>(value: T | undefined | null): value is T {
+  return value !== undefined && value !== null;
+}
+
+function normalizeProductListResponse(
+  serverData: ServerProductListResponse,
+): ProductListResponse {
+  const pagination = serverData.pagination;
+
+  return {
+    products: serverData.data || serverData.products || [],
+    pagination: {
+      page: pagination.currentPage || pagination.page || 1,
+      limit: pagination.pageSize || pagination.limit || 10,
+      total: pagination.totalItems || pagination.total || 0,
+      totalPages: pagination.totalPages || 1,
+    },
+  };
+}
+
+function buildProductQueryParams(
+  params: ProductListParams,
+): Record<string, QueryParamValue> {
+  const queryParams: Record<string, QueryParamValue> = {};
+
+  if (hasValue(params.page)) queryParams.page = params.page;
+  if (hasValue(params.limit)) queryParams.limit = params.limit;
+  if (params.sort) queryParams.sort = params.sort;
+  if (params.category) queryParams.category = params.category;
+  if (params.brand) queryParams.brand = params.brand;
+  if (hasValue(params.minPrice)) queryParams.minPrice = params.minPrice;
+  if (hasValue(params.maxPrice)) queryParams.maxPrice = params.maxPrice;
+  if (params.tags?.length) queryParams.tags = params.tags.join(",");
+  if (params.search?.trim()) queryParams.search = params.search.trim();
+  if (hasValue(params.isActive)) queryParams.isActive = params.isActive;
+  if (params.rating) queryParams.rating = params.rating;
+  if (params.colors) queryParams.colors = params.colors;
+  if (params.sizes) queryParams.sizes = params.sizes;
+  if (params.shop) queryParams.shop = params.shop;
+  if (params.shopCategory) queryParams.shopCategory = params.shopCategory;
+
+  return queryParams;
+}
+
+function getNextPageParam(lastPage: ProductListResponse) {
+  const { page, totalPages } = lastPage.pagination;
+  return page < totalPages ? page + 1 : undefined;
+}
+
+function invalidateProductLists(queryClient: QueryClient) {
+  return queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+}
+
+function invalidateProductDetailById(
+  queryClient: QueryClient,
+  productId: string,
+) {
+  return queryClient.invalidateQueries({
+    queryKey: productKeys.detailById(productId),
+  });
+}
+
+function syncProductDetailBySlug(queryClient: QueryClient, product: Product) {
+  if (product.slug) {
+    queryClient.setQueryData(productKeys.detail(product.slug), product);
+  }
+}
+
 const productApi = {
   getAll: async (params: ProductListParams): Promise<ProductListResponse> => {
-    const queryParams: Record<string, string | number | boolean> = {};
-
-    // Only add params that have values
-    if (params.page) queryParams.page = params.page;
-    if (params.limit) queryParams.limit = params.limit;
-    if (params.sort) queryParams.sort = params.sort;
-    if (params.category) queryParams.category = params.category;
-    if (params.brand) queryParams.brand = params.brand;
-    if (params.minPrice) queryParams.minPrice = params.minPrice;
-    if (params.maxPrice) queryParams.maxPrice = params.maxPrice;
-    if (params.tags?.length) queryParams.tags = params.tags.join(",");
-    if (params.search) queryParams.search = params.search;
-    if (params.isActive !== undefined) queryParams.isActive = params.isActive;
-    if (params.rating) queryParams.rating = params.rating;
-    if (params.colors) queryParams.colors = params.colors;
-    if (params.sizes) queryParams.sizes = params.sizes;
-    if (params.shop) queryParams.shop = params.shop;
-    if (params.shopCategory) queryParams.shopCategory = params.shopCategory;
-
-    const response = await instance.get("/products", { params: queryParams });
+    const response = await instance.get("/products", {
+      params: buildProductQueryParams(params),
+    });
     const serverData = extractApiData<ServerProductListResponse>(response);
-
-    // Normalize server response to client interface
-    // Server returns { data: [...], pagination: {...} } but client expects { products: [...], pagination: {...} }
-    return {
-      products: serverData.data || serverData.products || [],
-      pagination: {
-        page:
-          serverData.pagination.currentPage || serverData.pagination.page || 1,
-        limit:
-          serverData.pagination.pageSize || serverData.pagination.limit || 10,
-        total:
-          serverData.pagination.totalItems || serverData.pagination.total || 0,
-        totalPages: serverData.pagination.totalPages || 1,
-      },
-    };
+    return normalizeProductListResponse(serverData);
   },
 
   getBySlug: async (slug: string): Promise<Product> => {
@@ -125,8 +170,13 @@ const productApi = {
 
   getByCategory: async (categorySlug: string): Promise<Product[]> => {
     const response = await instance.get(`/products/category/${categorySlug}`);
-    const result = extractApiData<{ data: Product[] }>(response);
-    return result.data || [];
+    const result = extractApiData<{ data?: Product[]; products?: Product[] } | Product[]>(
+      response,
+    );
+    if (Array.isArray(result)) {
+      return result;
+    }
+    return result.data || result.products || [];
   },
 
   getByCategoryPaginated: async (
@@ -137,17 +187,8 @@ const productApi = {
     const response = await instance.get(`/products/category/${categorySlug}`, {
       params: { page, limit },
     });
-    const serverData = extractApiData<ServerProductListResponse & { data?: Product[] }>(response);
-
-    return {
-      products: serverData.data || [],
-      pagination: {
-        page: serverData.pagination?.currentPage || serverData.pagination?.page || 1,
-        limit: serverData.pagination?.pageSize || serverData.pagination?.limit || 20,
-        total: serverData.pagination?.totalItems || serverData.pagination?.total || 0,
-        totalPages: serverData.pagination?.totalPages || 1,
-      },
-    };
+    const serverData = extractApiData<ServerProductListResponse>(response);
+    return normalizeProductListResponse(serverData);
   },
 
   getRelated: async (productId: string): Promise<Product[]> => {
@@ -260,14 +301,10 @@ export function useInfiniteProducts(
 ) {
   return useInfiniteQuery({
     queryKey: productKeys.infinite(params),
-    queryFn: async ({ pageParam = 1 }) => {
-      return productApi.getAll({ ...params, page: pageParam });
-    },
+    queryFn: ({ pageParam = 1 }) =>
+      productApi.getAll({ ...params, page: pageParam }),
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
-      const { page, totalPages } = lastPage.pagination;
-      return page < totalPages ? page + 1 : undefined;
-    },
+    getNextPageParam,
     staleTime: STALE_TIME.LONG,
   });
 }
@@ -356,14 +393,10 @@ export function useInfiniteProductsByCategory(
 
   return useInfiniteQuery({
     queryKey: productKeys.infiniteByCategory(categorySlug),
-    queryFn: async ({ pageParam = 1 }) => {
-      return productApi.getByCategoryPaginated(categorySlug, pageParam, limit);
-    },
+    queryFn: ({ pageParam = 1 }) =>
+      productApi.getByCategoryPaginated(categorySlug, pageParam, limit),
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
-      const { page, totalPages } = lastPage.pagination;
-      return page < totalPages ? page + 1 : undefined;
-    },
+    getNextPageParam,
     enabled: options?.enabled ?? !!categorySlug,
     staleTime: STALE_TIME.LONG,
   });
@@ -409,14 +442,10 @@ export function useInfiniteShopProducts(
 
   return useInfiniteQuery({
     queryKey: productKeys.infiniteShopProducts(shopId, params),
-    queryFn: async ({ pageParam = 1 }) => {
-      return productApi.getAll({ ...params, shop: shopId, page: pageParam, limit });
-    },
+    queryFn: ({ pageParam = 1 }) =>
+      productApi.getAll({ ...params, shop: shopId, page: pageParam, limit }),
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
-      const { page, totalPages } = lastPage.pagination;
-      return page < totalPages ? page + 1 : undefined;
-    },
+    getNextPageParam,
     enabled: !!shopId,
     staleTime: STALE_TIME.LONG,
   });
@@ -426,10 +455,12 @@ export function useInfiniteShopProducts(
  * Search products
  */
 export function useProductSearch(keyword: string, limit?: number) {
+  const normalizedKeyword = keyword.trim();
+
   return useQuery({
-    queryKey: productKeys.search(keyword, limit),
-    queryFn: () => productApi.search({ keyword, limit }),
-    enabled: keyword.length >= 2,
+    queryKey: productKeys.search(normalizedKeyword, limit),
+    queryFn: () => productApi.search({ keyword: normalizedKeyword, limit }),
+    enabled: normalizedKeyword.length >= 2,
     staleTime: STALE_TIME.MEDIUM,
   });
 }
@@ -443,8 +474,7 @@ export function useCreateProduct() {
   return useMutation({
     mutationFn: productApi.create,
     onSuccess: () => {
-      // Invalidate product lists to refetch
-      queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      invalidateProductLists(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Create product failed" });
@@ -461,16 +491,9 @@ export function useUpdateProduct() {
   return useMutation({
     mutationFn: productApi.update,
     onSuccess: (data, variables) => {
-      // Invalidate specific product and lists
-      queryClient.invalidateQueries({
-        queryKey: productKeys.detailById(variables.productId),
-      });
-      queryClient.invalidateQueries({ queryKey: productKeys.lists() });
-
-      // Update cache directly if we have slug
-      if (data.slug) {
-        queryClient.setQueryData(productKeys.detail(data.slug), data);
-      }
+      invalidateProductDetailById(queryClient, variables.productId);
+      invalidateProductLists(queryClient);
+      syncProductDetailBySlug(queryClient, data);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Update product failed" });
@@ -487,7 +510,7 @@ export function useDeleteProduct() {
   return useMutation({
     mutationFn: productApi.delete,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      invalidateProductLists(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Delete product failed" });
@@ -504,14 +527,9 @@ export function useUpdateSellerProduct() {
   return useMutation({
     mutationFn: productApi.updateSeller,
     onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: productKeys.detailById(variables.productId),
-      });
-      queryClient.invalidateQueries({ queryKey: productKeys.lists() });
-
-      if (data.slug) {
-        queryClient.setQueryData(productKeys.detail(data.slug), data);
-      }
+      invalidateProductDetailById(queryClient, variables.productId);
+      invalidateProductLists(queryClient);
+      syncProductDetailBySlug(queryClient, data);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Seller update product failed" });
@@ -528,7 +546,7 @@ export function useDeleteSellerProduct() {
   return useMutation({
     mutationFn: productApi.deleteSeller,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+      invalidateProductLists(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Seller delete product failed" });
@@ -544,10 +562,8 @@ export function useUpdateProductModel() {
 
   return useMutation({
     mutationFn: productApi.updateModel,
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: productKeys.detailById(variables.productId),
-      });
+    onSuccess: (_, variables) => {
+      invalidateProductDetailById(queryClient, variables.productId);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Update model failed" });
@@ -564,9 +580,7 @@ export function useDeleteProductModel() {
   return useMutation({
     mutationFn: productApi.deleteModel,
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: productKeys.detailById(variables.productId),
-      });
+      invalidateProductDetailById(queryClient, variables.productId);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Delete model failed" });
@@ -628,7 +642,9 @@ export function useProductDetail({
   const addToCartMutation = useAddToCart();
 
   // Convert error to string
-  const error = queryError ? (queryError as Error).message : null;
+  const safeErrorMessage = queryError
+    ? getSafeErrorMessage(queryError, "Không thể tải thông tin sản phẩm")
+    : null;
 
   // Local state
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
@@ -645,10 +661,10 @@ export function useProductDetail({
 
   // Show error toast
   useEffect(() => {
-    if (error) {
-      toast.error(error);
+    if (safeErrorMessage) {
+      toast.error(safeErrorMessage);
     }
-  }, [error]);
+  }, [safeErrorMessage]);
 
   // Get selected variant
   const selectedVariant = useMemo(() => {
@@ -808,7 +824,7 @@ export function useProductDetail({
     quantity,
     selectedImageIndex,
     isLoading,
-    error,
+    error: safeErrorMessage,
     displayImages,
     activePrice,
     shop,

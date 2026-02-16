@@ -16,6 +16,7 @@ import { ProductsTable } from "@/components/admin/products/ProductTable";
 import { PaginationControls } from "@/components/common/Pagination";
 import { UpdateModelProduct } from "@/components/product/forms/UpdateModelProduct";
 import { ViewModelProduct } from "@/components/product/forms/ViewModelProduct";
+import { getSafeErrorMessage } from "@/api";
 
 export default function AdminProductsPage() {
   const { data: shopsData } = useAllShops();
@@ -113,25 +114,19 @@ export default function AdminProductsPage() {
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [isUpdating, setIsUpdating] = useState(false);
+  const isUpdating = updateProductMutation.isPending;
 
   const handleUpdateProduct = async (id: string, productData: FormData) => {
-    setIsUpdating(true);
     try {
       await updateProductMutation.mutateAsync({
         productId: id,
         formData: productData,
       });
-      fetchProducts();
       setUpdateModalOpen(false);
       setSelectedProduct(null);
       toast.success("Cập nhật sản phẩm thành công");
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Không thể cập nhật sản phẩm";
-      toast.error(errorMessage);
-    } finally {
-      setIsUpdating(false);
+      toast.error(getSafeErrorMessage(error, "Không thể cập nhật sản phẩm"));
     }
   };
 
@@ -139,12 +134,9 @@ export default function AdminProductsPage() {
     if (!confirm("Bạn có chắc muốn xóa sản phẩm này?")) return;
     try {
       await deleteProductMutation.mutateAsync(product._id);
-      fetchProducts();
       toast.success("Xóa sản phẩm thành công");
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Không thể xóa sản phẩm";
-      toast.error(errorMessage);
+      toast.error(getSafeErrorMessage(error, "Không thể xóa sản phẩm"));
     }
   };
 

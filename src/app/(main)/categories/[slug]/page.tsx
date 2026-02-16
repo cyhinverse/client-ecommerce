@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ProductCard } from "@/components/product/ProductCard";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 import {
   ChevronRight,
   ChevronLeft,
@@ -16,6 +16,7 @@ import {
   ChevronDown,
   Package,
 } from "lucide-react";
+import { getSafeErrorMessage } from "@/api";
 
 type SortType = "default" | "sales" | "price-asc" | "price-desc" | "newest";
 
@@ -36,7 +37,7 @@ export default function CategoryDetailPage() {
 
   useEffect(() => {
     if (error) {
-      toast.error(String(error));
+      toast.error(getSafeErrorMessage(error, "Không thể tải danh mục"));
     }
   }, [error]);
 

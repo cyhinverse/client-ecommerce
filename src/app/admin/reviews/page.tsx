@@ -1,8 +1,6 @@
 "use client";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import instance from "@/api/api";
-import { extractApiData } from "@/api";
+import { useAdminReviews, useDeleteAdminReview } from "@/hooks/queries";
 import { Star, Search, Trash2, ExternalLink } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,26 +11,8 @@ import { toast } from "sonner";
 import Image from "next/image";
 import Link from "next/link";
 import { format } from "date-fns";
-import type { PaginationData } from "@/types/common";
-
-type AdminReview = {
-  _id: string;
-  user?: { _id: string; username: string; email?: string };
-  product?:
-    | string
-    | { _id: string; name: string; slug?: string; images?: string[] };
-  rating: number;
-  comment?: string;
-  createdAt: string;
-};
-
-type AdminReviewsResponse = {
-  data: AdminReview[];
-  pagination: PaginationData | null;
-};
 
 export default function AdminReviewsPage() {
-  const queryClient = useQueryClient();
   const { filters, updateFilter, resetFilters } = useUrlFilters({
     defaultFilters: {
       page: 1,
@@ -43,38 +23,30 @@ export default function AdminReviewsPage() {
     basePath: "/admin/reviews",
   });
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["admin-reviews", filters],
-    queryFn: async () => {
-      const params: Record<string, string | number> = {
-        page: String(filters.page),
-        limit: String(filters.limit),
-      };
-      if (filters.rating !== "all") params.rating = String(filters.rating);
-      if (filters.search) params.search = String(filters.search);
+  const queryParams = {
+    page: Number(filters.page) || 1,
+    limit: Number(filters.limit) || 10,
+    rating: filters.rating !== "all" ? Number(filters.rating) : undefined,
+    search: filters.search ? String(filters.search) : undefined,
+  };
 
-      const res = await instance.get("/reviews", { params });
-      return extractApiData<AdminReviewsResponse>(res);
-    },
-  });
+  const { data, isLoading } = useAdminReviews(queryParams);
 
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => instance.delete(`/reviews/${id}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-reviews"] });
+  const deleteMutation = useDeleteAdminReview();
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Bạn có chắc chắn muốn xóa đánh giá này không?")) return;
+
+    try {
+      await deleteMutation.mutateAsync(id);
       toast.success("Đã xóa đánh giá thành công");
-    },
-    onError: () => toast.error("Không thể xóa đánh giá"),
-  });
+    } catch {
+      toast.error("Không thể xóa đánh giá");
+    }
+  };
 
   const reviews = data?.data || [];
   const pagination = data?.pagination;
-
-  const handleDelete = (id: string) => {
-    if (confirm("Bạn có chắc chắn muốn xóa đánh giá này không?")) {
-      deleteMutation.mutate(id);
-    }
-  };
 
   return (
     <div className="space-y-6 p-1">
@@ -199,7 +171,9 @@ export default function AdminReviewsPage() {
                           variant="ghost"
                           size="icon"
                           className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                          onClick={() => handleDelete(review._id)}
+                          onClick={() => {
+                            void handleDelete(review._id);
+                          }}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

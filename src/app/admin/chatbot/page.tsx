@@ -1,59 +1,36 @@
 "use client";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 
 import { PaginationControls } from "@/components/common/Pagination";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
-import instance from "@/api/api";
-import { extractApiData } from "@/api";
+import {
+  useAdminChatbotSessions,
+  useAdminChatbotHistory,
+  type ChatSession,
+  type ChatMessage,
+} from "@/hooks/queries";
 import { format } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
-
-interface ChatSession {
-  sessionId: string;
-  lastMessage: string;
-  messageCount: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface ChatMessage {
-  role: "user" | "assistant";
-  content: string;
-  timestamp: string;
-}
+import { cn } from "@/utils/cn";
 
 export default function AdminChatbotPage() {
   const { filters, updateFilter } = useUrlFilters({
     defaultFilters: { page: 1, limit: 10 },
     basePath: "/admin/chatbot",
   });
+  const page = Number(filters.page) || 1;
+  const limit = Number(filters.limit) || 10;
 
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
 
-  // Fetch sessions
-  const { data, isLoading } = useQuery({
-    queryKey: ["admin-chatbot-sessions", filters],
-    queryFn: async () => {
-      const res = await instance.get("/chatbot/admin/sessions", {
-        params: { page: filters.page, limit: filters.limit },
-      });
-      return extractApiData(res);
-    },
+  const { data, isLoading } = useAdminChatbotSessions({
+    page,
+    limit,
   });
 
-  // Fetch history for selected session
-  const { data: historyData, isLoading: historyLoading } = useQuery({
-    queryKey: ["admin-chatbot-history", selectedSession],
-    queryFn: async () => {
-      if (!selectedSession) return null;
-      const res = await instance.get(`/chatbot/history/${selectedSession}`);
-      return extractApiData(res);
-    },
-    enabled: !!selectedSession,
-  });
+  const { data: historyData, isLoading: historyLoading } =
+    useAdminChatbotHistory(selectedSession);
 
   const sessions = data?.data || [];
   const pagination = data?.pagination;

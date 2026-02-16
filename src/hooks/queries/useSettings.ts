@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-query";
 import instance from "@/api/api";
 import { extractApiData } from "@/api";
+import { errorHandler } from "@/services/errorHandler";
 import { STALE_TIME } from "@/constants/cache";
 import { settingsKeys } from "@/lib/queryKeys";
 import { Settings, UpdateSettingsPayload } from "@/types/settings";
@@ -51,6 +52,9 @@ export function useUpdateSettings() {
     mutationFn: settingsApi.updateSettings,
     onSuccess: (data) => {
       queryClient.setQueryData(settingsKeys.current(), data);
+    },
+    onError: (error) => {
+      errorHandler.log(error, { context: "Update settings failed" });
     },
   });
 }

@@ -8,7 +8,8 @@ import { useDeleteAddress, useProfile } from "@/hooks/queries/useProfile";
 import { toast } from "sonner";
 import { Address, AddressTabProps } from "@/types/address";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
+import { getSafeErrorMessage } from "@/api";
 
 export default function AddressTab({ user }: AddressTabProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -56,11 +57,9 @@ export default function AddressTab({ user }: AddressTabProps) {
       toast.success("Đã xóa địa chỉ thành công");
     } catch (error) {
       console.error("Error deleting address:", error);
-      const err = error as { response?: { data?: { message?: string } } };
-      const errorMessage =
-        err.response?.data?.message ||
-        "Không thể xóa địa chỉ. Vui lòng thử lại.";
-      toast.error(errorMessage);
+      toast.error(
+        getSafeErrorMessage(error, "Không thể xóa địa chỉ. Vui lòng thử lại."),
+      );
     } finally {
       setIsDeleting(null);
     }

@@ -5,7 +5,7 @@ import { Ticket, Store, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Voucher } from "@/types/voucher";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 
 interface VoucherCardProps {
   voucher: Voucher;

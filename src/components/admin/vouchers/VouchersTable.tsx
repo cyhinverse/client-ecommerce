@@ -40,7 +40,7 @@ import {
 import { Voucher } from "@/types/voucher";
 import { Shop } from "@/types/shop";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 import Image from "next/image";
 
 interface DiscountsTableProps {

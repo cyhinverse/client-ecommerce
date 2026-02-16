@@ -2,7 +2,7 @@
 import { Clock, Truck, CheckCircle, XCircle, RefreshCw, Package, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Order, OrderProduct } from "@/types/order";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 import Image from "next/image";
 
 interface OrderCardProps {

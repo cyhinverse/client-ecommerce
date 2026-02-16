@@ -9,14 +9,14 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
-import { useAppDispatch } from "@/hooks/hooks";
-import { resetPassword } from "@/features/auth/authAction";
+import { useResetPassword } from "@/hooks/queries";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
+import { getSafeErrorMessage } from "@/api";
 
 const resetPasswordSchema = z
   .object({
@@ -62,15 +62,15 @@ function PasswordRequirement({ met, text }: { met: boolean; text: string }) {
 }
 
 export default function ResetPasswordPage() {
-  const dispatch = useAppDispatch();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const resetPasswordMutation = useResetPassword();
 
   const emailFromUrl = (searchParams.get("email") ?? "").trim();
 
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const isLoading = resetPasswordMutation.isPending;
 
   const {
     register,
@@ -90,24 +90,17 @@ export default function ResetPasswordPage() {
   const newPassword = watch("newPassword");
 
   const onSubmit = async (data: ResetPasswordFormData) => {
-    setIsLoading(true);
     try {
-      await dispatch(
-        resetPassword({
-          email: data.email,
-          code: data.code,
-          newPassword: data.newPassword,
-        }),
-      ).unwrap();
+      await resetPasswordMutation.mutateAsync({
+        email: data.email,
+        code: data.code,
+        newPassword: data.newPassword,
+      });
 
       toast.success("Đặt lại mật khẩu thành công!");
       router.replace("/login");
-    } catch (error) {
-      toast.error(
-        (error as { message?: string })?.message || "Không thể đặt lại mật khẩu",
-      );
-    } finally {
-      setIsLoading(false);
+    } catch (error: unknown) {
+      toast.error(getSafeErrorMessage(error, "Không thể đặt lại mật khẩu"));
     }
   };
 
@@ -257,4 +250,3 @@ export default function ResetPasswordPage() {
     </div>
   );
 }
-

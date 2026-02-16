@@ -9,14 +9,14 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { register as registerAction } from "@/features/auth/authAction";
+import { useRegister } from "@/hooks/queries";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
+import { getSafeErrorMessage } from "@/api";
 
 const registerSchema = z
   .object({
@@ -53,12 +53,12 @@ function PasswordRequirement({ met, text }: { met: boolean; text: string }) {
 }
 
 export default function RegisterPage() {
-  const dispatch = useAppDispatch();
   const router = useRouter();
+  const registerMutation = useRegister();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { loading } = useAppSelector((state) => state.auth);
+  const loading = registerMutation.isPending;
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -74,15 +74,13 @@ export default function RegisterPage() {
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
-      await dispatch(registerAction(data)).unwrap();
+      await registerMutation.mutateAsync(data);
       toast.success(
         "Tạo tài khoản thành công! Vui lòng kiểm tra email để lấy mã xác thực.",
       );
       router.push(`/verify-code?email=${encodeURIComponent(data.email)}`);
-    } catch (error) {
-      toast.error(
-        (error as { message?: string })?.message || "Đăng ký thất bại",
-      );
+    } catch (error: unknown) {
+      toast.error(getSafeErrorMessage(error, "Đăng ký thất bại"));
     }
   };
 
@@ -239,4 +237,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-

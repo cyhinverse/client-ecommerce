@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,24 +31,19 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { useDashboardStats } from "@/hooks/queries/useStatistics";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 
 export default function AdminDashboard() {
   const { socket } = useSocket();
   const { data: stats, isLoading: loading, refetch } = useDashboardStats();
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  useEffect(() => {
-    refetch();
-  }, [refetch, refreshKey]);
 
   useEffect(() => {
     if (!socket) return;
 
     const handleUpdate = () => {
       toast.info("Đang cập nhật bảng điều khiển...");
-      setRefreshKey((prev) => prev + 1);
+      refetch();
     };
 
     socket.on("new_order", handleUpdate);
@@ -60,10 +55,10 @@ export default function AdminDashboard() {
       socket.off("new_user", handleUpdate);
       socket.off("new_product", handleUpdate);
     };
-  }, [socket]);
+  }, [socket, refetch]);
 
   const handleRefresh = () => {
-    setRefreshKey((prev) => prev + 1);
+    refetch();
   };
 
   const getStatusBadge = (status: string) => {

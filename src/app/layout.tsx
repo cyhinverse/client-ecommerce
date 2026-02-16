@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { ReduxProvider } from "./Provider";
 import { SocketProvider } from "@/context/SocketContext";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 
-const inter = Inter({
+const inter = localFont({
+  src: "../../public/fonts/InterVariable.woff2",
   variable: "--font-sans",
-  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {

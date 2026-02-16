@@ -60,12 +60,16 @@ export {
 export {
   useActiveFlashSale,
   useFlashSaleSchedule,
+  useAdminFlashSaleProducts,
+  useAdminFlashSaleSchedule,
   useFlashSaleBySlot,
   useFlashSaleStats,
   useAddToFlashSale,
   useRemoveFromFlashSale,
   useFlashSaleWithCountdown,
   useFlashSaleWithCountdown as useFlashSale,
+  type AdminFlashSaleProduct,
+  type AdminFlashSaleSlot,
 } from "./useFlashSale";
 
 // Wishlist queries
@@ -120,6 +124,18 @@ export {
   type UpdateUserData,
 } from "./useProfile";
 
+// Auth mutations
+export {
+  useLogin,
+  useRegister,
+  useSendVerificationCode,
+  useVerifyCode,
+  useForgotPassword,
+  useResetPassword,
+  useLogout,
+  useRefreshAuthSession,
+} from "./useAuth";
+
 // Shop queries
 export {
   useMyShop,
@@ -142,10 +158,15 @@ export {
   useProductReviews,
   useShopReviews,
   useUserReviews,
+  useAdminReviews,
   useCreateReview,
   useUpdateReview,
   useDeleteReview,
+  useDeleteAdminReview,
   type Review,
+  type AdminReview,
+  type AdminReviewListParams,
+  type AdminReviewListResponse,
   type ReviewListParams,
   type ReviewListResponse,
   type CreateReviewData,
@@ -179,6 +200,27 @@ export {
   type CreateNotificationData,
 } from "./useNotifications";
 
+// Chatbot queries
+export {
+  useAdminChatbotSessions,
+  useAdminChatbotHistory,
+  type ChatSession,
+  type ChatMessage,
+  type AdminChatbotSessionsResponse,
+  type AdminChatbotHistoryResponse,
+} from "./useChatbot";
+
+// Chat queries
+export {
+  useChatConversations,
+  useChatMessages,
+  useStartConversation,
+  useSendChatMessage,
+  useMarkConversationAsRead,
+  type ChatMessagesParams,
+  type ChatMessagesResponse,
+} from "./useChat";
+
 // Statistics queries (Admin)
 export {
   useDashboardStats,
@@ -209,6 +251,14 @@ export {
   type PaymentUrlResponse,
   type PaymentDetails,
 } from "./usePayment";
+
+// Shipping queries
+export {
+  useMyShippingTemplates,
+  useCreateShippingTemplate,
+  useUpdateShippingTemplate,
+  useDeleteShippingTemplate,
+} from "./useShipping";
 
 // Shop Category queries
 export {

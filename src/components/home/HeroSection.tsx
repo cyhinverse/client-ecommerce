@@ -5,7 +5,7 @@ import Banner from "./Banner";
 import SubsidySection from "./SubsidySection";
 import UserCard from "./UserCard";
 import PromoGrid from "./PromoGrid";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 
 export default function HeroSection() {
   const { isOpen: isChatOpen } = useAppSelector((state) => state.chat);

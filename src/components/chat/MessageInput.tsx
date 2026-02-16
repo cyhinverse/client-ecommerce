@@ -4,32 +4,29 @@ import { Send, Image as ImageIcon, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { sendMessage } from "@/features/chat/chatAction";
+import { useSendChatMessage } from "@/hooks/queries";
 
 interface MessageInputProps {
   conversationId: string;
 }
 
 export default function MessageInput({ conversationId }: MessageInputProps) {
-  const dispatch = useAppDispatch();
-  const { isSending, error } = useAppSelector((state) => state.chat);
+  const sendMessageMutation = useSendChatMessage();
+  const isSending = sendMessageMutation.isPending;
   const [content, setContent] = useState("");
 
   const handleSend = async () => {
     if (!content.trim()) return;
 
     try {
-      await dispatch(
-        sendMessage({
-          conversationId,
-          content: content.trim(),
-          messageType: "text",
-        })
-      ).unwrap();
+      await sendMessageMutation.mutateAsync({
+        conversationId,
+        content: content.trim(),
+        messageType: "text",
+      });
       setContent("");
     } catch {
-      toast.error(error || "Không thể gửi tin nhắn");
+      toast.error("Không thể gửi tin nhắn");
     }
   };
 

@@ -11,9 +11,10 @@ export {
   extractApiData,
   extractPaginatedData,
   extractApiError,
+  getSafeErrorMessage,
   getLocalizedError,
   ERROR_MESSAGES,
-} from "./utils";
+} from "../utils/api";
 
 // Types
 export type {
@@ -21,4 +22,4 @@ export type {
   PaginationMeta,
   PaginatedResponse,
   ApiError,
-} from "./utils";
+} from "../utils/api";

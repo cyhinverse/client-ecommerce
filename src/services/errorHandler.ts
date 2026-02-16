@@ -4,15 +4,13 @@
  */
 
 import { toast } from 'sonner';
+import { extractApiError } from "@/utils/api";
+import type { ApiError } from "@/utils/api";
 
 /**
  * Standard API error structure
  */
-export interface ApiError {
-  message: string;
-  code?: number;
-  field?: string;
-}
+export type { ApiError } from "@/utils/api";
 
 /**
  * Options for error logging
@@ -28,58 +26,7 @@ export interface ErrorHandlerOptions {
  * Extract error message from various error formats
  */
 function extractError(error: unknown): ApiError {
-  // Handle null/undefined
-  if (error === null || error === undefined) {
-    return {
-      message: 'Đã xảy ra lỗi, vui lòng thử lại sau',
-      code: 500,
-    };
-  }
-
-  // Handle axios error structure
-  const axiosError = error as {
-    response?: {
-      data?: {
-        message?: string;
-        code?: number;
-        field?: string;
-        status?: string;
-      };
-      status?: number;
-    };
-    message?: string;
-  };
-
-  // Try to get message from response data first
-  if (axiosError?.response?.data?.message) {
-    return {
-      message: axiosError.response.data.message,
-      code: axiosError.response.data.code || axiosError.response.status,
-      field: axiosError.response.data.field,
-    };
-  }
-
-  // Fall back to error message
-  if (axiosError?.message) {
-    return {
-      message: axiosError.message,
-      code: axiosError.response?.status,
-    };
-  }
-
-  // Handle Error instances
-  if (error instanceof Error) {
-    return {
-      message: error.message,
-      code: 500,
-    };
-  }
-
-  // Default error
-  return {
-    message: 'Đã xảy ra lỗi, vui lòng thử lại sau',
-    code: 500,
-  };
+  return extractApiError(error);
 }
 
 /**

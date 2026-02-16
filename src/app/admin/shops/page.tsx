@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Store, Search, MoreHorizontal, Eye, Ban, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,10 +21,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
-import instance from "@/api/api";
+import { getSafeErrorMessage } from "@/api";
 import { toast } from "sonner";
 import { ViewShopModal } from "@/components/admin/shops/ViewShopModal";
 import { Shop as BaseShop, ShopOwner } from "@/types/shop";
+import { useAllShops, useUpdateShopStatus } from "@/hooks/queries";
 
 // Extended Shop type for admin list view with additional stats
 interface AdminShopListItem extends Omit<BaseShop, 'owner'> {
@@ -34,40 +35,28 @@ interface AdminShopListItem extends Omit<BaseShop, 'owner'> {
 }
 
 export default function AdminShopsPage() {
-  const [shops, setShops] = useState<AdminShopListItem[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedShop, setSelectedShop] = useState<AdminShopListItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const statusMutation = useUpdateShopStatus();
 
-  const fetchShops = async () => {
+  const {
+    data: shopsResponse,
+    isLoading,
+    error,
+    refetch,
+  } = useAllShops();
+  const shops = (shopsResponse?.shops as AdminShopListItem[] | undefined) ?? [];
+
+  const handleStatusChange = async (
+    shopId: string,
+    newStatus: "active" | "inactive" | "banned",
+  ) => {
     try {
-      setLoading(true);
-      const response = await instance.get("/shops/admin/all");
-      const data = response.data.data;
-      // Handle paginated response
-      setShops(Array.isArray(data) ? data : data?.data || []);
-    } catch (error) {
-      console.error("Failed to fetch shops:", error);
-      toast.error("Failed to load shops");
-      setShops([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchShops();
-  }, []);
-
-  const handleStatusChange = async (shopId: string, newStatus: string) => {
-    try {
-      await instance.put(`/shops/admin/${shopId}/status`, { status: newStatus });
+      await statusMutation.mutateAsync({ shopId, status: newStatus });
       toast.success(`Shop status updated to ${newStatus}`);
-      fetchShops();
-    } catch (error) {
-      console.error("Failed to update shop status:", error);
-      toast.error("Failed to update shop status");
+    } catch (mutationError) {
+      toast.error(getSafeErrorMessage(mutationError, "Failed to update shop status"));
     }
   };
 
@@ -104,6 +93,25 @@ export default function AdminShopsPage() {
   const totalShops = shops.length;
   const activeShops = shops.filter((s) => s.status === "active").length;
   const inactiveShops = shops.filter((s) => s.status === "inactive").length;
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Shops Management</h1>
+          <p className="text-sm text-muted-foreground">Manage all registered shops</p>
+        </div>
+        <div className="rounded-2xl bg-[#f7f7f7] dark:bg-[#1C1C1E] p-8 text-center space-y-4">
+          <p className="text-red-500">
+            {getSafeErrorMessage(error, "Failed to load shops")}
+          </p>
+          <Button onClick={() => refetch()} className="rounded-xl">
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -159,7 +167,7 @@ export default function AdminShopsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
+            {isLoading ? (
               [...Array(5)].map((_, i) => (
                 <TableRow key={i}>
                   <TableCell><Skeleton className="h-10 w-40" /></TableCell>

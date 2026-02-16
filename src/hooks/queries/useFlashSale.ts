@@ -2,10 +2,15 @@
  * Flash Sale React Query Hooks
  * Replaces flashSaleAction.ts async thunks with React Query
  */
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  QueryClient,
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import instance from "@/api/api";
-import { extractApiData } from "@/api";
+import { extractApiData, getSafeErrorMessage } from "@/api";
 import { errorHandler } from "@/services/errorHandler";
 import { STALE_TIME, REFETCH_INTERVAL } from "@/constants/cache";
 import { flashSaleKeys } from "@/lib/queryKeys";
@@ -15,6 +20,34 @@ import {
   FlashSaleSlotResponse,
   AddToFlashSalePayload,
 } from "@/types/flash-sale";
+
+export interface AdminFlashSaleProduct {
+  _id: string;
+  name: string;
+  slug: string;
+  variants?: { images?: string[] }[];
+  price: { currentPrice: number };
+  flashSale: {
+    isActive: boolean;
+    salePrice: number;
+    discountPercent: number;
+    stock: number;
+    soldCount: number;
+    startTime: string;
+    endTime: string;
+  };
+}
+
+export interface AdminFlashSaleSlot {
+  startTime: string;
+  endTime: string;
+  status: string;
+  label: string;
+}
+
+function invalidateFlashSaleQueries(queryClient: QueryClient) {
+  return queryClient.invalidateQueries({ queryKey: flashSaleKeys.all });
+}
 
 // ============ API Functions ============
 const flashSaleApi = {
@@ -27,6 +60,19 @@ const flashSaleApi = {
   },
 
   getSchedule: async (): Promise<FlashSaleSlot[]> => {
+    const response = await instance.get("/flash-sale/schedule");
+    return extractApiData(response);
+  },
+
+  getAdminProducts: async (): Promise<AdminFlashSaleProduct[]> => {
+    const response = await instance.get("/flash-sale");
+    const data = extractApiData<{
+      data?: AdminFlashSaleProduct[];
+    } | AdminFlashSaleProduct[]>(response);
+    return Array.isArray(data) ? data : (data?.data ?? []);
+  },
+
+  getAdminSchedule: async (): Promise<AdminFlashSaleSlot[]> => {
     const response = await instance.get("/flash-sale/schedule");
     return extractApiData(response);
   },
@@ -85,6 +131,28 @@ export function useFlashSaleSchedule() {
 }
 
 /**
+ * Get admin flash sale products
+ */
+export function useAdminFlashSaleProducts() {
+  return useQuery({
+    queryKey: flashSaleKeys.adminProducts(),
+    queryFn: flashSaleApi.getAdminProducts,
+    staleTime: STALE_TIME.SHORT,
+  });
+}
+
+/**
+ * Get admin flash sale schedule
+ */
+export function useAdminFlashSaleSchedule() {
+  return useQuery({
+    queryKey: flashSaleKeys.adminSchedule(),
+    queryFn: flashSaleApi.getAdminSchedule,
+    staleTime: STALE_TIME.VERY_LONG,
+  });
+}
+
+/**
  * Get flash sale products by time slot
  */
 export function useFlashSaleBySlot(
@@ -121,7 +189,7 @@ export function useAddToFlashSale() {
   return useMutation({
     mutationFn: flashSaleApi.addProduct,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: flashSaleKeys.all });
+      invalidateFlashSaleQueries(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Add to flash sale failed" });
@@ -138,7 +206,7 @@ export function useRemoveFromFlashSale() {
   return useMutation({
     mutationFn: flashSaleApi.removeProduct,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: flashSaleKeys.all });
+      invalidateFlashSaleQueries(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Remove from flash sale failed" });
@@ -231,9 +299,10 @@ export function useFlashSaleWithCountdown() {
   const isLoading = isLoadingProducts || isLoadingSchedule;
   const error =
     productsError || scheduleError
-      ? (productsError as Error)?.message ||
-        (scheduleError as Error)?.message ||
-        "An error occurred"
+      ? getSafeErrorMessage(
+          productsError || scheduleError,
+          "Không thể tải dữ liệu flash sale"
+        )
       : null;
 
   return {

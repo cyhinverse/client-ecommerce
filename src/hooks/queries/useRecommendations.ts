@@ -5,7 +5,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef } from "react";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/api";
+import { extractApiData, getSafeErrorMessage } from "@/api";
 import { errorHandler } from "@/services/errorHandler";
 import { STALE_TIME } from "@/constants/cache";
 import { recommendationKeys } from "@/lib/queryKeys";
@@ -221,16 +221,12 @@ export function useRecommendation(options?: {
 
   // Refetch functions
   const fetchForYou = useCallback(
-    (newLimit?: number) => {
-      return forYouQuery.refetch();
-    },
+    () => forYouQuery.refetch(),
     [forYouQuery]
   );
 
   const fetchRecentlyViewed = useCallback(
-    (newLimit?: number) => {
-      return recentlyViewedQuery.refetch();
-    },
+    () => recentlyViewedQuery.refetch(),
     [recentlyViewedQuery]
   );
 
@@ -308,7 +304,7 @@ export function useRecommendation(options?: {
     similar,
     homepage,
     isLoading,
-    error: error ? (error as Error).message : null,
+    error: error ? getSafeErrorMessage(error, "Không thể tải gợi ý") : null,
     fetchForYou,
     fetchRecentlyViewed,
     fetchFBT,

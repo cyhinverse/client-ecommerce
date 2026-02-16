@@ -5,7 +5,7 @@ import { useRecommendation } from "@/hooks/queries/useRecommendations";
 import { ProductCard } from "@/components/product/ProductCard";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { Product } from "@/types/product";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 
 interface RecommendationSectionProps {
   className?: string;
@@ -61,11 +61,7 @@ const ProductGrid = memo(function ProductGrid({
 export const ForYouSection = memo(function ForYouSection({
   className,
 }: RecommendationSectionProps) {
-  const { forYou, isLoading, fetchForYou } = useRecommendation();
-
-  useEffect(() => {
-    fetchForYou(12);
-  }, [fetchForYou]);
+  const { forYou, isLoading } = useRecommendation({ limit: 12 });
 
   if (isLoading && forYou.length === 0) {
     return (
@@ -92,11 +88,7 @@ export const ForYouSection = memo(function ForYouSection({
 export const RecentlyViewedSection = memo(function RecentlyViewedSection({
   className,
 }: RecommendationSectionProps) {
-  const { recentlyViewed, fetchRecentlyViewed } = useRecommendation();
-
-  useEffect(() => {
-    fetchRecentlyViewed(10);
-  }, [fetchRecentlyViewed]);
+  const { recentlyViewed } = useRecommendation({ limit: 10 });
 
   if (recentlyViewed.length === 0) return null;
 

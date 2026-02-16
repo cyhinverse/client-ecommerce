@@ -23,6 +23,7 @@ import { useUnreadNotificationCount } from "@/hooks/queries/useNotifications";
 import { toggleChat } from "@/features/chat/chatSlice";
 import { useSearchSuggestions } from "@/hooks/queries/useSearch";
 import { useCart } from "@/hooks/queries/useCart";
+import { useWishlistCount } from "@/hooks/queries/useWishlist";
 import { formatCurrency } from "@/utils/format";
 import { pathArray } from "@/constants/PathArray";
 import {
@@ -32,7 +33,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 import TopBar from "./TopBar";
 
 // Category data with subcategories
@@ -77,7 +78,9 @@ export default function HeaderLayout() {
   );
   const { data: cartQueryData } = useCart({ enabled: isAuthenticated });
   const { data: unreadCountData } = useUnreadNotificationCount();
+  const { data: wishlistCountData } = useWishlistCount();
   const unreadCount = unreadCountData || 0;
+  const wishlistCount = wishlistCountData || 0;
   const [isOpen, setIsOpen] = useState(false);
 
   // Search State
@@ -444,55 +447,16 @@ export default function HeaderLayout() {
                                             <p className="text-sm font-medium text-gray-800 truncate group-hover:text-[#E53935]">
                                               {product.name}
                                             </p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-sm font-bold text-[#E53935]">
-                            {formatCurrency(
-                              product.price
-                                ?.discountPrice ||
-                                product.price
-                                  ?.currentPrice ||
-                                0,
-                            )}
-                          </span>
-                          {product.price?.discountPrice &&
-                            product.price?.currentPrice >
-                              product.price
-                                ?.discountPrice && (
-                              <span className="text-xs text-gray-400 line-through">
-                                {formatCurrency(
-                                  product.price
-                                    .currentPrice,
-                                )}
-                              </span>
-                            )}
-                        </div>
-                      </div>
-                      <Search className="w-4 h-4 text-gray-300 group-hover:text-[#E53935]" />
-                    </div>
-                  ))}
-              </div>
-
-              {/* View All Results */}
-              <button
-                onClick={() => handleSearchSubmit()}
-                className="w-full mt-3 py-2 text-sm font-medium text-[#E53935] hover:bg-[#E53935]/5 rounded-lg transition-colors"
-              >
-                Xem tất cả kết quả cho &quot;{searchQuery}&quot;
-              </button>
-            </div>
-          ) : (
-            <div className="py-8 text-center">
-              <Search className="w-10 h-10 text-gray-200 mx-auto mb-2" />
-              <p className="text-sm text-gray-500">
-                Không tìm thấy sản phẩm hoặc shop nào cho &quot;
-                {searchQuery}&quot;
-              </p>
-              <p className="text-xs text-gray-400 mt-1">
-                Thử tìm kiếm với từ khóa khác
-              </p>
-            </div>
-          )}
-                                              </span>
+                                              <div className="flex items-center gap-2 mt-0.5">
+                                                <span className="text-sm font-bold text-[#E53935]">
+                                                  {formatCurrency(
+                                                    product.price
+                                                      ?.discountPrice ||
+                                                      product.price
+                                                        ?.currentPrice ||
+                                                      0,
+                                                  )}
+                                                </span>
                                               {product.price?.discountPrice &&
                                                 product.price?.currentPrice >
                                                   product.price
@@ -603,7 +567,14 @@ export default function HeaderLayout() {
                         href="/wishlist"
                         className="group flex flex-col items-center gap-0.5 text-gray-500 hover:text-[#E53935] transition-colors"
                       >
-                        <Heart className="h-6 w-6 stroke-[1.5]" />
+                        <div className="relative">
+                          <Heart className="h-6 w-6 stroke-[1.5]" />
+                          {wishlistCount > 0 && (
+                            <span className="absolute -top-1 -right-1 h-3.5 min-w-[14px] px-0.5 rounded-full bg-[#E53935] text-[9px] font-bold text-white flex items-center justify-center border border-white">
+                              {wishlistCount > 99 ? "99+" : wishlistCount}
+                            </span>
+                          )}
+                        </div>
                         <span className="text-[10px]">Yêu thích</span>
                       </Link>
 

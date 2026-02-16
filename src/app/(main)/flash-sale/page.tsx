@@ -1,7 +1,7 @@
 "use client";
 import FlashSaleSection from "@/components/product/FlashSaleSection";
 import { useAppSelector } from "@/hooks/hooks";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 import { Zap } from "lucide-react";
 import { ProductCard } from "@/components/product/ProductCard";
 import { useFlashSaleWithCountdown } from "@/hooks/queries/useFlashSale";
@@ -13,10 +13,12 @@ export default function FlashSalePage() {
 
   return (
     <main className="w-full min-h-screen bg-gray-50 py-8">
-      <div className={cn(
-        "mx-auto px-4 transition-all duration-300",
-        isChatOpen ? "max-w-full" : "container max-w-[1400px]"
-      )}>
+      <div
+        className={cn(
+          "mx-auto px-4 transition-all duration-300",
+          isChatOpen ? "max-w-full" : "container max-w-[1400px]",
+        )}
+      >
         <div className="flex items-center gap-3 mb-8 bg-gradient-to-r from-[#E53935] to-[#FF5722] p-6 rounded-2xl text-white shadow-lg">
           <Zap className="h-10 w-10 fill-current" />
           <div>

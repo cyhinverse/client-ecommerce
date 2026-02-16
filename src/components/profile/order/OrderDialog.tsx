@@ -23,7 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useCreatePaymentUrl } from "@/hooks/queries";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 import { Separator } from "@/components/ui/separator";
 
 interface OrderDialogProps {

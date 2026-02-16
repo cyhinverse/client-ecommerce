@@ -2,9 +2,14 @@
  * Notification React Query Hooks
  * Replaces notificationAction.ts async thunks with React Query
  */
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  QueryClient,
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import instance from "@/api/api";
-import { extractApiData, extractApiError } from "@/api";
+import { extractApiData } from "@/api";
 import { errorHandler } from "@/services/errorHandler";
 import { STALE_TIME, REFETCH_INTERVAL } from "@/constants/cache";
 import { notificationKeys } from "@/lib/queryKeys";
@@ -32,6 +37,10 @@ export interface CreateNotificationData {
   userId?: string;
   link?: string;
   orderId?: string;
+}
+
+function invalidateNotificationQueries(queryClient: QueryClient) {
+  return queryClient.invalidateQueries({ queryKey: notificationKeys.all });
 }
 
 // ============ API Functions ============
@@ -129,7 +138,7 @@ export function useMarkNotificationAsRead() {
   return useMutation({
     mutationFn: notificationApi.markAsRead,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+      invalidateNotificationQueries(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Mark as read failed" });
@@ -146,7 +155,7 @@ export function useMarkAllNotificationsAsRead() {
   return useMutation({
     mutationFn: notificationApi.markAllAsRead,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+      invalidateNotificationQueries(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Mark all as read failed" });
@@ -163,7 +172,7 @@ export function useDeleteNotification() {
   return useMutation({
     mutationFn: notificationApi.delete,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+      invalidateNotificationQueries(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Delete notification failed" });
@@ -180,7 +189,7 @@ export function useClearAllNotifications() {
   return useMutation({
     mutationFn: notificationApi.clearAll,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+      invalidateNotificationQueries(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Clear all notifications failed" });
@@ -197,7 +206,7 @@ export function useCreateNotification() {
   return useMutation({
     mutationFn: notificationApi.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+      invalidateNotificationQueries(queryClient);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Create notification failed" });
@@ -213,6 +222,6 @@ export function useInvalidateNotifications() {
   const queryClient = useQueryClient();
 
   return () => {
-    queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+    invalidateNotificationQueries(queryClient);
   };
 }

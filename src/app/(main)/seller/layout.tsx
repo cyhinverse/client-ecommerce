@@ -17,7 +17,7 @@ import {
   Menu,
 } from "lucide-react";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 import { useAppSelector } from "@/hooks/hooks";
 import { useMyShop } from "@/hooks/queries/useShop";
 import { Button } from "@/components/ui/button";

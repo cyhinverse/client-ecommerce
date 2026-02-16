@@ -52,8 +52,9 @@ const cartApi = {
     return extractApiData(response);
   },
 
-  clear: async (): Promise<void> => {
-    await instance.delete("/cart");
+  clear: async (): Promise<Cart> => {
+    const response = await instance.delete("/cart");
+    return extractApiData(response);
   },
 };
 
@@ -129,9 +130,8 @@ export function useClearCart() {
 
   return useMutation({
     mutationFn: cartApi.clear,
-    onSuccess: () => {
-      // Invalidate to refetch empty cart
-      queryClient.invalidateQueries({ queryKey: cartKeys.all });
+    onSuccess: (data) => {
+      queryClient.setQueryData(cartKeys.current(), data);
     },
     onError: (error) => {
       errorHandler.log(error, { context: "Clear cart failed" });

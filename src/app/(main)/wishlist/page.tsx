@@ -15,6 +15,7 @@ import { useAddToCart } from "@/hooks/queries/useCart";
 import { Product } from "@/types/product";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { useRouter } from "next/navigation";
+import { getSafeErrorMessage } from "@/api";
 
 export default function WishlistPage() {
   const router = useRouter();
@@ -34,8 +35,7 @@ export default function WishlistPage() {
         await removeFromWishlistMutation.mutateAsync(productId);
         toast.success("Đã xóa khỏi danh sách yêu thích");
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Có lỗi xảy ra";
-        toast.error(errorMessage);
+        toast.error(getSafeErrorMessage(error, "Có lỗi xảy ra"));
       }
     },
     [removeFromWishlistMutation]
@@ -53,8 +53,7 @@ export default function WishlistPage() {
         });
         toast.success("Đã thêm vào giỏ hàng");
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Không thể thêm vào giỏ hàng";
-        toast.error(errorMessage);
+        toast.error(getSafeErrorMessage(error, "Không thể thêm vào giỏ hàng"));
       }
     },
     [addToCartMutation]

@@ -24,7 +24,7 @@ import { User as UserIcon, Mail, Shield, Key, CheckCircle, Loader2 } from "lucid
 import { User, UpdateUserData, UserRole } from "@/types/user";
 import { RESOURCES, ACTIONS } from "@/constants/permissions";
 import { getRolePermissions, getUserPermissions } from "@/api/permission";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 
 interface UpdateModelUserProps {
   open: boolean;

@@ -72,9 +72,9 @@ export default function NotificationModel({
             </div>
           ) : notifications.length > 0 ? (
             <div>
-              {notifications.map((noti, index) => (
+              {notifications.map((noti) => (
                 <NotificationItem
-                  key={`${noti._id}-${index}`}
+                  key={noti._id}
                   notification={noti}
                   onClose={onClose}
                 />

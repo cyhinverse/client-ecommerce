@@ -7,7 +7,13 @@ import {
   updateCartItem,
   removeItemsByShop,
 } from "./cartAction";
-import { CartItem, CartState, groupCartItemsByShop, getCartItemPriceValue } from "@/types/cart";
+import {
+  Cart,
+  CartItem,
+  CartState,
+  groupCartItemsByShop,
+  getCartItemPriceValue,
+} from "@/types/cart";
 
 const initialState: CartState = {
   data: null,
@@ -32,10 +38,54 @@ const calculateCartTotals = (items: CartItem[], selectedItems: CartItem[]) => {
   return { totalAmount, checkoutTotal };
 };
 
+const getRejectedErrorMessage = (
+  action: { payload?: unknown },
+  fallback: string
+): string => {
+  if (
+    action.payload &&
+    typeof action.payload === "object" &&
+    "message" in action.payload
+  ) {
+    const message = (action.payload as { message?: unknown }).message;
+    if (typeof message === "string" && message.trim() !== "") {
+      return message;
+    }
+  }
+  return fallback;
+};
+
 export const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
+    setCartFromQuery: (state, action: { payload: Cart | null }) => {
+      const cartData = action.payload;
+      if (!cartData) {
+        state.data = null;
+        state.selectedItems = [];
+        state.checkoutTotal = 0;
+        state.itemsByShop = [];
+        return;
+      }
+
+      const selectedIds = new Set(state.selectedItems.map((item) => item._id));
+      const items = (cartData.items ?? []).map((item: CartItem) => ({
+        ...item,
+        selected: selectedIds.has(item._id),
+      }));
+
+      const selectedItems = items.filter((item) => item.selected);
+      const { checkoutTotal } = calculateCartTotals(items, selectedItems);
+
+      state.data = {
+        ...cartData,
+        items,
+      };
+      state.selectedItems = selectedItems;
+      state.checkoutTotal = checkoutTotal;
+      state.itemsByShop = groupCartItemsByShop(items);
+    },
     addToCartLocal: (state, action) => {
       if (!state.data) {
         state.data = {
@@ -209,9 +259,11 @@ export const cartSlice = createSlice({
     prepareForCheckout: (state) => {
       if (!state.data) return;
 
-      // Chỉ giữ lại selected items trong cart
-      state.data.items = state.selectedItems;
-      state.data.totalAmount = state.checkoutTotal;
+      const { checkoutTotal } = calculateCartTotals(
+        state.data.items,
+        state.selectedItems
+      );
+      state.checkoutTotal = checkoutTotal;
     },
 
     clearError: (state) => {
@@ -253,7 +305,7 @@ export const cartSlice = createSlice({
     });
     builder.addCase(getCart.rejected, (state, action) => {
       state.isLoading = false;
-      state.error = action.error.message || "Không thể lấy giỏ hàng";
+      state.error = getRejectedErrorMessage(action, "Không thể lấy giỏ hàng");
     });
 
     // Add to Cart
@@ -279,8 +331,10 @@ export const cartSlice = createSlice({
     });
     builder.addCase(addToCart.rejected, (state, action) => {
       state.isLoading = false;
-      state.error =
-        action.error.message || "Không thể thêm sản phẩm vào giỏ hàng";
+      state.error = getRejectedErrorMessage(
+        action,
+        "Không thể thêm sản phẩm vào giỏ hàng"
+      );
     });
 
     // Remove from Cart
@@ -317,8 +371,10 @@ export const cartSlice = createSlice({
     });
     builder.addCase(removeFromCart.rejected, (state, action) => {
       state.isLoading = false;
-      state.error =
-        action.error.message || "Không thể xóa sản phẩm khỏi giỏ hàng";
+      state.error = getRejectedErrorMessage(
+        action,
+        "Không thể xóa sản phẩm khỏi giỏ hàng"
+      );
     });
 
     // Clear Cart
@@ -339,7 +395,7 @@ export const cartSlice = createSlice({
     });
     builder.addCase(clearCart.rejected, (state, action) => {
       state.isLoading = false;
-      state.error = action.error.message || "Không thể xóa giỏ hàng";
+      state.error = getRejectedErrorMessage(action, "Không thể xóa giỏ hàng");
     });
 
     builder.addCase(updateCartItem.pending, (state) => {
@@ -389,7 +445,7 @@ export const cartSlice = createSlice({
     });
     builder.addCase(updateCartItem.rejected, (state, action) => {
       state.isLoading = false;
-      state.error = action.error.message || "Không thể cập nhật giỏ hàng";
+      state.error = getRejectedErrorMessage(action, "Không thể cập nhật giỏ hàng");
     });
 
     // NEW: Remove items by shop
@@ -416,12 +472,16 @@ export const cartSlice = createSlice({
     });
     builder.addCase(removeItemsByShop.rejected, (state, action) => {
       state.isLoading = false;
-      state.error = action.error.message || "Không thể xóa sản phẩm theo shop";
+      state.error = getRejectedErrorMessage(
+        action,
+        "Không thể xóa sản phẩm theo shop"
+      );
     });
   },
 });
 
 export const {
+  setCartFromQuery,
   addToCartLocal,
   removeFromCartLocal,
   clearCartLocal,

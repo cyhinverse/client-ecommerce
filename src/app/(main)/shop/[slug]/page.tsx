@@ -23,7 +23,7 @@ import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { useShopBySlug, useShopCategories } from "@/hooks/queries/useShop";
 import { useInfiniteShopProducts } from "@/hooks/queries/useProducts";
-import { startConversation } from "@/features/chat/chatAction";
+import { useStartConversation } from "@/hooks/queries";
 import { setChatOpen } from "@/features/chat/chatSlice";
 
 export default function ShopPage() {
@@ -66,6 +66,7 @@ export default function ShopPage() {
   }, [productsData]);
 
   const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const startConversationMutation = useStartConversation();
 
   // Intersection Observer for infinite scroll
   const handleObserver = useCallback(
@@ -105,7 +106,7 @@ export default function ShopPage() {
     if (!currentShop?._id) return;
 
     try {
-      await dispatch(startConversation({ shopId: currentShop._id })).unwrap();
+      await startConversationMutation.mutateAsync({ shopId: currentShop._id });
       dispatch(setChatOpen(true));
     } catch {
       toast.error("Không thể bắt đầu cuộc trò chuyện");
@@ -370,7 +371,7 @@ export default function ShopPage() {
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 {filteredProducts.map((product, index) => (
-                  <ProductCard key={`${product._id}-${index}`} product={product} index={index} />
+                  <ProductCard key={product._id} product={product} index={index} />
                 ))}
               </div>
             )}

@@ -1,4 +1,3 @@
-// CartPage - Taobao Style with Shop Grouping
 "use client";
 import { useEffect, useState, useMemo } from "react";
 import {
@@ -16,19 +15,20 @@ import Image from "next/image";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import {
-  getCart,
-  updateCartItem,
-  removeFromCart,
-  clearCart,
-} from "@/features/cart/cartAction";
-import {
+  setCartFromQuery,
   toggleSelectItem,
   selectAllItems,
   unselectAllItems,
   prepareForCheckout,
 } from "@/features/cart/cartSlice";
 import { formatCurrency } from "@/utils/format";
-import { useApplyVoucher } from "@/hooks/queries";
+import {
+  useApplyVoucher,
+  useCart,
+  useUpdateCartItem,
+  useRemoveFromCart,
+  useClearCart,
+} from "@/hooks/queries";
 import { ApplyVoucherResult } from "@/types/voucher";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { toast } from "sonner";
@@ -37,46 +37,71 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { groupCartItemsByShop, CartItem } from "@/types/cart";
 import { ForYouSection } from "@/components/product/RecommendationSection";
+import { getSafeErrorMessage } from "@/api";
 
 const EMPTY_CART_ITEMS: CartItem[] = [];
 
 export default function CartPage() {
   const {
-    data: cartData,
-    isLoading,
-    error,
+    data: cartStateData,
     selectedItems,
     checkoutTotal,
   } = useAppSelector((state) => state.cart);
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const cartQuery = useCart();
+  const updateCartItemMutation = useUpdateCartItem();
+  const removeFromCartMutation = useRemoveFromCart();
+  const clearCartMutation = useClearCart();
   const [promoCode, setPromoCode] = useState("");
   const [appliedVoucher, setAppliedVoucher] =
     useState<ApplyVoucherResult | null>(null);
   const applyVoucherMutation = useApplyVoucher();
+  const cartData = cartStateData ?? cartQuery.data;
+  const isLoading = cartQuery.isLoading;
 
   const appliedPlatformVoucher =
     appliedVoucher?.scope === "platform" ? appliedVoucher : null;
   const voucherLoading = applyVoucherMutation.isPending;
 
   useEffect(() => {
-    dispatch(getCart());
-  }, [dispatch]);
+    if (cartQuery.data) {
+      dispatch(setCartFromQuery(cartQuery.data));
+    }
+  }, [dispatch, cartQuery.data]);
 
-  const updateQuantity = (itemId: string, newQuantity: number) => {
+  const updateQuantity = async (itemId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
-    dispatch(updateCartItem({ itemId, quantity: newQuantity }));
+    try {
+      const updatedCart = await updateCartItemMutation.mutateAsync({
+        itemId,
+        quantity: newQuantity,
+      });
+      dispatch(setCartFromQuery(updatedCart));
+    } catch (error: unknown) {
+      toast.error(getSafeErrorMessage(error, "Không thể cập nhật giỏ hàng"));
+    }
   };
 
-  const handleClearCart = () => {
-    dispatch(clearCart());
-    setAppliedVoucher(null);
-    toast.success("Đã xóa giỏ hàng");
+  const handleClearCart = async () => {
+    try {
+      const clearedCart = await clearCartMutation.mutateAsync();
+      dispatch(setCartFromQuery(clearedCart));
+      setAppliedVoucher(null);
+      toast.success("Đã xóa giỏ hàng");
+    } catch (error: unknown) {
+      toast.error(getSafeErrorMessage(error, "Không thể xóa giỏ hàng"));
+    }
   };
 
-  const handleRemoveItem = (itemId: string) => {
-    dispatch(removeFromCart({ itemId }));
-    toast.success("Đã xóa sản phẩm");
+  const handleRemoveItem = async (itemId: string) => {
+    try {
+      const updatedCart = await removeFromCartMutation.mutateAsync(itemId);
+      dispatch(setCartFromQuery(updatedCart));
+      toast.success("Đã xóa sản phẩm");
+    } catch (error: unknown) {
+      toast.error(getSafeErrorMessage(error, "Không thể xóa sản phẩm"));
+    }
   };
 
   const handleToggleSelect = (itemId: string) => {
@@ -120,10 +145,8 @@ export default function CartPage() {
       });
       setAppliedVoucher(result);
       toast.success("Áp dụng mã giảm giá thành công!");
-    } catch (err) {
-      const errorMessage =
-        (err as Error).message || "Không thể áp dụng mã giảm giá";
-      toast.error(errorMessage);
+    } catch (error: unknown) {
+      toast.error(getSafeErrorMessage(error, "Không thể áp dụng mã giảm giá"));
       setAppliedVoucher(null);
     }
   };
@@ -263,12 +286,14 @@ export default function CartPage() {
     return item.price?.currentPrice ?? 0;
   };
 
-  if (error) {
-    toast.error("Lỗi khi tải giỏ hàng");
-  }
+  useEffect(() => {
+    if (cartQuery.isError) {
+      toast.error(getSafeErrorMessage(cartQuery.error, "Lỗi khi tải giỏ hàng"));
+    }
+  }, [cartQuery.isError, cartQuery.error]);
 
   // Empty State - Taobao Style
-  if (!isLoading && (!cartData?.items || cartData.items.length === 0)) {
+  if (!isLoading && !cartQuery.isFetching && (!cartData?.items || cartData.items.length === 0)) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center p-4 bg-background">
         <motion.div
@@ -326,7 +351,9 @@ export default function CartPage() {
                   Chọn tất cả ({cartData?.items?.length || 0} sản phẩm)
                 </span>
                 <button
-                  onClick={handleClearCart}
+                  onClick={() => {
+                    void handleClearCart();
+                  }}
                   className="sm:ml-auto text-gray-500 hover:text-red-500 flex items-center gap-1"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -347,9 +374,9 @@ export default function CartPage() {
                   </div>
                   <button
                     onClick={() => {
-                      deletedItems.forEach((item) =>
-                        handleRemoveItem(item._id)
-                      );
+                      deletedItems.forEach((item) => {
+                        void handleRemoveItem(item._id);
+                      });
                     }}
                     className="text-sm text-red-500 hover:text-red-600 font-medium"
                   >
@@ -481,7 +508,7 @@ export default function CartPage() {
                         <div className="flex items-center shrink-0">
                           <button
                             onClick={() =>
-                              updateQuantity(item._id, item.quantity - 1)
+                              void updateQuantity(item._id, item.quantity - 1)
                             }
                             disabled={item.quantity <= 1}
                             className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-l text-gray-500 hover:bg-gray-50 disabled:opacity-50"
@@ -496,7 +523,7 @@ export default function CartPage() {
                           />
                           <button
                             onClick={() =>
-                              updateQuantity(item._id, item.quantity + 1)
+                              void updateQuantity(item._id, item.quantity + 1)
                             }
                             className="w-7 h-7 flex items-center justify-center border border-gray-200 rounded-r text-gray-500 hover:bg-gray-50"
                           >
@@ -506,7 +533,9 @@ export default function CartPage() {
 
                         {/* Remove */}
                         <button
-                          onClick={() => handleRemoveItem(item._id)}
+                          onClick={() => {
+                            void handleRemoveItem(item._id);
+                          }}
                           className="text-gray-400 hover:text-red-500 shrink-0"
                         >
                           <Trash2 className="h-4 w-4" />

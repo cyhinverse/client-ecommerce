@@ -2,11 +2,15 @@
 import { MessageCircle } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { toggleChat } from "@/features/chat/chatSlice";
+import { useChatConversations } from "@/hooks/queries";
 
 export default function ChatButton() {
   const dispatch = useAppDispatch();
-  const { isOpen, conversations } = useAppSelector((state) => state.chat);
+  const { isOpen } = useAppSelector((state) => state.chat);
   const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const { data: conversations = [] } = useChatConversations({
+    enabled: isAuthenticated,
+  });
 
   const totalUnread = conversations.reduce((sum, c) => sum + c.unreadCount, 0);
 

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
 import {
   MessageSquare,
@@ -17,28 +17,44 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useMyShop } from "@/hooks/queries";
-import { cn } from "@/lib/utils";
-import { useAppSelector, useAppDispatch } from "@/hooks/hooks";
-import { getMyConversations, getMessages, sendMessage, markMessagesAsRead } from "@/features/chat/chatAction";
-import { setCurrentConversation } from "@/features/chat/chatSlice";
+import { cn } from "@/utils/cn";
+import { useAppSelector } from "@/hooks/hooks";
+import {
+  useChatConversations,
+  useChatMessages,
+  useSendChatMessage,
+  useMarkConversationAsRead,
+} from "@/hooks/queries";
 import { Conversation } from "@/types/chat";
 import { useSocket } from "@/context/SocketContext";
 import { joinConversation, leaveConversation } from "@/socket/chat.socket";
+import { toast } from "sonner";
 
 export default function SellerChatPage() {
   const { data: myShop } = useMyShop();
-  const dispatch = useAppDispatch();
-  
-  const { 
-    conversations, 
-    messages, 
-    currentConversation, 
-    isLoadingConversations, 
-    isLoadingMessages,
-    isSending 
-  } = useAppSelector((state) => state.chat);
+  const { data: conversations = [], isLoading: isLoadingConversations } =
+    useChatConversations();
+  const [selectedConversationId, setSelectedConversationId] = useState<
+    string | null
+  >(null);
+  const currentConversation = useMemo(
+    () =>
+      conversations.find((conversation) => conversation._id === selectedConversationId) ??
+      null,
+    [conversations, selectedConversationId],
+  );
+  const {
+    data: messageData,
+    isLoading: isLoadingMessages,
+  } = useChatMessages(
+    { conversationId: selectedConversationId ?? "" },
+    { enabled: !!selectedConversationId },
+  );
+  const messages = messageData?.messages ?? [];
+  const sendMessageMutation = useSendChatMessage();
+  const markAsReadMutation = useMarkConversationAsRead();
+  const isSending = sendMessageMutation.isPending;
   const { data: user } = useAppSelector((state) => state.auth);
-
   const { socket } = useSocket();
 
   const [newMessage, setNewMessage] = useState("");
@@ -46,45 +62,42 @@ export default function SellerChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    dispatch(getMyConversations());
-  }, [dispatch]);
+    if (
+      selectedConversationId &&
+      !conversations.some((conversation) => conversation._id === selectedConversationId)
+    ) {
+      setSelectedConversationId(null);
+    }
+  }, [conversations, selectedConversationId]);
+
+  useEffect(() => {
+    if (!socket || !selectedConversationId) return;
+    joinConversation(socket, selectedConversationId);
+    return () => {
+      leaveConversation(socket, selectedConversationId);
+    };
+  }, [socket, selectedConversationId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  useEffect(() => {
-    return () => {
-      if (socket && currentConversation) {
-        leaveConversation(socket, currentConversation._id);
-      }
-    };
-  }, [socket, currentConversation]);
-
-  const handleSelectConversation = (conv: Conversation) => {
-    if (socket && currentConversation) {
-      leaveConversation(socket, currentConversation._id);
-    }
-
-    dispatch(setCurrentConversation(conv));
-    dispatch(getMessages({ conversationId: conv._id }));  
-    dispatch(markMessagesAsRead(conv._id));  
-
-
-    if (socket) {
-      joinConversation(socket, conv._id);
-    }
+  const handleSelectConversation = (conversation: Conversation) => {
+    setSelectedConversationId(conversation._id);
+    markAsReadMutation.mutate(conversation._id);
   };
 
-  // Handle sending message
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!newMessage.trim() || !currentConversation || isSending) return;
-    
-    dispatch(sendMessage({
-      conversationId: currentConversation._id,
-      content: newMessage.trim(),
-    }));
-    setNewMessage("");
+    try {
+      await sendMessageMutation.mutateAsync({
+        conversationId: currentConversation._id,
+        content: newMessage.trim(),
+      });
+      setNewMessage("");
+    } catch {
+      toast.error("Không thể gửi tin nhắn");
+    }
   };
 
   const formatTime = (date: string) =>
@@ -93,9 +106,8 @@ export default function SellerChatPage() {
       minute: "2-digit",
     });
 
-  // Filter conversations by search term
-  const filteredConversations = conversations.filter((conv) =>
-    conv.user.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredConversations = conversations.filter((conversation) =>
+    conversation.user.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   if (!myShop) return null;
@@ -137,21 +149,21 @@ export default function SellerChatPage() {
                 <p className="text-sm text-center">Chưa có tin nhắn nào</p>
               </div>
             ) : (
-              filteredConversations.map((conv) => (
+              filteredConversations.map((conversation) => (
                 <button
-                  key={conv._id}
-                  onClick={() => handleSelectConversation(conv)}
+                  key={conversation._id}
+                  onClick={() => handleSelectConversation(conversation)}
                   className={cn(
                     "w-full p-4 flex items-center gap-3 hover:bg-[#f7f7f7] transition-colors text-left",
-                    currentConversation?._id === conv._id && "bg-[#f7f7f7]"
+                    currentConversation?._id === conversation._id && "bg-[#f7f7f7]",
                   )}
                 >
                   <div className="relative">
                     <div className="w-12 h-12 rounded-full overflow-hidden bg-[#f7f7f7]">
-                      {conv.user.avatar ? (
+                      {conversation.user.avatar ? (
                         <Image
-                          src={conv.user.avatar}
-                          alt={conv.user.name}
+                          src={conversation.user.avatar}
+                          alt={conversation.user.name}
                           width={48}
                           height={48}
                           className="object-cover"
@@ -162,26 +174,26 @@ export default function SellerChatPage() {
                         </div>
                       )}
                     </div>
-                    {conv.unreadCount > 0 && (
+                    {conversation.unreadCount > 0 && (
                       <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-xs rounded-full flex items-center justify-center">
-                        {conv.unreadCount}
+                        {conversation.unreadCount}
                       </span>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <p className="font-medium text-gray-800 truncate">
-                        {conv.user.name}
+                        {conversation.user.name}
                       </p>
-                      {conv.lastMessage && (
+                      {conversation.lastMessage && (
                         <span className="text-xs text-gray-400">
-                          {formatTime(conv.lastMessage.createdAt)}
+                          {formatTime(conversation.lastMessage.createdAt)}
                         </span>
                       )}
                     </div>
-                    {conv.lastMessage && (
+                    {conversation.lastMessage && (
                       <p className="text-sm text-gray-500 truncate">
-                        {conv.lastMessage.content}
+                        {conversation.lastMessage.content}
                       </p>
                     )}
                   </div>
@@ -241,32 +253,32 @@ export default function SellerChatPage() {
                     <p className="text-sm">Bắt đầu cuộc trò chuyện</p>
                   </div>
                 ) : (
-                  messages.map((msg) => (
+                  messages.map((message) => (
                     <div
-                      key={msg._id}
+                      key={message._id}
                       className={cn(
                         "flex",
-                        msg.sender === user?._id ? "justify-end" : "justify-start"
+                        message.sender === user?._id ? "justify-end" : "justify-start",
                       )}
                     >
                       <div
                         className={cn(
                           "max-w-[70%] px-4 py-2.5 rounded-2xl",
-                          msg.sender === user?._id
+                          message.sender === user?._id
                             ? "bg-primary text-white rounded-br-md"
-                            : "bg-white text-gray-800 rounded-bl-md"
+                            : "bg-white text-gray-800 rounded-bl-md",
                         )}
                       >
-                        <p className="text-sm">{msg.content}</p>
+                        <p className="text-sm">{message.content}</p>
                         <p
                           className={cn(
                             "text-[10px] mt-1",
-                            msg.sender === user?._id
+                            message.sender === user?._id
                               ? "text-white/70"
-                              : "text-gray-400"
+                              : "text-gray-400",
                           )}
                         >
-                          {formatTime(msg.createdAt)}
+                          {formatTime(message.createdAt)}
                         </p>
                       </div>
                     </div>
@@ -301,12 +313,12 @@ export default function SellerChatPage() {
                     placeholder="Nhập tin nhắn..."
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+                    onKeyDown={(e) => e.key === "Enter" && void handleSendMessage()}
                     className="flex-1 min-w-[200px] h-11 rounded-xl bg-[#f7f7f7] border-0"
                     disabled={isSending}
                   />
                   <Button
-                    onClick={handleSendMessage}
+                    onClick={() => void handleSendMessage()}
                     disabled={!newMessage.trim() || isSending}
                     className="bg-primary hover:bg-primary/90 rounded-xl h-11 px-4"
                   >
