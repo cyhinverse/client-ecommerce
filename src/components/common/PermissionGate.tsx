@@ -158,7 +158,10 @@ export const RequireRole: React.FC<RequireRoleProps> = ({
   const { role, isAuthenticated } = usePermissions();
   const [isChecking, setIsChecking] = React.useState(true);
 
-  const allowedRoles = Array.isArray(roles) ? roles : [roles];
+  const allowedRoles = React.useMemo(
+    () => (Array.isArray(roles) ? roles : [roles]),
+    [roles],
+  );
 
   React.useEffect(() => {
     if (!isAuthenticated) {

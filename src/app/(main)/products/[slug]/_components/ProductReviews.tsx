@@ -7,12 +7,19 @@ import ReviewItem from "@/components/review/ReviewItem";
 import { useProductReviews } from "@/hooks/queries/useReviews";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Review, RatingBreakdown } from "@/types/review";
+import { formatDate } from "@/utils/format";
 
 interface ProductReviewsProps {
   productId: string;
   ratingAverage?: number;
   reviewCount?: number;
 }
+
+const REVIEW_DATE_OPTIONS: Intl.DateTimeFormatOptions = {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+};
 
 // Rating Breakdown Component
 function RatingBreakdownComponent({
@@ -78,14 +85,6 @@ export function ProductReviews({
     });
     return breakdown;
   }, [reviews]);
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("vi-VN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
-  };
 
   const getInitial = (name: string) => {
     return name?.charAt(0)?.toUpperCase() || "U";
@@ -162,7 +161,7 @@ export function ProductReviews({
               initial={getInitial(review.user?.name)}
               name={maskName(review.user?.name)}
               rating={review.rating}
-              date={formatDate(review.createdAt)}
+              date={formatDate(review.createdAt, REVIEW_DATE_OPTIONS)}
               verified={(review as Review).verified}
               comment={review.comment}
             />

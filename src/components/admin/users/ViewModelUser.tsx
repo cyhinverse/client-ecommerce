@@ -24,6 +24,7 @@ import { User } from "@/types/user";
 import Image from "next/image";
 import UserPermissions from "./UserPermissions";
 import { cn } from "@/utils/cn";
+import { formatDate } from "@/utils/format";
 
 interface ViewModelUserProps {
   open: boolean;
@@ -31,6 +32,12 @@ interface ViewModelUserProps {
   user: User | null;
   onEdit?: (user: User) => void;
 }
+
+const LONG_DATE_OPTIONS: Intl.DateTimeFormatOptions = {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+};
 
 export function ViewModelUser({
   open,
@@ -61,14 +68,6 @@ export function ViewModelUser({
       onOpenChange(false);
       onEdit(user);
     }
-  };
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("vi-VN", { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
   };
 
   return (
@@ -147,7 +146,9 @@ export function ViewModelUser({
                     <Calendar className="w-3.5 h-3.5" />
                     Ngày tham gia
                   </div>
-                  <div className="text-sm font-semibold">{formatDate(user.createdAt)}</div>
+                  <div className="text-sm font-semibold">
+                    {formatDate(user.createdAt, LONG_DATE_OPTIONS)}
+                  </div>
                 </div>
                 <div className="p-4 rounded-2xl bg-gray-50/50 dark:bg-white/5 border border-border/50 space-y-2">
                   <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-1.5">

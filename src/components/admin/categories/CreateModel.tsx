@@ -27,8 +27,6 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import {
   Loader2,
-  Save,
-  X,
   Plus,
   Folder,
   ChevronDown,

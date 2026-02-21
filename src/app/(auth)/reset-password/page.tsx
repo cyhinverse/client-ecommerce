@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Check, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
@@ -75,8 +75,8 @@ export default function ResetPasswordPage() {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
-    watch,
   } = useForm<ResetPasswordFormData>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
@@ -87,7 +87,10 @@ export default function ResetPasswordPage() {
     },
   });
 
-  const newPassword = watch("newPassword");
+  const newPassword = useWatch({
+    control,
+    name: "newPassword",
+  });
 
   const onSubmit = async (data: ResetPasswordFormData) => {
     try {

@@ -25,14 +25,7 @@ import {
 import { Category } from "@/types/category";
 import { useState } from "react";
 import Image from "next/image";
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("vi-VN", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
+import { formatDate } from "@/utils/format";
 
 interface ViewCategoryModalProps {
   isOpen: boolean;
@@ -40,6 +33,12 @@ interface ViewCategoryModalProps {
   onEdit: (category: Category) => void;
   category: Category | null;
 }
+
+const LONG_DATE_OPTIONS: Intl.DateTimeFormatOptions = {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+};
 
 export function ViewCategoryModal({
   isOpen,
@@ -138,7 +137,7 @@ export function ViewCategoryModal({
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm font-medium">
-                    {formatDate(category.createdAt || "")}
+                    {formatDate(category.createdAt || "", LONG_DATE_OPTIONS)}
                   </span>
                 </div>
               </div>

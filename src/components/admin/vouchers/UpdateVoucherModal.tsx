@@ -21,7 +21,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 // Updated: Import from voucher types with backward compatibility aliases
 import { UpdateVoucherData, Voucher } from "@/types/voucher";
-import { useProducts } from "@/hooks/queries/useProducts";
 import { Loader2 } from "lucide-react";
 
 interface UpdateModelDiscountProps {

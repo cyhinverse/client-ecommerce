@@ -21,7 +21,6 @@ import {
   BookOpen,
   Flower2,
   Clock,
-  Ticket,
 } from "lucide-react";
 
 
@@ -134,7 +133,7 @@ export default function CategorySidebar({ className }: CategorySidebarProps) {
                   {category.subcategories &&
                     category.subcategories.length > 0 && (
                       <div className="flex items-center gap-1 text-muted-foreground overflow-hidden">
-                        {category.subcategories.slice(0, 3).map((sub, idx) => (
+                        {category.subcategories.slice(0, 3).map((sub) => (
                           <span
                             key={sub._id}
                             className="flex items-center gap-1 whitespace-nowrap"

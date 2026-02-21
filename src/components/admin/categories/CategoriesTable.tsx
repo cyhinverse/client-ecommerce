@@ -37,6 +37,7 @@ import { Category } from "@/types/category";
 import { Badge } from "@/components/ui/badge";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import Image from "next/image";
+import { formatDate } from "@/utils/format";
 
 interface CategoriesTableProps {
   categories: Category[];
@@ -67,10 +68,6 @@ export const getStatusBadge = (status: boolean) => {
       Ngừng hoạt động
     </Badge>
   );
-};
-
-export const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString("vi-VN");
 };
 
 const CategoryRow = ({

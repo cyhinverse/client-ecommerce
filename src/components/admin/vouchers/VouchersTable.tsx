@@ -41,6 +41,7 @@ import { Voucher } from "@/types/voucher";
 import { Shop } from "@/types/shop";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { cn } from "@/utils/cn";
+import { formatDate } from "@/utils/format";
 import Image from "next/image";
 
 interface DiscountsTableProps {
@@ -90,10 +91,6 @@ export function DiscountsTable({
       onSearch(debouncedSearch);
     }
   }, [debouncedSearch, searchTerm, onSearch]);
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("vi-VN");
-  };
 
   const isExpired = (endDate: string) => {
     return new Date(endDate) < new Date();

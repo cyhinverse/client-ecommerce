@@ -9,13 +9,16 @@ import { injectStore } from "@/api/api";
 
 const createNoopStorage = () => {
   return {
-    getItem(_key: string): Promise<null> {
+    getItem(key: string): Promise<null> {
+      void key;
       return Promise.resolve(null);
     },
-    setItem(_key: string, value: string): Promise<string> {
+    setItem(key: string, value: string): Promise<string> {
+      void key;
       return Promise.resolve(value);
     },
-    removeItem(_key: string): Promise<void> {
+    removeItem(key: string): Promise<void> {
+      void key;
       return Promise.resolve();
     },
   };

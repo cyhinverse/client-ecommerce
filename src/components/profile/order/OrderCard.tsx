@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Order, OrderProduct } from "@/types/order";
 import { cn } from "@/utils/cn";
 import Image from "next/image";
+import { formatCurrency, formatDate } from "@/utils/format";
 
 interface OrderCardProps {
     order: Order;
@@ -11,6 +12,12 @@ interface OrderCardProps {
     onCancelOrder: (orderId: string) => void;
     isCancelling: boolean;
 }
+
+const ORDER_DATE_OPTIONS: Intl.DateTimeFormatOptions = {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+};
 
 export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancelling }: OrderCardProps) {
     const getStatusConfig = (status: Order["status"]) => {
@@ -27,21 +34,6 @@ export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancell
 
     const statusConfig = getStatusConfig(order.status);
     const StatusIcon = statusConfig.icon;
-
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat("vi-VN", {
-            style: "currency",
-            currency: "VND",
-        }).format(amount);
-    };
-
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString("vi-VN", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-        });
-    };
 
     const getProductImage = (product: OrderProduct) => {
         return product.image || "/images/placeholder-product.jpg";
@@ -62,7 +54,7 @@ export default function OrderCard({ order, onViewOrder, onCancelOrder, isCancell
                         </div>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                        Đã đặt vào ngày {formatDate(order.createdAt)}
+                        Đã đặt vào ngày {formatDate(order.createdAt, ORDER_DATE_OPTIONS)}
                     </p>
                 </div>
                 <div className="text-left md:text-right">

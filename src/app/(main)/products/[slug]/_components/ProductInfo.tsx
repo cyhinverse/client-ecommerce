@@ -3,13 +3,12 @@
 import { useMemo } from "react";
 import { Star, ShieldCheck, Truck, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Product, Variant, Price, FlashSaleInfo } from "@/types/product";
+import { Product, Price, FlashSaleInfo } from "@/types/product";
 import { Shop } from "@/types/shop";
 import WishlistButton from "@/components/common/WishlistButton";
 
 interface ProductInfoProps {
   product: Product;
-  selectedVariant: Variant | null;
   activePrice: Price | null;
   shop: Shop | null;
 }
@@ -40,7 +39,6 @@ function FlashSaleCountdown({ flashSale }: { flashSale: FlashSaleInfo }) {
 
 export function ProductInfo({
   product,
-  selectedVariant,
   activePrice,
   shop,
 }: ProductInfoProps) {

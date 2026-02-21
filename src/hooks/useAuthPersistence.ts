@@ -27,7 +27,7 @@ export const useAuthPersistence = () => {
           // Pre-populate React Query cache
           queryClient.setQueryData(userKeys.profile(), result);
         }
-      } catch (error) {
+      } catch {
         // If 401/403 or network error, assume not authenticated via cookies
         dispatch(authSlice.actions.setIsAuthenticated(false));
         // We don't check localStorage anymore

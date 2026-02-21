@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Image from "next/image";
 import { Tag, Plus, Edit2, Trash2, Save, X, GripVertical } from "lucide-react";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import { Button } from "@/components/ui/button";
@@ -189,11 +190,13 @@ export default function SellerCategoriesPage() {
                 className="mt-1.5 h-11 rounded-xl border-0 bg-white"
               />
               {formData.image ? (
-                <div className="mt-3 w-16 h-16 rounded-lg overflow-hidden border border-gray-200 bg-white">
-                  <img
+                <div className="relative mt-3 w-16 h-16 rounded-lg overflow-hidden border border-gray-200 bg-white">
+                  <Image
                     src={formData.image}
                     alt="Category preview"
-                    className="w-full h-full object-contain"
+                    fill
+                    unoptimized
+                    className="object-contain"
                   />
                 </div>
               ) : null}
@@ -262,9 +265,12 @@ export default function SellerCategoriesPage() {
                   <GripVertical className="h-4 w-4 text-gray-300 cursor-grab" />
                   <div className="w-10 h-10 rounded-lg overflow-hidden bg-[#f7f7f7] border border-gray-200 flex items-center justify-center">
                     {category.image ? (
-                      <img
+                      <Image
                         src={category.image}
                         alt={category.name}
+                        width={40}
+                        height={40}
+                        unoptimized
                         className="w-full h-full object-contain"
                       />
                     ) : (

@@ -39,6 +39,7 @@ import { Badge } from "@/components/ui/badge";
 import { User } from "@/types/user";
 import Image from "next/image";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
+import { formatDate as formatDateValue } from "@/utils/format";
 
 interface UsersTableProps {
   users: User[];
@@ -92,10 +93,6 @@ export const getRoleBadge = (roles: string) => {
       {roleNames[roles] || roles}
     </Badge>
   );
-};
-
-export const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString("vi-VN");
 };
 
 export function UsersTable({
@@ -367,7 +364,7 @@ export function UsersTable({
                     <TableCell>
                         <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
                         <Calendar className="h-3 w-3" />
-                        <span>{formatDate(user.createdAt)}</span>
+                        <span>{formatDateValue(user.createdAt)}</span>
                         </div>
                     </TableCell>
                     <TableCell className="text-right pr-6">

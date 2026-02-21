@@ -4,6 +4,7 @@ import {
   DollarSign,
   ShoppingCart,
 } from "lucide-react";
+import { formatCurrency } from "@/utils/format";
 
 interface OrderStatusCount {
   _id: string;
@@ -33,8 +34,7 @@ export function OrdersStats({
   totalRevenue = 0,
   ordersByStatus = [],
 }: OrdersStatsProps) {
-
-  let calculatedStats = {
+  const fallbackStats = {
     total: totalOrders,
     pending: pendingOrders,
     confirmed: confirmedOrders,
@@ -42,28 +42,23 @@ export function OrdersStats({
     shipped: shippedOrders,
     delivered: deliveredOrders,
     cancelled: cancelledOrders,
-    revenue: totalRevenue
+    revenue: totalRevenue,
   };
 
-  if (ordersByStatus && ordersByStatus.length > 0) {
-    calculatedStats = {
-      total: ordersByStatus.reduce((sum, item) => sum + item.count, 0),
-      pending: ordersByStatus.find(item => item._id === 'pending')?.count || 0,
-      confirmed: ordersByStatus.find(item => item._id === 'confirmed')?.count || 0,
-      processing: ordersByStatus.find(item => item._id === 'processing')?.count || 0,
-      shipped: ordersByStatus.find(item => item._id === 'shipped')?.count || 0,
-      delivered: ordersByStatus.find(item => item._id === 'delivered')?.count || 0,
-      cancelled: ordersByStatus.find(item => item._id === 'cancelled')?.count || 0,
-      revenue: totalRevenue
-    };
-  }
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(value);
-  };
+  const statsByStatus = new Map(ordersByStatus.map((item) => [item._id, item.count]));
+  const calculatedStats =
+    ordersByStatus.length > 0
+      ? {
+          total: ordersByStatus.reduce((sum, item) => sum + item.count, 0),
+          pending: statsByStatus.get("pending") || 0,
+          confirmed: statsByStatus.get("confirmed") || 0,
+          processing: statsByStatus.get("processing") || 0,
+          shipped: statsByStatus.get("shipped") || 0,
+          delivered: statsByStatus.get("delivered") || 0,
+          cancelled: statsByStatus.get("cancelled") || 0,
+          revenue: totalRevenue,
+        }
+      : fallbackStats;
 
   const formatNumber = (value: number) => {
     return new Intl.NumberFormat("vi-VN").format(value);

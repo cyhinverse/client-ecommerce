@@ -32,8 +32,6 @@ import {
   useAdminFlashSaleSchedule,
   useAddToFlashSale,
   useRemoveFromFlashSale,
-  type AdminFlashSaleProduct as FlashSaleProduct,
-  type AdminFlashSaleSlot as TimeSlot,
 } from "@/hooks/queries";
 
 export default function AdminFlashSalePage() {

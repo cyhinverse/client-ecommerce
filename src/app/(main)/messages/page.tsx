@@ -33,20 +33,28 @@ export default function MessagesPage() {
   const [selectedConversationId, setSelectedConversationId] = useState<
     string | null
   >(null);
+  const activeConversationId = useMemo(() => {
+    if (!selectedConversationId) return null;
+    return conversations.some(
+      (conversation) => conversation._id === selectedConversationId,
+    )
+      ? selectedConversationId
+      : null;
+  }, [conversations, selectedConversationId]);
   const currentConversation = useMemo(
     () =>
-      conversations.find((conversation) => conversation._id === selectedConversationId) ??
+      conversations.find((conversation) => conversation._id === activeConversationId) ??
       null,
-    [conversations, selectedConversationId],
+    [conversations, activeConversationId],
   );
   const {
     data: messageData,
     isLoading: isLoadingMessages,
   } = useChatMessages(
-    { conversationId: selectedConversationId ?? "" },
-    { enabled: !!selectedConversationId },
+    { conversationId: activeConversationId ?? "" },
+    { enabled: !!activeConversationId },
   );
-  const messages = messageData?.messages ?? [];
+  const messages = useMemo(() => messageData?.messages ?? [], [messageData?.messages]);
 
   const sendMessageMutation = useSendChatMessage();
   const markAsReadMutation = useMarkConversationAsRead();
@@ -60,21 +68,12 @@ export default function MessagesPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (
-      selectedConversationId &&
-      !conversations.some((conversation) => conversation._id === selectedConversationId)
-    ) {
-      setSelectedConversationId(null);
-    }
-  }, [conversations, selectedConversationId]);
-
-  useEffect(() => {
-    if (!socket || !selectedConversationId) return;
-    joinConversation(socket, selectedConversationId);
+    if (!socket || !activeConversationId) return;
+    joinConversation(socket, activeConversationId);
     return () => {
-      leaveConversation(socket, selectedConversationId);
+      leaveConversation(socket, activeConversationId);
     };
-  }, [socket, selectedConversationId]);
+  }, [socket, activeConversationId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

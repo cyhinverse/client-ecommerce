@@ -29,6 +29,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, MoreHorizontal, Eye, Edit, Trash2, Store, Calendar } from "lucide-react";
 import SpinnerLoading from "@/components/common/SpinnerLoading";
 import Image from "next/image";
+import { formatCurrency, formatDate } from "@/utils/format";
 
 export interface OrdersTableProps {
   orders: Order[];
@@ -181,17 +182,6 @@ export function OrdersTable({
     );
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("vi-VN");
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount);
-  };
-
   const getShopInfo = (
     shopId: string | Shop | undefined,
   ): { name: string; logo?: string } => {
@@ -335,101 +325,104 @@ export function OrdersTable({
                   </TableCell>
                 </TableRow>
               ) : (
-                orders.map((order) => (
-                  <TableRow
-                    key={order._id}
-                    className={`border-0 hover:bg-[#f7f7f7]/50 transition-colors ${
-                      isLoading ? "opacity-50 pointer-events-none" : ""
-                    }`}
-                  >
-                    <TableCell className="font-medium pl-6 text-sm">
-                      #{order._id.slice(-8).toUpperCase()}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className="font-medium text-sm text-foreground">
-                          {order.shippingAddress.fullName}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {order.shippingAddress.phone}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2 max-w-[140px]">
-                        {getShopInfo(order.shopId).logo ? (
-                          <div className="relative h-6 w-6 rounded-md overflow-hidden bg-[#f7f7f7] shrink-0">
-                            <Image
-                              src={getShopInfo(order.shopId).logo!}
-                              alt={getShopInfo(order.shopId).name}
-                              width={24}
-                              height={24}
-                              className="h-full w-full object-cover"
-                            />
-                          </div>
-                        ) : (
-                          <div className="h-6 w-6 rounded-md bg-[#f7f7f7] flex items-center justify-center shrink-0">
-                            <Store className="h-3 w-3 text-muted-foreground" />
-                          </div>
-                        )}
-                        <span
-                          className="text-sm text-muted-foreground truncate"
-                          title={getShopInfo(order.shopId).name}
-                        >
-                          {getShopInfo(order.shopId).name}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {formatDate(order.createdAt)}
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {formatCurrency(order.totalAmount)}
-                    </TableCell>
-                    <TableCell>{getStatusBadge(order.status)}</TableCell>
-                    <TableCell>
-                      {getPaymentStatusBadge(order.paymentStatus)}
-                    </TableCell>
-                    <TableCell className="pr-6 text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            className="h-8 w-8 p-0 rounded-lg hover:bg-[#f7f7f7]"
+                orders.map((order) => {
+                  const shopInfo = getShopInfo(order.shopId);
+                  return (
+                    <TableRow
+                      key={order._id}
+                      className={`border-0 hover:bg-[#f7f7f7]/50 transition-colors ${
+                        isLoading ? "opacity-50 pointer-events-none" : ""
+                      }`}
+                    >
+                      <TableCell className="font-medium pl-6 text-sm">
+                        #{order._id.slice(-8).toUpperCase()}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <span className="font-medium text-sm text-foreground">
+                            {order.shippingAddress.fullName}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {order.shippingAddress.phone}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2 max-w-[140px]">
+                          {shopInfo.logo ? (
+                            <div className="relative h-6 w-6 rounded-md overflow-hidden bg-[#f7f7f7] shrink-0">
+                              <Image
+                                src={shopInfo.logo}
+                                alt={shopInfo.name}
+                                width={24}
+                                height={24}
+                                className="h-full w-full object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="h-6 w-6 rounded-md bg-[#f7f7f7] flex items-center justify-center shrink-0">
+                              <Store className="h-3 w-3 text-muted-foreground" />
+                            </div>
+                          )}
+                          <span
+                            className="text-sm text-muted-foreground truncate"
+                            title={shopInfo.name}
                           >
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          align="end"
-                          className="rounded-xl border-0 shadow-lg"
-                        >
-                          <DropdownMenuItem
-                            onClick={() => onView(order)}
-                            className="cursor-pointer gap-2"
+                            {shopInfo.name}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {formatDate(order.createdAt)}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {formatCurrency(order.totalAmount)}
+                      </TableCell>
+                      <TableCell>{getStatusBadge(order.status)}</TableCell>
+                      <TableCell>
+                        {getPaymentStatusBadge(order.paymentStatus)}
+                      </TableCell>
+                      <TableCell className="pr-6 text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              className="h-8 w-8 p-0 rounded-lg hover:bg-[#f7f7f7]"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="end"
+                            className="rounded-xl border-0 shadow-lg"
                           >
-                            <Eye className="w-4 h-4" />
-                            Xem chi tiết
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => onEdit(order)}
-                            className="cursor-pointer gap-2"
-                          >
-                            <Edit className="w-4 h-4" />
-                            Cập nhật trạng thái
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => onDelete(order)}
-                            className="text-destructive cursor-pointer gap-2"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                            Xóa
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))
+                            <DropdownMenuItem
+                              onClick={() => onView(order)}
+                              className="cursor-pointer gap-2"
+                            >
+                              <Eye className="w-4 h-4" />
+                              Xem chi tiết
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => onEdit(order)}
+                              className="cursor-pointer gap-2"
+                            >
+                              <Edit className="w-4 h-4" />
+                              Cập nhật trạng thái
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => onDelete(order)}
+                              className="text-destructive cursor-pointer gap-2"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              Xóa
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>

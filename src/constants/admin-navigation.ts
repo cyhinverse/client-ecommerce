@@ -5,7 +5,6 @@ import {
   Settings,
   Bell,
   Album,
-  TicketPercent,
   LayoutDashboardIcon,
   Image as ImageIcon,
   Store,

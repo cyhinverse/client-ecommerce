@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Edit, Package, Store } from "lucide-react";
 import Image from "next/image";
+import { formatCurrency, formatDate } from "@/utils/format";
 
 interface ViewOrderModalProps {
   isOpen: boolean;
@@ -17,6 +18,14 @@ interface ViewOrderModalProps {
   onEdit: (order: Order) => void;
   order: Order | null;
 }
+
+const ORDER_DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+};
 
 export function ViewOrderModal({
   isOpen,
@@ -77,23 +86,6 @@ export function ViewOrderModal({
     );
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("vi-VN", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
   const getShopInfo = (
     shopId: string | Shop | undefined
   ): { name: string; logo?: string; slug?: string } => {
@@ -101,6 +93,8 @@ export function ViewOrderModal({
     if (typeof shopId === "string") return { name: shopId };
     return { name: shopId.name || "N/A", logo: shopId.logo, slug: shopId.slug };
   };
+
+  const shopInfo = getShopInfo(order.shopId);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -135,7 +129,7 @@ export function ViewOrderModal({
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Ngày đặt:</span>
-                <span>{formatDate(order.createdAt)}</span>
+                <span>{formatDate(order.createdAt, ORDER_DATE_TIME_OPTIONS)}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Trạng thái:</span>
@@ -153,17 +147,17 @@ export function ViewOrderModal({
           </div>
 
           {/* Shop Information */}
-          {order.shopId && (
+                {order.shopId && (
             <div className="p-5 rounded-2xl bg-gray-50/50 dark:bg-white/5 border border-border/50 space-y-4">
               <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">
                 Thông tin cửa hàng
               </h3>
               <div className="flex items-center gap-3">
-                {getShopInfo(order.shopId).logo ? (
+                {shopInfo.logo ? (
                   <div className="relative h-12 w-12 rounded-xl overflow-hidden bg-gray-100 border border-border/50">
                     <Image
-                      src={getShopInfo(order.shopId).logo!}
-                      alt={getShopInfo(order.shopId).name}
+                      src={shopInfo.logo}
+                      alt={shopInfo.name}
                       fill
                       className="object-cover"
                     />
@@ -175,11 +169,11 @@ export function ViewOrderModal({
                 )}
                 <div>
                   <p className="font-medium text-foreground">
-                    {getShopInfo(order.shopId).name}
+                    {shopInfo.name}
                   </p>
-                  {getShopInfo(order.shopId).slug && (
+                  {shopInfo.slug && (
                     <p className="text-xs text-muted-foreground">
-                      @{getShopInfo(order.shopId).slug}
+                      @{shopInfo.slug}
                     </p>
                   )}
                 </div>

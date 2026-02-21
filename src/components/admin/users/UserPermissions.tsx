@@ -9,8 +9,6 @@ import { toast } from "sonner";
 import {
   RESOURCES,
   ACTIONS,
-  PERMISSIONS,
-  type Permission,
 } from "@/constants/permissions";
 import {
   getUserPermissions,

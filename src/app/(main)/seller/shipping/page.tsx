@@ -21,6 +21,7 @@ import {
   useDeleteShippingTemplate,
 } from "@/hooks/queries";
 import { ShippingTemplate, ShippingRule, CreateShippingTemplatePayload } from "@/types/shipping";
+import { formatCurrency } from "@/utils/format";
 
 export default function SellerShippingPage() {
   const { data: templates = [], isLoading } = useMyShippingTemplates();
@@ -129,8 +130,6 @@ export default function SellerShippingPage() {
       isDefault: false,
     });
   };
-
-  const formatCurrency = (value: number) => `₫${value.toLocaleString("vi-VN")}`;
 
   return (
     <div className="space-y-6">

@@ -25,12 +25,21 @@ import { useCreatePaymentUrl } from "@/hooks/queries";
 import { toast } from "sonner";
 import { cn } from "@/utils/cn";
 import { Separator } from "@/components/ui/separator";
+import { formatCurrency, formatDate } from "@/utils/format";
 
 interface OrderDialogProps {
   order: Order | null;
   open: boolean;
   onClose: () => void;
 }
+
+const ORDER_DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+};
 
 export default function OrderDialog({
   order,
@@ -107,23 +116,6 @@ export default function OrderDialog({
   const statusConfig = getStatusConfig(order.status);
   const StatusIcon = statusConfig.icon;
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("vi-VN", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
   const displayId = order.orderCode
     ? `#${order.orderCode}`
     : `#${order._id?.slice(-8).toUpperCase()}`;
@@ -139,7 +131,7 @@ export default function OrderDialog({
               </DialogTitle>
               <DialogDescription className="mt-1.5 flex items-center gap-2 text-sm">
                 <Calendar className="h-4 w-4" />
-                {formatDate(order.createdAt)}
+                {formatDate(order.createdAt, ORDER_DATE_TIME_OPTIONS)}
               </DialogDescription>
             </div>
             <div

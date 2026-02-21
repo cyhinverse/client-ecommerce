@@ -12,13 +12,12 @@ import {
   Edit,
   Calendar,
   DollarSign,
-  Package,
   BarChart3,
   Clock,
   Tag,
-  Store,
 } from "lucide-react";
 import { cn } from "@/utils/cn";
+import { formatDate } from "@/utils/format";
 
 interface ViewModelDiscountProps {
   open: boolean;
@@ -27,6 +26,14 @@ interface ViewModelDiscountProps {
   onEdit: (discount: Voucher) => void;
 }
 
+const DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+};
+
 export function ViewModelDiscount({
   open,
   onOpenChange,
@@ -34,16 +41,6 @@ export function ViewModelDiscount({
   onEdit,
 }: ViewModelDiscountProps) {
   if (!discount) return null;
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("vi-VN", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   const statusConfig = {
     active: {
@@ -181,7 +178,7 @@ export function ViewModelDiscount({
                   <span className="text-sm">Ngày bắt đầu</span>
                 </div>
                 <span className="text-sm font-medium">
-                  {formatDate(discount.startDate)}
+                  {formatDate(discount.startDate, DATE_TIME_OPTIONS)}
                 </span>
               </div>
               <div className="h-px bg-border/50" />
@@ -191,7 +188,7 @@ export function ViewModelDiscount({
                   <span className="text-sm">Ngày kết thúc</span>
                 </div>
                 <span className="text-sm font-medium">
-                  {formatDate(discount.endDate)}
+                  {formatDate(discount.endDate, DATE_TIME_OPTIONS)}
                 </span>
               </div>
             </div>

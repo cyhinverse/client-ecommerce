@@ -20,7 +20,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Loader2 } from "lucide-react";
-import { useProducts } from "@/hooks/queries/useProducts";
 // Updated: Import from voucher types with backward compatibility alias
 import { CreateVoucherData } from "@/types/voucher";
 

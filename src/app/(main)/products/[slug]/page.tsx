@@ -32,7 +32,6 @@ export default function ProductDetailPage() {
   const {
     product,
     // ... other destructures
-    selectedVariant,
     selectedVariantIndex,
     selectedSize,
     quantity,
@@ -107,7 +106,6 @@ export default function ProductDetailPage() {
           <div className="flex-1 min-w-0 space-y-6">
             <ProductInfo
               product={product}
-              selectedVariant={selectedVariant}
               activePrice={activePrice}
               shop={shop}
             />
